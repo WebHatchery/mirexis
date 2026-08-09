@@ -20,7 +20,9 @@
     { "id": "supply_recovery", "name": "ISOLATION: DEAD FREIGHT", "objective": "Reach the stranded supply crawler, recover its manifest, and clear the approach.", "objective_kind": "secure_and_clear", "faction": "directorate", "map_recipe": "directorate_yard", "materials_reward": 28, "biomass_reward": 0, "power_reward": 0, "round_limit": 8 },
     { "id": "nest_suppression", "name": "ISOLATION: ROOT BURN", "objective": "Eliminate every Brood organism guarding the growth before it can relocate.", "objective_kind": "eliminate_all", "faction": "brood", "map_recipe": "brood_hollow", "materials_reward": 32, "biomass_reward": 6, "power_reward": 0, "round_limit": 7 },
     { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "map_recipe": "ascendant_ruin", "materials_reward": 24, "biomass_reward": 0, "power_reward": 2, "round_limit": 6 },
-    { "id": "courier_extraction", "name": "ISOLATION: LAST TRANSMISSION", "objective": "Break through the Directorate cordon and get any colonist carrying the stolen coordinates to extraction.", "objective_kind": "extraction", "faction": "directorate", "map_recipe": "directorate_checkpoint", "materials_reward": 30, "biomass_reward": 0, "power_reward": 0, "round_limit": 6 }
+    { "id": "courier_extraction", "name": "ISOLATION: LAST TRANSMISSION", "objective": "Break through the Directorate cordon and get any colonist carrying the stolen coordinates to extraction.", "objective_kind": "extraction", "faction": "directorate", "map_recipe": "directorate_checkpoint", "materials_reward": 30, "biomass_reward": 0, "power_reward": 0, "round_limit": 6 },
+    { "id": "sporefield_extraction", "name": "ISOLATION: RED HARVEST", "objective": "Carry a viable Brood culture through the sporefield and reach the marked extraction channel.", "objective_kind": "extraction", "faction": "brood", "map_recipe": "brood_sporefield", "materials_reward": 22, "biomass_reward": 8, "power_reward": 0, "round_limit": 6 },
+    { "id": "vault_purge", "name": "ISOLATION: SILENT CHOIR", "objective": "Eliminate every Ascendant echo inside the fractured vault before the harmonic field stabilises.", "objective_kind": "eliminate_all", "faction": "ascendants", "map_recipe": "ascendant_vault", "materials_reward": 22, "biomass_reward": 0, "power_reward": 3, "round_limit": 7 }
   ],
   "map_recipes": [
     {
@@ -50,6 +52,20 @@
       "objective_tile": [6, 4],
       "terrain_costs": [{ "position": [5, 3], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [7, 3], "cost": 2 }],
       "cover_edges": [{ "position": [5, 4], "direction": "north", "strength": 30 }, { "position": [7, 4], "direction": "south", "strength": 30 }]
+    },
+    {
+      "id": "brood_sporefield",
+      "blocked_tiles": [[4, 0], [4, 1], [4, 6], [4, 7], [6, 2], [6, 5], [8, 3], [8, 4]],
+      "objective_tile": [10, 4],
+      "terrain_costs": [{ "position": [3, 3], "cost": 2 }, { "position": [3, 4], "cost": 2 }, { "position": [7, 2], "cost": 2 }, { "position": [7, 5], "cost": 2 }, { "position": [9, 3], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 3], "direction": "east", "strength": 20 }, { "position": [7, 4], "direction": "west", "strength": 20 }, { "position": [9, 5], "direction": "north", "strength": 20 }]
+    },
+    {
+      "id": "ascendant_vault",
+      "blocked_tiles": [[3, 3], [3, 4], [5, 1], [5, 6], [7, 2], [7, 5], [10, 0], [10, 3]],
+      "objective_tile": [8, 4],
+      "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [4, 5], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [6, 4], "cost": 2 }, { "position": [9, 4], "cost": 2 }],
+      "cover_edges": [{ "position": [6, 2], "direction": "south", "strength": 30 }, { "position": [8, 3], "direction": "east", "strength": 30 }, { "position": [9, 5], "direction": "west", "strength": 30 }]
     }
   ]
 }

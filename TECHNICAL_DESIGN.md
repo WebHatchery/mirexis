@@ -387,9 +387,10 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `research`, `roster`, `legacy`,
-`briefing`, `pressure`, `gameplay`, `extraction`, `variant`, `equipment`, `class_target`,
-`breach`, and `debrief` by default. Capture setup seeds each scene deterministically,
-including objective, doctrine, legacy, pressure-modifier, and targeting states.
+`briefing`, `pressure`, `gameplay`, `extraction`, `variant`, `sporefield`, `vault`,
+`equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
+each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
+new-operation battlefield, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -398,8 +399,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (51 domain/migration tests plus the shared source-size gate)
-- deterministic fourteen-scene capture with visual inspection
+- `cargo test` (52 domain/migration tests plus the shared source-size gate)
+- deterministic sixteen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -428,7 +429,7 @@ boundaries when continuing:
   four implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The four current map recipes support authored and safe mirrored layouts. Additional
+- The six current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
   building damage/repair, power demand, and free placement for every building remain.

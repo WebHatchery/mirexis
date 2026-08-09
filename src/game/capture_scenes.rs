@@ -16,6 +16,16 @@ impl Game {
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
             "pressure" => self.capture_pressure(),
+            "sporefield" => self.capture_template_operation(
+                "sporefield_extraction",
+                4,
+                OperationModifier::BroodFrenzy,
+            ),
+            "vault" => self.capture_template_operation(
+                "vault_purge",
+                5,
+                OperationModifier::AscendantInterference,
+            ),
             "extraction" => self.capture_extraction(),
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
@@ -58,6 +68,49 @@ impl Game {
     fn capture_pressure(&mut self) {
         self.active_mission.operation_modifier = OperationModifier::BroodFrenzy;
         self.state = AppState::MissionBriefing;
+    }
+
+    fn capture_template_operation(
+        &mut self,
+        template_id: &str,
+        seed: u64,
+        modifier: OperationModifier,
+    ) {
+        let template = self
+            .data
+            .campaign
+            .mission_templates
+            .iter()
+            .find(|template| template.id == template_id)
+            .expect("capture mission template exists");
+        let recipe = self
+            .data
+            .campaign
+            .map_recipes
+            .iter()
+            .find(|recipe| recipe.id == template.map_recipe)
+            .expect("capture map recipe exists");
+        let layout = crate::map_variants::materialize(recipe, &self.data, seed);
+        self.active_mission.id = format!("capture_{}", template.id);
+        self.active_mission.name = template.name.clone();
+        self.active_mission.briefing = format!(
+            "Pressure intelligence confirms {} resistance.",
+            template.faction
+        );
+        self.active_mission.objective = template.objective.clone();
+        self.active_mission.objective_kind = template.objective_kind;
+        self.active_mission.hostile_faction = template.faction.clone();
+        self.active_mission.round_limit = template.round_limit;
+        self.active_mission.materials_reward = template.materials_reward;
+        self.active_mission.biomass_reward = template.biomass_reward;
+        self.active_mission.power_reward = template.power_reward;
+        self.active_mission.operation_modifier = modifier;
+        self.active_mission.seed = seed;
+        self.active_mission.blocked_tiles = layout.blocked_tiles;
+        self.active_mission.objective_tile = layout.objective_tile;
+        self.active_mission.terrain_costs = layout.terrain_costs;
+        self.active_mission.cover_edges = layout.cover_edges;
+        self.reset_capture_session(AppState::Tactical);
     }
 
     fn capture_equipment_target(&mut self) {

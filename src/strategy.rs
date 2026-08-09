@@ -589,7 +589,29 @@ mod tests {
             assert_eq!(mission.hostile_faction, template.faction);
             assert!(layouts.insert(mission.blocked_tiles));
         }
-        assert_eq!(layouts.len(), 4);
+        assert_eq!(layouts.len(), data.campaign.mission_templates.len());
+    }
+
+    #[test]
+    fn new_faction_operations_have_distinct_objectives_and_recovery() {
+        let data = GameData::load().unwrap();
+        let sporefield = data
+            .campaign
+            .mission_templates
+            .iter()
+            .find(|template| template.id == "sporefield_extraction")
+            .unwrap();
+        assert_eq!(sporefield.objective_kind, ObjectiveKind::Extraction);
+        assert_eq!(sporefield.biomass_reward, 8);
+        let vault = data
+            .campaign
+            .mission_templates
+            .iter()
+            .find(|template| template.id == "vault_purge")
+            .unwrap();
+        assert_eq!(vault.objective_kind, ObjectiveKind::EliminateAll);
+        assert_eq!(vault.power_reward, 3);
+        assert_ne!(sporefield.map_recipe, vault.map_recipe);
     }
 
     #[test]
