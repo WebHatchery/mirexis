@@ -34,6 +34,7 @@ pub struct MissionDef {
     pub objective: String,
     #[serde(default)]
     pub objective_kind: ObjectiveKind,
+    pub hostile_faction: String,
     pub round_limit: u32,
     pub materials_reward: i32,
     pub seed: u64,
@@ -90,6 +91,8 @@ pub struct UnitDef {
     pub role: String,
     pub mutation: String,
     pub team: Team,
+    #[serde(default)]
+    pub faction: Option<String>,
     pub position: [i32; 2],
     pub max_health: i32,
     pub move_range: u8,
@@ -158,6 +161,7 @@ pub struct CampaignDef {
     pub research: Vec<ResearchDef>,
     pub events: Vec<CharacterEventDef>,
     pub mission_templates: Vec<MissionTemplateDef>,
+    pub map_recipes: Vec<MapRecipeDef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -193,8 +197,18 @@ pub struct MissionTemplateDef {
     pub objective: String,
     pub objective_kind: ObjectiveKind,
     pub faction: String,
+    pub map_recipe: String,
     pub materials_reward: i32,
     pub round_limit: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MapRecipeDef {
+    pub id: String,
+    pub blocked_tiles: Vec<[i32; 2]>,
+    pub objective_tile: [i32; 2],
+    pub terrain_costs: Vec<TerrainCostDef>,
+    pub cover_edges: Vec<CoverEdgeDef>,
 }
 
 #[derive(Debug, Clone)]
@@ -258,6 +272,13 @@ impl GameData {
             "mission template",
             self.campaign
                 .mission_templates
+                .iter()
+                .map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "map recipe",
+            self.campaign
+                .map_recipes
                 .iter()
                 .map(|entry| entry.id.as_str()),
         )?;
@@ -332,6 +353,63 @@ impl GameData {
                 return Err(format!(
                     "Mission template {} references missing faction {}",
                     template.id, template.faction
+                ));
+            }
+            if !self
+                .campaign
+                .map_recipes
+                .iter()
+                .any(|recipe| recipe.id == template.map_recipe)
+            {
+                return Err(format!(
+                    "Mission template {} references missing map recipe {}",
+                    template.id, template.map_recipe
+                ));
+            }
+        }
+        for faction in &self.campaign.factions {
+            if !self.roster.iter().any(|unit| {
+                unit.team == Team::Hostile && unit.faction.as_deref() == Some(&faction.id)
+            }) {
+                return Err(format!("Faction {} has no hostile units", faction.id));
+            }
+        }
+        for recipe in &self.campaign.map_recipes {
+            let positions = recipe
+                .blocked_tiles
+                .iter()
+                .chain(std::iter::once(&recipe.objective_tile))
+                .chain(recipe.terrain_costs.iter().map(|entry| &entry.position));
+            if positions.into_iter().any(|position| {
+                position[0] < 0
+                    || position[1] < 0
+                    || position[0] >= self.config.world_width as i32
+                    || position[1] >= self.config.world_height as i32
+            }) {
+                return Err(format!(
+                    "Map recipe {} contains an out-of-bounds tile",
+                    recipe.id
+                ));
+            }
+            if recipe.blocked_tiles.contains(&recipe.objective_tile) {
+                return Err(format!("Map recipe {} blocks its objective", recipe.id));
+            }
+        }
+        for template in &self.campaign.mission_templates {
+            let recipe = self
+                .campaign
+                .map_recipes
+                .iter()
+                .find(|recipe| recipe.id == template.map_recipe)
+                .expect("map recipe references were validated above");
+            if self.roster.iter().any(|unit| {
+                unit.team == Team::Hostile
+                    && unit.faction.as_deref() == Some(&template.faction)
+                    && recipe.blocked_tiles.contains(&unit.position)
+            }) {
+                return Err(format!(
+                    "Mission template {} blocks a hostile spawn",
+                    template.id
                 ));
             }
         }

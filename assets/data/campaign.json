@@ -17,8 +17,31 @@
     { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Mara asks the infirmary to document her accelerating chitin growth.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1 }
   ],
   "mission_templates": [
-    { "id": "supply_recovery", "name": "ISOLATION: DEAD FREIGHT", "objective": "Reach the stranded supply crawler, recover its manifest, and clear the approach.", "objective_kind": "secure_and_clear", "faction": "directorate", "materials_reward": 28, "round_limit": 8 },
-    { "id": "nest_suppression", "name": "ISOLATION: ROOT BURN", "objective": "Eliminate every Brood organism guarding the growth before it can relocate.", "objective_kind": "eliminate_all", "faction": "brood", "materials_reward": 32, "round_limit": 7 },
-    { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "materials_reward": 24, "round_limit": 6 }
+    { "id": "supply_recovery", "name": "ISOLATION: DEAD FREIGHT", "objective": "Reach the stranded supply crawler, recover its manifest, and clear the approach.", "objective_kind": "secure_and_clear", "faction": "directorate", "map_recipe": "directorate_yard", "materials_reward": 28, "round_limit": 8 },
+    { "id": "nest_suppression", "name": "ISOLATION: ROOT BURN", "objective": "Eliminate every Brood organism guarding the growth before it can relocate.", "objective_kind": "eliminate_all", "faction": "brood", "map_recipe": "brood_hollow", "materials_reward": 32, "round_limit": 7 },
+    { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "map_recipe": "ascendant_ruin", "materials_reward": 24, "round_limit": 6 }
+  ],
+  "map_recipes": [
+    {
+      "id": "directorate_yard",
+      "blocked_tiles": [[4, 1], [4, 2], [4, 5], [4, 6], [8, 3], [8, 4]],
+      "objective_tile": [10, 1],
+      "terrain_costs": [{ "position": [6, 3], "cost": 2 }, { "position": [6, 4], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 2], "direction": "east", "strength": 25 }, { "position": [9, 5], "direction": "west", "strength": 25 }]
+    },
+    {
+      "id": "brood_hollow",
+      "blocked_tiles": [[5, 0], [5, 1], [5, 6], [5, 7], [7, 3], [7, 4]],
+      "objective_tile": [9, 4],
+      "terrain_costs": [{ "position": [4, 3], "cost": 2 }, { "position": [4, 4], "cost": 2 }, { "position": [8, 2], "cost": 2 }, { "position": [8, 5], "cost": 2 }],
+      "cover_edges": [{ "position": [6, 2], "direction": "west", "strength": 20 }, { "position": [9, 5], "direction": "south", "strength": 20 }]
+    },
+    {
+      "id": "ascendant_ruin",
+      "blocked_tiles": [[4, 2], [4, 5], [6, 1], [6, 6], [8, 2], [8, 5]],
+      "objective_tile": [6, 4],
+      "terrain_costs": [{ "position": [5, 3], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [7, 3], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 4], "direction": "north", "strength": 30 }, { "position": [7, 4], "direction": "south", "strength": 30 }]
+    }
   ]
 }

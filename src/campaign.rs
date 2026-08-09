@@ -83,12 +83,17 @@ impl CampaignState {
         }
     }
 
-    pub fn deployment_roster(&self, data: &GameData) -> Vec<UnitDef> {
+    pub fn deployment_roster(
+        &self,
+        data: &GameData,
+        mission: &crate::data::MissionDef,
+    ) -> Vec<UnitDef> {
         data.roster
             .iter()
             .filter_map(|base| {
                 if base.team == Team::Hostile {
-                    return Some(base.clone());
+                    return (base.faction.as_deref() == Some(&mission.hostile_faction))
+                        .then(|| base.clone());
                 }
                 let character = self.roster.iter().find(|record| record.id == base.id)?;
                 (character.availability == Availability::Ready)
@@ -378,10 +383,29 @@ mod tests {
     fn deployment_applies_class_mutation_and_equipment() {
         let data = GameData::load().unwrap();
         let campaign = CampaignState::new(&data);
-        let roster = campaign.deployment_roster(&data);
+        let roster = campaign.deployment_roster(&data, &data.mission);
         let mara = roster.iter().find(|unit| unit.id == "mara_venn").unwrap();
         assert!(mara.armour >= 5);
         assert_eq!(mara.role, "Defender");
+    }
+
+    #[test]
+    fn deployment_uses_only_the_mission_factions_hostiles() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        for faction in ["brood", "directorate", "ascendants"] {
+            let mut mission = data.mission.clone();
+            mission.hostile_faction = faction.to_owned();
+            let roster = campaign.deployment_roster(&data, &mission);
+            let hostiles = roster
+                .iter()
+                .filter(|unit| unit.team == Team::Hostile)
+                .collect::<Vec<_>>();
+            assert!(!hostiles.is_empty());
+            assert!(hostiles
+                .iter()
+                .all(|unit| unit.faction.as_deref() == Some(faction)));
+        }
     }
 
     fn consequence(id: &str, name: &str) -> CharacterConsequence {
@@ -406,7 +430,7 @@ mod tests {
         campaign.apply_mission_outcome(&outcome, &mission, &data);
         assert_eq!(campaign.roster[2].availability, Availability::Recovering);
         assert!(!campaign
-            .deployment_roster(&data)
+            .deployment_roster(&data, &data.mission)
             .iter()
             .any(|unit| unit.id == "ilya_reed"));
         for _ in 0..3 {

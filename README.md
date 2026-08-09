@@ -13,6 +13,7 @@ The completed roadmap slice includes:
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
 - secure-and-clear, elimination, and holdout mission objectives with live progress
+- faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,

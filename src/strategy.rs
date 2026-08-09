@@ -163,18 +163,25 @@ impl StrategyState {
         Ok(())
     }
 
-    pub fn materialize_selected(&self, base: &MissionDef, colony: &ColonyState) -> MissionDef {
+    pub fn materialize_selected(&self, data: &GameData, colony: &ColonyState) -> MissionDef {
+        let base = &data.mission;
         let Some(instance) = self.selected_mission() else {
             return base.clone();
         };
         let defense = colony.defense_map();
         let colony_defense = instance.map_recipe == "colony_defense";
+        let recipe = data
+            .campaign
+            .map_recipes
+            .iter()
+            .find(|recipe| recipe.id == instance.map_recipe);
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
             briefing: instance.briefing.clone(),
             objective: instance.objective.clone(),
             objective_kind: instance.objective_kind,
+            hostile_faction: instance.faction_id.clone(),
             round_limit: instance.round_limit,
             materials_reward: instance.materials_reward,
             seed: instance.seed,
@@ -184,6 +191,8 @@ impl StrategyState {
                     .iter()
                     .map(|tile| [tile.x, tile.y])
                     .collect()
+            } else if let Some(recipe) = recipe {
+                recipe.blocked_tiles.clone()
             } else {
                 base.blocked_tiles.clone()
             },
@@ -192,10 +201,15 @@ impl StrategyState {
                     .critical_objectives
                     .first()
                     .map_or(base.objective_tile, |tile| [tile.x, tile.y])
+            } else if let Some(recipe) = recipe {
+                recipe.objective_tile
             } else {
                 base.objective_tile
             },
-            terrain_costs: base.terrain_costs.clone(),
+            terrain_costs: recipe.map_or_else(
+                || base.terrain_costs.clone(),
+                |recipe| recipe.terrain_costs.clone(),
+            ),
             cover_edges: if colony_defense {
                 defense
                     .cover_tiles
@@ -206,6 +220,8 @@ impl StrategyState {
                         strength: 25,
                     })
                     .collect()
+            } else if let Some(recipe) = recipe {
+                recipe.cover_edges.clone()
             } else {
                 base.cover_edges.clone()
             },
@@ -362,7 +378,7 @@ impl StrategyState {
             objective: template.objective.clone(),
             objective_kind: template.objective_kind,
             faction_id: template.faction.clone(),
-            map_recipe: "outer_mire".to_owned(),
+            map_recipe: template.map_recipe.clone(),
             seed,
             round_limit: template.round_limit,
             materials_reward: template.materials_reward,
@@ -427,7 +443,24 @@ mod tests {
             .place_construction(crate::colony::BuildingKind::Barricade, [1, 1])
             .unwrap();
         colony.advance_operation();
-        let materialized = strategy.materialize_selected(&data.mission, &colony);
+        let materialized = strategy.materialize_selected(&data, &colony);
         assert!(materialized.blocked_tiles.contains(&[3, 2]));
+    }
+
+    #[test]
+    fn each_faction_template_materializes_its_own_battlefield() {
+        let data = GameData::load().unwrap();
+        let colony = ColonyState::new();
+        let mut layouts = std::collections::HashSet::new();
+        for template in &data.campaign.mission_templates {
+            let mut strategy = StrategyState::new(&data);
+            let instance = strategy.instantiate(template);
+            strategy.selected_mission_id = instance.id.clone();
+            strategy.mission_offers = vec![instance];
+            let mission = strategy.materialize_selected(&data, &colony);
+            assert_eq!(mission.hostile_faction, template.faction);
+            assert!(layouts.insert(mission.blocked_tiles));
+        }
+        assert_eq!(layouts.len(), 3);
     }
 }

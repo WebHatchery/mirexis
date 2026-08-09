@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 0.7.0
+Save/content version: 0.8.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -130,7 +130,9 @@ Hostiles are ordered by stable ID. They attack the lowest-health valid colonist,
 otherwise move toward the nearest colonist using validated commands, then try to
 attack again. Ties use stable health/ID or distance/coordinate ordering. Brood hunters
 and Sporecasters differ through data-backed range, movement, armour, accuracy, and
-damage profiles.
+damage profiles. Mission faction now filters deployment to Brood organisms,
+Directorate riflemen and a suppression drone, or Ascendant sentinels and a rift
+warden; factions no longer borrow the authored Glassroot enemy squad.
 
 ## 6. Character and Progression Contract
 
@@ -213,12 +215,12 @@ Current embedded files under `assets/data/` are:
 |---|---|
 | `game_config.json` | Identity, save version, grid, AP budget, root seed |
 | `mission.json` | Authored Glassroot mission and tactical map data |
-| `roster.json` | Tactical baselines and hostile archetypes |
+| `roster.json` | Tactical baselines and faction-tagged hostile archetypes |
 | `characters.json` | Persistent recruits and aptitude/loadout references |
 | `classes.json` | Class families and deployment modifiers |
 | `mutations.json` | Gift and complication hooks |
 | `equipment.json` | Starter equipment modifiers |
-| `campaign.json` | Isolation factions, research, events, mission templates |
+| `campaign.json` | Isolation factions, research, events, mission and map recipes |
 | `texture_manifest.json` | Runtime texture declarations |
 
 `GameData::load()` rejects duplicate IDs, missing character/class/mutation/equipment
@@ -297,7 +299,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (26 domain/migration tests plus the shared source-size gate)
+- `cargo test` (28 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -327,8 +329,8 @@ boundaries when continuing:
   beyond the three implemented objective types.
 - Elevation, destructible cover, targeted class abilities, items, persistent statuses,
   reactions, and animation/audio consumers are not yet implemented.
-- Generated outer-mire missions reuse Glassroot geometry with different seeds,
-  objectives, rewards, and limits. Add data-backed map recipes before adding volume.
+- The three current map recipes are fixed authored layouts. Procedural variation,
+  elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
   building damage/repair, power demand, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and richer
@@ -338,6 +340,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is data-backed map and hostile recipes, followed by
-status resolution. Those additions should make faction missions mechanically distinct
+The recommended next vertical slice is status resolution and class abilities, followed
+by richer enemy behavior. Those additions should deepen squad and faction identity
 without requiring a strategic rewrite.

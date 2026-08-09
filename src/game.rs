@@ -54,11 +54,11 @@ impl Game {
         let campaign = CampaignState::new(&data);
         let active_mission = campaign
             .strategy
-            .materialize_selected(&data.mission, &campaign.colony);
+            .materialize_selected(&data, &campaign.colony);
         let session = GameSession::new(
             &data.config,
             &active_mission,
-            &campaign.deployment_roster(&data),
+            &campaign.deployment_roster(&data, &active_mission),
         );
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
         let mut notifications = NotificationManager::new();
@@ -143,7 +143,9 @@ impl Game {
                 self.session = GameSession::new(
                     &self.data.config,
                     &self.active_mission,
-                    &self.campaign.deployment_roster(&self.data),
+                    &self
+                        .campaign
+                        .deployment_roster(&self.data, &self.active_mission),
                 );
                 self.session.tactical.objective_state = crate::state::ObjectiveState::Victory;
                 for unit in &mut self.session.tactical.units {
@@ -159,7 +161,9 @@ impl Game {
                 self.session = GameSession::new(
                     &self.data.config,
                     &self.active_mission,
-                    &self.campaign.deployment_roster(&self.data),
+                    &self
+                        .campaign
+                        .deployment_roster(&self.data, &self.active_mission),
                 );
                 self.state = AppState::Tactical;
             }
@@ -212,7 +216,7 @@ impl Game {
                 self.active_mission = self
                     .campaign
                     .strategy
-                    .materialize_selected(&self.data.mission, &self.campaign.colony);
+                    .materialize_selected(&self.data, &self.campaign.colony);
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
@@ -221,7 +225,7 @@ impl Game {
                 self.active_mission = self
                     .campaign
                     .strategy
-                    .materialize_selected(&self.data.mission, &self.campaign.colony);
+                    .materialize_selected(&self.data, &self.campaign.colony);
                 self.state = AppState::MissionBriefing;
             }
             UiAction::SelectMission(mission_id) => {
@@ -230,7 +234,7 @@ impl Game {
                         self.active_mission = self
                             .campaign
                             .strategy
-                            .materialize_selected(&self.data.mission, &self.campaign.colony);
+                            .materialize_selected(&self.data, &self.campaign.colony);
                         self.notifications.success("Mission selected");
                         self.autosave_campaign_only("Mission selection autosaved");
                     }
@@ -269,7 +273,9 @@ impl Game {
                 self.session = GameSession::new(
                     &self.data.config,
                     &self.active_mission,
-                    &self.campaign.deployment_roster(&self.data),
+                    &self
+                        .campaign
+                        .deployment_roster(&self.data, &self.active_mission),
                 );
                 self.state = AppState::Tactical;
                 self.autosave_current("Deployment autosaved");
@@ -463,7 +469,7 @@ impl Game {
                 self.active_mission = self
                     .campaign
                     .strategy
-                    .materialize_selected(&self.data.mission, &self.campaign.colony);
+                    .materialize_selected(&self.data, &self.campaign.colony);
                 if let Some(tactical) = save.tactical {
                     self.session = GameSession::from_tactical(tactical);
                     self.state = if self.session.battle_is_over() {
@@ -475,7 +481,9 @@ impl Game {
                     self.session = GameSession::new(
                         &self.data.config,
                         &self.active_mission,
-                        &self.campaign.deployment_roster(&self.data),
+                        &self
+                            .campaign
+                            .deployment_roster(&self.data, &self.active_mission),
                     );
                     self.state = AppState::Colony;
                 }
