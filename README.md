@@ -38,6 +38,8 @@ The completed roadmap slice includes:
   then unlocks that protocol's own Contact battlefield
 - protocol-specific Smartlink, Living Plate, or Phase Lens workshop prototypes that
   unlock permanently after the matching signal trace is won
+- protocol-gated Contact aftermath events that alter the contacted faction's attention
+  and leave a permanent character legacy on Kira, Mara, or Sol
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

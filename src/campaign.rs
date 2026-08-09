@@ -270,9 +270,7 @@ impl CampaignState {
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
         let event = self
             .strategy
-            .character_events
-            .iter()
-            .find(|event| !event.resolved)
+            .available_event()
             .cloned()
             .ok_or_else(|| "No unresolved character events".to_owned())?;
         let data_legacy = data
@@ -914,5 +912,53 @@ mod tests {
         assert!(campaign
             .craft_equipment("kira_voss", "brood_living_plate", &data)
             .is_err());
+    }
+
+    #[test]
+    fn contact_aftermath_event_changes_its_faction_and_character() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        campaign
+            .strategy
+            .choose_contact_protocol("ascendant_capacitor", &mut campaign.colony, &data)
+            .unwrap();
+        campaign.strategy.contact_trace_completed = true;
+        campaign.resolve_first_character_event(&data).unwrap();
+        campaign.resolve_first_character_event(&data).unwrap();
+        let attention_before = campaign
+            .strategy
+            .factions
+            .iter()
+            .find(|faction| faction.id == "ascendants")
+            .unwrap()
+            .attention;
+        assert_eq!(
+            campaign.resolve_first_character_event(&data).unwrap(),
+            "The Light Between Seconds"
+        );
+        assert_eq!(
+            campaign
+                .strategy
+                .factions
+                .iter()
+                .find(|faction| faction.id == "ascendants")
+                .unwrap()
+                .attention,
+            (attention_before - 5).max(0)
+        );
+        assert!(campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "sol_cairn")
+            .unwrap()
+            .event_legacies
+            .iter()
+            .any(|legacy| legacy.id == "ascendant_contact_aftermath"));
     }
 }

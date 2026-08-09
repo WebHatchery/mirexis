@@ -253,10 +253,16 @@ pub struct CharacterEventDef {
     pub participants: Vec<String>,
     pub food_cost: i32,
     pub attention_change: i32,
+    #[serde(default)]
+    pub attention_faction: String,
     pub legacy_name: String,
     pub legacy_character_id: String,
     pub legacy_stat: String,
     pub legacy_amount: i32,
+    #[serde(default)]
+    pub required_protocol: String,
+    #[serde(default)]
+    pub requires_contact_trace: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -551,6 +557,30 @@ impl GameData {
             }
         }
         for event in &self.campaign.events {
+            if !event.attention_faction.is_empty()
+                && !self
+                    .campaign
+                    .factions
+                    .iter()
+                    .any(|faction| faction.id == event.attention_faction)
+            {
+                return Err(format!(
+                    "Campaign event {} references missing attention faction {}",
+                    event.id, event.attention_faction
+                ));
+            }
+            if !event.required_protocol.is_empty()
+                && !self
+                    .campaign
+                    .contact_protocols
+                    .iter()
+                    .any(|protocol| protocol.id == event.required_protocol)
+            {
+                return Err(format!(
+                    "Campaign event {} references missing Contact protocol {}",
+                    event.id, event.required_protocol
+                ));
+            }
             for participant in &event.participants {
                 if !self
                     .characters

@@ -44,6 +44,8 @@ pub struct CharacterEventState {
     pub food_cost: i32,
     pub attention_change: i32,
     #[serde(default)]
+    pub attention_faction: String,
+    #[serde(default)]
     pub legacy_name: String,
     #[serde(default)]
     pub legacy_character_id: String,
@@ -51,6 +53,10 @@ pub struct CharacterEventState {
     pub legacy_stat: String,
     #[serde(default)]
     pub legacy_amount: i32,
+    #[serde(default)]
+    pub required_protocol: String,
+    #[serde(default)]
+    pub requires_contact_trace: bool,
     pub resolved: bool,
 }
 
@@ -156,19 +162,7 @@ impl StrategyState {
                 .campaign
                 .events
                 .iter()
-                .map(|event| CharacterEventState {
-                    id: event.id.clone(),
-                    title: event.title.clone(),
-                    description: event.description.clone(),
-                    participants: event.participants.clone(),
-                    food_cost: event.food_cost,
-                    attention_change: event.attention_change,
-                    legacy_name: event.legacy_name.clone(),
-                    legacy_character_id: event.legacy_character_id.clone(),
-                    legacy_stat: event.legacy_stat.clone(),
-                    legacy_amount: event.legacy_amount,
-                    resolved: false,
-                })
+                .map(character_event_from_def)
                 .collect(),
             mission_offers: vec![initial.clone()],
             selected_mission_id: initial.id,
@@ -427,24 +421,64 @@ impl StrategyState {
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
-        let event = self
+        let index = self
             .character_events
-            .iter_mut()
-            .find(|event| !event.resolved)
+            .iter()
+            .position(|event| {
+                event_is_available(
+                    event,
+                    &self.contact_protocol_id,
+                    self.contact_trace_completed,
+                )
+            })
             .ok_or_else(|| "No unresolved character events".to_owned())?;
-        if colony.resources.food < event.food_cost {
-            return Err(format!("This choice requires {} food", event.food_cost));
+        let event = &self.character_events[index];
+        let (title, food_cost, attention_change, attention_faction) = (
+            event.title.clone(),
+            event.food_cost,
+            event.attention_change,
+            if event.attention_faction.is_empty() {
+                "directorate".to_owned()
+            } else {
+                event.attention_faction.clone()
+            },
+        );
+        if colony.resources.food < food_cost {
+            return Err(format!("This choice requires {} food", food_cost));
         }
-        colony.resources.food -= event.food_cost;
-        if let Some(directorate) = self
+        colony.resources.food -= food_cost;
+        if let Some(faction) = self
             .factions
             .iter_mut()
-            .find(|faction| faction.id == "directorate")
+            .find(|faction| faction.id == attention_faction)
         {
-            directorate.attention = (directorate.attention + event.attention_change).clamp(0, 100);
+            faction.attention = (faction.attention + attention_change).clamp(0, 100);
         }
-        event.resolved = true;
-        Ok(event.title.clone())
+        self.character_events[index].resolved = true;
+        Ok(title)
+    }
+
+    pub fn available_event(&self) -> Option<&CharacterEventState> {
+        self.character_events.iter().find(|event| {
+            event_is_available(
+                event,
+                &self.contact_protocol_id,
+                self.contact_trace_completed,
+            )
+        })
+    }
+
+    pub fn ensure_character_events(&mut self, data: &GameData) {
+        for definition in &data.campaign.events {
+            if !self
+                .character_events
+                .iter()
+                .any(|event| event.id == definition.id)
+            {
+                self.character_events
+                    .push(character_event_from_def(definition));
+            }
+        }
     }
 
     pub fn active_threat(&self) -> Option<&TelegraphedThreat> {
@@ -567,6 +601,35 @@ impl StrategyState {
             operation_modifier,
         }
     }
+}
+
+fn character_event_from_def(event: &crate::data::CharacterEventDef) -> CharacterEventState {
+    CharacterEventState {
+        id: event.id.clone(),
+        title: event.title.clone(),
+        description: event.description.clone(),
+        participants: event.participants.clone(),
+        food_cost: event.food_cost,
+        attention_change: event.attention_change,
+        attention_faction: event.attention_faction.clone(),
+        legacy_name: event.legacy_name.clone(),
+        legacy_character_id: event.legacy_character_id.clone(),
+        legacy_stat: event.legacy_stat.clone(),
+        legacy_amount: event.legacy_amount,
+        required_protocol: event.required_protocol.clone(),
+        requires_contact_trace: event.requires_contact_trace,
+        resolved: false,
+    }
+}
+
+fn event_is_available(
+    event: &CharacterEventState,
+    protocol_id: &str,
+    trace_complete: bool,
+) -> bool {
+    !event.resolved
+        && (event.required_protocol.is_empty() || event.required_protocol == protocol_id)
+        && (!event.requires_contact_trace || trace_complete)
 }
 
 #[cfg(test)]

@@ -404,12 +404,7 @@ fn draw_operations(
                 actions.push(UiAction::CompleteResearch(research.id.clone()));
             }
         }
-        if let Some(event) = campaign
-            .strategy
-            .character_events
-            .iter()
-            .find(|entry| !entry.resolved)
-        {
+        if let Some(event) = campaign.strategy.available_event() {
             draw_character_event(campaign, data, event, mouse, actions);
         }
     }
@@ -484,6 +479,17 @@ fn draw_character_event(
     } else {
         event.legacy_amount
     };
+    let attention_faction = if event.attention_faction.is_empty() {
+        "directorate"
+    } else {
+        event.attention_faction.as_str()
+    };
+    let attention_name = campaign
+        .strategy
+        .factions
+        .iter()
+        .find(|faction| faction.id == attention_faction)
+        .map_or(attention_faction, |faction| faction.name.as_str());
     if colony_button(
         Rect::new(878.0, 548.0, 362.0, 32.0),
         &format!("EVENT: {}", event.title),
@@ -505,11 +511,12 @@ fn draw_character_event(
         });
     draw_ui_text_ex(
         &format!(
-            "CHOICE EFFECT // {} {:+} {} · {} FOOD · DIRECTORATE {:+}",
+            "CHOICE EFFECT // {} {:+} {} · {} FOOD · {} {:+}",
             recipient.to_uppercase(),
             legacy_amount,
             legacy_stat.to_uppercase(),
             event.food_cost,
+            attention_name.to_uppercase(),
             event.attention_change
         ),
         878.0,

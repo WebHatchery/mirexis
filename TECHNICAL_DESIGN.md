@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase Two — Contact entry
-Save/content version: 1.9.0
+Save/content version: 1.10.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -343,6 +343,10 @@ map family and the SignalTrace contract; non-matching Contact templates remain l
 A victorious matching trace persists its aftermath and unlocks exactly one workshop
 prototype: Directorate Smartlink, Brood Living Plate, or Ascendant Phase Lens. Other
 protocol prototypes remain visible but locked, making the consequence auditable.
+It also exposes one protocol-gated aftermath event. Resolving that event spends food,
+reduces the contacted faction's attention, and gives a permanent accuracy, health, or
+movement legacy to the named participant. Migration backfills newly authored event
+states into old campaigns without replaying resolved events.
 
 ## 9. Content Registry
 
@@ -407,6 +411,7 @@ Migration coverage:
 | 1.6.0 | Persistent mutually exclusive Contact protocol choice |
 | 1.7.0 | Protocol-gated Contact offers and the SignalTrace objective contract |
 | 1.8.0 | Persistent trace aftermath and protocol-gated workshop prototypes |
+| 1.9.0 | Protocol-gated aftermath events with faction and character consequences |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -438,7 +443,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `legacy`, `briefing`, `pressure`, `gameplay`,
+`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `legacy`,
+`briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
@@ -452,8 +458,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (67 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-five-scene capture with visual inspection
+- `cargo test` (69 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-six-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -490,10 +496,10 @@ boundaries when continuing:
   equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
-  operation whose victory unlocks a matching equipment prototype. Further Contact
-  story, relationships, and later phases remain future content.
+  operation whose victory unlocks a matching equipment prototype and aftermath event.
+  Deeper Contact relationships and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a faction relationship and follow-up event for
-the completed trace, giving the Contact choice a narrative as well as mechanical echo.
+The recommended next vertical slice is a visible Contact completion contract leading
+into Adaptation after the trace, prototype, and aftermath have all been confronted.

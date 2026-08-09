@@ -46,6 +46,7 @@ pub fn migrate_save_value(
     add_class_action_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
+    save.campaign.strategy.ensure_character_events(data);
     save.campaign.colony.ensure_phase_one_infrastructure(
         detected_version.as_deref() != Some(data.config.version.as_str()),
     );
@@ -578,5 +579,33 @@ mod tests {
         let migrated = migrate_save_value(Some("1.8.0".to_owned()), legacy, &data).unwrap();
         assert_eq!(migrated.version, data.config.version);
         assert!(!migrated.campaign.strategy.contact_trace_completed);
+    }
+
+    #[test]
+    fn prototype_save_gains_protocol_aftermath_events() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.9.0", &campaign)).unwrap();
+        legacy["campaign"]["strategy"]["character_events"]
+            .as_array_mut()
+            .unwrap()
+            .retain(|event| {
+                event["required_protocol"]
+                    .as_str()
+                    .is_none_or(str::is_empty)
+            });
+        let migrated = migrate_save_value(Some("1.9.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(
+            migrated.campaign.strategy.character_events.len(),
+            data.campaign.events.len()
+        );
+        assert!(migrated
+            .campaign
+            .strategy
+            .character_events
+            .iter()
+            .any(|event| event.id == "brood_contact_aftermath"));
     }
 }

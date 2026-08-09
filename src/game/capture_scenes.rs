@@ -13,6 +13,7 @@ impl Game {
             "colony" => self.state = AppState::Colony,
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
+            "contact_event" => self.capture_contact_event(),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -93,6 +94,17 @@ impl Game {
             .expect("capture Contact protocol is available");
         self.campaign.strategy.contact_trace_completed = true;
         self.state = AppState::Roster;
+    }
+
+    fn capture_contact_event(&mut self) {
+        self.capture_contact_gear();
+        self.campaign
+            .resolve_first_character_event(&self.data)
+            .expect("first Isolation capture event resolves");
+        self.campaign
+            .resolve_first_character_event(&self.data)
+            .expect("second Isolation capture event resolves");
+        self.state = AppState::Colony;
     }
 
     fn capture_legacy(&mut self) {
