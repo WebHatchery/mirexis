@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.5.0
+Save/content version: 1.6.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -317,6 +317,12 @@ When an assault reaches zero, the only offer becomes a colony-defense mission.
 Winning resets the countdown and reduces strength; failure returns it sooner and
 stronger. This is the first escalation loop, not the full five-phase campaign.
 
+Isolation now has a persistent completion contract: win three operations, complete
+any research doctrine, and repel a colony-defense assault. Meeting all three gates
+advances the campaign header to Phase Two: Contact and grants two Alien Components
+once. The colony loop remains playable after the transition; Contact-specific
+operations, research, and story consequences are the next content layer.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -376,6 +382,7 @@ Migration coverage:
 | 1.2.0 | Tactical equipment identity and once-per-mission item usage |
 | 1.3.0 | Battle-local destructible-cover integrity |
 | 1.4.0 | Hydroponics, Power Plant, construction selection, and power-model rebasing |
+| 1.5.0 | Persistent Isolation victory, doctrine, and repelled-assault phase progress |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -406,8 +413,8 @@ Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
 translated into `UiAction` or tactical commands before simulation mutation. Tactical
 units use labels as well as faction color, and colony buildings use text labels.
 
-`scripts/capture_ui.ps1` captures `title`, `colony`, `damage`, `power`, `construction`,
-`research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`, `extraction`,
+`scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
+`construction`, `research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`, `extraction`,
 `variant`, `sporefield`, `vault`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
@@ -420,8 +427,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (58 domain/migration tests plus the shared source-size gate)
-- deterministic nineteen-scene capture with visual inspection
+- `cargo test` (60 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -456,11 +463,12 @@ boundaries when continuing:
   population, other facility construction, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
   equipment families need content beyond the starter roster screen.
-- Isolation is a repeatable Phase One loop. Story gates and Phases Two–Five remain
-  future campaign content.
+- Isolation has a visible completion gate and advances into a persistent Contact
+  state. Contact-specific story, operations, research, and later phases remain future
+  campaign content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is another layer of Isolation campaign content:
-additional mission templates that test the squad, completed doctrines, earned
-legacies, pressure modifiers, and resource priorities in new combinations.
+The recommended next vertical slice is the first Contact content: spend recovered
+Alien Components on a consequential doctrine or facility and introduce an operation
+whose objective makes the phase transition mechanically distinct.

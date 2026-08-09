@@ -30,6 +30,8 @@ The completed roadmap slice includes:
 - Directorate, Brood, and Ascendant attention; a telegraphed assault; persistent
   research doctrines and character-event legacies; seeded mission generation; and
   faction-pressure battlefield modifiers with materials, biomass, and power recovery
+- a visible Isolation completion contract—three victories, one doctrine, and one
+  repelled colony assault—that advances the persistent campaign into Contact
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

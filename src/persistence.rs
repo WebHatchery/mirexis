@@ -49,6 +49,16 @@ pub fn migrate_save_value(
     save.campaign.colony.ensure_phase_one_infrastructure(
         detected_version.as_deref() != Some(data.config.version.as_str()),
     );
+    if detected_version.as_deref() != Some(data.config.version.as_str())
+        && !save.campaign.strategy.isolation_complete
+    {
+        save.campaign.strategy.isolation_victories =
+            save.campaign.operations_completed.min(3) as u8;
+        save.campaign.strategy.first_assault_repulsed = save.campaign.operations_completed >= 4;
+        save.campaign
+            .strategy
+            .refresh_isolation_completion(&mut save.campaign.colony);
+    }
     let mut selected = 0;
     for character in &mut save.campaign.roster {
         if character.deployment_selected {
@@ -469,5 +479,24 @@ mod tests {
             .has_facility(crate::colony::BuildingKind::PowerPlant));
         assert_eq!(migrated.campaign.colony.resources.power, 4);
         assert_eq!(migrated.campaign.colony.power_supply(), 8);
+    }
+
+    #[test]
+    fn economy_save_recovers_isolation_phase_progress() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.operations_completed = 4;
+        campaign.strategy.research[0].completed = true;
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.5.0", &campaign)).unwrap();
+        let strategy = legacy["campaign"]["strategy"].as_object_mut().unwrap();
+        strategy.remove("isolation_victories");
+        strategy.remove("first_assault_repulsed");
+        strategy.remove("isolation_complete");
+        let migrated = migrate_save_value(Some("1.5.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.campaign.strategy.isolation_complete);
+        assert_eq!(migrated.campaign.strategy.phase_id, "contact");
+        assert_eq!(migrated.campaign.colony.resources.alien_components, 2);
     }
 }

@@ -87,6 +87,12 @@ pub struct StrategyState {
     pub character_events: Vec<CharacterEventState>,
     pub mission_offers: Vec<MissionInstance>,
     pub selected_mission_id: String,
+    #[serde(default)]
+    pub isolation_victories: u8,
+    #[serde(default)]
+    pub first_assault_repulsed: bool,
+    #[serde(default)]
+    pub isolation_complete: bool,
     rng: SeededRng,
 }
 
@@ -162,6 +168,9 @@ impl StrategyState {
                 .collect(),
             mission_offers: vec![initial.clone()],
             selected_mission_id: initial.id,
+            isolation_victories: 0,
+            first_assault_repulsed: false,
+            isolation_complete: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -272,6 +281,12 @@ impl StrategyState {
         data: &GameData,
     ) {
         let victory = outcome.result == ObjectiveState::Victory;
+        if victory {
+            self.isolation_victories = self.isolation_victories.saturating_add(1).min(3);
+            if mission.map_recipe == "colony_defense" {
+                self.first_assault_repulsed = true;
+            }
+        }
         if let Some(faction) = self
             .factions
             .iter_mut()
@@ -319,13 +334,32 @@ impl StrategyState {
         colony.resources.materials -= research.materials_cost;
         colony.resources.power += research.power_reward;
         research.completed = true;
-        Ok(research.name.clone())
+        let name = research.name.clone();
+        self.refresh_isolation_completion(colony);
+        Ok(name)
     }
 
     pub fn research_completed(&self, research_id: &str) -> bool {
         self.research
             .iter()
             .any(|research| research.id == research_id && research.completed)
+    }
+
+    pub fn refresh_isolation_completion(&mut self, colony: &mut ColonyState) -> bool {
+        if self.isolation_complete
+            || self.isolation_victories < 3
+            || !self.first_assault_repulsed
+            || !self.research.iter().any(|research| research.completed)
+        {
+            return false;
+        }
+        self.isolation_complete = true;
+        self.phase_id = "contact".to_owned();
+        self.phase_name = "PHASE TWO: CONTACT".to_owned();
+        self.phase_summary =
+            "Mirexis survived isolation. Enemy signals now answer the colony by name.".to_owned();
+        colony.resources.alien_components += 2;
+        true
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
@@ -485,6 +519,36 @@ mod tests {
         assert_eq!(a.mission_offers, b.mission_offers);
         assert_eq!(a.active_threat().unwrap().operations_until, 2);
         assert_eq!(a.mission_offers.len(), 2);
+    }
+
+    #[test]
+    fn isolation_completion_requires_victories_research_and_a_repulsed_assault() {
+        let data = GameData::load().unwrap();
+        let mut strategy = StrategyState::new(&data);
+        strategy.isolation_victories = 2;
+        let mut defense = strategy.selected_mission().unwrap().clone();
+        defense.map_recipe = "colony_defense".to_owned();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
+        };
+        strategy.resolve_mission(&outcome, &defense, &data);
+        assert_eq!(strategy.isolation_victories, 3);
+        assert!(strategy.first_assault_repulsed);
+
+        let mut colony = ColonyState::new();
+        assert!(!strategy.refresh_isolation_completion(&mut colony));
+        strategy.research[0].completed = true;
+        assert!(strategy.refresh_isolation_completion(&mut colony));
+        assert_eq!(strategy.phase_id, "contact");
+        assert_eq!(colony.resources.alien_components, 2);
+        assert!(!strategy.refresh_isolation_completion(&mut colony));
+        assert_eq!(colony.resources.alien_components, 2);
     }
 
     #[test]

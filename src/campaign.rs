@@ -236,6 +236,7 @@ impl CampaignState {
             self.colony.damage_for_failed_defense(mission.seed);
         }
         self.strategy.resolve_mission(outcome, mission, data);
+        self.strategy.refresh_isolation_completion(&mut self.colony);
         let xp = if outcome.result == ObjectiveState::Victory {
             20
         } else {

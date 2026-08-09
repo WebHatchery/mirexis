@@ -38,6 +38,12 @@ fn draw_header(campaign: &CampaignState) {
         TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
+        &campaign.strategy.phase_name,
+        292.0,
+        54.0,
+        TextStyle::new(15.0, dark::ACCENT).params(),
+    );
+    draw_ui_text_ex(
         &format!("OPERATIONS COMPLETED  {}", campaign.operations_completed),
         940.0,
         54.0,
@@ -218,6 +224,42 @@ fn draw_operations(
         218.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
+    let doctrine_complete = campaign
+        .strategy
+        .research
+        .iter()
+        .any(|research| research.completed);
+    draw_ui_text_ex(
+        &if campaign.strategy.isolation_complete {
+            "CONTACT // ISOLATION BROKEN // 2 ALIEN COMPONENTS RECOVERED".to_owned()
+        } else {
+            format!(
+                "ISOLATION // VICTORIES {}/3 · DOCTRINE {} · ASSAULT {}",
+                campaign.strategy.isolation_victories,
+                if doctrine_complete {
+                    "READY"
+                } else {
+                    "PENDING"
+                },
+                if campaign.strategy.first_assault_repulsed {
+                    "REPELLED"
+                } else {
+                    "PENDING"
+                }
+            )
+        },
+        878.0,
+        232.0,
+        TextStyle::new(
+            10.0,
+            if campaign.strategy.isolation_complete {
+                dark::POSITIVE
+            } else {
+                dark::TEXT_DIM
+            },
+        )
+        .params(),
+    );
     if let Some(threat) = campaign.strategy.active_threat() {
         draw_ui_text_ex(
             &format!(
@@ -225,7 +267,7 @@ fn draw_operations(
                 threat.name, threat.operations_until, threat.strength
             ),
             878.0,
-            242.0,
+            248.0,
             TextStyle::new(12.0, dark::WARNING).params(),
         );
     }

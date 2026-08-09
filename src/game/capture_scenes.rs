@@ -11,6 +11,7 @@ impl Game {
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
+            "contact" => self.capture_contact(),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -54,6 +55,16 @@ impl Game {
         for research in &mut self.campaign.strategy.research {
             research.completed = true;
         }
+        self.state = AppState::Colony;
+    }
+
+    fn capture_contact(&mut self) {
+        self.campaign.strategy.isolation_victories = 3;
+        self.campaign.strategy.first_assault_repulsed = true;
+        self.campaign.strategy.research[0].completed = true;
+        self.campaign
+            .strategy
+            .refresh_isolation_completion(&mut self.campaign.colony);
         self.state = AppState::Colony;
     }
 
