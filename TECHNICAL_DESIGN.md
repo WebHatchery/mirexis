@@ -67,12 +67,14 @@ Important transition payloads:
 |---|---|---|
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
+| `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
 | `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
+| `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
@@ -86,6 +88,7 @@ Important transition payloads:
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 | `cover_ui.rs` | Cover integrity bars and attackable-tile outlines | Simulation mutation |
+| `tactical_unit_ui.rs` | Unit tokens, selection rings, and target outlines | Simulation mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
 multi-objective logic that would push it toward the source limit.
@@ -186,9 +189,11 @@ limit.
 
 Every base class has one once-per-round tactical action. Soldier focuses its shots;
 Defender braces through the hostile phase; Scout converts Surge into action points and
-movement; Medic dresses the squad's worst wound; Engineer launches an armour-ignoring
-shock drone; Psionic disrupts the nearest hostile; and Biotech grants short-lived squad
-regeneration. Class identity is carried into `UnitState` rather than inferred from text.
+movement; Medic dresses a chosen nearby wound; Engineer launches an armour-ignoring
+shock drone at a chosen hostile; Psionic disrupts a chosen hostile; and Biotech grants
+short-lived squad regeneration. The three targeted actions use the same highlighted
+targeting mode and execution validator as field equipment. Class identity is carried
+into `UnitState` rather than inferred from text.
 
 The Field Medkit restores five vitality to a chosen wounded colonist within three
 tiles. The Field Toolkit grants Guarded to a chosen nearby colonist, and the Survey
@@ -352,8 +357,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
-`equipment`, `breach`, and `debrief` by default. `Game::begin_capture_scene()` seeds each
-scene deterministically, including valid equipment targeting and breached-cover states.
+`equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds each
+scene deterministically, including equipment/class targeting and breached-cover states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -362,8 +367,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (42 domain/migration tests plus the shared source-size gate)
-- deterministic eight-scene capture with visual inspection
+- `cargo test` (43 domain/migration tests plus the shared source-size gate)
+- deterministic nine-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -390,8 +395,8 @@ boundaries when continuing:
 
 - Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
   beyond the three implemented objective types.
-- Elevation, additional player-targeted class abilities, long-lived injuries as tactical
-  statuses, reactions, and animation/audio consumers are not yet implemented.
+- Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
+  consumers are not yet implemented.
 - The three current map recipes are fixed authored layouts. Procedural variation,
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
@@ -403,6 +408,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is explicitly targeted class abilities, followed by
-an additional objective contract. Those additions should deepen squad identity and
+The recommended next vertical slice is an additional objective contract, followed by
+procedural variation within each faction's map family. Those additions should deepen
 mission variety without requiring a strategic rewrite.

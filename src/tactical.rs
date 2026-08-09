@@ -191,6 +191,7 @@ pub enum Command {
     },
     ActivateClassAction {
         unit_id: String,
+        target_id: Option<String>,
     },
     UseEquipment {
         unit_id: String,

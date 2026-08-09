@@ -1,7 +1,7 @@
 //! Class-specific tactical actions and their status effects.
 
 use crate::data::Team;
-use crate::state::{BattleEvent, CommandCost, GameSession, RuleError};
+use crate::state::{BattleEvent, Command, CommandCost, GameSession, RuleError};
 use crate::tactical::{manhattan, StatusEffect, StatusKind};
 
 pub(crate) fn action_name(class_id: &str) -> Option<&'static str> {
@@ -17,7 +17,66 @@ pub(crate) fn action_name(class_id: &str) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn validate(session: &GameSession, unit_id: &str) -> Result<CommandCost, RuleError> {
+pub(crate) fn requires_target(class_id: &str) -> bool {
+    matches!(class_id, "medic" | "engineer" | "psionic")
+}
+
+impl GameSession {
+    pub fn activate_selected_class_action(&mut self) -> Result<Vec<BattleEvent>, RuleError> {
+        let unit_id = self
+            .tactical
+            .selected_unit
+            .clone()
+            .ok_or(RuleError::UnknownUnit)?;
+        self.execute(Command::ActivateClassAction {
+            unit_id,
+            target_id: None,
+        })
+    }
+
+    pub fn can_activate_selected_class_action(&self) -> bool {
+        self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
+            self.validate(&Command::ActivateClassAction {
+                unit_id: unit_id.clone(),
+                target_id: None,
+            })
+            .is_ok()
+        })
+    }
+
+    pub fn can_target_class_action(&self, unit_id: &str, target_id: &str) -> bool {
+        self.validate(&Command::ActivateClassAction {
+            unit_id: unit_id.to_owned(),
+            target_id: Some(target_id.to_owned()),
+        })
+        .is_ok()
+    }
+
+    pub fn activate_class_action_on(
+        &mut self,
+        unit_id: &str,
+        target_id: &str,
+    ) -> Result<Vec<BattleEvent>, RuleError> {
+        self.execute(Command::ActivateClassAction {
+            unit_id: unit_id.to_owned(),
+            target_id: Some(target_id.to_owned()),
+        })
+    }
+}
+
+pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str) -> bool {
+    session
+        .tactical
+        .units
+        .iter()
+        .any(|target| session.can_target_class_action(unit_id, &target.id))
+}
+
+pub(crate) fn validate(
+    session: &GameSession,
+    unit_id: &str,
+    target_id: Option<&str>,
+) -> Result<CommandCost, RuleError> {
     let unit = session.unit(unit_id).ok_or(RuleError::UnknownUnit)?;
     if session.tactical.phase != crate::state::TacticalPhase::Player {
         return Err(RuleError::WrongPhase);
@@ -34,20 +93,24 @@ pub(crate) fn validate(session: &GameSession, unit_id: &str) -> Result<CommandCo
     if unit.action_points < 1 {
         return Err(RuleError::InsufficientActionPoints);
     }
-    let available = match unit.class_id.as_str() {
-        "medic" => session.tactical.units.iter().any(|ally| {
-            ally.team == Team::Colony && !ally.incapacitated && ally.health < ally.max_health
+    let target_valid = match unit.class_id.as_str() {
+        "medic" => target_matches(session, unit_id, target_id, Team::Colony, 4, |target| {
+            target.health < target.max_health
         }),
-        "engineer" => nearest_hostile(session, unit_id, 4).is_some(),
-        "psionic" => nearest_hostile(session, unit_id, 5).is_some(),
-        _ => true,
+        "engineer" => target_matches(session, unit_id, target_id, Team::Hostile, 4, |_| true),
+        "psionic" => target_matches(session, unit_id, target_id, Team::Hostile, 5, |_| true),
+        _ => target_id.is_none(),
     };
-    available
+    target_valid
         .then_some(CommandCost { action_points: 1 })
-        .ok_or(RuleError::ClassActionUnavailable)
+        .ok_or(RuleError::InvalidTarget)
 }
 
-pub(crate) fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEvent> {
+pub(crate) fn execute(
+    session: &mut GameSession,
+    unit_id: &str,
+    target_id: Option<&str>,
+) -> Vec<BattleEvent> {
     let class_id = session.unit(unit_id).unwrap().class_id.clone();
     let action = action_name(&class_id).unwrap().to_owned();
     let unit = session
@@ -75,11 +138,16 @@ pub(crate) fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEve
             unit.action_points = unit.action_points.saturating_add(3);
             apply_status(session, unit_id, StatusKind::Quickened, 1, &mut events);
         }
-        "medic" => heal_most_wounded(session, &mut events),
-        "engineer" => damage_nearest(session, unit_id, 4, 3, &mut events),
+        "medic" => heal_target(session, target_id.unwrap(), &mut events),
+        "engineer" => damage_target(session, target_id.unwrap(), 3, &mut events),
         "psionic" => {
-            let target = nearest_hostile(session, unit_id, 5).unwrap();
-            apply_status(session, &target, StatusKind::Disrupted, 1, &mut events);
+            apply_status(
+                session,
+                target_id.unwrap(),
+                StatusKind::Disrupted,
+                1,
+                &mut events,
+            );
         }
         "biotech" => {
             let allies = session
@@ -99,25 +167,24 @@ pub(crate) fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEve
     events
 }
 
-fn nearest_hostile(session: &GameSession, unit_id: &str, range: i32) -> Option<String> {
-    let origin = session.unit(unit_id)?.position;
-    session
-        .tactical
-        .units
-        .iter()
-        .filter(|unit| {
-            unit.team == Team::Hostile
-                && !unit.incapacitated
-                && manhattan(origin, unit.position) <= range
-        })
-        .min_by_key(|unit| {
-            (
-                manhattan(origin, unit.position),
-                unit.health,
-                unit.id.clone(),
-            )
-        })
-        .map(|unit| unit.id.clone())
+fn target_matches(
+    session: &GameSession,
+    unit_id: &str,
+    target_id: Option<&str>,
+    team: Team,
+    range: i32,
+    extra: impl FnOnce(&crate::state::UnitState) -> bool,
+) -> bool {
+    let Some((unit, target)) = session
+        .unit(unit_id)
+        .zip(target_id.and_then(|target_id| session.unit(target_id)))
+    else {
+        return false;
+    };
+    target.team == team
+        && !target.incapacitated
+        && manhattan(unit.position, target.position) <= range
+        && extra(target)
 }
 
 pub(crate) fn apply_status(
@@ -147,18 +214,7 @@ pub(crate) fn apply_status(
     });
 }
 
-fn heal_most_wounded(session: &mut GameSession, events: &mut Vec<BattleEvent>) {
-    let target_id = session
-        .tactical
-        .units
-        .iter()
-        .filter(|unit| {
-            unit.team == Team::Colony && !unit.incapacitated && unit.health < unit.max_health
-        })
-        .min_by_key(|unit| (unit.health * 100 / unit.max_health.max(1), unit.id.clone()))
-        .unwrap()
-        .id
-        .clone();
+fn heal_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
     let target = session
         .tactical
         .units
@@ -168,20 +224,18 @@ fn heal_most_wounded(session: &mut GameSession, events: &mut Vec<BattleEvent>) {
     let before = target.health;
     target.health = (target.health + 4).min(target.max_health);
     events.push(BattleEvent::UnitHealed {
-        unit_id: target_id,
+        unit_id: target_id.to_owned(),
         amount: target.health - before,
         remaining: target.health,
     });
 }
 
-fn damage_nearest(
+fn damage_target(
     session: &mut GameSession,
-    unit_id: &str,
-    range: i32,
+    target_id: &str,
     damage: i32,
     events: &mut Vec<BattleEvent>,
 ) {
-    let target_id = nearest_hostile(session, unit_id, range).unwrap();
     let target = session
         .tactical
         .units
@@ -190,13 +244,15 @@ fn damage_nearest(
         .unwrap();
     target.health = (target.health - damage).max(0);
     events.push(BattleEvent::DamageApplied {
-        target_id: target_id.clone(),
+        target_id: target_id.to_owned(),
         amount: damage,
         remaining: target.health,
     });
     if target.health == 0 {
         target.incapacitated = true;
-        events.push(BattleEvent::UnitIncapacitated { unit_id: target_id });
+        events.push(BattleEvent::UnitIncapacitated {
+            unit_id: target_id.to_owned(),
+        });
     }
 }
 
@@ -259,7 +315,9 @@ mod tests {
             .unwrap()
             .health = 3;
         medic.tactical.selected_unit = Some("ilya_reed".into());
-        medic.activate_selected_class_action().unwrap();
+        medic
+            .activate_class_action_on("ilya_reed", "mara_venn")
+            .unwrap();
         assert_eq!(medic.unit("mara_venn").unwrap().health, 7);
 
         let mut engineer = engineer_session();
@@ -272,7 +330,9 @@ mod tests {
             .position = TilePos::new(7, 2);
         let before_health = engineer.unit("brood_stalker_a").unwrap().health;
         engineer.tactical.selected_unit = Some("sol_cairn".into());
-        engineer.activate_selected_class_action().unwrap();
+        engineer
+            .activate_class_action_on("sol_cairn", "brood_stalker_a")
+            .unwrap();
         assert_eq!(
             engineer.unit("brood_stalker_a").unwrap().health,
             before_health - 3
@@ -296,12 +356,40 @@ mod tests {
             kira.class_id = class_id.to_owned();
             kira.position = TilePos::new(7, 2);
             session.tactical.selected_unit = Some("kira_voss".into());
-            session.activate_selected_class_action().unwrap();
+            if requires_target(class_id) {
+                session
+                    .activate_class_action_on("kira_voss", "brood_stalker_a")
+                    .unwrap();
+            } else {
+                session.activate_selected_class_action().unwrap();
+            }
             assert!(session
                 .tactical
                 .units
                 .iter()
                 .any(|unit| unit.has_status(expected_status)));
         }
+    }
+
+    #[test]
+    fn targeted_class_action_changes_only_the_chosen_valid_unit() {
+        let mut medic = session();
+        for id in ["kira_voss", "mara_venn"] {
+            medic
+                .tactical
+                .units
+                .iter_mut()
+                .find(|unit| unit.id == id)
+                .unwrap()
+                .health -= 4;
+        }
+        let kira_before = medic.unit("kira_voss").unwrap().health;
+        let mara_before = medic.unit("mara_venn").unwrap().health;
+        medic
+            .activate_class_action_on("ilya_reed", "kira_voss")
+            .unwrap();
+        assert_eq!(medic.unit("kira_voss").unwrap().health, kira_before + 4);
+        assert_eq!(medic.unit("mara_venn").unwrap().health, mara_before);
+        assert!(!medic.can_target_class_action("ilya_reed", "mara_venn"));
     }
 }

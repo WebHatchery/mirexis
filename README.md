@@ -14,7 +14,7 @@ The completed roadmap slice includes:
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
 - secure-and-clear, elimination, and holdout mission objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- seven class actions and round-resolved combat statuses
+- seven class actions, explicit Medic/Engineer/Psionic targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
 - persistent three-colonist squad selection with a visible reserve
 - roster-wide class training and slot-replacing workshop equipment

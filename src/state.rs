@@ -166,8 +166,8 @@ impl GameSession {
             } => self.validate_attack(attacker_id, target_id),
             Command::Interact { unit_id } => self.validate_interact(unit_id),
             Command::ActivateMutation { unit_id } => self.validate_mutation(unit_id),
-            Command::ActivateClassAction { unit_id } => {
-                crate::class_actions::validate(self, unit_id)
+            Command::ActivateClassAction { unit_id, target_id } => {
+                crate::class_actions::validate(self, unit_id, target_id.as_deref())
             }
             Command::UseEquipment {
                 unit_id,
@@ -191,8 +191,8 @@ impl GameSession {
             } => self.execute_attack(&attacker_id, &target_id),
             Command::Interact { unit_id } => self.execute_interact(&unit_id),
             Command::ActivateMutation { unit_id } => self.execute_mutation(&unit_id),
-            Command::ActivateClassAction { unit_id } => {
-                crate::class_actions::execute(self, &unit_id)
+            Command::ActivateClassAction { unit_id, target_id } => {
+                crate::class_actions::execute(self, &unit_id, target_id.as_deref())
             }
             Command::UseEquipment {
                 unit_id,
@@ -280,24 +280,6 @@ impl GameSession {
     pub fn can_activate_selected_mutation(&self) -> bool {
         self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
             self.validate(&Command::ActivateMutation {
-                unit_id: unit_id.clone(),
-            })
-            .is_ok()
-        })
-    }
-
-    pub fn activate_selected_class_action(&mut self) -> Result<Vec<BattleEvent>, RuleError> {
-        let unit_id = self
-            .tactical
-            .selected_unit
-            .clone()
-            .ok_or(RuleError::UnknownUnit)?;
-        self.execute(Command::ActivateClassAction { unit_id })
-    }
-
-    pub fn can_activate_selected_class_action(&self) -> bool {
-        self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
-            self.validate(&Command::ActivateClassAction {
                 unit_id: unit_id.clone(),
             })
             .is_ok()

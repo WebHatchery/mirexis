@@ -1,12 +1,14 @@
 //! Application state machine, persistence, and toolkit integration.
 
+mod capture_scenes;
+
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 use crate::colony_ui;
 use crate::data::{GameData, MissionDef};
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, MissionOutcome, SaveData};
-use crate::ui::{self, UiAction, UiContext};
+use crate::ui::{self, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::events::EventBus;
@@ -30,9 +32,14 @@ enum AppState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct EquipmentTargeting {
-    unit_id: String,
-    equipment_id: String,
+enum TacticalTargeting {
+    Equipment {
+        unit_id: String,
+        equipment_id: String,
+    },
+    ClassAction {
+        unit_id: String,
+    },
 }
 
 pub struct Game {
@@ -47,7 +54,7 @@ pub struct Game {
     save_exists: bool,
     last_outcome: Option<MissionOutcome>,
     autosave: AutoSaveManager,
-    equipment_targeting: Option<EquipmentTargeting>,
+    targeting: Option<TacticalTargeting>,
 }
 
 impl Game {
@@ -87,7 +94,7 @@ impl Game {
             save_exists,
             last_outcome: None,
             autosave: AutoSaveManager::default(),
-            equipment_targeting: None,
+            targeting: None,
         }
     }
 
@@ -120,8 +127,8 @@ impl Game {
             }
             AppState::Tactical => {
                 if input.escape_pressed {
-                    self.events.push(if self.equipment_targeting.is_some() {
-                        UiAction::CancelEquipmentTargeting
+                    self.events.push(if self.targeting.is_some() {
+                        UiAction::CancelTargeting
                     } else {
                         UiAction::ReturnToTitle
                     });
@@ -135,7 +142,7 @@ impl Game {
                 if is_key_pressed(KeyCode::Enter) {
                     self.events.push(UiAction::EndPhase);
                 }
-                if self.equipment_targeting.is_none() {
+                if self.targeting.is_none() {
                     if let Some((dx, dy)) = ui::tile_move_from_keys() {
                         self.session.move_selection(dx, dy);
                     }
@@ -151,112 +158,6 @@ impl Game {
         let actions: Vec<_> = self.events.drain().collect();
         for action in actions {
             self.apply_action(action);
-        }
-    }
-
-    pub fn begin_capture_scene(&mut self, scene: &str) {
-        self.equipment_targeting = None;
-        match scene {
-            "title" => self.state = AppState::Title,
-            "colony" => self.state = AppState::Colony,
-            "roster" => self.state = AppState::Roster,
-            "briefing" => self.state = AppState::MissionBriefing,
-            "equipment" => {
-                self.session = GameSession::new(
-                    &self.data.config,
-                    &self.active_mission,
-                    &self
-                        .campaign
-                        .deployment_roster(&self.data, &self.active_mission),
-                );
-                let kira_position = self
-                    .session
-                    .unit("kira_voss")
-                    .expect("capture roster includes Kira")
-                    .position;
-                if let Some(hostile) = self
-                    .session
-                    .tactical
-                    .units
-                    .iter_mut()
-                    .find(|unit| unit.team == crate::data::Team::Hostile)
-                {
-                    hostile.position =
-                        macroquad_toolkit::grid::TilePos::new(kira_position.x + 3, kira_position.y);
-                }
-                self.equipment_targeting = Some(EquipmentTargeting {
-                    unit_id: "kira_voss".to_owned(),
-                    equipment_id: "survey_harness".to_owned(),
-                });
-                self.state = AppState::Tactical;
-            }
-            "breach" => {
-                self.session = GameSession::new(
-                    &self.data.config,
-                    &self.active_mission,
-                    &self
-                        .campaign
-                        .deployment_roster(&self.data, &self.active_mission),
-                );
-                let position = self
-                    .session
-                    .tactical
-                    .destructible_cover
-                    .iter()
-                    .find(|cover| self.session.can_attack_selected_cover(cover.position))
-                    .expect("capture map includes attackable cover")
-                    .position;
-                while self.session.tactical.blocked.contains(&position) {
-                    if let Some(unit) =
-                        self.session.tactical.units.iter_mut().find(|unit| {
-                            Some(&unit.id) == self.session.tactical.selected_unit.as_ref()
-                        })
-                    {
-                        unit.action_points = self.data.config.max_action_points;
-                    }
-                    self.session
-                        .attack_selected_cover(position)
-                        .expect("capture cover remains attackable");
-                }
-                if let Some(unit) = self
-                    .session
-                    .tactical
-                    .units
-                    .iter_mut()
-                    .find(|unit| Some(&unit.id) == self.session.tactical.selected_unit.as_ref())
-                {
-                    unit.action_points = self.data.config.max_action_points;
-                }
-                self.state = AppState::Tactical;
-            }
-            "debrief" => {
-                self.session = GameSession::new(
-                    &self.data.config,
-                    &self.active_mission,
-                    &self
-                        .campaign
-                        .deployment_roster(&self.data, &self.active_mission),
-                );
-                self.session.tactical.objective_state = crate::state::ObjectiveState::Victory;
-                for unit in &mut self.session.tactical.units {
-                    if unit.team == crate::data::Team::Hostile {
-                        unit.incapacitated = true;
-                        unit.health = 0;
-                    }
-                }
-                self.last_outcome = self.session.mission_outcome(&self.active_mission);
-                self.state = AppState::Debrief;
-            }
-            _ => {
-                self.session = GameSession::new(
-                    &self.data.config,
-                    &self.active_mission,
-                    &self
-                        .campaign
-                        .deployment_roster(&self.data, &self.active_mission),
-                );
-                self.state = AppState::Tactical;
-            }
         }
     }
 
@@ -282,14 +183,18 @@ impl Game {
                 save_exists: self.save_exists,
                 loaded_assets: self.assets.len(),
                 ui: &virtual_ui,
-                equipment_user: self
-                    .equipment_targeting
-                    .as_ref()
-                    .map(|targeting| targeting.unit_id.as_str()),
-                targeted_equipment: self
-                    .equipment_targeting
-                    .as_ref()
-                    .map(|targeting| targeting.equipment_id.as_str()),
+                targeting: self.targeting.as_ref().map(|targeting| match targeting {
+                    TacticalTargeting::Equipment {
+                        unit_id,
+                        equipment_id,
+                    } => TargetingView::Equipment {
+                        unit_id,
+                        equipment_id,
+                    },
+                    TacticalTargeting::ClassAction { unit_id } => {
+                        TargetingView::ClassAction { unit_id }
+                    }
+                }),
             }),
             AppState::Debrief => ui::draw_debrief(
                 &self.active_mission,
@@ -313,7 +218,7 @@ impl Game {
     fn apply_action(&mut self, action: UiAction) {
         match action {
             UiAction::StartMission => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.campaign = CampaignState::new(&self.data);
                 self.active_mission = self
                     .campaign
@@ -372,7 +277,7 @@ impl Game {
                 }
             }
             UiAction::DeployMission => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.session = GameSession::new(
                     &self.data.config,
                     &self.active_mission,
@@ -399,11 +304,11 @@ impl Game {
             }
             UiAction::Continue => self.load_game(),
             UiAction::ReturnToTitle => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.state = AppState::Colony;
                 self.autosave_campaign_only("Colony entry autosaved");
             }
@@ -514,9 +419,36 @@ impl Game {
                 ),
                 Err(_) => self.notifications.warning("Class action is unavailable"),
             },
+            UiAction::ArmClassAction => {
+                if let Some(unit_id) = self.session.tactical.selected_unit.clone() {
+                    self.targeting = Some(TacticalTargeting::ClassAction { unit_id });
+                    self.notifications
+                        .info("Choose a highlighted class-action target");
+                }
+            }
+            UiAction::UseClassActionOn(target_id) => {
+                let result = match self.targeting.take() {
+                    Some(TacticalTargeting::ClassAction { unit_id }) => self
+                        .session
+                        .activate_class_action_on(&unit_id, &target_id)
+                        .map_err(|_| ()),
+                    _ => Err(()),
+                };
+                match result {
+                    Ok(events) => self.notifications.success(
+                        events
+                            .first()
+                            .map(crate::ui_widgets::event_summary)
+                            .unwrap_or_else(|| "Class action activated".to_owned()),
+                    ),
+                    Err(()) => self
+                        .notifications
+                        .warning("Class-action target is no longer valid"),
+                }
+            }
             UiAction::ArmEquipment(equipment_id) => {
                 if let Some(unit_id) = self.session.tactical.selected_unit.clone() {
-                    self.equipment_targeting = Some(EquipmentTargeting {
+                    self.targeting = Some(TacticalTargeting::Equipment {
                         unit_id,
                         equipment_id,
                     });
@@ -524,20 +456,21 @@ impl Game {
                         .info("Choose a highlighted equipment target");
                 }
             }
-            UiAction::CancelEquipmentTargeting => {
-                self.equipment_targeting = None;
-                self.notifications.info("Equipment targeting cancelled");
+            UiAction::CancelTargeting => {
+                self.targeting = None;
+                self.notifications.info("Tactical targeting cancelled");
             }
             UiAction::UseEquipmentOn(target_id) => {
-                let result = self
-                    .equipment_targeting
-                    .take()
-                    .ok_or(())
-                    .and_then(|targeting| {
-                        self.session
-                            .use_equipment(&targeting.unit_id, &targeting.equipment_id, &target_id)
-                            .map_err(|_| ())
-                    });
+                let result = match self.targeting.take() {
+                    Some(TacticalTargeting::Equipment {
+                        unit_id,
+                        equipment_id,
+                    }) => self
+                        .session
+                        .use_equipment(&unit_id, &equipment_id, &target_id)
+                        .map_err(|_| ()),
+                    _ => Err(()),
+                };
                 match result {
                     Ok(events) => self.notifications.success(
                         events
@@ -551,7 +484,7 @@ impl Game {
                 }
             }
             UiAction::EndPhase => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.session.end_player_phase(&self.data.config);
                 self.notifications.info(format!(
                     "Enemy activity resolved — round {}",
@@ -655,7 +588,7 @@ impl Game {
         );
         match loaded {
             Ok(save) => {
-                self.equipment_targeting = None;
+                self.targeting = None;
                 self.campaign = save.campaign;
                 self.active_mission = self
                     .campaign

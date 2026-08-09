@@ -3,7 +3,7 @@
 use crate::campaign::CampaignState;
 use crate::data::{GameData, MissionDef, ObjectiveKind, Team};
 use crate::grid_ui::GridView;
-use crate::state::{GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState};
+use crate::state::{GameSession, MissionOutcome, ObjectiveState, TacticalPhase};
 use crate::ui_widgets::{action_status, button, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -38,13 +38,26 @@ pub enum UiAction {
     InteractObjective,
     ActivateMutation,
     ActivateClassAction,
+    ArmClassAction,
+    UseClassActionOn(String),
     ArmEquipment(String),
-    CancelEquipmentTargeting,
+    CancelTargeting,
     UseEquipmentOn(String),
     EndPhase,
     Save,
     Load,
     DeleteSave,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TargetingView<'a> {
+    Equipment {
+        unit_id: &'a str,
+        equipment_id: &'a str,
+    },
+    ClassAction {
+        unit_id: &'a str,
+    },
 }
 
 pub struct UiContext<'a> {
@@ -54,8 +67,7 @@ pub struct UiContext<'a> {
     pub save_exists: bool,
     pub loaded_assets: usize,
     pub ui: &'a VirtualUi,
-    pub equipment_user: Option<&'a str>,
-    pub targeted_equipment: Option<&'a str>,
+    pub targeting: Option<TargetingView<'a>>,
 }
 
 pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiAction> {
@@ -427,13 +439,19 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         }
     }
     for unit in &ctx.session.tactical.units {
-        let targetable =
-            ctx.equipment_user
-                .zip(ctx.targeted_equipment)
-                .is_some_and(|(user, equipment)| {
-                    ctx.session.can_use_equipment(user, equipment, &unit.id)
-                });
-        draw_unit(
+        let targetable = match ctx.targeting {
+            Some(TargetingView::Equipment {
+                unit_id,
+                equipment_id,
+            }) => ctx
+                .session
+                .can_use_equipment(unit_id, equipment_id, &unit.id),
+            Some(TargetingView::ClassAction { unit_id }) => {
+                ctx.session.can_target_class_action(unit_id, &unit.id)
+            }
+            None => false,
+        };
+        crate::tactical_unit_ui::draw_unit(
             view,
             unit,
             ctx.session.tactical.selected_unit.as_deref() == Some(&unit.id),
@@ -442,19 +460,34 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     if is_mouse_button_released(MouseButton::Left) {
         if let Some(tile) = view.tile_at(mouse) {
-            if let Some((user, equipment)) = ctx.equipment_user.zip(ctx.targeted_equipment) {
+            if let Some(targeting) = ctx.targeting {
                 let target = ctx
                     .session
                     .tactical
                     .units
                     .iter()
                     .find(|unit| unit.position == tile);
-                if let Some(target) = target
-                    .filter(|target| ctx.session.can_use_equipment(user, equipment, &target.id))
-                {
-                    actions.push(UiAction::UseEquipmentOn(target.id.clone()));
+                let action = target.and_then(|target| match targeting {
+                    TargetingView::Equipment {
+                        unit_id,
+                        equipment_id,
+                    } if ctx
+                        .session
+                        .can_use_equipment(unit_id, equipment_id, &target.id) =>
+                    {
+                        Some(UiAction::UseEquipmentOn(target.id.clone()))
+                    }
+                    TargetingView::ClassAction { unit_id }
+                        if ctx.session.can_target_class_action(unit_id, &target.id) =>
+                    {
+                        Some(UiAction::UseClassActionOn(target.id.clone()))
+                    }
+                    _ => None,
+                });
+                if let Some(action) = action {
+                    actions.push(action);
                 } else {
-                    actions.push(UiAction::CancelEquipmentTargeting);
+                    actions.push(UiAction::CancelTargeting);
                 }
                 return;
             }
@@ -476,57 +509,6 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             }
         }
     }
-}
-
-fn draw_unit(view: GridView, unit: &UnitState, selected: bool, targetable: bool) {
-    let rect = view.tile_rect(unit.position);
-    let color = match unit.team {
-        Team::Colony => Color::new(0.22, 0.75, 0.63, 1.0),
-        Team::Hostile => Color::new(0.86, 0.27, 0.25, 1.0),
-    };
-    let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.48);
-    let color = if unit.incapacitated {
-        Color::new(color.r * 0.35, color.g * 0.35, color.b * 0.35, 1.0)
-    } else {
-        color
-    };
-    draw_circle(center.x, center.y, rect.w * 0.28, color);
-    draw_circle_lines(
-        center.x,
-        center.y,
-        rect.w * 0.28,
-        if selected { 4.0 } else { 2.0 },
-        if selected {
-            WHITE
-        } else {
-            Color::new(0.04, 0.08, 0.08, 1.0)
-        },
-    );
-    if targetable {
-        draw_rectangle_lines(
-            rect.x + 5.0,
-            rect.y + 5.0,
-            rect.w - 10.0,
-            rect.h - 10.0,
-            3.0,
-            Color::new(0.95, 0.74, 0.24, 1.0),
-        );
-    }
-    let initials = unit
-        .name
-        .split_whitespace()
-        .filter_map(|word| word.chars().next())
-        .take(2)
-        .collect::<String>();
-    draw_text_centered_in_box(
-        &initials,
-        rect.x,
-        rect.y,
-        rect.w,
-        rect.h - 2.0,
-        15.0,
-        Color::new(0.03, 0.07, 0.07, 1.0),
-    );
 }
 
 fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
@@ -634,22 +616,18 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     ) {
         actions.push(UiAction::ActivateMutation);
     }
-    let class_label = selected
-        .and_then(|unit| crate::class_actions::action_name(&unit.class_id))
-        .unwrap_or("CLASS ACTION");
-    if button(
+    crate::class_action_ui::draw_action_button(
+        ctx,
+        selected,
         Rect::new(
             x + action_width + 8.0,
             panel.bottom() - 144.0,
             action_width,
             38.0,
         ),
-        class_label,
-        ctx.session.can_activate_selected_class_action(),
         mouse,
-    ) {
-        actions.push(UiAction::ActivateClassAction);
-    }
+        actions,
+    );
     crate::equipment_ui::draw_action_button(
         ctx,
         selected,

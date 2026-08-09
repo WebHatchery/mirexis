@@ -1,7 +1,7 @@
 //! Tactical field-equipment controls.
 
 use crate::state::UnitState;
-use crate::ui::{UiAction, UiContext};
+use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
@@ -18,7 +18,13 @@ pub(crate) fn draw_action_button(
         .as_deref()
         .and_then(crate::equipment_actions::action_name)
         .unwrap_or("FIELD ITEM");
-    let targeting = ctx.targeted_equipment == equipment_id.as_deref();
+    let targeting = matches!(
+        (ctx.targeting, equipment_id.as_deref()),
+        (
+            Some(TargetingView::Equipment { equipment_id: active, .. }),
+            Some(current)
+        ) if active == current
+    );
     if !button(
         rect,
         if targeting {
@@ -36,7 +42,7 @@ pub(crate) fn draw_action_button(
         return;
     }
     if targeting {
-        actions.push(UiAction::CancelEquipmentTargeting);
+        actions.push(UiAction::CancelTargeting);
     } else if let Some(equipment_id) = equipment_id {
         actions.push(UiAction::ArmEquipment(equipment_id));
     }

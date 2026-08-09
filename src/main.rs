@@ -4,6 +4,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::capture;
 
 mod campaign;
+mod class_action_ui;
 mod class_actions;
 mod colony;
 mod colony_ui;
@@ -21,6 +22,7 @@ mod state;
 mod strategy;
 mod tactical;
 mod tactical_ai;
+mod tactical_unit_ui;
 mod ui;
 mod ui_widgets;
 
