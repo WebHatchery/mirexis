@@ -56,7 +56,7 @@ pub enum ObjectiveKind {
     Extraction,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TerrainCostDef {
     pub position: [i32; 2],
     pub cost: u8,
@@ -71,7 +71,7 @@ pub enum EdgeDirection {
     West,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CoverEdgeDef {
     pub position: [i32; 2],
     pub direction: EdgeDirection,

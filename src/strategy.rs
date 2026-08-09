@@ -175,6 +175,8 @@ impl StrategyState {
             .map_recipes
             .iter()
             .find(|recipe| recipe.id == instance.map_recipe);
+        let layout =
+            recipe.map(|recipe| crate::map_variants::materialize(recipe, data, instance.seed));
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
@@ -191,8 +193,8 @@ impl StrategyState {
                     .iter()
                     .map(|tile| [tile.x, tile.y])
                     .collect()
-            } else if let Some(recipe) = recipe {
-                recipe.blocked_tiles.clone()
+            } else if let Some(layout) = &layout {
+                layout.blocked_tiles.clone()
             } else {
                 base.blocked_tiles.clone()
             },
@@ -201,14 +203,14 @@ impl StrategyState {
                     .critical_objectives
                     .first()
                     .map_or(base.objective_tile, |tile| [tile.x, tile.y])
-            } else if let Some(recipe) = recipe {
-                recipe.objective_tile
+            } else if let Some(layout) = &layout {
+                layout.objective_tile
             } else {
                 base.objective_tile
             },
-            terrain_costs: recipe.map_or_else(
+            terrain_costs: layout.as_ref().map_or_else(
                 || base.terrain_costs.clone(),
-                |recipe| recipe.terrain_costs.clone(),
+                |layout| layout.terrain_costs.clone(),
             ),
             cover_edges: if colony_defense {
                 defense
@@ -220,8 +222,8 @@ impl StrategyState {
                         strength: 25,
                     })
                     .collect()
-            } else if let Some(recipe) = recipe {
-                recipe.cover_edges.clone()
+            } else if let Some(layout) = &layout {
+                layout.cover_edges.clone()
             } else {
                 base.cover_edges.clone()
             },
@@ -462,5 +464,32 @@ mod tests {
             assert!(layouts.insert(mission.blocked_tiles));
         }
         assert_eq!(layouts.len(), 4);
+    }
+
+    #[test]
+    fn mission_seed_selects_a_repeatable_safe_map_variant() {
+        let data = GameData::load().unwrap();
+        let colony = ColonyState::new();
+        let template = data
+            .campaign
+            .mission_templates
+            .iter()
+            .find(|template| template.id == "courier_extraction")
+            .unwrap();
+        let mut strategy = StrategyState::new(&data);
+        let mut instance = strategy.instantiate(template);
+        instance.seed = 2;
+        strategy.selected_mission_id = instance.id.clone();
+        strategy.mission_offers = vec![instance.clone()];
+        let authored = strategy.materialize_selected(&data, &colony);
+        instance.seed = 3;
+        strategy.mission_offers = vec![instance.clone()];
+        let variant = strategy.materialize_selected(&data, &colony);
+        assert_ne!(authored.blocked_tiles, variant.blocked_tiles);
+        assert_eq!(
+            variant.blocked_tiles,
+            strategy.materialize_selected(&data, &colony).blocked_tiles
+        );
+        assert!(!variant.blocked_tiles.contains(&variant.objective_tile));
     }
 }

@@ -15,6 +15,7 @@ mod equipment_actions;
 mod equipment_ui;
 mod game;
 mod grid_ui;
+mod map_variants;
 mod persistence;
 mod reinforcements;
 mod roster_ui;

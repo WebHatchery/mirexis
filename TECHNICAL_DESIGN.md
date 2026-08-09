@@ -80,6 +80,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
+| `map_variants.rs` | Seed-driven safe transforms of authored battlefield geometry | Mission selection |
 | `persistence.rs` | Project schema migrations inside toolkit slots | Platform storage paths |
 | `ui.rs` | Title, briefing, tactical, debrief rendering and intents | Direct state mutation |
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
@@ -170,6 +171,12 @@ Holdout missions prebuild deterministic reinforcement waves for rounds three and
 Queued units are part of `TacticalState`, so saves preserve future pressure exactly.
 Arrival chooses the nearest valid edge tile, emits a battle event, and prevents an early
 elimination victory while waves remain. The sidebar reports pending waves.
+
+Each authored map recipe has two deterministic layouts selected by the mission seed:
+the authored geometry and a vertical mirror. Mirroring preserves left/right deployment
+pressure, rotates north/south cover facings, and transforms terrain and objective tiles
+together. A safety gate rejects any candidate that blocks an objective or any authored
+unit spawn. Campaign saves preserve the seed; tactical saves preserve realized geometry.
 
 ## 6. Character and Progression Contract
 
@@ -362,7 +369,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
-`extraction`, `equipment`, `class_target`, `breach`, and `debrief` by default. Capture
+`extraction`, `variant`, `equipment`, `class_target`, `breach`, and `debrief` by default. Capture
 setup seeds each scene deterministically, including objective and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
 
@@ -372,8 +379,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (43 domain/migration tests plus the shared source-size gate)
-- deterministic ten-scene capture with visual inspection
+- `cargo test` (45 domain/migration tests plus the shared source-size gate)
+- deterministic eleven-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -402,8 +409,8 @@ boundaries when continuing:
   four implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The four current map recipes are fixed authored layouts. Procedural variation,
-  elevation, spawn recipes, and additional battlefield families remain future work.
+- The four current map recipes support authored and safe mirrored layouts. Additional
+  transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
   building damage/repair, power demand, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
@@ -413,6 +420,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an additional objective contract, followed by
-procedural variation within each faction's map family. Those additions should deepen
-mission variety without requiring a strategic rewrite.
+The recommended next vertical slice is another layer of Isolation campaign content:
+additional mission templates, research consequences, or character events that change
+later operations rather than resolving as one-off resource exchanges.

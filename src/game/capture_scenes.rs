@@ -14,6 +14,7 @@ impl Game {
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
             "extraction" => self.capture_extraction(),
+            "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
             "class_target" => self.capture_class_target(),
             "breach" => self.capture_breach(),
@@ -56,7 +57,15 @@ impl Game {
     }
 
     fn capture_extraction(&mut self) {
-        self.active_mission.name = "ISOLATION: LAST TRANSMISSION".to_owned();
+        self.configure_extraction(2, "ISOLATION: LAST TRANSMISSION");
+    }
+
+    fn capture_map_variant(&mut self) {
+        self.configure_extraction(3, "LAST TRANSMISSION // SOUTHERN APPROACH");
+    }
+
+    fn configure_extraction(&mut self, seed: u64, name: &str) {
+        self.active_mission.name = name.to_owned();
         self.active_mission.objective =
             "Get any colonist carrying the stolen coordinates to extraction.".to_owned();
         self.active_mission.objective_kind = ObjectiveKind::Extraction;
@@ -69,10 +78,12 @@ impl Game {
             .iter()
             .find(|recipe| recipe.id == "directorate_checkpoint")
             .expect("extraction capture recipe exists");
-        self.active_mission.blocked_tiles = recipe.blocked_tiles.clone();
-        self.active_mission.objective_tile = recipe.objective_tile;
-        self.active_mission.terrain_costs = recipe.terrain_costs.clone();
-        self.active_mission.cover_edges = recipe.cover_edges.clone();
+        let layout = crate::map_variants::materialize(recipe, &self.data, seed);
+        self.active_mission.seed = seed;
+        self.active_mission.blocked_tiles = layout.blocked_tiles;
+        self.active_mission.objective_tile = layout.objective_tile;
+        self.active_mission.terrain_costs = layout.terrain_costs;
+        self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
         let evac = self.session.tactical.objective_tile;
         let colonist = self
