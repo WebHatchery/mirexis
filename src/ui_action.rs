@@ -30,6 +30,7 @@ pub enum UiAction {
     RepairBuilding(String),
     TreatInjury,
     SelectTile(TilePos),
+    SelectNextReady,
     MoveSelected(TilePos),
     AttackSelected(String),
     AttackCover(TilePos),

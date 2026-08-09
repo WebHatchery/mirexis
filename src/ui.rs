@@ -665,14 +665,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
 
 fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let y = 644.0;
-    if button(Rect::new(18.0, y, 130.0, 44.0), "TITLE", true, mouse) {
+    if button(Rect::new(18.0, y, 105.0, 44.0), "TITLE", true, mouse) {
         actions.push(UiAction::ReturnToTitle);
     }
-    if button(Rect::new(160.0, y, 130.0, 44.0), "SAVE", true, mouse) {
+    if button(Rect::new(133.0, y, 90.0, 44.0), "SAVE", true, mouse) {
         actions.push(UiAction::Save);
     }
     if button(
-        Rect::new(302.0, y, 130.0, 44.0),
+        Rect::new(233.0, y, 90.0, 44.0),
         "LOAD",
         ctx.save_exists,
         mouse,
@@ -680,18 +680,26 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::Load);
     }
     if button(
-        Rect::new(444.0, y, 150.0, 44.0),
+        Rect::new(333.0, y, 130.0, 44.0),
         "DELETE SAVE",
         ctx.save_exists,
         mouse,
     ) {
         actions.push(UiAction::DeleteSave);
     }
-    if button(Rect::new(606.0, y, 100.0, 44.0), "HELP", true, mouse) {
+    if button(Rect::new(473.0, y, 90.0, 44.0), "HELP", true, mouse) {
         actions.push(UiAction::ToggleTacticalHelp);
     }
-    if button(Rect::new(718.0, y, 90.0, 44.0), "LOG", true, mouse) {
+    if button(Rect::new(573.0, y, 80.0, 44.0), "LOG", true, mouse) {
         actions.push(UiAction::ToggleBattleLog);
+    }
+    if button(
+        Rect::new(663.0, y, 145.0, 44.0),
+        "NEXT READY [TAB]",
+        crate::phase_readiness::ready_count(ctx.session) > 0,
+        mouse,
+    ) {
+        actions.push(UiAction::SelectNextReady);
     }
     draw_ui_text_ex(
         &format!(

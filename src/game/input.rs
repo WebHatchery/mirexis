@@ -57,6 +57,9 @@ impl Game {
                     self.events.push(UiAction::ToggleBattleLog);
                 }
                 if !self.show_tactical_help && !self.show_battle_log {
+                    if is_key_pressed(KeyCode::Tab) {
+                        self.events.push(UiAction::SelectNextReady);
+                    }
                     if is_key_pressed(KeyCode::S) {
                         self.events.push(UiAction::Save);
                     }

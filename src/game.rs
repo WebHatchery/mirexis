@@ -468,6 +468,11 @@ impl Game {
                 }
             }
             UiAction::SelectTile(tile) => self.session.select_tile(tile),
+            UiAction::SelectNextReady => {
+                if crate::phase_readiness::select_next(&mut self.session).is_none() {
+                    self.notifications.info("No colonist has actions remaining");
+                }
+            }
             UiAction::MoveSelected(tile) => {
                 if self.session.move_selected_to(tile) {
                     self.notifications.info("Colonist repositioned");

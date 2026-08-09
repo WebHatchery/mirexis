@@ -45,7 +45,7 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         &[
             "Movement and weapons spend action points.",
             "Class, mutation, gear, and overwatch add options.",
-            "Enter or END COLONY PHASE releases hostile AI.",
+            "End Phase warns once if colonists remain ready.",
             "Orange intent lines forecast the first response.",
         ],
     );
@@ -72,7 +72,7 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         ],
     );
     text(
-        "KEYS // ARROWS inspect · ENTER end phase · S save · L load · H help · B log",
+        "KEYS // ARROWS inspect · TAB next ready · ENTER end phase · S save · L load · H help · B log",
         230.0,
         526.0,
         15.0,

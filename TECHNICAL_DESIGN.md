@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.48.0
+Save/content version: 1.49.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -105,7 +105,7 @@ Important transition payloads:
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |
 | `phase_refresh.rs` | Team AP, regeneration, temporary-stat, and per-phase-use reset | Command validation or drawing |
-| `phase_readiness.rs` | Read-only active colonist count for guarded phase handoff | Command execution or persistence |
+| `phase_readiness.rs` | Active-colonist count and deterministic next-ready selection | Action execution or persistence |
 | `phase_replay.rs` | Bounded timed hostile-event playback and skip affordance | Simulation ordering or persistence |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
@@ -620,6 +620,7 @@ Migration coverage:
 | 1.45.0 | No new fields; hostile-phase playback is bounded presentation state only |
 | 1.46.0 | No new fields; formation choice is applied only while creating a new session |
 | 1.47.0 | No new fields; end-phase confirmation is transient application UI state |
+| 1.48.0 | No new fields; next-ready selection changes existing selected unit and tile only |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -728,5 +729,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is next-ready-colonist cycling from keyboard and the
-tactical footer, reducing repeated map scanning during multi-character turns.
+The recommended next vertical slice is on-grid action-point pips and spent markers for every
+colonist, making squad readiness visible without selecting or cycling through each unit.

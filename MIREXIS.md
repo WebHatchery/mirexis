@@ -452,6 +452,11 @@ warning instead of immediately yielding to hostiles. The button reports how many
 are still ready and requires a second End Phase command; any intervening tactical action
 cancels the warning, while a fully spent squad hands off without an unnecessary confirmation.
 
+The tactical footer and `Tab` key select the next non-incapacitated colonist with unspent
+action points, wrapping through deployment order and moving grid focus to their current tile.
+Fully spent squad members are skipped, and invoking the control with nobody ready leaves the
+current selection unchanged rather than inventing a command target.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.
