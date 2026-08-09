@@ -21,6 +21,7 @@ pub enum UiAction {
     CompleteResearch(String),
     ResolveCharacterEvent,
     DeployMission,
+    ToggleDeployment(String),
     Continue,
     ReturnToTitle,
     ReturnToColony,
@@ -159,40 +160,45 @@ pub fn draw_mission_briefing(
         dark::TEXT_DIM,
     );
     draw_ui_text_ex(
-        "DEPLOYMENT",
+        &format!(
+            "DEPLOYMENT // {}/{} SELECTED",
+            campaign.selected_squad_count(),
+            crate::campaign::SQUAD_LIMIT
+        ),
         200.0,
         370.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
-    let squad = campaign
-        .roster
-        .iter()
-        .filter(|character| character.availability == crate::campaign::Availability::Ready)
-        .map(|character| {
-            let class_name = data
-                .classes
-                .iter()
-                .find(|class| class.id == character.active_class)
-                .map_or(character.active_class.as_str(), |class| class.name.as_str());
-            let mutation_name = data
-                .mutations
-                .iter()
-                .find(|mutation| mutation.id == character.mutation_id)
-                .map_or(character.mutation_id.as_str(), |mutation| {
-                    mutation.name.as_str()
-                });
-            format!(
-                "{} · {} · {} · {} XP",
-                character.name, class_name, mutation_name, character.experience
-            )
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-    draw_text_block(&squad, 200.0, 394.0, 650.0, 110.0, 18.0, 6.0, dark::TEXT);
+    for (index, character) in campaign.roster.iter().enumerate() {
+        let class_name = data
+            .classes
+            .iter()
+            .find(|class| class.id == character.active_class)
+            .map_or(character.active_class.as_str(), |class| class.name.as_str());
+        let state = if character.availability != crate::campaign::Availability::Ready {
+            "RECOVERING"
+        } else if character.deployment_selected {
+            "DEPLOY"
+        } else {
+            "RESERVE"
+        };
+        let label = format!(
+            "[{}] {} · {} · LV{} · {} XP",
+            state, character.name, class_name, character.level, character.experience
+        );
+        if button(
+            Rect::new(200.0, 384.0 + index as f32 * 32.0, 650.0, 28.0),
+            &label,
+            character.availability == crate::campaign::Availability::Ready,
+            mouse,
+        ) {
+            actions.push(UiAction::ToggleDeployment(character.id.clone()));
+        }
+    }
     if button(
         Rect::new(820.0, 520.0, 250.0, 48.0),
         "DEPLOY SQUAD",
-        true,
+        campaign.selected_squad_count() > 0,
         mouse,
     ) {
         actions.push(UiAction::DeployMission);

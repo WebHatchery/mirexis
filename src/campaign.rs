@@ -7,6 +7,8 @@ use crate::strategy::{MissionInstance, StrategyState};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+pub const SQUAD_LIMIT: usize = 3;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Availability {
@@ -36,6 +38,8 @@ pub struct CharacterRecord {
     pub mutation_id: String,
     pub injuries: Vec<InjuryRecord>,
     pub availability: Availability,
+    #[serde(default = "deployment_selected_default")]
+    pub deployment_selected: bool,
     pub equipment_ids: Vec<String>,
 }
 
@@ -56,6 +60,7 @@ impl CharacterRecord {
             mutation_id: def.mutation.clone(),
             injuries: Vec::new(),
             availability: Availability::Ready,
+            deployment_selected: true,
             equipment_ids: def.equipment.clone(),
         }
     }
@@ -71,12 +76,16 @@ pub struct CampaignState {
 
 impl CampaignState {
     pub fn new(data: &GameData) -> Self {
+        let mut roster = data
+            .characters
+            .iter()
+            .map(CharacterRecord::from_def)
+            .collect::<Vec<_>>();
+        for (index, character) in roster.iter_mut().enumerate() {
+            character.deployment_selected = index < SQUAD_LIMIT;
+        }
         Self {
-            roster: data
-                .characters
-                .iter()
-                .map(CharacterRecord::from_def)
-                .collect(),
+            roster,
             colony: ColonyState::new(),
             strategy: StrategyState::new(data),
             operations_completed: 0,
@@ -88,18 +97,63 @@ impl CampaignState {
         data: &GameData,
         mission: &crate::data::MissionDef,
     ) -> Vec<UnitDef> {
-        data.roster
+        let mut deployment = data
+            .roster
             .iter()
             .filter_map(|base| {
-                if base.team == Team::Hostile {
-                    return (base.faction.as_deref() == Some(&mission.hostile_faction))
-                        .then(|| base.clone());
+                if base.team != Team::Colony {
+                    return None;
                 }
                 let character = self.roster.iter().find(|record| record.id == base.id)?;
-                (character.availability == Availability::Ready)
+                (character.availability == Availability::Ready && character.deployment_selected)
                     .then(|| derive_unit(base, character, data))
             })
-            .collect()
+            .take(SQUAD_LIMIT)
+            .collect::<Vec<_>>();
+        deployment.extend(
+            data.roster
+                .iter()
+                .filter(|base| {
+                    base.team == Team::Hostile
+                        && base.faction.as_deref() == Some(&mission.hostile_faction)
+                })
+                .cloned(),
+        );
+        deployment
+    }
+
+    pub fn selected_squad_count(&self) -> usize {
+        self.roster
+            .iter()
+            .filter(|character| {
+                character.availability == Availability::Ready && character.deployment_selected
+            })
+            .count()
+            .min(SQUAD_LIMIT)
+    }
+
+    pub fn toggle_deployment(&mut self, character_id: &str) -> Result<bool, String> {
+        let selected_count = self.selected_squad_count();
+        let character = self
+            .roster
+            .iter_mut()
+            .find(|character| character.id == character_id)
+            .ok_or_else(|| format!("Unknown colonist: {}", character_id))?;
+        if character.availability != Availability::Ready {
+            return Err(format!("{} is still recovering", character.name));
+        }
+        if character.deployment_selected {
+            if selected_count <= 1 {
+                return Err("At least one colonist must deploy".to_owned());
+            }
+            character.deployment_selected = false;
+        } else {
+            if selected_count >= SQUAD_LIMIT {
+                return Err(format!("Squad limit is {} colonists", SQUAD_LIMIT));
+            }
+            character.deployment_selected = true;
+        }
+        Ok(character.deployment_selected)
     }
 
     pub fn apply_mission_outcome(
@@ -278,6 +332,10 @@ impl CampaignState {
     }
 }
 
+fn deployment_selected_default() -> bool {
+    true
+}
+
 pub fn derived_mutation_traits(
     character: &CharacterRecord,
     data: &GameData,
@@ -407,6 +465,33 @@ mod tests {
                 .iter()
                 .all(|unit| unit.faction.as_deref() == Some(faction)));
         }
+    }
+
+    #[test]
+    fn squad_selection_enforces_reserves_and_a_three_colonist_limit() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        assert_eq!(campaign.selected_squad_count(), SQUAD_LIMIT);
+        assert_eq!(
+            campaign
+                .deployment_roster(&data, &data.mission)
+                .iter()
+                .filter(|unit| unit.team == Team::Colony)
+                .count(),
+            SQUAD_LIMIT
+        );
+        assert!(campaign.toggle_deployment("sol_cairn").is_err());
+        assert!(!campaign.toggle_deployment("kira_voss").unwrap());
+        assert!(campaign.toggle_deployment("sol_cairn").unwrap());
+        assert_eq!(campaign.selected_squad_count(), SQUAD_LIMIT);
+        assert!(campaign
+            .deployment_roster(&data, &data.mission)
+            .iter()
+            .any(|unit| unit.id == "sol_cairn"));
+        assert!(!campaign
+            .deployment_roster(&data, &data.mission)
+            .iter()
+            .any(|unit| unit.id == "kira_voss"));
     }
 
     fn consequence(id: &str, name: &str) -> CharacterConsequence {

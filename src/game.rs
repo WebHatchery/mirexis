@@ -281,6 +281,19 @@ impl Game {
                 self.autosave_current("Deployment autosaved");
                 self.notifications.success("Operation Glassroot deployed");
             }
+            UiAction::ToggleDeployment(character_id) => {
+                match self.campaign.toggle_deployment(&character_id) {
+                    Ok(selected) => {
+                        self.notifications.info(if selected {
+                            "Colonist assigned to the deployment squad"
+                        } else {
+                            "Colonist moved to reserve"
+                        });
+                        self.autosave_campaign_only("Squad selection autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::Continue => self.load_game(),
             UiAction::ReturnToTitle => self.state = AppState::Title,
             UiAction::ReturnToColony => {

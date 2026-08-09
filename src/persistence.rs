@@ -1,6 +1,6 @@
 //! Campaign save migration at schema boundaries.
 
-use crate::campaign::CampaignState;
+use crate::campaign::{CampaignState, SQUAD_LIMIT};
 use crate::colony::ColonyState;
 use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
@@ -45,6 +45,16 @@ pub fn migrate_save_value(
     add_class_action_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
+    let mut selected = 0;
+    for character in &mut save.campaign.roster {
+        if character.deployment_selected {
+            if selected < SQUAD_LIMIT {
+                selected += 1;
+            } else {
+                character.deployment_selected = false;
+            }
+        }
+    }
     save.version = data.config.version.clone();
     Ok(save)
 }
@@ -161,7 +171,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -198,7 +208,7 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 
@@ -222,7 +232,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
         let tactical = migrated.tactical.as_ref().unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         assert!(!tactical.units[0].mutation_gift_used);
         assert_eq!(tactical.units[0].temporary_armour, 0);
     }
@@ -244,7 +254,7 @@ mod tests {
             mission.as_object_mut().unwrap().remove("objective_kind");
         }
         let migrated = migrate_save_value(Some("0.6.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         assert_eq!(
             migrated.tactical.unwrap().objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
@@ -268,7 +278,7 @@ mod tests {
             unit.remove("statuses");
         }
         let migrated = migrate_save_value(Some("0.8.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         let kira = migrated
             .tactical
             .unwrap()
@@ -292,7 +302,32 @@ mod tests {
             .unwrap()
             .remove("reinforcement_waves");
         let migrated = migrate_save_value(Some("0.9.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.0.0");
+        assert_eq!(migrated.version, "1.1.0");
         assert!(migrated.tactical.unwrap().reinforcement_waves.is_empty());
+    }
+
+    #[test]
+    fn reinforcement_save_gains_a_bounded_deployment_squad() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.0.0", &campaign)).unwrap();
+        for character in legacy["campaign"]["roster"].as_array_mut().unwrap() {
+            character
+                .as_object_mut()
+                .unwrap()
+                .remove("deployment_selected");
+        }
+        let migrated = migrate_save_value(Some("1.0.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "1.1.0");
+        assert_eq!(
+            migrated
+                .campaign
+                .roster
+                .iter()
+                .filter(|character| character.deployment_selected)
+                .count(),
+            SQUAD_LIMIT
+        );
     }
 }

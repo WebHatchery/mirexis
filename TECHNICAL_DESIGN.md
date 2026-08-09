@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.0.0
+Save/content version: 1.1.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -18,7 +18,7 @@ The implemented slice proves all roadmap systems together:
 2. Inspect resources, faction attention, an assault countdown, research, events,
    recruits, facilities, and mission offers.
 3. Place construction, train a colonist, treat injuries, and craft equipment.
-4. Select an authored or seeded generated mission and deploy available recruits.
+4. Select an authored or seeded generated mission and choose three ready recruits.
 5. Resolve deterministic movement, attacks, an interactive objective, enemy AI,
    victory, or failure.
 6. Apply rewards, XP, injury, recovery, pressure, threat, and new mission offers.
@@ -149,7 +149,12 @@ elimination victory while waves remain. The sidebar reports pending waves.
 
 `CharacterRecord` persists identity, biography, aptitude ratings, XP, level, active
 class, class history, learned and active skills, mutation ID, injuries, availability,
-and equipment IDs. `UnitState` is disposable battle state.
+equipment IDs, and deployment selection. `UnitState` is disposable battle state.
+
+Briefing exposes all four current recruits as deploy or reserve rows. At least one and
+at most three ready colonists may be selected; injuries disable their row. Selection is
+autosaved, survives operations, and is applied before faction hostiles join the tactical
+roster, so reserve choice affects class, mutation, and equipment access in the mission.
 
 Seven initial class families are loaded from `classes.json`. Aptitude changes the
 material cost of training but never class eligibility. Switching classes retains
@@ -283,6 +288,7 @@ Migration coverage:
 | 0.6.0 | Typed objective fields for tactical state and mission offers |
 | 0.8.0 | Class identity, action-use flag, and timed tactical statuses |
 | 0.9.0 | Serialized holdout reinforcement queue |
+| 1.0.0 | Persistent deployment selection, normalized to the three-colonist limit |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -323,7 +329,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (35 domain/migration tests plus the shared source-size gate)
+- `cargo test` (37 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

@@ -215,6 +215,15 @@ mod tests {
         GameSession::new(&data.config, &data.mission, &roster)
     }
 
+    fn engineer_session() -> GameSession {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.toggle_deployment("kira_voss").unwrap();
+        campaign.toggle_deployment("sol_cairn").unwrap();
+        let roster = campaign.deployment_roster(&data, &data.mission);
+        GameSession::new(&data.config, &data.mission, &roster)
+    }
+
     #[test]
     fn starting_classes_each_change_the_battle_state() {
         let mut scout = session();
@@ -253,7 +262,7 @@ mod tests {
         medic.activate_selected_class_action().unwrap();
         assert_eq!(medic.unit("mara_venn").unwrap().health, 7);
 
-        let mut engineer = session();
+        let mut engineer = engineer_session();
         engineer
             .tactical
             .units
