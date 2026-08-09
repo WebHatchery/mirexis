@@ -373,6 +373,7 @@ impl Game {
                 Err(err) => self.notifications.warning(err),
             },
             UiAction::ToggleDeployment(character_id) => {
+                let _ = self.campaign.select_character(&character_id);
                 match self.campaign.toggle_deployment(&character_id) {
                     Ok(selected) => {
                         self.notifications.info(if selected {

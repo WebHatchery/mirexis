@@ -418,6 +418,10 @@ objective contract and deadline, deployed hostile count and roles, the primary f
 ability, and known hazard types/counts. This information sits beside recovery rewards so
 squad selection can answer the mission actually being deployed.
 
+Each briefing roster row also selects that colonist for a derived loadout summary beside
+the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
+range, weapon AP, and lasting scars can be compared while toggling the three-person squad.
+
 ### Player Phase
 
 The player activates characters in any order.

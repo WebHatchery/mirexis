@@ -175,6 +175,18 @@ impl CampaignState {
         deployment
     }
 
+    pub fn derived_character_unit(&self, character_id: &str, data: &GameData) -> Option<UnitDef> {
+        let character = self
+            .roster
+            .iter()
+            .find(|record| record.id == character_id)?;
+        let base = data
+            .roster
+            .iter()
+            .find(|unit| unit.team == Team::Colony && unit.id == character_id)?;
+        Some(derive_unit(base, character, data))
+    }
+
     pub fn selected_squad_count(&self) -> usize {
         self.roster
             .iter()

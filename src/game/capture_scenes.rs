@@ -107,6 +107,10 @@ impl Game {
                 );
                 self.state = AppState::MissionBriefing;
             }
+            "loadout_briefing" => {
+                self.capture_trauma();
+                self.state = AppState::MissionBriefing;
+            }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",

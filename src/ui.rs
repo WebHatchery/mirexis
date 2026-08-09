@@ -210,7 +210,8 @@ pub fn draw_mission_briefing(
             TextStyle::new(15.0, dark::TEXT_DIM).params(),
         );
     }
-    crate::briefing_intel_ui::draw(data, mission, vec2(880.0, 342.0));
+    crate::briefing_intel_ui::draw(data, mission, vec2(880.0, 328.0));
+    crate::briefing_loadout_ui::draw(campaign, data, vec2(880.0, 454.0));
     draw_ui_text_ex(
         &format!(
             "DEPLOYMENT // {}/{} SELECTED // SUPPLY {} FOOD",
@@ -252,7 +253,7 @@ pub fn draw_mission_briefing(
         }
     }
     if button(
-        Rect::new(820.0, 520.0, 250.0, 48.0),
+        Rect::new(820.0, 562.0, 250.0, 48.0),
         &format!(
             "DEPLOY SQUAD · {} FOOD",
             campaign.deployment_food_cost(data)
@@ -264,7 +265,7 @@ pub fn draw_mission_briefing(
         actions.push(UiAction::DeployMission);
     }
     if button(
-        Rect::new(200.0, 520.0, 180.0, 48.0),
+        Rect::new(200.0, 562.0, 180.0, 48.0),
         "STAND DOWN",
         true,
         mouse,
