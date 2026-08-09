@@ -37,6 +37,8 @@ pub struct MissionDef {
     pub hostile_faction: String,
     pub round_limit: u32,
     pub materials_reward: i32,
+    #[serde(default = "default_cover_integrity")]
+    pub cover_integrity: i32,
     pub seed: u64,
     pub blocked_tiles: Vec<[i32; 2]>,
     pub objective_tile: [i32; 2],
@@ -44,6 +46,10 @@ pub struct MissionDef {
     pub terrain_costs: Vec<TerrainCostDef>,
     #[serde(default)]
     pub cover_edges: Vec<CoverEdgeDef>,
+}
+
+fn default_cover_integrity() -> i32 {
+    6
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

@@ -87,8 +87,8 @@ impl GameSession {
                     .iter()
                     .map(|position| DestructibleCover {
                         position: tile(*position),
-                        health: 6,
-                        max_health: 6,
+                        health: mission.cover_integrity,
+                        max_health: mission.cover_integrity,
                     })
                     .collect(),
                 units,

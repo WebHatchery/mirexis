@@ -262,6 +262,35 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         }
     }
     draw_ui_text_ex(
+        "ACTIVE DOCTRINES",
+        878.0,
+        592.0,
+        TextStyle::new(12.0, dark::ACCENT).params(),
+    );
+    let mut doctrine_y = 606.0;
+    for research in campaign
+        .strategy
+        .research
+        .iter()
+        .filter(|entry| entry.completed)
+    {
+        draw_ui_text_ex(
+            &format!("{} // {}", research.name, research.description),
+            878.0,
+            doctrine_y,
+            TextStyle::new(10.0, dark::TEXT_DIM).params(),
+        );
+        doctrine_y += 11.0;
+    }
+    if doctrine_y == 606.0 {
+        draw_ui_text_ex(
+            "No completed field doctrine",
+            878.0,
+            doctrine_y,
+            TextStyle::new(10.0, dark::TEXT_DIM).params(),
+        );
+    }
+    draw_ui_text_ex(
         &format!(
             "Barricade: 20 materials · one operation · {} structures mapped",
             defense.blocked_tiles.len()

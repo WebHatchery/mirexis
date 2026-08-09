@@ -208,10 +208,13 @@ impl CampaignState {
             {
                 let traits = derived_mutation_traits(character, data);
                 let delayed_healing = traits.get("medical_healing").copied().unwrap_or(0) < 0;
+                let triage_bonus = u8::from(self.strategy.research_completed("xeno_triage"));
+                let recovery_operations =
+                    (if delayed_healing { 3 } else { 2 } - triage_bonus).max(1);
                 character.injuries.push(InjuryRecord {
                     id: format!("operation_{}_trauma", self.operations_completed),
                     name: "Mire exposure trauma".to_owned(),
-                    recovery_operations: if delayed_healing { 3 } else { 2 },
+                    recovery_operations,
                 });
                 character.availability = Availability::Recovering;
             }
@@ -574,6 +577,29 @@ mod tests {
             campaign.advance_recovery();
         }
         assert_eq!(campaign.roster[2].availability, Availability::Ready);
+    }
+
+    #[test]
+    fn xeno_triage_shortens_new_injury_recovery() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign
+            .strategy
+            .research
+            .iter_mut()
+            .find(|research| research.id == "xeno_triage")
+            .unwrap()
+            .completed = true;
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Failed,
+            colonists_deployed: 4,
+            colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
+            hostiles_neutralised: 0,
+            materials_awarded: 0,
+        };
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert_eq!(campaign.roster[2].injuries[0].recovery_operations, 2);
     }
 
     #[test]

@@ -185,7 +185,17 @@ impl StrategyState {
             objective_kind: instance.objective_kind,
             hostile_faction: instance.faction_id.clone(),
             round_limit: instance.round_limit,
-            materials_reward: instance.materials_reward,
+            materials_reward: instance.materials_reward
+                + if self.research_completed("salvage_doctrine") {
+                    8
+                } else {
+                    0
+                },
+            cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
+                10
+            } else {
+                base.cover_integrity
+            },
             seed: instance.seed,
             blocked_tiles: if colony_defense {
                 defense
@@ -285,6 +295,12 @@ impl StrategyState {
         colony.resources.power += research.power_reward;
         research.completed = true;
         Ok(research.name.clone())
+    }
+
+    pub fn research_completed(&self, research_id: &str) -> bool {
+        self.research
+            .iter()
+            .any(|research| research.id == research_id && research.completed)
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
@@ -447,6 +463,41 @@ mod tests {
         colony.advance_operation();
         let materialized = strategy.materialize_selected(&data, &colony);
         assert!(materialized.blocked_tiles.contains(&[3, 2]));
+    }
+
+    #[test]
+    fn completed_research_changes_future_mission_materialization() {
+        let data = GameData::load().unwrap();
+        let colony = ColonyState::new();
+        let mut strategy = StrategyState::new(&data);
+        let base_reward = strategy.selected_mission().unwrap().materials_reward;
+        strategy
+            .research
+            .iter_mut()
+            .find(|research| research.id == "salvage_doctrine")
+            .unwrap()
+            .completed = true;
+        assert_eq!(
+            strategy
+                .materialize_selected(&data, &colony)
+                .materials_reward,
+            base_reward + 8
+        );
+
+        strategy
+            .research
+            .iter_mut()
+            .find(|research| research.id == "field_fortifications")
+            .unwrap()
+            .completed = true;
+        strategy.threats[0].operations_until = 0;
+        strategy.generate_missions(&data);
+        assert_eq!(
+            strategy
+                .materialize_selected(&data, &colony)
+                .cover_integrity,
+            10
+        );
     }
 
     #[test]

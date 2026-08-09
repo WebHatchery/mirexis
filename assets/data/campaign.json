@@ -8,9 +8,9 @@
     { "id": "ascendants", "name": "Ascendants", "initial_attention": 4 }
   ],
   "research": [
-    { "id": "field_fortifications", "name": "Field Fortifications", "description": "Reinforce improvised colony cover.", "materials_cost": 35, "power_reward": 1 },
-    { "id": "xeno_triage", "name": "Xeno-Triage", "description": "Adapt the infirmary to mutated tissue.", "materials_cost": 30, "power_reward": 0 },
-    { "id": "salvage_doctrine", "name": "Salvage Doctrine", "description": "Recover useful material without slowing evacuation.", "materials_cost": 40, "power_reward": 2 }
+    { "id": "field_fortifications", "name": "Field Fortifications", "description": "Colony-defense cover begins with 10 integrity.", "materials_cost": 35, "power_reward": 1 },
+    { "id": "xeno_triage", "name": "Xeno-Triage", "description": "New injuries recover one operation sooner.", "materials_cost": 30, "power_reward": 0 },
+    { "id": "salvage_doctrine", "name": "Salvage Doctrine", "description": "Successful operations recover 8 additional materials.", "materials_cost": 40, "power_reward": 2 }
   ],
   "events": [
     { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Kira finds Sol rerouting food to an isolated survey family.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2 },

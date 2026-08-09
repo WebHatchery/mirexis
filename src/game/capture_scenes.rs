@@ -11,6 +11,7 @@ impl Game {
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
+            "research" => self.capture_research(),
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
             "extraction" => self.capture_extraction(),
@@ -32,6 +33,13 @@ impl Game {
                 .deployment_roster(&self.data, &self.active_mission),
         );
         self.state = state;
+    }
+
+    fn capture_research(&mut self) {
+        for research in &mut self.campaign.strategy.research {
+            research.completed = true;
+        }
+        self.state = AppState::Colony;
     }
 
     fn capture_equipment_target(&mut self) {
