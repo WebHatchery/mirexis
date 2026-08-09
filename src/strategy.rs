@@ -124,6 +124,10 @@ pub struct StrategyState {
     pub escalation_complete: bool,
     #[serde(default)]
     pub mirexis_path_id: String,
+    #[serde(default)]
+    pub mirexis_operation_completed: bool,
+    #[serde(default)]
+    pub campaign_complete: bool,
     rng: SeededRng,
 }
 
@@ -201,6 +205,8 @@ impl StrategyState {
             escalation_branch_completed: false,
             escalation_complete: false,
             mirexis_path_id: String::new(),
+            mirexis_operation_completed: false,
+            campaign_complete: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -375,6 +381,19 @@ impl StrategyState {
                 })
             {
                 self.escalation_branch_completed = true;
+            }
+            if data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.id == mission.template_id)
+                .is_some_and(|template| {
+                    !template.required_mirexis_path.is_empty()
+                        && template.required_mirexis_path == self.mirexis_path_id
+                })
+            {
+                self.mirexis_operation_completed = true;
+                self.refresh_mirexis_completion(data);
             }
         }
         if let Some(faction) = self
@@ -657,6 +676,7 @@ impl StrategyState {
                         || template.required_response == self.escalation_response_id)
                     && (template.required_mirexis_path.is_empty()
                         || template.required_mirexis_path == self.mirexis_path_id)
+                    && (!self.campaign_complete || template.required_mirexis_path.is_empty())
             })
             .collect::<Vec<_>>();
         templates.sort_by_key(|template| {

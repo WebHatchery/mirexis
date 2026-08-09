@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
-Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Five — identity-branched operations
-Save/content version: 1.25.0
+Status: Phase 0 through Phase 5 campaign arc complete
+Current campaign slice: complete identity-branched campaign
+Save/content version: 1.26.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -68,6 +68,7 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
+| `ui_debrief.rs` | Operation results and campaign-finale presentation | Outcome or campaign mutation |
 | `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
@@ -460,6 +461,13 @@ Ascendant secure-and-clear operation at the colony's new gate. These templates r
 mutually exclusive, carry distinct objectives and map families, and are prioritized
 for both new campaigns and migrated saves that already committed an identity.
 
+Winning the operation belonging to the committed path sets the persistent Mirexis
+operation and campaign completion gates. The selected path supplies a data-backed ending
+title, revelation, and colony legacy: a sovereign redoubt, a planetary symbiosis, or an
+open link to the intelligence beneath Mirexis. The finale operation retires from the
+offer pool, the debrief and colony hub expose the ending, and generic post-campaign
+operations remain available so a completed save is still playable.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -539,6 +547,7 @@ Migration coverage:
 | 1.22.0 | Persistent response-branch victory and Escalation completion gates |
 | 1.23.0 | Persistent Phase Five Mirexis identity path selection |
 | 1.24.0 | Path-locked Phase Five offers for already committed identities |
+| 1.25.0 | Persistent final-operation and campaign-completion gates |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -572,6 +581,8 @@ units use labels as well as faction color, and colony buildings use text labels.
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
+`redoubt_end`, `commonwealth_end`, `threshold_end`,
+`finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
@@ -588,8 +599,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (97 domain/migration tests plus the shared source-size gate)
-- deterministic forty-six-scene capture with visual inspection
+- `cargo test` (99 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -635,11 +646,11 @@ boundaries when continuing:
   persistent Phase Four strategic tradeoff with a matching follow-up operation. Winning
   that branch completes Escalation and enters Phase Five, where one identity path changes
   an existing colony economy and opens a dedicated operation against one of the three
-  powers. Later path-specific revelations, aftermath, and end-state resolution remain
-  future content.
+  powers. Winning it reveals a path-specific truth and persists one of three campaign
+  endings while leaving optional post-campaign operations available.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a persistent completion and aftermath contract
-for the three identity operations, carrying each chosen future into a distinct final
-revelation and campaign end-state.
+The recommended next vertical slice is deeper replayability around the complete arc:
+additional Symbiotic Organism evolution paths, advanced classes, and equipment families
+that create materially different squads before the three final operations.

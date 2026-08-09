@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase Five — Identity-Branched Operations
+## Current Slice: Complete Identity-Branched Campaign
 
 The completed roadmap slice includes:
 
@@ -80,6 +80,9 @@ The completed roadmap slice includes:
 - three identity-locked Phase Five operations: defend the Human Redoubt's Last Wall
   from a Directorate breach, awaken the Living Commonwealth's Root Choir under Brood
   attack, or secure the Open Threshold's Door of Light against Ascendant claimants
+- three persistent campaign endings revealed by victory in the matching final operation:
+  a sovereign Human Redoubt, an awakened Living Commonwealth, or an Open Threshold
+  linked to the mind beneath Mirexis, followed by optional post-campaign operations
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -118,5 +121,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the identity-branched Phase Five operations, and the texture manifest. `GameData::load()`
+content through the three identity-branched campaign endings, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.

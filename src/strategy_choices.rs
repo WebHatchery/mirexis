@@ -82,4 +82,23 @@ impl StrategyState {
         self.regenerate_missions(data);
         Ok(path.name.clone())
     }
+
+    pub fn refresh_mirexis_completion(&mut self, data: &GameData) -> bool {
+        if self.campaign_complete || !self.escalation_complete || !self.mirexis_operation_completed
+        {
+            return false;
+        }
+        let Some(path) = data
+            .campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == self.mirexis_path_id)
+        else {
+            return false;
+        };
+        self.campaign_complete = true;
+        self.phase_name = path.ending_title.clone();
+        self.phase_summary = format!("{} {}", path.revelation, path.legacy);
+        true
+    }
 }

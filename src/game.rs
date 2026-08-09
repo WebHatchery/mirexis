@@ -199,11 +199,12 @@ impl Game {
                     }
                 }),
             }),
-            AppState::Debrief => ui::draw_debrief(
+            AppState::Debrief => crate::ui_debrief::draw_debrief(
                 &self.active_mission,
                 self.last_outcome
                     .as_ref()
                     .expect("debrief requires an outcome"),
+                &self.campaign,
                 &virtual_ui,
             ),
         };

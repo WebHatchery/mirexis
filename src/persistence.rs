@@ -979,4 +979,20 @@ mod tests {
             .iter()
             .any(|mission| mission.template_id == "mirexis_threshold_door_of_light"));
     }
+
+    #[test]
+    fn phase_five_operation_save_gains_campaign_completion_gates() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.25.0", &campaign)).unwrap();
+        let strategy = legacy["campaign"]["strategy"].as_object_mut().unwrap();
+        strategy.remove("mirexis_operation_completed");
+        strategy.remove("campaign_complete");
+        let migrated = migrate_save_value(Some("1.25.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(!migrated.campaign.strategy.mirexis_operation_completed);
+        assert!(!migrated.campaign.strategy.campaign_complete);
+    }
 }

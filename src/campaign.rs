@@ -1411,4 +1411,59 @@ mod tests {
             .choose_mirexis_path("human_redoubt", &mut threshold.colony, &data)
             .is_err());
     }
+
+    #[test]
+    fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
+        let data = GameData::load().unwrap();
+        for (path_id, template_id, ending_title) in [
+            (
+                "human_redoubt",
+                "mirexis_redoubt_last_wall",
+                "THE LAST WALL HOLDS",
+            ),
+            (
+                "living_commonwealth",
+                "mirexis_commonwealth_root_choir",
+                "THE ROOT CHOIR ANSWERS",
+            ),
+            (
+                "open_threshold",
+                "mirexis_threshold_door_of_light",
+                "THE DOOR OF LIGHT OPENS",
+            ),
+        ] {
+            let mut campaign = CampaignState::new(&data);
+            campaign.strategy.escalation_complete = true;
+            campaign.strategy.phase_id = "mirexis".to_owned();
+            campaign.colony.resources.materials = 100;
+            campaign.colony.resources.biomass = 30;
+            campaign.colony.resources.power = 20;
+            campaign
+                .strategy
+                .choose_mirexis_path(path_id, &mut campaign.colony, &data)
+                .unwrap();
+            let mission = campaign.strategy.selected_mission().unwrap().clone();
+            assert_eq!(mission.template_id, template_id);
+            let outcome = MissionOutcome {
+                result: ObjectiveState::Victory,
+                colonists_deployed: 3,
+                colonists_incapacitated: Vec::new(),
+                hostiles_neutralised: 3,
+                materials_awarded: mission.materials_reward,
+                biomass_awarded: mission.biomass_reward,
+                power_awarded: mission.power_reward,
+            };
+            campaign.apply_mission_outcome(&outcome, &mission, &data);
+
+            assert!(campaign.strategy.mirexis_operation_completed);
+            assert!(campaign.strategy.campaign_complete);
+            assert_eq!(campaign.strategy.phase_name, ending_title);
+            assert!(!campaign.strategy.phase_summary.is_empty());
+            assert!(campaign
+                .strategy
+                .mission_offers
+                .iter()
+                .all(|offer| offer.template_id != template_id));
+        }
+    }
 }

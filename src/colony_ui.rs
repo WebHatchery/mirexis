@@ -247,7 +247,21 @@ fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
-    let phase_progress = if campaign.strategy.escalation_complete {
+    let phase_progress = if campaign.strategy.campaign_complete {
+        data.campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == campaign.strategy.mirexis_path_id)
+            .map_or_else(
+                || "MIREXIS // FINAL OPERATION WON // COLONY ENDURES".to_owned(),
+                |path| {
+                    format!(
+                        "MIREXIS // {} // FINAL OPERATION WON",
+                        path.name.to_uppercase()
+                    )
+                },
+            )
+    } else if campaign.strategy.escalation_complete {
         data.campaign
             .mirexis_paths
             .iter()
@@ -438,7 +452,33 @@ fn draw_operations(
                     .find(|mutation| mutation.id == character.mutation_id)
                     .is_some_and(|mutation| !mutation.evolutions.is_empty())
         });
-    if choosing_contact {
+    if campaign.strategy.campaign_complete {
+        if let Some(path) = data
+            .campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == campaign.strategy.mirexis_path_id)
+        {
+            draw_ui_text_ex(
+                &path.ending_title,
+                878.0,
+                520.0,
+                TextStyle::new(14.0, dark::POSITIVE).params(),
+            );
+            draw_ui_text_ex(
+                &path.revelation,
+                878.0,
+                544.0,
+                TextStyle::new(11.0, dark::TEXT).params(),
+            );
+            draw_ui_text_ex(
+                &path.legacy,
+                878.0,
+                564.0,
+                TextStyle::new(11.0, dark::TEXT_DIM).params(),
+            );
+        }
+    } else if choosing_contact {
         draw_ui_text_ex(
             "FIRST CONTACT // SPEND 2 COMPONENTS // CHOOSE ONE",
             878.0,

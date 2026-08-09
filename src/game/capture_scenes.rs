@@ -25,6 +25,10 @@ impl Game {
             "escalation_response" => self.capture_escalation_response(),
             "mirexis" => self.capture_mirexis(),
             "mirexis_path" => self.capture_mirexis_path(),
+            "redoubt_end" => self.capture_mirexis_end("human_redoubt"),
+            "commonwealth_end" => self.capture_mirexis_end("living_commonwealth"),
+            "threshold_end" => self.capture_mirexis_end("open_threshold"),
+            "finale_debrief" => self.capture_finale_debrief(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -288,6 +292,49 @@ impl Game {
             .choose_mirexis_path("open_threshold", &mut self.campaign.colony, &self.data)
             .expect("Mirexis capture can choose the open threshold");
         self.state = AppState::Colony;
+    }
+
+    fn capture_mirexis_end(&mut self, path_id: &str) {
+        self.capture_mirexis();
+        self.campaign.colony.resources.materials = 100;
+        self.campaign.colony.resources.biomass = 30;
+        self.campaign.colony.resources.power = 20;
+        self.campaign
+            .strategy
+            .choose_mirexis_path(path_id, &mut self.campaign.colony, &self.data)
+            .expect("Mirexis ending capture can commit its path");
+        self.campaign.strategy.mirexis_operation_completed = true;
+        assert!(self
+            .campaign
+            .strategy
+            .refresh_mirexis_completion(&self.data));
+        self.campaign.strategy.regenerate_missions(&self.data);
+        self.campaign.operations_completed = 1;
+        self.state = AppState::Colony;
+    }
+
+    fn capture_finale_debrief(&mut self) {
+        self.capture_template_operation(
+            "mirexis_threshold_door_of_light",
+            24,
+            OperationModifier::AscendantInterference,
+        );
+        self.campaign.strategy.escalation_complete = true;
+        self.campaign.strategy.mirexis_path_id = "open_threshold".to_owned();
+        self.campaign.strategy.mirexis_operation_completed = true;
+        assert!(self
+            .campaign
+            .strategy
+            .refresh_mirexis_completion(&self.data));
+        self.session.tactical.objective_state = ObjectiveState::Victory;
+        for unit in &mut self.session.tactical.units {
+            if unit.team == Team::Hostile {
+                unit.incapacitated = true;
+                unit.health = 0;
+            }
+        }
+        self.last_outcome = self.session.mission_outcome(&self.active_mission);
+        self.state = AppState::Debrief;
     }
 
     fn capture_adaptation_operation(&mut self) {

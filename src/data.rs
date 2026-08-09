@@ -262,6 +262,9 @@ pub struct MirexisPathDef {
     pub defense_cover_bonus: i32,
     pub deployment_food_discount: i32,
     pub power_bonus: i32,
+    pub ending_title: String,
+    pub revelation: String,
+    pub legacy: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
