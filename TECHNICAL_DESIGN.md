@@ -282,6 +282,12 @@ Mission resolution adjusts the responsible faction's attention, advances threats
 and generates two offers from `campaign.json` templates. Generation uses the
 serialized toolkit RNG, so saving and loading preserves the future stream.
 
+At 20 or more attention, generated operations gain a typed faction-pressure modifier.
+Directorate fire-control gives hostile attacks +10 accuracy, Brood frenzy gives hostile
+units +1 movement, and Ascendant interference gives colonist attacks -10 accuracy.
+The modifier is fixed on the mission offer, disclosed in selection and briefing, and
+realized into unit state when the tactical session is constructed.
+
 When an assault reaches zero, the only offer becomes a colony-defense mission.
 Winning resets the countdown and reduces strength; failure returns it sooner and
 stronger. This is the first escalation loop, not the full five-phase campaign.
@@ -375,9 +381,9 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `research`, `roster`, `legacy`,
-`briefing`, `gameplay`, `extraction`, `variant`, `equipment`, `class_target`, `breach`,
-and `debrief` by default. Capture setup seeds each scene deterministically, including
-objective, doctrine, legacy, and targeting states.
+`briefing`, `pressure`, `gameplay`, `extraction`, `variant`, `equipment`, `class_target`,
+`breach`, and `debrief` by default. Capture setup seeds each scene deterministically,
+including objective, doctrine, legacy, pressure-modifier, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -386,8 +392,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (48 domain/migration tests plus the shared source-size gate)
-- deterministic thirteen-scene capture with visual inspection
+- `cargo test` (50 domain/migration tests plus the shared source-size gate)
+- deterministic fourteen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -428,5 +434,5 @@ boundaries when continuing:
   or renamed safely.
 
 The recommended next vertical slice is another layer of Isolation campaign content:
-additional mission templates or operation modifiers that test the squad, completed
-doctrines, and earned character legacies in new combinations.
+additional mission templates or faction-specific rewards that test the squad,
+completed doctrines, earned legacies, and pressure modifiers in new combinations.

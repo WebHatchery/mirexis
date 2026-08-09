@@ -37,6 +37,8 @@ pub struct MissionDef {
     pub hostile_faction: String,
     pub round_limit: u32,
     pub materials_reward: i32,
+    #[serde(default)]
+    pub operation_modifier: OperationModifier,
     #[serde(default = "default_cover_integrity")]
     pub cover_integrity: i32,
     pub seed: u64,
@@ -46,6 +48,36 @@ pub struct MissionDef {
     pub terrain_costs: Vec<TerrainCostDef>,
     #[serde(default)]
     pub cover_edges: Vec<CoverEdgeDef>,
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OperationModifier {
+    #[default]
+    None,
+    DirectorateFireControl,
+    BroodFrenzy,
+    AscendantInterference,
+}
+
+impl OperationModifier {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::None => "NO ESCALATION",
+            Self::DirectorateFireControl => "DIRECTORATE FIRE-CONTROL",
+            Self::BroodFrenzy => "BROOD FRENZY",
+            Self::AscendantInterference => "ASCENDANT INTERFERENCE",
+        }
+    }
+
+    pub fn description(self) -> &'static str {
+        match self {
+            Self::None => "No faction-pressure modifier is active.",
+            Self::DirectorateFireControl => "Hostile attacks gain 10 accuracy.",
+            Self::BroodFrenzy => "Hostile units gain 1 movement.",
+            Self::AscendantInterference => "Colonist attacks lose 10 accuracy.",
+        }
+    }
 }
 
 fn default_cover_integrity() -> i32 {

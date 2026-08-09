@@ -1,7 +1,9 @@
 //! Deterministic tactical command simulation and persistence model.
 
 use crate::campaign::CampaignState;
-use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
+use crate::data::{
+    EdgeDirection, GameConfig, MissionDef, ObjectiveKind, OperationModifier, Team, UnitDef,
+};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
     BattleEvent, Command, CommandCost, DestructibleCover, ObjectiveState, ReinforcementWave,
@@ -53,10 +55,24 @@ pub struct GameSession {
 impl GameSession {
     pub fn new(config: &GameConfig, mission: &MissionDef, roster: &[UnitDef]) -> Self {
         let fog = FlatGrid::new(config.world_width, config.world_height, FogState::Visible);
-        let units = roster
+        let mut units = roster
             .iter()
             .map(|unit| UnitState::from_def(unit, config.max_action_points))
             .collect::<Vec<_>>();
+        for unit in &mut units {
+            match mission.operation_modifier {
+                OperationModifier::DirectorateFireControl if unit.team == Team::Hostile => {
+                    unit.accuracy += 10;
+                }
+                OperationModifier::BroodFrenzy if unit.team == Team::Hostile => {
+                    unit.move_range = unit.move_range.saturating_add(1);
+                }
+                OperationModifier::AscendantInterference if unit.team == Team::Colony => {
+                    unit.accuracy -= 10;
+                }
+                _ => {}
+            }
+        }
         let selected_unit = units
             .iter()
             .find(|unit| unit.team == Team::Colony)
@@ -791,6 +807,48 @@ mod tests {
             })
             .unwrap();
         assert!(matches!(events[0], BattleEvent::UnitMoved { cost: 2, .. }));
+    }
+
+    #[test]
+    fn operation_pressure_modifiers_change_their_intended_team() {
+        let data = crate::data::GameData::load().unwrap();
+        let colony = data
+            .roster
+            .iter()
+            .find(|unit| unit.team == Team::Colony)
+            .unwrap();
+        let hostile = data
+            .roster
+            .iter()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        let mut mission = data.mission.clone();
+
+        mission.operation_modifier = OperationModifier::DirectorateFireControl;
+        let session = GameSession::new(&data.config, &mission, &data.roster);
+        assert_eq!(
+            session.unit(&hostile.id).unwrap().accuracy,
+            hostile.accuracy + 10
+        );
+        assert_eq!(session.unit(&colony.id).unwrap().accuracy, colony.accuracy);
+
+        mission.operation_modifier = OperationModifier::BroodFrenzy;
+        let session = GameSession::new(&data.config, &mission, &data.roster);
+        assert_eq!(
+            session.unit(&hostile.id).unwrap().move_range,
+            hostile.move_range + 1
+        );
+
+        mission.operation_modifier = OperationModifier::AscendantInterference;
+        let session = GameSession::new(&data.config, &mission, &data.roster);
+        assert_eq!(
+            session.unit(&colony.id).unwrap().accuracy,
+            colony.accuracy - 10
+        );
+        assert_eq!(
+            session.unit(&hostile.id).unwrap().accuracy,
+            hostile.accuracy
+        );
     }
 
     #[test]

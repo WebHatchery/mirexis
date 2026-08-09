@@ -3,6 +3,7 @@
 use crate::colony::ColonyState;
 use crate::data::{
     CoverEdgeDef, EdgeDirection, GameData, MissionDef, MissionTemplateDef, ObjectiveKind,
+    OperationModifier,
 };
 use crate::state::{MissionOutcome, ObjectiveState};
 use macroquad_toolkit::rng::SeededRng;
@@ -67,6 +68,8 @@ pub struct MissionInstance {
     pub seed: u64,
     pub round_limit: u32,
     pub materials_reward: i32,
+    #[serde(default)]
+    pub operation_modifier: OperationModifier,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -97,6 +100,7 @@ impl StrategyState {
             seed: data.config.battle_seed,
             round_limit: data.mission.round_limit,
             materials_reward: data.mission.materials_reward,
+            operation_modifier: data.mission.operation_modifier,
         };
         Self {
             phase_id: data.campaign.phase_id.clone(),
@@ -203,6 +207,7 @@ impl StrategyState {
                 } else {
                     0
                 },
+            operation_modifier: instance.operation_modifier,
             cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
                 10
             } else {
@@ -362,6 +367,7 @@ impl StrategyState {
                 seed: self.rng.next_u64(),
                 round_limit: 8,
                 materials_reward: 18,
+                operation_modifier: OperationModifier::DirectorateFireControl,
             };
             self.selected_mission_id = defense.id.clone();
             self.mission_offers = vec![defense];
@@ -397,6 +403,21 @@ impl StrategyState {
 
     fn instantiate(&mut self, template: &MissionTemplateDef) -> MissionInstance {
         let seed = self.rng.next_u64();
+        let attention = self
+            .factions
+            .iter()
+            .find(|faction| faction.id == template.faction)
+            .map_or(0, |faction| faction.attention);
+        let operation_modifier = if attention < 20 {
+            OperationModifier::None
+        } else {
+            match template.faction.as_str() {
+                "directorate" => OperationModifier::DirectorateFireControl,
+                "brood" => OperationModifier::BroodFrenzy,
+                "ascendants" => OperationModifier::AscendantInterference,
+                _ => OperationModifier::None,
+            }
+        };
         MissionInstance {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
@@ -412,6 +433,7 @@ impl StrategyState {
             seed,
             round_limit: template.round_limit,
             materials_reward: template.materials_reward,
+            operation_modifier,
         }
     }
 }
@@ -510,6 +532,31 @@ mod tests {
                 .cover_integrity,
             10
         );
+    }
+
+    #[test]
+    fn high_faction_attention_adds_its_pressure_modifier() {
+        let data = GameData::load().unwrap();
+        for (faction_id, expected) in [
+            ("directorate", OperationModifier::DirectorateFireControl),
+            ("brood", OperationModifier::BroodFrenzy),
+            ("ascendants", OperationModifier::AscendantInterference),
+        ] {
+            let mut strategy = StrategyState::new(&data);
+            strategy
+                .factions
+                .iter_mut()
+                .find(|faction| faction.id == faction_id)
+                .unwrap()
+                .attention = 20;
+            let template = data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.faction == faction_id)
+                .unwrap();
+            assert_eq!(strategy.instantiate(template).operation_modifier, expected);
+        }
     }
 
     #[test]

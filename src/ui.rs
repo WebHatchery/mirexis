@@ -113,7 +113,6 @@ pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiA
         6.0,
         dark::TEXT_DIM,
     );
-
     if button(
         Rect::new(106.0, 450.0, 240.0, 48.0),
         "NEW OPERATION",
@@ -179,6 +178,18 @@ pub fn draw_mission_briefing(
         7.0,
         dark::TEXT_DIM,
     );
+    if mission.operation_modifier != crate::data::OperationModifier::None {
+        draw_ui_text_ex(
+            &format!(
+                "PRESSURE MODIFIER // {} // {}",
+                mission.operation_modifier.label(),
+                mission.operation_modifier.description()
+            ),
+            200.0,
+            342.0,
+            TextStyle::new(15.0, dark::NEGATIVE).params(),
+        );
+    }
     draw_ui_text_ex(
         &format!(
             "DEPLOYMENT // {}/{} SELECTED",

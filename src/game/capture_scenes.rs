@@ -1,7 +1,7 @@
 //! Deterministic UI-reference scene construction.
 
 use super::{AppState, Game, TacticalTargeting};
-use crate::data::{ObjectiveKind, Team};
+use crate::data::{ObjectiveKind, OperationModifier, Team};
 use crate::state::{GameSession, ObjectiveState};
 use macroquad_toolkit::grid::TilePos;
 
@@ -15,6 +15,7 @@ impl Game {
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
+            "pressure" => self.capture_pressure(),
             "extraction" => self.capture_extraction(),
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
@@ -52,6 +53,11 @@ impl Game {
             .expect("second capture event resolves");
         self.campaign.selected_character_id = "mara_venn".to_owned();
         self.state = AppState::Roster;
+    }
+
+    fn capture_pressure(&mut self) {
+        self.active_mission.operation_modifier = OperationModifier::BroodFrenzy;
+        self.state = AppState::MissionBriefing;
     }
 
     fn capture_equipment_target(&mut self) {
