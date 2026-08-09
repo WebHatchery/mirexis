@@ -14,6 +14,7 @@ mod data;
 mod equipment_actions;
 mod equipment_ui;
 mod game;
+mod gene_lab_ui;
 mod grid_ui;
 mod map_variants;
 mod persistence;

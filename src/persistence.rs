@@ -61,6 +61,15 @@ pub fn migrate_save_value(
     {
         save.campaign.strategy.regenerate_missions(data);
     }
+    if detected_version.as_deref() == Some("1.13.0")
+        && save
+            .campaign
+            .roster
+            .iter()
+            .any(|character| !character.mutation_evolution_id.is_empty())
+    {
+        save.campaign.colony.ensure_gene_lab();
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -691,5 +700,24 @@ mod tests {
             .mission_offers
             .iter()
             .any(|mission| mission.template_id == "adaptation_glass_nerve"));
+    }
+
+    #[test]
+    fn adaptation_operation_save_gains_an_existing_gene_lab() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.roster[0].mutation_evolution_id = "expanded_cortex".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.13.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.13.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .colony
+            .buildings
+            .iter()
+            .any(|building| building.kind == crate::colony::BuildingKind::GeneLab));
     }
 }

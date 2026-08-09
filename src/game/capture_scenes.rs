@@ -15,6 +15,7 @@ impl Game {
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),
             "adaptation" => self.capture_adaptation(),
+            "gene_lab" => self.capture_gene_lab(),
             "evolution" => self.capture_evolution(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
@@ -123,11 +124,30 @@ impl Game {
         self.campaign
             .craft_equipment("sol_cairn", "ascendant_phase_lens", &self.data)
             .expect("Contact capture prototype is crafted");
+        self.campaign
+            .colony
+            .select_construction(crate::colony::BuildingKind::GeneLab)
+            .expect("Adaptation capture can plan the Gene Lab");
         self.state = AppState::Colony;
     }
 
-    fn capture_evolution(&mut self) {
+    fn capture_gene_lab(&mut self) {
         self.capture_adaptation();
+        self.campaign
+            .colony
+            .place_construction(crate::colony::BuildingKind::GeneLab, [1, 1])
+            .expect("Adaptation capture can construct the Gene Lab");
+        self.campaign
+            .colony
+            .place_construction(crate::colony::BuildingKind::PowerPlant, [1, 2])
+            .expect("Adaptation capture can power the Gene Lab");
+        self.campaign.colony.advance_operation();
+        self.campaign.selected_character_id = "kira_voss".to_owned();
+        self.state = AppState::GeneLab;
+    }
+
+    fn capture_evolution(&mut self) {
+        self.capture_gene_lab();
         self.campaign
             .choose_mutation_evolution("kira_voss", "expanded_cortex", &self.data)
             .expect("Adaptation capture evolution is available");

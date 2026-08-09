@@ -25,6 +25,7 @@ enum AppState {
     Title,
     Colony,
     Roster,
+    GeneLab,
     MissionBriefing,
     Tactical,
     Debrief,
@@ -111,7 +112,7 @@ impl Game {
                     self.events.push(UiAction::ReturnToTitle);
                 }
             }
-            AppState::Roster => {
+            AppState::Roster | AppState::GeneLab => {
                 if input.escape_pressed {
                     self.events.push(UiAction::ReturnToColony);
                 }
@@ -168,6 +169,9 @@ impl Game {
             AppState::Colony => colony_ui::draw_colony(&self.campaign, &self.data, &virtual_ui),
             AppState::Roster => {
                 crate::roster_ui::draw_roster(&self.campaign, &self.data, &virtual_ui)
+            }
+            AppState::GeneLab => {
+                crate::gene_lab_ui::draw_gene_lab(&self.campaign, &self.data, &virtual_ui)
             }
             AppState::MissionBriefing => ui::draw_mission_briefing(
                 &self.data,
@@ -342,6 +346,17 @@ impl Game {
                 self.autosave_campaign_only("Colony entry autosaved");
             }
             UiAction::OpenRoster => self.state = AppState::Roster,
+            UiAction::OpenGeneLab => {
+                if self
+                    .campaign
+                    .colony
+                    .has_facility(crate::colony::BuildingKind::GeneLab)
+                {
+                    self.state = AppState::GeneLab;
+                } else {
+                    self.notifications.warning("The Gene Lab is offline");
+                }
+            }
             UiAction::SelectColonist(character_id) => {
                 match self.campaign.select_character(&character_id) {
                     Ok(()) => self.autosave_campaign_only("Roster selection autosaved"),
@@ -349,12 +364,26 @@ impl Game {
                 }
             }
             UiAction::SelectConstruction(kind) => {
+                if kind == crate::colony::BuildingKind::GeneLab
+                    && !self.campaign.strategy.contact_complete
+                {
+                    self.notifications
+                        .warning("The Gene Lab unlocks in Adaptation");
+                    return;
+                }
                 match self.campaign.colony.select_construction(kind) {
                     Ok(()) => self.notifications.info(format!("Planning {}", kind.name())),
                     Err(err) => self.notifications.warning(err),
                 }
             }
             UiAction::ConstructBuilding(kind, position) => {
+                if kind == crate::colony::BuildingKind::GeneLab
+                    && !self.campaign.strategy.contact_complete
+                {
+                    self.notifications
+                        .warning("The Gene Lab unlocks in Adaptation");
+                    return;
+                }
                 match self.campaign.colony.place_construction(kind, position) {
                     Ok(_) => {
                         self.notifications

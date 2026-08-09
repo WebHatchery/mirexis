@@ -28,7 +28,8 @@ The completed roadmap slice includes:
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, powered facilities, operation rations, Hydroponics production,
-  selectable barricade/Power Plant construction, layout-derived defenses, and repairs
+  selectable Barricade/Power Plant/Gene Lab construction, layout-derived defenses,
+  and repairs
 - Directorate, Brood, and Ascendant attention; a telegraphed assault; persistent
   research doctrines and character-event legacies; seeded mission generation; and
   faction-pressure battlefield modifiers with materials, biomass, and power recovery
@@ -45,7 +46,8 @@ The completed roadmap slice includes:
   advances the persistent campaign into Phase Three: Adaptation
 - an irreversible, biomass-funded Neural Bloom evolution for Kira: Expanded Cortex
   trades higher accuracy for food upkeep, while Echo Mind trades weapon damage for
-  movement; the chosen gift and complication both affect later deployments
+  movement; the powered, damageable Gene Lab owns the choice and the resulting gift
+  and complication both affect later deployments
 - an Adaptation-only Glass Nerve operation generated immediately after evolution,
   with a distinct Ascendant cradle battlefield, a six-round secure-and-clear contract,
   and visible materials, biomass, and power recovery

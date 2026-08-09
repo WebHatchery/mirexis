@@ -12,7 +12,7 @@
     ./scripts/capture_ui.ps1 -Frames 60 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("title", "colony", "contact", "contact_gear", "contact_event", "adaptation", "evolution", "adaptation_operation", "glass_nerve", "damage", "power", "construction", "research", "roster", "legacy", "briefing", "pressure", "gameplay", "extraction", "variant", "sporefield", "vault", "black_channel", "living_chorus", "open_circuit", "trace_active", "equipment", "class_target", "breach", "debrief"),
+    [string[]]$Scenes = @("title", "colony", "contact", "contact_gear", "contact_event", "adaptation", "gene_lab", "evolution", "adaptation_operation", "glass_nerve", "damage", "power", "construction", "research", "roster", "legacy", "briefing", "pressure", "gameplay", "extraction", "variant", "sporefield", "vault", "black_channel", "living_chorus", "open_circuit", "trace_active", "equipment", "class_target", "breach", "debrief"),
     [int]$Frames = 150,
     [string]$OutputDir = "docs\verification",
     [switch]$SkipBuild

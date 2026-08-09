@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — Adaptation operations
-Save/content version: 1.13.0
+Current campaign slice: Phase Three — Gene Lab
+Save/content version: 1.14.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -68,6 +68,7 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
+| `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
@@ -272,14 +273,17 @@ Initial facilities have stable coordinates:
 - Hydroponics: three food after each resolved operation while powered.
 - Power Plant: four power supply and a critical defense objective.
 
-The colony grid selects and places either a 20-material Barricade or a 45-material
-Power Plant. Both reserve their plot and complete after one resolved operation.
-Reserved plots cannot be reused. Campaign time never depends on wall-clock time.
+The colony grid always offers a 20-material Barricade or a 45-material Power Plant.
+Adaptation adds one unique 50-material Gene Lab. All three reserve their plot and
+complete after one resolved operation. Reserved plots cannot be reused. Campaign time
+never depends on wall-clock time.
 
 Power is a derived capacity model. Base recovered power and operational Power Plants
 form supply; undamaged facilities form demand. A 7-demand/8-supply starting grid has
 one unit of headroom. When supply falls short, stable building order determines which
 later facilities display `NO POWER` and stop satisfying their gameplay gates.
+The Gene Lab adds three demand, intentionally requiring recovered power or another
+Power Plant before its evolution chamber operates.
 
 Deployment commits one food per ready squad member plus positive mutation upkeep.
 Powered Hydroponics returns three food after an operation, sustaining the standard
@@ -292,9 +296,9 @@ into the tactical mission, so colony placement and defense geometry share one so
 
 A failed colony-defense outcome deterministically damages one saved operational
 facility, falling back to other structures only when every facility is already down.
-Damaged Barracks, Infirmary, and Workshop buildings stop satisfying their gameplay
-gates. The layout marks damage and its material cost directly; clicking the building
-repairs it and autosaves the restored facility.
+Damaged Barracks, Infirmary, Workshop, and Gene Lab buildings stop satisfying their
+gameplay gates. The layout marks damage and its material cost directly; clicking the
+building repairs it and autosaves the restored facility.
 
 ## 8. Phase One and Contact Strategy Contract
 
@@ -368,6 +372,13 @@ deployment-food burden visible, while either evolution changes Kira's derived co
 stats. Migrating an already evolved 1.12 save regenerates its offers so the new
 operation cannot remain hidden behind serialized Contact-era content.
 
+Mutation evolution is accessed by clicking a completed, powered Gene Lab rather than
+through the generic operations panel. Its dedicated chamber lists every colonist's
+mutation state, exposes researched paths, discloses biomass costs and complications,
+and preserves the existing selected-colonist state. The facility can be damaged,
+repaired, or disabled by insufficient power. Migrating an evolved 1.13 save adds the
+lab to an open colony plot without changing the established evolution.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -435,6 +446,7 @@ Migration coverage:
 | 1.10.0 | Persistent Contact completion and Adaptation transition |
 | 1.11.0 | Persistent mutation evolution choice and derived gift/complication fields |
 | 1.12.0 | Phase-gated Adaptation operation offers for already evolved campaigns |
+| 1.13.0 | Gene Lab infrastructure for already evolved Adaptation campaigns |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -466,7 +478,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `evolution`,
+`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
@@ -482,8 +494,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (75 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-scene capture with visual inspection
+- `cargo test` (77 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-one-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -514,8 +526,8 @@ boundaries when continuing:
   consumers are not yet implemented.
 - The ten current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
-- The colony has fixed core facilities and placeable Barricades/Power Plants;
-  population, other facility construction, and free placement for every building remain.
+- The colony has fixed core facilities and placeable Barricades, Power Plants, and one
+  Adaptation-gated Gene Lab; population and free placement for every building remain.
 - Additional mutation evolutions, advanced classes, relationships, permanent death,
   and additional equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
@@ -528,6 +540,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is the Gene Lab: a visible colony facility that
-owns mutation research, stabilization, and future evolution access rather than leaving
-Adaptation choices in the generic operations panel.
+The recommended next vertical slice is a second researched evolution pair for Mara's
+Chitinous Growth, using the Gene Lab's existing multi-colonist interface and attaching
+new tactical and strategic consequences to a different squad role.

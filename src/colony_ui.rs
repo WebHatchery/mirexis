@@ -55,7 +55,7 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
     let panel = Rect::new(18.0, 96.0, 820.0, 580.0);
     draw_surface_with_title(
         panel,
-        Some("SETTLEMENT LAYOUT // PLAN CONSTRUCTION · CLICK DAMAGED BUILDINGS TO REPAIR"),
+        Some("SETTLEMENT LAYOUT // PLAN CONSTRUCTION // CLICK DAMAGED BUILDINGS TO REPAIR"),
         &SurfaceStyle::new(Color::new(0.035, 0.052, 0.062, 0.98))
             .with_border(1.0, Color::new(0.19, 0.40, 0.40, 0.9))
             .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
@@ -124,6 +124,11 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
                     }
                 } else if unpowered {
                     draw_text("NO POWER", rect.x + 7.0, rect.y + 66.0, 10.0, dark::WARNING);
+                } else if building.kind == BuildingKind::GeneLab {
+                    draw_text("OPEN LAB", rect.x + 7.0, rect.y + 66.0, 10.0, dark::ACCENT);
+                    if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
+                        actions.push(UiAction::OpenGeneLab);
+                    }
                 }
             } else if let Some(project) = project {
                 draw_building_label(rect, &format!("{}\nPLANNED", project.kind.name()));
@@ -135,15 +140,27 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
             }
         }
     }
-    for (index, kind) in [BuildingKind::Barricade, BuildingKind::PowerPlant]
-        .into_iter()
-        .enumerate()
+    let mut construction_kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
+    if campaign.strategy.contact_complete
+        && !campaign
+            .colony
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::GeneLab)
+        && !campaign
+            .colony
+            .construction_queue
+            .iter()
+            .any(|project| project.kind == BuildingKind::GeneLab)
     {
+        construction_kinds.push(BuildingKind::GeneLab);
+    }
+    for (index, kind) in construction_kinds.into_iter().enumerate() {
         let selected = campaign.colony.planned_construction == kind;
         if colony_button(
-            Rect::new(105.0 + index as f32 * 260.0, 640.0, 246.0, 30.0),
+            Rect::new(105.0 + index as f32 * 210.0, 640.0, 200.0, 30.0),
             &format!(
-                "{}PLAN {} · {} MAT",
+                "{}PLAN {} // {} MAT",
                 if selected { "> " } else { "" },
                 kind.name().to_uppercase(),
                 kind.material_cost()
@@ -161,6 +178,7 @@ fn draw_building_label(rect: Rect, label: &str) {
         "Command Centre" => "COMMAND\nCENTRE",
         "Power Plant" => "POWER\nPLANT",
         "Hydroponics" => "HYDRO\nPONICS",
+        "Gene Lab" => "GENE\nLAB",
         other => other,
     };
     for (index, line) in short.lines().enumerate() {
@@ -250,7 +268,7 @@ fn draw_operations(
             )
     } else {
         format!(
-            "ISOLATION // VICTORIES {}/3 · DOCTRINE {} · ASSAULT {}",
+            "ISOLATION // VICTORIES {}/3 // DOCTRINE {} // ASSAULT {}",
             campaign.strategy.isolation_victories,
             if doctrine_complete {
                 "READY"
@@ -370,7 +388,7 @@ fn draw_operations(
             .iter()
             .find(|mutation| mutation.id == character.mutation_id)
     });
-    let choosing_evolution = campaign.strategy.contact_complete
+    let evolution_pending = campaign.strategy.contact_complete
         && evolution_character.is_some_and(|character| character.mutation_evolution_id.is_empty())
         && evolution_mutation.is_some_and(|mutation| !mutation.evolutions.is_empty());
     if choosing_contact {
@@ -397,39 +415,25 @@ fn draw_operations(
                 actions.push(UiAction::ChooseContactProtocol(protocol.id.clone()));
             }
         }
-    } else if choosing_evolution {
-        let character = evolution_character.expect("Adaptation character was found");
-        let mutation = evolution_mutation.expect("Adaptation mutation was found");
+    } else if evolution_pending {
+        let lab_exists = campaign
+            .colony
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::GeneLab);
+        let lab_ready = campaign.colony.has_facility(BuildingKind::GeneLab);
         draw_ui_text_ex(
-            "ADAPT KIRA'S NEURAL BLOOM // CHOOSE ONE",
+            if lab_ready {
+                "GENE LAB READY // CLICK THE FACILITY TO EVOLVE KIRA"
+            } else if lab_exists {
+                "GENE LAB OFFLINE // RESTORE POWER OR REPAIR THE FACILITY"
+            } else {
+                "GENE LAB REQUIRED // PLAN IT ON AN OPEN COLONY PLOT"
+            },
             878.0,
             514.0,
             TextStyle::new(11.0, dark::ACCENT).params(),
         );
-        for (index, evolution) in mutation.evolutions.iter().take(2).enumerate() {
-            let button_y = 520.0 + index as f32 * 48.0;
-            if colony_button(
-                Rect::new(878.0, button_y, 362.0, 30.0),
-                &format!(
-                    "{} // {} BIOMASS",
-                    evolution.name.to_uppercase(),
-                    evolution.biomass_cost
-                ),
-                campaign.colony.resources.biomass >= evolution.biomass_cost,
-                mouse,
-            ) {
-                actions.push(UiAction::ChooseMutationEvolution(
-                    character.id.clone(),
-                    evolution.id.clone(),
-                ));
-            }
-            draw_ui_text_ex(
-                &evolution.description,
-                882.0,
-                button_y + 40.0,
-                TextStyle::new(10.0, dark::TEXT_DIM).params(),
-            );
-        }
     } else {
         if let Some(research) = campaign
             .strategy
@@ -440,7 +444,7 @@ fn draw_operations(
             if colony_button(
                 Rect::new(878.0, 510.0, 362.0, 32.0),
                 &format!(
-                    "RESEARCH {} · {} MAT",
+                    "RESEARCH {} // {} MAT",
                     research.name, research.materials_cost
                 ),
                 true,
@@ -453,7 +457,7 @@ fn draw_operations(
             draw_character_event(campaign, data, event, mouse, actions);
         }
     }
-    if !choosing_contact && !choosing_evolution {
+    if !choosing_contact && !evolution_pending {
         draw_ui_text_ex(
             "ACTIVE DOCTRINES",
             878.0,
@@ -486,7 +490,7 @@ fn draw_operations(
     }
     draw_ui_text_ex(
         &format!(
-            "Plan: {} · {} materials · one operation · {} structures mapped",
+            "Plan: {} // {} materials // one operation // {} structures mapped",
             campaign.colony.planned_construction.name(),
             campaign.colony.planned_construction.material_cost(),
             defense.blocked_tiles.len()
@@ -556,7 +560,7 @@ fn draw_character_event(
         });
     draw_ui_text_ex(
         &format!(
-            "CHOICE EFFECT // {} {:+} {} · {} FOOD · {} {:+}",
+            "CHOICE EFFECT // {} {:+} {} // {} FOOD // {} {:+}",
             recipient.to_uppercase(),
             legacy_amount,
             legacy_stat.to_uppercase(),

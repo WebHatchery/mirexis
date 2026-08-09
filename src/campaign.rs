@@ -496,6 +496,9 @@ impl CampaignState {
         if !self.strategy.contact_complete {
             return Err("Mutation evolution unlocks in Adaptation".to_owned());
         }
+        if !self.colony.has_facility(BuildingKind::GeneLab) {
+            return Err("A powered Gene Lab is required for mutation evolution".to_owned());
+        }
         let character = self
             .roster
             .iter()
@@ -1067,6 +1070,11 @@ mod tests {
         let data = GameData::load().unwrap();
         let mut campaign = CampaignState::new(&data);
         campaign.strategy.contact_complete = true;
+        assert!(campaign
+            .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
+            .is_err());
+        campaign.colony.ensure_gene_lab();
+        campaign.colony.resources.power += 2;
         let accuracy_before = campaign
             .deployment_roster(&data, &data.mission)
             .into_iter()

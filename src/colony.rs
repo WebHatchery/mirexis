@@ -17,6 +17,7 @@ pub enum BuildingKind {
     Barricade,
     Hydroponics,
     PowerPlant,
+    GeneLab,
 }
 
 impl BuildingKind {
@@ -29,6 +30,7 @@ impl BuildingKind {
             Self::Barricade => "Barricade",
             Self::Hydroponics => "Hydroponics",
             Self::PowerPlant => "Power Plant",
+            Self::GeneLab => "Gene Lab",
         }
     }
 
@@ -36,6 +38,7 @@ impl BuildingKind {
         match self {
             Self::Barricade => 20,
             Self::PowerPlant => 45,
+            Self::GeneLab => 50,
             _ => 0,
         }
     }
@@ -44,6 +47,7 @@ impl BuildingKind {
         match self {
             Self::CommandCentre | Self::Barracks | Self::Infirmary => 1,
             Self::Workshop | Self::Hydroponics => 2,
+            Self::GeneLab => 3,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -56,6 +60,7 @@ impl BuildingKind {
         match self {
             Self::Barricade => 10,
             Self::CommandCentre => 35,
+            Self::GeneLab => 30,
             _ => 25,
         }
     }
@@ -168,7 +173,10 @@ impl ColonyState {
     }
 
     pub fn select_construction(&mut self, kind: BuildingKind) -> Result<(), String> {
-        if !matches!(kind, BuildingKind::Barricade | BuildingKind::PowerPlant) {
+        if !matches!(
+            kind,
+            BuildingKind::Barricade | BuildingKind::PowerPlant | BuildingKind::GeneLab
+        ) {
             return Err(format!("{} cannot be planned here", kind.name()));
         }
         self.planned_construction = kind;
@@ -189,6 +197,18 @@ impl ColonyState {
         }
         if self.is_occupied(position) {
             return Err("Plot is already occupied or reserved".to_owned());
+        }
+        if kind == BuildingKind::GeneLab
+            && (self
+                .buildings
+                .iter()
+                .any(|building| building.kind == BuildingKind::GeneLab)
+                || self
+                    .construction_queue
+                    .iter()
+                    .any(|project| project.kind == BuildingKind::GeneLab))
+        {
+            return Err("The colony can support only one Gene Lab".to_owned());
         }
         let cost = kind.material_cost();
         if self.resources.materials < cost {
@@ -296,7 +316,8 @@ impl ColonyState {
                 BuildingKind::CommandCentre
                 | BuildingKind::Infirmary
                 | BuildingKind::Hydroponics
-                | BuildingKind::PowerPlant => critical_objectives.push(position),
+                | BuildingKind::PowerPlant
+                | BuildingKind::GeneLab => critical_objectives.push(position),
             }
         }
         ColonyDefenseMap {
@@ -338,6 +359,19 @@ impl ColonyState {
                 self.resources.power = (self.resources.power - 4).max(0);
             }
         }
+    }
+
+    pub fn ensure_gene_lab(&mut self) {
+        if self
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::GeneLab)
+        {
+            return;
+        }
+        let position = self.first_open_plot([1, 1]);
+        self.buildings
+            .push(building("gene_lab", BuildingKind::GeneLab, position));
     }
 
     fn first_open_plot(&self, preferred: [i32; 2]) -> [i32; 2] {
@@ -445,5 +479,20 @@ mod tests {
         assert!(colony.buildings.iter().any(
             |building| building.kind == BuildingKind::PowerPlant && building.position == [1, 1]
         ));
+    }
+
+    #[test]
+    fn gene_lab_is_unique_and_requires_additional_power() {
+        let mut colony = ColonyState::new();
+        colony
+            .place_construction(BuildingKind::GeneLab, [1, 1])
+            .unwrap();
+        assert!(colony
+            .place_construction(BuildingKind::GeneLab, [1, 2])
+            .is_err());
+        colony.advance_operation();
+        assert!(!colony.has_facility(BuildingKind::GeneLab));
+        colony.resources.power += 2;
+        assert!(colony.has_facility(BuildingKind::GeneLab));
     }
 }

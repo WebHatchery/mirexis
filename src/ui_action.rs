@@ -18,6 +18,7 @@ pub enum UiAction {
     ReturnToTitle,
     ReturnToColony,
     OpenRoster,
+    OpenGeneLab,
     SelectColonist(String),
     TrainSelected(String),
     CraftSelected(String),
