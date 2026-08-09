@@ -39,6 +39,14 @@ pub(crate) fn draw_unit(view: GridView, unit: &UnitState, selected: bool, target
             Color::new(0.95, 0.74, 0.24, 1.0),
         );
     }
+    if !unit.statuses.is_empty() && !unit.incapacitated {
+        draw_circle(
+            rect.x + rect.w - 9.0,
+            rect.y + 9.0,
+            5.0,
+            Color::new(0.95, 0.74, 0.24, 1.0),
+        );
+    }
     if targetable {
         draw_rectangle_lines(
             rect.x + 5.0,

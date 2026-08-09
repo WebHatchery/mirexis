@@ -20,6 +20,7 @@ pub(crate) fn resolve_enemy_phase(session: &mut GameSession) {
             if session.battle_is_over() {
                 return;
             }
+            crate::enemy_abilities::try_activate(session, &enemy_id);
             if session.can_attack_defense_objective(&enemy_id) {
                 let _ = session.execute(Command::AttackObjective {
                     attacker_id: enemy_id.clone(),

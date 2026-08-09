@@ -207,6 +207,9 @@ A technologically advanced human military and corporate power.
 - artillery
 - battlefield electronics
 
+Directorate units now open a viable activation with **Suppression Lock**, spending one
+action point to Disrupt the most vulnerable visible colonist for their next player phase.
+
 ### Technology
 
 - rail weapons
@@ -246,6 +249,9 @@ Different Brood creatures evolve for specialised roles.
 - regeneration
 - adaptive mutations
 
+Brood units now open an activation with **Predatory Surge**, spending one action point to
+become Quickened while they close on the squad or a vulnerable mission asset.
+
 ### Battlefield Characteristics
 
 Brood forces may alter terrain by spreading:
@@ -277,6 +283,9 @@ Their technology operates according to principles barely understood by human sci
 - gravity manipulation
 - psionic abilities
 - battlefield control
+
+Ascendant units now open an activation with **Phase Ward**, spending one action point for
+Guarded armour that persists through the colony's response.
 
 ### Technology
 

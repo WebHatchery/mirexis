@@ -125,6 +125,13 @@ pub fn migrate_save_value(
     if detected_version.as_deref() != Some(data.config.version.as_str()) {
         if let Some(tactical) = &mut save.tactical {
             for unit in &mut tactical.units {
+                if unit.faction.is_none() {
+                    unit.faction = data
+                        .roster
+                        .iter()
+                        .find(|definition| definition.id == unit.id)
+                        .and_then(|definition| definition.faction.clone());
+                }
                 if unit.equipment_ids.is_empty() {
                     if let Some(character) = save
                         .campaign
@@ -1148,5 +1155,27 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert_eq!(tactical.objective_integrity, 0);
         assert_eq!(tactical.objective_max_integrity, 0);
+    }
+
+    #[test]
+    fn defense_objective_save_gains_hostile_factions_and_ready_abilities() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.33.0", &campaign)).unwrap();
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            let unit = unit.as_object_mut().unwrap();
+            unit.remove("faction");
+            unit.remove("enemy_ability_used");
+        }
+        let migrated = migrate_save_value(Some("1.33.0".to_owned()), legacy, &data).unwrap();
+        let tactical = migrated.tactical.unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(tactical
+            .units
+            .iter()
+            .filter(|unit| unit.team == crate::data::Team::Hostile)
+            .all(|unit| unit.faction.is_some() && !unit.enemy_ability_used));
     }
 }

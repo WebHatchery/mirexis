@@ -22,6 +22,8 @@ The completed roadmap slice includes:
 - save-stable authored and vertically mirrored variants for every mission map family
 - eleven class actions, explicit ally/enemy targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
+- once-per-phase faction abilities: Brood Predatory Surge, Directorate Suppression Lock,
+  and Ascendant Phase Ward, each surfaced through status markers and the battle log
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

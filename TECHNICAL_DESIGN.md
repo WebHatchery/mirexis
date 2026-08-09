@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.33.0
+Save/content version: 1.34.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -81,12 +81,14 @@ Important transition payloads:
 | `class_training.rs` | Training costs, advanced-class gates, switching, and class-definition validation | UI state |
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
+| `enemy_abilities.rs` | Faction ability validation, target choice, effects, and AI activation | General hostile movement or rendering |
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective-specific tactical progress summaries | Objective mutation |
+| `phase_refresh.rs` | Team AP, regeneration, temporary-stat, and per-phase-use reset | Command validation or drawing |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
@@ -569,6 +571,7 @@ Migration coverage:
 | 1.30.0 | Save-stable per-unit overwatch state, defaulting older tactical saves to disarmed |
 | 1.31.0 | Persistent per-character trauma histories, defaulting older rosters to unscarred |
 | 1.32.0 | Defense-asset integrity fields, inactive by default for older tactical saves |
+| 1.33.0 | Tactical faction identity and once-per-phase hostile ability use state |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -606,7 +609,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `pressure`, `gameplay`,
+`briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -620,8 +623,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (120 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-nine-scene capture with visual inspection
+- `cargo test` (124 domain/migration tests plus the shared source-size gate)
+- deterministic sixty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -676,5 +679,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is faction-signature active abilities that make Brood,
-Directorate, and Ascendant squads demand different tactical counterplay.
+The recommended next vertical slice is environmental hazard tiles that change positioning
+decisions across existing maps instead of only increasing movement cost.

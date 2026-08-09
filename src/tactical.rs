@@ -61,6 +61,8 @@ pub struct UnitState {
     pub equipment_ids: Vec<String>,
     pub mutation: String,
     pub team: Team,
+    #[serde(default)]
+    pub faction: Option<String>,
     pub position: TilePos,
     pub health: i32,
     pub max_health: i32,
@@ -91,6 +93,8 @@ pub struct UnitState {
     pub statuses: Vec<StatusEffect>,
     #[serde(default)]
     pub overwatching: bool,
+    #[serde(default)]
+    pub enemy_ability_used: bool,
 }
 
 impl UnitState {
@@ -103,6 +107,7 @@ impl UnitState {
             equipment_ids: def.equipment_ids.clone(),
             mutation: def.mutation.clone(),
             team: def.team,
+            faction: def.faction.clone(),
             position: TilePos::new(def.position[0], def.position[1]),
             health: def.max_health,
             max_health: def.max_health,
@@ -124,6 +129,7 @@ impl UnitState {
             used_equipment_ids: Vec::new(),
             statuses: Vec::new(),
             overwatching: false,
+            enemy_ability_used: false,
         }
     }
 
@@ -208,6 +214,10 @@ pub enum Command {
     AttackObjective {
         attacker_id: String,
     },
+    ActivateEnemyAbility {
+        unit_id: String,
+        target_id: Option<String>,
+    },
     SetOverwatch {
         unit_id: String,
     },
@@ -236,6 +246,7 @@ pub enum RuleError {
     EquipmentUnavailable,
     CoverUnavailable,
     OverwatchUnavailable,
+    EnemyAbilityUnavailable,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -297,6 +308,10 @@ pub enum BattleEvent {
     ReactionTriggered {
         attacker_id: String,
         target_id: String,
+    },
+    EnemyAbilityActivated {
+        unit_id: String,
+        ability: String,
     },
     StatusApplied {
         unit_id: String,

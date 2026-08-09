@@ -1,0 +1,187 @@
+//! Deterministic once-per-phase abilities that distinguish hostile factions.
+
+use crate::data::Team;
+use crate::state::GameSession;
+use crate::tactical::{manhattan, BattleEvent, Command, CommandCost, RuleError, StatusKind};
+
+const ABILITY_COST: u8 = 1;
+
+pub(crate) fn try_activate(session: &mut GameSession, unit_id: &str) {
+    let faction = session
+        .unit(unit_id)
+        .and_then(|unit| unit.faction.as_deref())
+        .unwrap_or_default();
+    let target_id = (faction == "directorate")
+        .then(|| disruption_target(session, unit_id))
+        .flatten();
+    let command = Command::ActivateEnemyAbility {
+        unit_id: unit_id.to_owned(),
+        target_id,
+    };
+    if session.validate(&command).is_ok() {
+        let _ = session.execute(command);
+    }
+}
+
+pub(crate) fn validate(
+    session: &GameSession,
+    unit_id: &str,
+    target_id: Option<&str>,
+) -> Result<CommandCost, RuleError> {
+    let unit = session.active_unit_for_phase(unit_id)?;
+    if unit.team != Team::Hostile || unit.enemy_ability_used || unit.action_points < ABILITY_COST {
+        return Err(RuleError::EnemyAbilityUnavailable);
+    }
+    match unit.faction.as_deref() {
+        Some("brood" | "ascendants") if target_id.is_none() => {}
+        Some("directorate") => {
+            let target = session
+                .unit(target_id.ok_or(RuleError::InvalidTarget)?)
+                .ok_or(RuleError::UnknownUnit)?;
+            if target.team != Team::Colony
+                || target.incapacitated
+                || manhattan(unit.position, target.position) > i32::from(unit.weapon_range)
+                || !session.has_line_of_fire(unit.position, target.position)
+            {
+                return Err(RuleError::InvalidTarget);
+            }
+        }
+        _ => return Err(RuleError::EnemyAbilityUnavailable),
+    }
+    Ok(CommandCost {
+        action_points: ABILITY_COST,
+    })
+}
+
+pub(crate) fn execute(
+    session: &mut GameSession,
+    unit_id: &str,
+    target_id: Option<&str>,
+) -> Vec<BattleEvent> {
+    let faction = session
+        .unit(unit_id)
+        .and_then(|unit| unit.faction.as_deref())
+        .unwrap()
+        .to_owned();
+    let (ability, affected_id, status, duration) = match faction.as_str() {
+        "brood" => ("Predatory Surge", unit_id, StatusKind::Quickened, 1),
+        "directorate" => (
+            "Suppression Lock",
+            target_id.unwrap(),
+            StatusKind::Disrupted,
+            1,
+        ),
+        "ascendants" => ("Phase Ward", unit_id, StatusKind::Guarded, 2),
+        _ => unreachable!("enemy ability faction was validated"),
+    };
+    let unit = session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == unit_id)
+        .unwrap();
+    unit.action_points -= ABILITY_COST;
+    unit.enemy_ability_used = true;
+    let mut events = Vec::new();
+    crate::class_actions::apply_status(session, affected_id, status, duration, &mut events);
+    events.push(BattleEvent::EnemyAbilityActivated {
+        unit_id: unit_id.to_owned(),
+        ability: ability.to_owned(),
+    });
+    events
+}
+
+fn disruption_target(session: &GameSession, unit_id: &str) -> Option<String> {
+    let unit = session.unit(unit_id)?;
+    let mut targets = session
+        .tactical
+        .units
+        .iter()
+        .filter(|target| {
+            target.team == Team::Colony
+                && !target.incapacitated
+                && manhattan(unit.position, target.position) <= i32::from(unit.weapon_range)
+                && session.has_line_of_fire(unit.position, target.position)
+        })
+        .collect::<Vec<_>>();
+    targets.sort_by_key(|target| (target.health, target.id.clone()));
+    targets.first().map(|target| target.id.clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::data::GameData;
+    use crate::tactical::TacticalPhase;
+    use macroquad_toolkit::grid::TilePos;
+
+    fn faction_session(faction: &str) -> (GameSession, String) {
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        session.tactical.phase = TacticalPhase::Enemy;
+        let unit = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.faction.as_deref() == Some(faction))
+            .unwrap();
+        unit.position = TilePos::new(5, 4);
+        let id = unit.id.clone();
+        (session, id)
+    }
+
+    #[test]
+    fn brood_surge_trades_an_action_for_immediate_mobility() {
+        let (mut session, unit_id) = faction_session("brood");
+        let before = session.unit(&unit_id).unwrap().action_points;
+        session
+            .execute(Command::ActivateEnemyAbility {
+                unit_id: unit_id.clone(),
+                target_id: None,
+            })
+            .unwrap();
+
+        let unit = session.unit(&unit_id).unwrap();
+        assert_eq!(unit.action_points, before - 1);
+        assert!(unit.has_status(StatusKind::Quickened));
+    }
+
+    #[test]
+    fn directorate_suppression_disrupts_a_visible_colonist() {
+        let (mut session, unit_id) = faction_session("directorate");
+        let target = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Colony)
+            .unwrap();
+        target.position = TilePos::new(5, 3);
+        let target_id = target.id.clone();
+        session
+            .execute(Command::ActivateEnemyAbility {
+                unit_id,
+                target_id: Some(target_id.clone()),
+            })
+            .unwrap();
+
+        assert!(session
+            .unit(&target_id)
+            .unwrap()
+            .has_status(StatusKind::Disrupted));
+    }
+
+    #[test]
+    fn ascendant_phase_ward_persists_into_the_player_response() {
+        let (mut session, unit_id) = faction_session("ascendants");
+        session
+            .execute(Command::ActivateEnemyAbility {
+                unit_id: unit_id.clone(),
+                target_id: None,
+            })
+            .unwrap();
+
+        let unit = session.unit(&unit_id).unwrap();
+        assert!(unit.has_status(StatusKind::Guarded));
+        assert_eq!(unit.effective_armour(), unit.armour + 2);
+    }
+}
