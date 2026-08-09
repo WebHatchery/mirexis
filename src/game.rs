@@ -23,6 +23,7 @@ use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_fr
 enum AppState {
     Title,
     Colony,
+    Roster,
     MissionBriefing,
     Tactical,
     Debrief,
@@ -96,6 +97,11 @@ impl Game {
                     self.events.push(UiAction::ReturnToTitle);
                 }
             }
+            AppState::Roster => {
+                if input.escape_pressed {
+                    self.events.push(UiAction::ReturnToColony);
+                }
+            }
             AppState::MissionBriefing => {
                 if input.escape_pressed {
                     self.events.push(UiAction::ReturnToColony);
@@ -138,6 +144,7 @@ impl Game {
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
+            "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
             "debrief" => {
                 self.session = GameSession::new(
@@ -176,6 +183,9 @@ impl Game {
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
             AppState::Colony => colony_ui::draw_colony(&self.campaign, &virtual_ui),
+            AppState::Roster => {
+                crate::roster_ui::draw_roster(&self.campaign, &self.data, &virtual_ui)
+            }
             AppState::MissionBriefing => ui::draw_mission_briefing(
                 &self.data,
                 &self.campaign,
@@ -300,6 +310,13 @@ impl Game {
                 self.state = AppState::Colony;
                 self.autosave_campaign_only("Colony entry autosaved");
             }
+            UiAction::OpenRoster => self.state = AppState::Roster,
+            UiAction::SelectColonist(character_id) => {
+                match self.campaign.select_character(&character_id) {
+                    Ok(()) => self.autosave_campaign_only("Roster selection autosaved"),
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::ConstructBarricade(position) => {
                 match self
                     .campaign
@@ -313,16 +330,15 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
-            UiAction::TrainKira => {
+            UiAction::TrainSelected(class_id) => {
+                let character_id = self.campaign.selected_character_id.clone();
                 match self
                     .campaign
-                    .train_character("kira_voss", "soldier", &self.data)
+                    .train_character(&character_id, &class_id, &self.data)
                 {
                     Ok(cost) => {
-                        self.notifications.success(format!(
-                            "Kira completed Soldier training · {} materials",
-                            cost
-                        ));
+                        self.notifications
+                            .success(format!("Training complete · {} materials", cost));
                         self.autosave_campaign_only("Training autosaved");
                     }
                     Err(err) => self.notifications.warning(err),
@@ -336,13 +352,20 @@ impl Game {
                 }
                 Err(err) => self.notifications.warning(err),
             },
-            UiAction::CraftKiraArmour => match self.campaign.craft_armour("kira_voss") {
-                Ok(()) => {
-                    self.notifications.success("Chitin Plate issued to Kira");
-                    self.autosave_campaign_only("Workshop change autosaved");
+            UiAction::CraftSelected(equipment_id) => {
+                let character_id = self.campaign.selected_character_id.clone();
+                match self
+                    .campaign
+                    .craft_equipment(&character_id, &equipment_id, &self.data)
+                {
+                    Ok(cost) => {
+                        self.notifications
+                            .success(format!("Equipment issued · {} materials", cost));
+                        self.autosave_campaign_only("Workshop change autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
                 }
-                Err(err) => self.notifications.warning(err),
-            },
+            }
             UiAction::SelectTile(tile) => self.session.select_tile(tile),
             UiAction::MoveSelected(tile) => {
                 if self.session.move_selected_to(tile) {

@@ -1081,7 +1081,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "1.1.0");
+        assert_eq!(migrated.version, "1.2.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

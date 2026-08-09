@@ -69,6 +69,8 @@ impl CharacterRecord {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CampaignState {
     pub roster: Vec<CharacterRecord>,
+    #[serde(default)]
+    pub selected_character_id: String,
     pub colony: ColonyState,
     pub strategy: StrategyState,
     pub operations_completed: u32,
@@ -85,6 +87,10 @@ impl CampaignState {
             character.deployment_selected = index < SQUAD_LIMIT;
         }
         Self {
+            selected_character_id: roster
+                .first()
+                .map(|character| character.id.clone())
+                .unwrap_or_default(),
             roster,
             colony: ColonyState::new(),
             strategy: StrategyState::new(data),
@@ -130,6 +136,25 @@ impl CampaignState {
             })
             .count()
             .min(SQUAD_LIMIT)
+    }
+
+    pub fn selected_character(&self) -> Option<&CharacterRecord> {
+        self.roster
+            .iter()
+            .find(|character| character.id == self.selected_character_id)
+            .or_else(|| self.roster.first())
+    }
+
+    pub fn select_character(&mut self, character_id: &str) -> Result<(), String> {
+        if !self
+            .roster
+            .iter()
+            .any(|character| character.id == character_id)
+        {
+            return Err(format!("Unknown colonist: {}", character_id));
+        }
+        self.selected_character_id = character_id.to_owned();
+        Ok(())
     }
 
     pub fn toggle_deployment(&mut self, character_id: &str) -> Result<bool, String> {
@@ -259,28 +284,44 @@ impl CampaignState {
         Ok(character.name.clone())
     }
 
-    pub fn craft_armour(&mut self, character_id: &str) -> Result<(), String> {
+    pub fn craft_equipment(
+        &mut self,
+        character_id: &str,
+        equipment_id: &str,
+        data: &GameData,
+    ) -> Result<u32, String> {
         if !self.colony.has_facility(BuildingKind::Workshop) {
             return Err("An operational workshop is required".to_owned());
         }
-        if self.colony.resources.materials < 25 {
-            return Err("Crafting requires 25 materials".to_owned());
-        }
+        let equipment = data
+            .equipment
+            .iter()
+            .find(|equipment| equipment.id == equipment_id)
+            .ok_or_else(|| format!("Unknown equipment: {}", equipment_id))?;
+        let cost = equipment_cost(&equipment.slot);
         let character = self
             .roster
             .iter_mut()
             .find(|character| character.id == character_id)
             .ok_or_else(|| format!("Unknown character: {}", character_id))?;
-        if character
-            .equipment_ids
-            .iter()
-            .any(|id| id == "chitin_plate")
-        {
-            return Err("Character already carries Chitin Plate".to_owned());
+        if character.equipment_ids.contains(&equipment.id) {
+            return Err(format!(
+                "{} already carries {}",
+                character.name, equipment.name
+            ));
         }
-        self.colony.resources.materials -= 25;
-        character.equipment_ids.push("chitin_plate".to_owned());
-        Ok(())
+        if self.colony.resources.materials < cost as i32 {
+            return Err(format!("Crafting requires {} materials", cost));
+        }
+        character.equipment_ids.retain(|id| {
+            data.equipment
+                .iter()
+                .find(|item| &item.id == id)
+                .is_none_or(|item| item.slot != equipment.slot)
+        });
+        self.colony.resources.materials -= cost as i32;
+        character.equipment_ids.push(equipment.id.clone());
+        Ok(cost)
     }
 
     pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
@@ -334,6 +375,15 @@ impl CampaignState {
 
 fn deployment_selected_default() -> bool {
     true
+}
+
+pub fn equipment_cost(slot: &str) -> u32 {
+    match slot {
+        "primary" => 30,
+        "armour" => 25,
+        "tool" | "module" => 20,
+        _ => 25,
+    }
 }
 
 pub fn derived_mutation_traits(
@@ -534,10 +584,24 @@ mod tests {
             .unwrap();
         assert!(cost >= 60);
         assert_eq!(campaign.roster[0].active_class, "soldier");
-        campaign.craft_armour("kira_voss").unwrap();
+        campaign
+            .craft_equipment("kira_voss", "chitin_plate", &data)
+            .unwrap();
         assert!(campaign.roster[0]
             .equipment_ids
             .iter()
             .any(|id| id == "chitin_plate"));
+        campaign.colony.resources.materials += 30;
+        campaign
+            .craft_equipment("kira_voss", "service_pistol", &data)
+            .unwrap();
+        assert!(campaign.roster[0]
+            .equipment_ids
+            .iter()
+            .any(|id| id == "service_pistol"));
+        assert!(!campaign.roster[0]
+            .equipment_ids
+            .iter()
+            .any(|id| id == "frontier_rifle"));
     }
 }

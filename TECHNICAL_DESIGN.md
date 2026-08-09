@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.1.0
+Save/content version: 1.2.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -45,8 +45,9 @@ The implemented application state machine is:
 
 ```text
 Boot -> Title -> Colony -> MissionBriefing -> Tactical -> Debrief -> Colony
-          |         |             |              |
-          |         +-- strategic actions       +-- manual tactical save/load
+          |         |  +-> Roster ---------+
+          |         |  +-> strategic actions
+          |         |                 Tactical: manual save/load
           +-- continue saved colony/battle
 ```
 
@@ -80,6 +81,7 @@ Important transition payloads:
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
 | `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
+| `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
 multi-objective logic that would push it toward the source limit.
@@ -155,6 +157,11 @@ Briefing exposes all four current recruits as deploy or reserve rows. At least o
 at most three ready colonists may be selected; injuries disable their row. Selection is
 autosaved, survives operations, and is applied before faction hostiles join the tactical
 roster, so reserve choice affects class, mutation, and equipment access in the mission.
+
+The colony roster screen persists a selected colonist and exposes every base class with
+aptitude-priced material costs. Workshop choices cover all starter equipment. Crafting
+replaces any item in the same slot while preserving other slots, so primary weapons,
+armour, tools, and modules remain mutually coherent rather than accumulating blindly.
 
 Seven initial class families are loaded from `classes.json`. Aptitude changes the
 material cost of training but never class eligibility. Switching classes retains
@@ -289,6 +296,7 @@ Migration coverage:
 | 0.8.0 | Class identity, action-use flag, and timed tactical statuses |
 | 0.9.0 | Serialized holdout reinforcement queue |
 | 1.0.0 | Persistent deployment selection, normalized to the three-colonist limit |
+| 1.1.0 | Persistent roster-screen character selection |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -319,8 +327,8 @@ Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
 translated into `UiAction` or tactical commands before simulation mutation. Tactical
 units use labels as well as faction color, and colony buildings use text labels.
 
-`scripts/capture_ui.ps1` captures `title`, `colony`, `briefing`, `gameplay`, and
-`debrief` by default. `Game::begin_capture_scene()` seeds each scene deterministically.
+`scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
+and `debrief` by default. `Game::begin_capture_scene()` seeds each scene deterministically.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -329,8 +337,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (37 domain/migration tests plus the shared source-size gate)
-- deterministic five-scene capture with visual inspection
+- `cargo test` (38 domain/migration tests plus the shared source-size gate)
+- deterministic six-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -363,8 +371,8 @@ boundaries when continuing:
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
   building damage/repair, power demand, and free placement for every building remain.
-- Mutation evolution, advanced classes, relationships, permanent death, and richer
-  equipment slots need content and UI beyond the existing rule hooks.
+- Mutation evolution, advanced classes, relationships, permanent death, and additional
+  equipment families need content beyond the starter roster screen.
 - Isolation is a repeatable Phase One loop. Story gates and Phases Two–Five remain
   future campaign content.
 - Saved content references need explicit validation before definitions can be removed

@@ -17,6 +17,7 @@ The completed roadmap slice includes:
 - seven class actions and round-resolved combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
 - persistent three-colonist squad selection with a visible reserve
+- roster-wide class training and slot-replacing workshop equipment
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,

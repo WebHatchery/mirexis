@@ -189,11 +189,11 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
     );
     if colony_button(
         Rect::new(878.0, 274.0, 362.0, 32.0),
-        "BARRACKS: TRAIN KIRA AS SOLDIER",
-        campaign.roster[0].active_class != "soldier",
+        "MANAGE ROSTER // TRAINING & GEAR",
+        true,
         mouse,
     ) {
-        actions.push(UiAction::TrainKira);
+        actions.push(UiAction::OpenRoster);
     }
     if colony_button(
         Rect::new(878.0, 312.0, 362.0, 32.0),
@@ -203,27 +203,16 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
     ) {
         actions.push(UiAction::TreatInjury);
     }
-    if colony_button(
-        Rect::new(878.0, 350.0, 362.0, 32.0),
-        "WORKSHOP: CRAFT KIRA ARMOUR",
-        !campaign.roster[0]
-            .equipment_ids
-            .iter()
-            .any(|id| id == "chitin_plate"),
-        mouse,
-    ) {
-        actions.push(UiAction::CraftKiraArmour);
-    }
     draw_ui_text_ex(
         "MISSION OFFERS",
         878.0,
-        410.0,
+        372.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
         let selected = mission.id == campaign.strategy.selected_mission_id;
         if colony_button(
-            Rect::new(878.0, 422.0 + index as f32 * 38.0, 362.0, 32.0),
+            Rect::new(878.0, 384.0 + index as f32 * 38.0, 362.0, 32.0),
             &format!("{}{}", if selected { "> " } else { "" }, mission.name),
             true,
             mouse,
@@ -232,7 +221,7 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         }
     }
     if colony_button(
-        Rect::new(878.0, 500.0, 362.0, 36.0),
+        Rect::new(878.0, 462.0, 362.0, 36.0),
         "BRIEF SELECTED MISSION",
         campaign.strategy.selected_mission().is_some(),
         mouse,
@@ -246,7 +235,7 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         .find(|entry| !entry.completed)
     {
         if colony_button(
-            Rect::new(878.0, 548.0, 362.0, 32.0),
+            Rect::new(878.0, 510.0, 362.0, 32.0),
             &format!(
                 "RESEARCH {} · {} MAT",
                 research.name, research.materials_cost
@@ -264,7 +253,7 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         .find(|entry| !entry.resolved)
     {
         if colony_button(
-            Rect::new(878.0, 586.0, 362.0, 32.0),
+            Rect::new(878.0, 548.0, 362.0, 32.0),
             &format!("EVENT: {}", event.title),
             true,
             mouse,

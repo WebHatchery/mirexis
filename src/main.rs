@@ -12,6 +12,7 @@ mod game;
 mod grid_ui;
 mod persistence;
 mod reinforcements;
+mod roster_ui;
 mod state;
 mod strategy;
 mod tactical;
