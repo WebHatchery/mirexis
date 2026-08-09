@@ -1,5 +1,6 @@
 //! Deterministic tactical command simulation and persistence model.
 
+use crate::campaign::CampaignState;
 use crate::data::{CoverEdgeDef, EdgeDirection, GameConfig, MissionDef, Team, UnitDef};
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
@@ -38,6 +39,7 @@ pub struct UnitState {
     pub weapon_range: u8,
     pub weapon_damage: i32,
     pub weapon_ap_cost: u8,
+    pub round_regeneration: i32,
     pub incapacitated: bool,
 }
 
@@ -59,6 +61,7 @@ impl UnitState {
             weapon_range: def.weapon_range,
             weapon_damage: def.weapon_damage,
             weapon_ap_cost: def.weapon_ap_cost,
+            round_regeneration: def.round_regeneration,
             incapacitated: false,
         }
     }
@@ -153,16 +156,23 @@ pub struct TacticalState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SaveData {
     pub version: String,
-    pub tactical: TacticalState,
+    pub campaign: CampaignState,
+    pub tactical: Option<TacticalState>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MissionOutcome {
     pub result: ObjectiveState,
     pub colonists_deployed: usize,
-    pub colonists_incapacitated: Vec<String>,
+    pub colonists_incapacitated: Vec<CharacterConsequence>,
     pub hostiles_neutralised: usize,
     pub materials_awarded: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CharacterConsequence {
+    pub id: String,
+    pub name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -219,16 +229,15 @@ impl GameSession {
         }
     }
 
-    pub fn from_save(save: SaveData) -> Self {
-        Self {
-            tactical: save.tactical,
-        }
+    pub fn from_tactical(tactical: TacticalState) -> Self {
+        Self { tactical }
     }
 
-    pub fn to_save(&self, version: &str) -> SaveData {
+    pub fn to_save(&self, version: &str, campaign: &CampaignState) -> SaveData {
         SaveData {
             version: version.to_owned(),
-            tactical: self.tactical.clone(),
+            campaign: campaign.clone(),
+            tactical: Some(self.tactical.clone()),
         }
     }
 
@@ -396,7 +405,10 @@ impl GameSession {
                 .units
                 .iter()
                 .filter(|unit| unit.team == Team::Colony && unit.incapacitated)
-                .map(|unit| unit.name.clone())
+                .map(|unit| CharacterConsequence {
+                    id: unit.id.clone(),
+                    name: unit.name.clone(),
+                })
                 .collect(),
             hostiles_neutralised: self
                 .tactical
@@ -739,6 +751,9 @@ impl GameSession {
         for unit in &mut self.tactical.units {
             if unit.team == team && !unit.incapacitated {
                 unit.action_points = action_points;
+                if unit.round_regeneration > 0 {
+                    unit.health = (unit.health + unit.round_regeneration).min(unit.max_health);
+                }
             }
         }
     }
@@ -881,8 +896,11 @@ mod tests {
     #[test]
     fn phase_zero_save_payload_migrates_to_battle_schema() {
         let data = crate::data::GameData::load().unwrap();
-        let current = GameSession::new(&data.config, &data.mission, &data.roster).to_save("0.2.0");
+        let campaign = CampaignState::new(&data);
+        let current =
+            GameSession::new(&data.config, &data.mission, &data.roster).to_save("0.2.0", &campaign);
         let mut legacy = serde_json::to_value(current).unwrap();
+        legacy.as_object_mut().unwrap().remove("campaign");
         let tactical = legacy["tactical"].as_object_mut().unwrap();
         for key in [
             "terrain_costs",
@@ -904,15 +922,16 @@ mod tests {
                 "weapon_damage",
                 "weapon_ap_cost",
                 "incapacitated",
+                "round_regeneration",
             ] {
                 unit.remove(key);
             }
         }
         let migrated =
-            crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data.config)
+            crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.2.0");
-        assert!(!migrated.tactical.units.is_empty());
+        assert_eq!(migrated.version, "0.3.0");
+        assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 
     #[test]
@@ -929,7 +948,7 @@ mod tests {
             .incapacitated = true;
         let outcome = session.mission_outcome(&data.mission).unwrap();
         assert_eq!(outcome.colonists_deployed, 4);
-        assert_eq!(outcome.colonists_incapacitated, vec!["Ilya Reed"]);
+        assert_eq!(outcome.colonists_incapacitated[0].id, "ilya_reed");
         assert_eq!(outcome.materials_awarded, data.mission.materials_reward);
     }
 }

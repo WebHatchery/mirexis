@@ -1,5 +1,6 @@
 //! Immediate-mode title and tactical presentation.
 
+use crate::campaign::CampaignState;
 use crate::data::{GameData, Team};
 use crate::state::{
     BattleEvent, GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState,
@@ -105,7 +106,11 @@ pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiA
     actions
 }
 
-pub fn draw_mission_briefing(data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
+pub fn draw_mission_briefing(
+    data: &GameData,
+    campaign: &CampaignState,
+    ui: &VirtualUi,
+) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
     draw_rectangle(
@@ -146,11 +151,28 @@ pub fn draw_mission_briefing(data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
         370.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
-    let squad = data
+    let squad = campaign
         .roster
         .iter()
-        .filter(|unit| unit.team == Team::Colony)
-        .map(|unit| format!("{} · {} · {}", unit.name, unit.role, unit.mutation))
+        .filter(|character| character.availability == crate::campaign::Availability::Ready)
+        .map(|character| {
+            let class_name = data
+                .classes
+                .iter()
+                .find(|class| class.id == character.active_class)
+                .map_or(character.active_class.as_str(), |class| class.name.as_str());
+            let mutation_name = data
+                .mutations
+                .iter()
+                .find(|mutation| mutation.id == character.mutation_id)
+                .map_or(character.mutation_id.as_str(), |mutation| {
+                    mutation.name.as_str()
+                });
+            format!(
+                "{} · {} · {} · {} XP",
+                character.name, class_name, mutation_name, character.experience
+            )
+        })
         .collect::<Vec<_>>()
         .join("\n");
     draw_text_block(&squad, 200.0, 394.0, 650.0, 110.0, 18.0, 6.0, dark::TEXT);
@@ -214,7 +236,12 @@ pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -
     } else {
         format!(
             "Incapacitated: {}",
-            outcome.colonists_incapacitated.join(", ")
+            outcome
+                .colonists_incapacitated
+                .iter()
+                .map(|entry| entry.name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
         )
     };
     let report = [

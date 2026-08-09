@@ -1,0 +1,27 @@
+[
+  {
+    "id": "chitinous_growth", "name": "Chitinous Growth",
+    "gift": [{ "stat": "armour", "amount": 2 }],
+    "complication": [{ "stat": "movement", "amount": -1 }]
+  },
+  {
+    "id": "neural_bloom", "name": "Neural Bloom",
+    "gift": [{ "stat": "psionic_access", "amount": 1 }],
+    "complication": [{ "stat": "psychic_resistance", "amount": -2 }]
+  },
+  {
+    "id": "regenerative_tissue", "name": "Regenerative Tissue",
+    "gift": [{ "stat": "round_regeneration", "amount": 1 }],
+    "complication": [{ "stat": "medical_healing", "amount": -25 }]
+  },
+  {
+    "id": "elastic_musculature", "name": "Elastic Musculature",
+    "gift": [{ "stat": "movement", "amount": 1 }],
+    "complication": [{ "stat": "heavy_armour_efficiency", "amount": -1 }]
+  },
+  {
+    "id": "symbiotic_organism", "name": "Symbiotic Organism",
+    "gift": [{ "stat": "biological_damage", "amount": 2 }],
+    "complication": [{ "stat": "food_upkeep", "amount": 1 }]
+  }
+]

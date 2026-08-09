@@ -1,5 +1,6 @@
 //! Application state machine, persistence, and toolkit integration.
 
+use crate::campaign::CampaignState;
 use crate::data::GameData;
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, MissionOutcome, SaveData};
@@ -12,6 +13,7 @@ use macroquad_toolkit::notifications::{
 };
 use macroquad_toolkit::persistence::{
     delete_slot, load_from_slot_with_migration, save_to_slot_with_version, slot_exists,
+    AutoSaveManager,
 };
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
 
@@ -26,12 +28,14 @@ enum AppState {
 pub struct Game {
     data: GameData,
     session: GameSession,
+    campaign: CampaignState,
     state: AppState,
     assets: AssetManager,
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
     last_outcome: Option<MissionOutcome>,
+    autosave: AutoSaveManager,
 }
 
 impl Game {
@@ -43,7 +47,12 @@ impl Game {
         assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
         let _ = assets.load_asset_pack("assets.zip").await;
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
-        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(
+            &data.config,
+            &data.mission,
+            &campaign.deployment_roster(&data),
+        );
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
         let mut notifications = NotificationManager::new();
         notifications.info(format!(
@@ -54,12 +63,14 @@ impl Game {
         Self {
             data,
             session,
+            campaign,
             state: AppState::Title,
             assets,
             notifications,
             events: EventBus::new(),
             save_exists,
             last_outcome: None,
+            autosave: AutoSaveManager::default(),
         }
     }
 
@@ -115,8 +126,11 @@ impl Game {
             "title" => self.state = AppState::Title,
             "briefing" => self.state = AppState::MissionBriefing,
             "debrief" => {
-                self.session =
-                    GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
+                self.session = GameSession::new(
+                    &self.data.config,
+                    &self.data.mission,
+                    &self.campaign.deployment_roster(&self.data),
+                );
                 self.session.tactical.objective_state = crate::state::ObjectiveState::Victory;
                 for unit in &mut self.session.tactical.units {
                     if unit.team == crate::data::Team::Hostile {
@@ -128,8 +142,11 @@ impl Game {
                 self.state = AppState::Debrief;
             }
             _ => {
-                self.session =
-                    GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
+                self.session = GameSession::new(
+                    &self.data.config,
+                    &self.data.mission,
+                    &self.campaign.deployment_roster(&self.data),
+                );
                 self.state = AppState::Tactical;
             }
         }
@@ -140,7 +157,9 @@ impl Game {
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
-            AppState::MissionBriefing => ui::draw_mission_briefing(&self.data, &virtual_ui),
+            AppState::MissionBriefing => {
+                ui::draw_mission_briefing(&self.data, &self.campaign, &virtual_ui)
+            }
             AppState::Tactical => ui::draw_tactical(UiContext {
                 data: &self.data,
                 session: &self.session,
@@ -174,9 +193,13 @@ impl Game {
                 self.last_outcome = None;
             }
             UiAction::DeployMission => {
-                self.session =
-                    GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
+                self.session = GameSession::new(
+                    &self.data.config,
+                    &self.data.mission,
+                    &self.campaign.deployment_roster(&self.data),
+                );
                 self.state = AppState::Tactical;
+                self.autosave_current("Deployment autosaved");
                 self.notifications.success("Operation Glassroot deployed");
             }
             UiAction::Continue => self.load_game(),
@@ -223,12 +246,41 @@ impl Game {
         }
         if let Some(outcome) = self.session.mission_outcome(&self.data.mission) {
             self.last_outcome = Some(outcome);
+            self.campaign.advance_recovery();
+            self.campaign.apply_mission_outcome(
+                self.last_outcome.as_ref().expect("outcome was just stored"),
+                &self.data,
+            );
             self.state = AppState::Debrief;
+            self.autosave_current("Debrief autosaved");
+        }
+    }
+
+    fn autosave_current(&mut self, success_message: &str) {
+        let save = self
+            .session
+            .to_save(&self.data.config.version, &self.campaign);
+        let game_name = self.data.config.game_name.clone();
+        let slot = self.data.config.save_slot.clone();
+        let version = self.data.config.version.clone();
+        match self
+            .autosave
+            .force(move || save_to_slot_with_version(&game_name, &slot, &save, &version))
+        {
+            Ok(()) => {
+                self.save_exists = true;
+                self.notifications.info(success_message);
+            }
+            Err(err) => self
+                .notifications
+                .danger(format!("Autosave failed: {}", err)),
         }
     }
 
     fn save_game(&mut self) {
-        let save = self.session.to_save(&self.data.config.version);
+        let save = self
+            .session
+            .to_save(&self.data.config.version, &self.campaign);
         match save_to_slot_with_version(
             &self.data.config.game_name,
             &self.data.config.save_slot,
@@ -248,11 +300,20 @@ impl Game {
             &self.data.config.game_name,
             &self.data.config.save_slot,
             &self.data.config.version,
-            |version, value| migrate_save_value(version, value, &self.data.config),
+            |version, value| migrate_save_value(version, value, &self.data),
         );
         match loaded {
             Ok(save) => {
-                self.session = GameSession::from_save(save);
+                self.campaign = save.campaign;
+                let tactical = save.tactical.unwrap_or_else(|| {
+                    GameSession::new(
+                        &self.data.config,
+                        &self.data.mission,
+                        &self.campaign.deployment_roster(&self.data),
+                    )
+                    .tactical
+                });
+                self.session = GameSession::from_tactical(tactical);
                 self.state = AppState::Tactical;
                 self.last_outcome = None;
                 self.notifications.success("Tactical state restored");

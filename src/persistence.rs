@@ -1,6 +1,7 @@
 //! Campaign save migration at schema boundaries.
 
-use crate::data::GameConfig;
+use crate::campaign::CampaignState;
+use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
 use macroquad_toolkit::rng::SeededRng;
 use serde_json::Value;
@@ -8,16 +9,42 @@ use serde_json::Value;
 pub fn migrate_save_value(
     detected_version: Option<String>,
     value: Value,
-    config: &GameConfig,
+    data: &GameData,
 ) -> Result<SaveData, String> {
     let mut payload = value.get("data").cloned().unwrap_or(value);
     if detected_version.as_deref() == Some("0.1.0") {
-        migrate_phase_zero_payload(&mut payload, config)?;
+        migrate_phase_zero_payload(&mut payload, &data.config)?;
+    }
+    if matches!(detected_version.as_deref(), Some("0.1.0" | "0.2.0")) {
+        let root = payload
+            .as_object_mut()
+            .ok_or_else(|| "Legacy save root is not an object".to_owned())?;
+        root.insert(
+            "campaign".to_owned(),
+            serde_json::to_value(CampaignState::new(data))
+                .map_err(|err| format!("Could not create migrated campaign: {}", err))?,
+        );
+        add_character_runtime_defaults(&mut payload)?;
     }
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
-    save.version = config.version.clone();
+    save.version = data.config.version.clone();
     Ok(save)
+}
+
+fn add_character_runtime_defaults(value: &mut Value) -> Result<(), String> {
+    let units = value
+        .get_mut("tactical")
+        .and_then(|tactical| tactical.get_mut("units"))
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| "Legacy save is missing tactical units".to_owned())?;
+    for unit in units {
+        if let Some(unit) = unit.as_object_mut() {
+            unit.entry("round_regeneration".to_owned())
+                .or_insert_with(|| serde_json::json!(0));
+        }
+    }
+    Ok(())
 }
 
 fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<(), String> {
@@ -62,7 +89,30 @@ fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<
         );
         unit.insert("weapon_damage".to_owned(), serde_json::json!(4));
         unit.insert("weapon_ap_cost".to_owned(), serde_json::json!(2));
+        unit.insert("round_regeneration".to_owned(), serde_json::json!(0));
         unit.insert("incapacitated".to_owned(), serde_json::json!(false));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::state::GameSession;
+
+    #[test]
+    fn phase_one_save_gains_campaign_and_character_runtime_fields() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.2.0", &campaign)).unwrap();
+        legacy.as_object_mut().unwrap().remove("campaign");
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            unit.as_object_mut().unwrap().remove("round_regeneration");
+        }
+        let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "0.3.0");
+        assert_eq!(migrated.campaign.roster.len(), 4);
+        assert!(migrated.tactical.is_some());
+    }
 }

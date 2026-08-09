@@ -1,0 +1,38 @@
+[
+  {
+    "id": "kira_voss",
+    "name": "Kira Voss",
+    "biography": "Former frontier surveyor who hears patterns in Mirexis static.",
+    "aptitudes": { "mobility": 5, "ballistics": 4, "psionics": 3, "medicine": 2 },
+    "initial_class": "scout",
+    "mutation": "neural_bloom",
+    "equipment": ["frontier_rifle", "survey_harness"]
+  },
+  {
+    "id": "mara_venn",
+    "name": "Mara Venn",
+    "biography": "A mining supervisor who held the west tunnel during first contact.",
+    "aptitudes": { "heavy_weapons": 5, "defence": 4, "engineering": 3, "medicine": 2, "psionics": 1 },
+    "initial_class": "defender",
+    "mutation": "chitinous_growth",
+    "equipment": ["mire_lmg", "chitin_plate"]
+  },
+  {
+    "id": "ilya_reed",
+    "name": "Ilya Reed",
+    "biography": "The colony clinician who learned to treat bodies that no longer follow textbooks.",
+    "aptitudes": { "medicine": 5, "biology": 4, "leadership": 3, "ballistics": 2 },
+    "initial_class": "medic",
+    "mutation": "regenerative_tissue",
+    "equipment": ["service_pistol", "field_medkit"]
+  },
+  {
+    "id": "sol_cairn",
+    "name": "Sol Cairn",
+    "biography": "A maintenance engineer who can cross a broken gantry faster than most people can climb it.",
+    "aptitudes": { "engineering": 5, "mobility": 4, "ballistics": 3, "biology": 2 },
+    "initial_class": "engineer",
+    "mutation": "elastic_musculature",
+    "equipment": ["service_pistol", "field_toolkit"]
+  }
+]

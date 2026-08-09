@@ -1,0 +1,9 @@
+[
+  { "id": "frontier_rifle", "name": "Frontier Rifle", "slot": "primary", "accuracy": 2, "armour": 0, "health": 0, "damage": 1 },
+  { "id": "mire_lmg", "name": "Mire LMG", "slot": "primary", "accuracy": -2, "armour": 0, "health": 0, "damage": 2 },
+  { "id": "service_pistol", "name": "Service Pistol", "slot": "primary", "accuracy": 0, "armour": 0, "health": 0, "damage": 0 },
+  { "id": "survey_harness", "name": "Survey Harness", "slot": "module", "accuracy": 1, "armour": 0, "health": 0, "damage": 0 },
+  { "id": "chitin_plate", "name": "Chitin Plate", "slot": "armour", "accuracy": 0, "armour": 1, "health": 1, "damage": 0 },
+  { "id": "field_medkit", "name": "Field Medkit", "slot": "tool", "accuracy": 0, "armour": 0, "health": 1, "damage": 0 },
+  { "id": "field_toolkit", "name": "Field Toolkit", "slot": "tool", "accuracy": 1, "armour": 0, "health": 0, "damage": 0 }
+]
