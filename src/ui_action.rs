@@ -40,6 +40,7 @@ pub enum UiAction {
     ArmEquipment(String),
     CancelTargeting,
     UseEquipmentOn(String),
+    SetOverwatch,
     EndPhase,
     Save,
     Load,

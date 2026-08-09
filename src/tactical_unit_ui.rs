@@ -30,6 +30,15 @@ pub(crate) fn draw_unit(view: GridView, unit: &UnitState, selected: bool, target
             Color::new(0.04, 0.08, 0.08, 1.0)
         },
     );
+    if unit.overwatching && !unit.incapacitated {
+        draw_circle_lines(
+            center.x,
+            center.y,
+            rect.w * 0.36,
+            3.0,
+            Color::new(0.95, 0.74, 0.24, 1.0),
+        );
+    }
     if targetable {
         draw_rectangle_lines(
             rect.x + 5.0,

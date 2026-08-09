@@ -628,8 +628,22 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         mouse,
         actions,
     );
+    let phase_width = (panel.w - 44.0) * 0.46;
     if button(
-        Rect::new(x, panel.bottom() - 100.0, panel.w - 36.0, 44.0),
+        Rect::new(x, panel.bottom() - 100.0, phase_width, 44.0),
+        "OVERWATCH",
+        ctx.session.can_set_selected_overwatch(),
+        mouse,
+    ) {
+        actions.push(UiAction::SetOverwatch);
+    }
+    if button(
+        Rect::new(
+            x + phase_width + 8.0,
+            panel.bottom() - 100.0,
+            panel.w - 44.0 - phase_width,
+            44.0,
+        ),
         "END COLONY PHASE",
         true,
         mouse,

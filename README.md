@@ -11,6 +11,7 @@ The completed roadmap slice includes:
 
 - a title → colony → briefing → tactical → debrief campaign loop
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
+- prepaid overwatch that reacts once when hostile movement enters weapon range and line of fire
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
 - secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
   trace objectives with live progress

@@ -20,6 +20,7 @@ mod gene_lab_ui;
 mod grid_ui;
 mod map_variants;
 mod operation_modifiers;
+mod overwatch;
 mod persistence;
 mod reinforcements;
 mod relationships;

@@ -387,6 +387,13 @@ Characters can generally:
 - defend
 - perform class actions
 
+The implemented Overwatch action spends the equipped weapon's attack-point cost during
+the player phase. It then fires once at the first hostile movement that enters range and
+line of fire during the enemy phase, with a 15-point reaction accuracy penalty. The shot
+is prepaid, deterministic, visibly armed on the battlefield, and expires if it is not
+triggered before the next player phase. This makes weapon profiles and firing lanes matter
+even when the player chooses not to attack immediately.
+
 Some abilities may consume both movement and action.
 
 ---

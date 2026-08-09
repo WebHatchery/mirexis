@@ -30,6 +30,11 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
             amount, remaining, ..
         } => format!("Cover took {} damage · {} integrity", amount, remaining),
         BattleEvent::CoverDestroyed { .. } => "Cover destroyed · route opened".to_owned(),
+        BattleEvent::OverwatchSet { unit_id } => format!("{} entered overwatch", unit_id),
+        BattleEvent::ReactionTriggered {
+            attacker_id,
+            target_id,
+        } => format!("{} reacted to {}", attacker_id, target_id),
         BattleEvent::StatusApplied { status, .. } => format!("{:?} status applied", status),
         BattleEvent::ReinforcementsArrived { count, .. } => {
             format!("{} hostile reinforcements arrived", count)
@@ -45,6 +50,9 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
 }
 
 pub(crate) fn action_status(unit: &UnitState) -> String {
+    if unit.overwatching {
+        return "OVERWATCH ARMED · REACTION READY".to_owned();
+    }
     let mutation = if unit.mutation_gift_used {
         "MUTATION SPENT"
     } else {

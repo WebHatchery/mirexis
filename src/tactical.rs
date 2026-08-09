@@ -89,6 +89,8 @@ pub struct UnitState {
     pub used_equipment_ids: Vec<String>,
     #[serde(default)]
     pub statuses: Vec<StatusEffect>,
+    #[serde(default)]
+    pub overwatching: bool,
 }
 
 impl UnitState {
@@ -121,6 +123,7 @@ impl UnitState {
             class_action_used: false,
             used_equipment_ids: Vec::new(),
             statuses: Vec::new(),
+            overwatching: false,
         }
     }
 
@@ -202,6 +205,9 @@ pub enum Command {
         attacker_id: String,
         position: TilePos,
     },
+    SetOverwatch {
+        unit_id: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -226,6 +232,7 @@ pub enum RuleError {
     ClassActionUnavailable,
     EquipmentUnavailable,
     CoverUnavailable,
+    OverwatchUnavailable,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -275,6 +282,13 @@ pub enum BattleEvent {
     },
     CoverDestroyed {
         position: TilePos,
+    },
+    OverwatchSet {
+        unit_id: String,
+    },
+    ReactionTriggered {
+        attacker_id: String,
+        target_id: String,
     },
     StatusApplied {
         unit_id: String,

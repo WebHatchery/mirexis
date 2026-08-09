@@ -1093,4 +1093,24 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(migrated.campaign.relationships.is_empty());
     }
+
+    #[test]
+    fn relationship_save_gains_disarmed_tactical_overwatch() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.30.0", &campaign)).unwrap();
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            unit.as_object_mut().unwrap().remove("overwatching");
+        }
+        let migrated = migrate_save_value(Some("1.30.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .tactical
+            .unwrap()
+            .units
+            .iter()
+            .all(|unit| !unit.overwatching));
+    }
 }

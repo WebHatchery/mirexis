@@ -510,6 +510,14 @@ impl Game {
                 ),
                 Err(_) => self.notifications.warning("Mutation gift is unavailable"),
             },
+            UiAction::SetOverwatch => match self.session.set_selected_overwatch() {
+                Ok(_) => self
+                    .notifications
+                    .success("Overwatch armed · first hostile movement in range draws fire"),
+                Err(_) => self
+                    .notifications
+                    .warning("Selected colonist cannot enter overwatch"),
+            },
             UiAction::ActivateClassAction => match self.session.activate_selected_class_action() {
                 Ok(events) => self.notifications.success(
                     events

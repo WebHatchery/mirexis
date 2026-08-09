@@ -183,13 +183,18 @@ impl GameSession {
                 attacker_id,
                 position,
             } => crate::cover_actions::validate(self, attacker_id, *position),
+            Command::SetOverwatch { unit_id } => crate::overwatch::validate(self, unit_id),
         }
     }
 
     pub fn execute(&mut self, command: Command) -> Result<Vec<BattleEvent>, RuleError> {
         self.validate(&command)?;
         let events = match command {
-            Command::Move { unit_id, to } => self.execute_move(&unit_id, to),
+            Command::Move { unit_id, to } => {
+                let mut events = self.execute_move(&unit_id, to);
+                events.extend(crate::overwatch::resolve_after_hostile_move(self, &unit_id));
+                events
+            }
             Command::Attack {
                 attacker_id,
                 target_id,
@@ -208,6 +213,7 @@ impl GameSession {
                 attacker_id,
                 position,
             } => crate::cover_actions::execute(self, &attacker_id, position),
+            Command::SetOverwatch { unit_id } => crate::overwatch::execute(self, &unit_id),
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -606,7 +612,7 @@ impl GameSession {
         events
     }
 
-    fn hit_chance(&self, attacker: &UnitState, target: &UnitState) -> u8 {
+    pub(crate) fn hit_chance(&self, attacker: &UnitState, target: &UnitState) -> u8 {
         let distance = manhattan(attacker.position, target.position);
         let range_penalty = (distance - i32::from(attacker.weapon_range) / 2).max(0) * 5;
         let cover = self.cover_against(target.position, attacker.position);
@@ -728,6 +734,7 @@ impl GameSession {
     fn refresh_team(&mut self, team: Team, action_points: u8) {
         for unit in &mut self.tactical.units {
             if unit.team == team && !unit.incapacitated {
+                unit.overwatching = false;
                 unit.action_points = action_points;
                 unit.mutation_gift_used = false;
                 unit.class_action_used = false;

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.30.0
+Save/content version: 1.31.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -84,6 +84,7 @@ Important transition payloads:
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
+| `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
 | `strategy_choices.rs` | Irreversible Contact-independent strategic choice transactions | Mission generation or rendering |
@@ -562,6 +563,7 @@ Migration coverage:
 | 1.27.0 | Data-backed advanced classes; existing class history and level remain valid |
 | 1.28.0 | Inspectable equipment definitions and weapon-profile overrides |
 | 1.29.0 | Persistent pair bonds, shared-victory history, and derived deployment bonuses |
+| 1.30.0 | Save-stable per-unit overwatch state, defaulting older tactical saves to disarmed |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -602,7 +604,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
-`equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
+`equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
@@ -613,8 +615,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (109 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-five-scene capture with visual inspection
+- `cargo test` (113 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-six-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -641,8 +643,9 @@ boundaries when continuing:
 
 - Escort, defense-target integrity, and additional multi-stage contracts remain beyond
   the five implemented objective types.
-- Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
-  consumers are not yet implemented.
+- Prepaid single-shot overwatch now reacts to hostile movement in range and line of fire.
+  Elevation, long-lived injuries as tactical statuses, additional reaction types, and
+  animation/audio consumers are not yet implemented.
 - The seventeen current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
@@ -667,5 +670,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a reaction-fire and overwatch system that makes
-weapon range and squad positioning matter during hostile movement.
+The recommended next vertical slice is persistent trauma and permanent-injury traits that
+make incapacitation change later missions without immediately deleting a named colonist.

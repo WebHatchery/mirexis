@@ -112,6 +112,7 @@ impl Game {
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
             "weapon_profile" => self.capture_weapon_profile(),
+            "overwatch" => self.capture_overwatch(),
             "class_target" => self.capture_class_target(),
             "breach" => self.capture_breach(),
             "debrief" => self.capture_debrief(),
@@ -582,6 +583,13 @@ impl Game {
         });
         kira.equipment_ids.push("needle_carbine".to_owned());
         self.reset_capture_session(AppState::Tactical);
+    }
+
+    fn capture_overwatch(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session
+            .set_selected_overwatch()
+            .expect("capture colonist can enter overwatch");
     }
 
     fn capture_extraction(&mut self) {
