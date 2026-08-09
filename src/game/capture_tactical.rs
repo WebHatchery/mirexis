@@ -6,6 +6,17 @@ use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase}
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_movement_route(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session.tactical.blocked.insert(TilePos::new(2, 2));
+        self.session
+            .tactical
+            .terrain_costs
+            .push((TilePos::new(2, 3), 2));
+        self.session.tactical.selected_unit = Some("kira_voss".to_owned());
+        self.session.tactical.selected_tile = TilePos::new(4, 3);
+    }
+
     pub(super) fn capture_vitality_markers(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         for unit in &mut self.session.tactical.units {

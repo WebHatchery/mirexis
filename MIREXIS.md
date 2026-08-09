@@ -404,6 +404,10 @@ movement AP and any landing hazard consequence. An attackable hostile instead pr
 the exact hit chance, normal-to-critical damage range, and weapon AP before the attack is
 committed.
 
+A reachable movement destination also traces the exact validated route in cyan. Each
+entered tile labels its own terrain cost, making blocked-cell detours and expensive ground
+visible alongside the existing total AP preview before the move is committed.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.

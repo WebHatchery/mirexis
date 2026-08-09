@@ -386,6 +386,10 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     crate::reinforcement_ui::draw(ctx.session, view);
     crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
+    let preview_tile = view
+        .tile_at(mouse)
+        .unwrap_or(ctx.session.tactical.selected_tile);
+    crate::action_preview_ui::draw_route(ctx.session, preview_tile, view);
     for unit in &ctx.session.tactical.units {
         let targetable = match ctx.targeting {
             Some(TargetingView::Equipment {
@@ -408,12 +412,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         );
     }
     ctx.feedback.draw(ctx.session, view);
-    crate::action_preview_ui::draw(
-        ctx.session,
-        view.tile_at(mouse)
-            .unwrap_or(ctx.session.tactical.selected_tile),
-        panel,
-    );
+    crate::action_preview_ui::draw(ctx.session, preview_tile, panel);
     if is_mouse_button_released(MouseButton::Left) {
         if let Some(tile) = view.tile_at(mouse) {
             if let Some(targeting) = ctx.targeting {

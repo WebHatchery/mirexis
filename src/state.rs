@@ -703,6 +703,11 @@ impl GameSession {
         )
     }
 
+    pub(crate) fn movement_path(&self, unit_id: &str, goal: TilePos) -> Option<Vec<TilePos>> {
+        let unit = self.unit(unit_id)?;
+        self.path_for(unit.position, goal, Some(unit_id))
+    }
+
     pub(crate) fn check_outcome(&mut self, events: &mut Vec<BattleEvent>) {
         let colonists_alive = self
             .tactical

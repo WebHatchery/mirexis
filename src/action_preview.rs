@@ -9,6 +9,7 @@ pub(crate) enum ActionPreview {
     Move {
         cost: u8,
         hazard: Option<HazardKind>,
+        path: Vec<TilePos>,
     },
     Attack {
         target_name: String,
@@ -57,9 +58,11 @@ pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPre
         .iter()
         .find(|hazard| hazard.position == tile)
         .map(|hazard| hazard.kind);
+    let path = session.movement_path(unit_id, tile)?;
     Some(ActionPreview::Move {
         cost: cost.action_points,
         hazard,
+        path,
     })
 }
 
@@ -73,20 +76,21 @@ mod tests {
     fn movement_preview_reports_validated_cost_and_landing_hazard() {
         let data = GameData::load().unwrap();
         let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
-        let selected = session.selected_unit().unwrap();
-        let tile = TilePos::new(selected.position.x + 1, selected.position.y);
+        let start = session.selected_unit().unwrap().position;
+        let tile = TilePos::new(start.x + 1, start.y);
         session.tactical.hazards.push(HazardTile {
             position: tile,
             kind: HazardKind::FireLane,
         });
 
-        assert_eq!(
+        assert!(matches!(
             for_tile(&session, tile),
             Some(ActionPreview::Move {
                 cost: 1,
                 hazard: Some(HazardKind::FireLane),
-            })
-        );
+                path,
+            }) if path.first() == Some(&start) && path.last() == Some(&tile)
+        ));
     }
 
     #[test]

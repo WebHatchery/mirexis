@@ -2,7 +2,9 @@
 
 use crate::action_preview::{self, ActionPreview};
 use crate::data::HazardKind;
+use crate::grid_ui::GridView;
 use crate::state::GameSession;
+use crate::tactical::terrain_cost;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
@@ -11,7 +13,7 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
         return;
     };
     let label = match preview {
-        ActionPreview::Move { cost, hazard } => match hazard {
+        ActionPreview::Move { cost, hazard, .. } => match hazard {
             Some(kind) => format!("MOVE // {} AP // {}", cost, hazard_effect(kind)),
             None => format!("MOVE // {} AP", cost),
         },
@@ -42,6 +44,41 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
         rect.y + 19.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
+}
+
+pub(crate) fn draw_route(
+    session: &GameSession,
+    tile: macroquad_toolkit::grid::TilePos,
+    view: GridView,
+) {
+    let Some(ActionPreview::Move { path, .. }) = action_preview::for_tile(session, tile) else {
+        return;
+    };
+    let mut previous: Option<Vec2> = None;
+    for (index, position) in path.iter().copied().enumerate() {
+        let rect = view.tile_rect(position);
+        let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
+        if let Some(from) = previous {
+            draw_line(from.x, from.y, center.x, center.y, 3.0, route_color());
+        }
+        if index > 0 {
+            draw_circle(center.x, center.y, 5.0, route_color());
+            draw_text_ex(
+                format!(
+                    "+{}",
+                    terrain_cost(position, &session.tactical.terrain_costs)
+                ),
+                rect.x + rect.w - 17.0,
+                rect.y + rect.h - 8.0,
+                TextStyle::new(10.0, dark::TEXT_BRIGHT).params(),
+            );
+        }
+        previous = Some(center);
+    }
+}
+
+fn route_color() -> Color {
+    Color::new(0.48, 0.90, 1.0, 0.9)
 }
 
 fn hazard_effect(kind: HazardKind) -> &'static str {
