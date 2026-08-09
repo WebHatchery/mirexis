@@ -402,6 +402,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         crate::tactical_unit_ui::draw_unit(
             view,
             unit,
+            ctx.data.config.max_action_points,
             ctx.session.tactical.selected_unit.as_deref() == Some(&unit.id),
             targetable,
         );

@@ -79,6 +79,7 @@ impl Game {
                 self.reset_capture_session(AppState::Tactical);
                 self.end_phase_armed = true;
             }
+            "readiness_markers" => self.capture_readiness_markers(),
             "line_formation" => self.capture_line_formation(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",

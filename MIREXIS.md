@@ -457,6 +457,11 @@ action points, wrapping through deployment order and moving grid focus to their 
 Fully spent squad members are skipped, and invoking the control with nobody ready leaves the
 current selection unchanged rather than inventing a command target.
 
+Every active colonist token also carries a row of action-point pips. Filled pips show the
+actions that remain without requiring selection, while a colonist at zero action points is
+labelled `SPENT`; incapacitated units omit the readiness treatment because their existing
+state already explains why they cannot act.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

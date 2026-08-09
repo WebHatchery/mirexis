@@ -4,9 +4,15 @@ use crate::data::Team;
 use crate::grid_ui::GridView;
 use crate::state::UnitState;
 use macroquad::prelude::*;
-use macroquad_toolkit::prelude::draw_text_centered_in_box;
+use macroquad_toolkit::prelude::{draw_text_centered_in_box, TextStyle};
 
-pub(crate) fn draw_unit(view: GridView, unit: &UnitState, selected: bool, targetable: bool) {
+pub(crate) fn draw_unit(
+    view: GridView,
+    unit: &UnitState,
+    max_action_points: u8,
+    selected: bool,
+    targetable: bool,
+) {
     let rect = view.tile_rect(unit.position);
     let color = match unit.team {
         Team::Colony => Color::new(0.22, 0.75, 0.63, 1.0),
@@ -72,4 +78,37 @@ pub(crate) fn draw_unit(view: GridView, unit: &UnitState, selected: bool, target
         15.0,
         Color::new(0.03, 0.07, 0.07, 1.0),
     );
+    if unit.team == Team::Colony && !unit.incapacitated {
+        draw_readiness(rect, unit.action_points, max_action_points);
+    }
+}
+
+fn draw_readiness(rect: Rect, action_points: u8, max_action_points: u8) {
+    if action_points == 0 {
+        let label = "SPENT";
+        let dimensions = measure_text(label, None, 9, 1.0);
+        draw_text_ex(
+            label,
+            rect.x + (rect.w - dimensions.width) * 0.5,
+            rect.y + rect.h - 3.0,
+            TextStyle::new(9.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
+        );
+        return;
+    }
+    let count = max_action_points.max(1);
+    let spacing = 7.0;
+    let start_x = rect.x + rect.w * 0.5 - (count.saturating_sub(1) as f32 * spacing) * 0.5;
+    for index in 0..count {
+        let center = vec2(start_x + index as f32 * spacing, rect.y + rect.h - 6.0);
+        draw_circle(
+            center.x,
+            center.y,
+            2.4,
+            if index < action_points {
+                Color::new(0.48, 0.90, 1.0, 1.0)
+            } else {
+                Color::new(0.14, 0.24, 0.26, 1.0)
+            },
+        );
+    }
 }

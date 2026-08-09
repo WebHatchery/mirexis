@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.49.0
+Save/content version: 1.50.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -123,7 +123,7 @@ Important transition payloads:
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 | `formation.rs` | Safe deterministic wedge, line, and column colony entry placement | Tactical persistence |
 | `cover_ui.rs` | Cover integrity bars and attackable-tile outlines | Simulation mutation |
-| `tactical_unit_ui.rs` | Unit tokens, selection rings, and target outlines | Simulation mutation |
+| `tactical_unit_ui.rs` | Unit tokens, selection rings, target outlines, and AP readiness markers | Simulation mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
 multi-objective logic that would push it toward the source limit.
@@ -621,6 +621,7 @@ Migration coverage:
 | 1.46.0 | No new fields; formation choice is applied only while creating a new session |
 | 1.47.0 | No new fields; end-phase confirmation is transient application UI state |
 | 1.48.0 | No new fields; next-ready selection changes existing selected unit and tile only |
+| 1.49.0 | No new fields; readiness markers derive from existing unit AP and incapacitation state |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -660,7 +661,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `root_choir`, `door_of_light`, `legacy`,
 `briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
-`open_circuit`, `trace_active`,
+`open_circuit`, `trace_active`, `readiness_markers`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
@@ -673,7 +674,7 @@ The completion baseline is:
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test` (144 domain/migration tests plus the shared source-size gate)
-- deterministic seventy-four-scene capture with visual inspection
+- deterministic seventy-five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -729,5 +730,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is on-grid action-point pips and spent markers for every
-colonist, making squad readiness visible without selecting or cycling through each unit.
+The recommended next vertical slice is compact on-grid vitality and armour treatment for
+every unit, making battlefield attrition readable without inspecting combatants one by one.

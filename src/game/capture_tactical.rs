@@ -6,6 +6,25 @@ use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase}
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_readiness_markers(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        for unit in self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == Team::Colony)
+        {
+            unit.action_points = match unit.id.as_str() {
+                "kira_voss" => 0,
+                "mara_venn" => 2,
+                _ => self.data.config.max_action_points,
+            };
+        }
+        self.session.tactical.selected_unit = Some("mara_venn".to_owned());
+        self.session.tactical.selected_tile = self.session.unit("mara_venn").unwrap().position;
+    }
+
     pub(super) fn capture_line_formation(&mut self) {
         let mut roster = self
             .campaign

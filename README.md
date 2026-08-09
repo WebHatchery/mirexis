@@ -54,6 +54,8 @@ The completed roadmap slice includes:
   by any intervening tactical command and bypassed when nobody can act
 - next-ready-colonist cycling from the tactical footer or `Tab`, skipping incapacitated or
   fully spent squad members and synchronizing both selected unit and grid focus
+- on-grid action-point pips for every active colonist, with an explicit `SPENT` marker
+  when that unit can no longer act during the current colony phase
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses
