@@ -288,6 +288,12 @@ units +1 movement, and Ascendant interference gives colonist attacks -10 accurac
 The modifier is fixed on the mission offer, disclosed in selection and briefing, and
 realized into unit state when the tactical session is constructed.
 
+Mission definitions and outcomes carry materials, biomass, and power separately.
+Brood operations can recover biomass, Ascendant operations can recover power, and
+Directorate operations concentrate on materials. The briefing discloses the full
+recovery package; victory copies it into the outcome, and debrief application updates
+all three saved colony resources through one path.
+
 When an assault reaches zero, the only offer becomes a colony-defense mission.
 Winning resets the countdown and reduces strength; failure returns it sooner and
 stronger. This is the first escalation loop, not the full five-phase campaign.
@@ -392,7 +398,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (50 domain/migration tests plus the shared source-size gate)
+- `cargo test` (51 domain/migration tests plus the shared source-size gate)
 - deterministic fourteen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -434,5 +440,5 @@ boundaries when continuing:
   or renamed safely.
 
 The recommended next vertical slice is another layer of Isolation campaign content:
-additional mission templates or faction-specific rewards that test the squad,
-completed doctrines, earned legacies, and pressure modifiers in new combinations.
+additional mission templates that test the squad, completed doctrines, earned
+legacies, pressure modifiers, and resource priorities in new combinations.

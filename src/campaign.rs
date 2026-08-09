@@ -201,6 +201,8 @@ impl CampaignState {
         self.operations_completed += 1;
         self.colony.advance_operation();
         self.colony.resources.materials += outcome.materials_awarded;
+        self.colony.resources.biomass += outcome.biomass_awarded;
+        self.colony.resources.power += outcome.power_awarded;
         self.strategy.resolve_mission(outcome, mission, data);
         let xp = if outcome.result == ObjectiveState::Victory {
             20
@@ -649,6 +651,8 @@ mod tests {
             colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
             hostiles_neutralised: 0,
             materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
         };
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         campaign.apply_mission_outcome(&outcome, &mission, &data);
@@ -680,6 +684,8 @@ mod tests {
             colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
             hostiles_neutralised: 0,
             materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
         };
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         campaign.apply_mission_outcome(&outcome, &mission, &data);
@@ -734,6 +740,27 @@ mod tests {
             derive_unit(mara_base, &campaign.roster[1], &data).armour,
             mara_before + 1
         );
+    }
+
+    #[test]
+    fn successful_operations_apply_all_recovered_resources() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let before = campaign.colony.resources.clone();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 2,
+            materials_awarded: 7,
+            biomass_awarded: 5,
+            power_awarded: 3,
+        };
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert_eq!(campaign.colony.resources.materials, before.materials + 7);
+        assert_eq!(campaign.colony.resources.biomass, before.biomass + 5);
+        assert_eq!(campaign.colony.resources.power, before.power + 3);
     }
 
     #[test]

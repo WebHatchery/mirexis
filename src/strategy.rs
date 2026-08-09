@@ -69,6 +69,10 @@ pub struct MissionInstance {
     pub round_limit: u32,
     pub materials_reward: i32,
     #[serde(default)]
+    pub biomass_reward: i32,
+    #[serde(default)]
+    pub power_reward: i32,
+    #[serde(default)]
     pub operation_modifier: OperationModifier,
 }
 
@@ -100,6 +104,8 @@ impl StrategyState {
             seed: data.config.battle_seed,
             round_limit: data.mission.round_limit,
             materials_reward: data.mission.materials_reward,
+            biomass_reward: data.mission.biomass_reward,
+            power_reward: data.mission.power_reward,
             operation_modifier: data.mission.operation_modifier,
         };
         Self {
@@ -207,6 +213,8 @@ impl StrategyState {
                 } else {
                     0
                 },
+            biomass_reward: instance.biomass_reward,
+            power_reward: instance.power_reward,
             operation_modifier: instance.operation_modifier,
             cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
                 10
@@ -367,6 +375,8 @@ impl StrategyState {
                 seed: self.rng.next_u64(),
                 round_limit: 8,
                 materials_reward: 18,
+                biomass_reward: 0,
+                power_reward: 0,
                 operation_modifier: OperationModifier::DirectorateFireControl,
             };
             self.selected_mission_id = defense.id.clone();
@@ -433,6 +443,8 @@ impl StrategyState {
             seed,
             round_limit: template.round_limit,
             materials_reward: template.materials_reward,
+            biomass_reward: template.biomass_reward,
+            power_reward: template.power_reward,
             operation_modifier,
         }
     }
@@ -465,6 +477,8 @@ mod tests {
             colonists_incapacitated: Vec::new(),
             hostiles_neutralised: 3,
             materials_awarded: 30,
+            biomass_awarded: 0,
+            power_awarded: 0,
         };
         a.resolve_mission(&outcome, &mission, &data);
         b.resolve_mission(&outcome, &mission, &data);
@@ -483,6 +497,8 @@ mod tests {
             colonists_incapacitated: Vec::new(),
             hostiles_neutralised: 3,
             materials_awarded: 30,
+            biomass_awarded: 0,
+            power_awarded: 0,
         };
         for _ in 0..3 {
             let mission = strategy.selected_mission().unwrap().clone();

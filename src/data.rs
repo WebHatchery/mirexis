@@ -38,6 +38,10 @@ pub struct MissionDef {
     pub round_limit: u32,
     pub materials_reward: i32,
     #[serde(default)]
+    pub biomass_reward: i32,
+    #[serde(default)]
+    pub power_reward: i32,
+    #[serde(default)]
     pub operation_modifier: OperationModifier,
     #[serde(default = "default_cover_integrity")]
     pub cover_integrity: i32,
@@ -246,6 +250,10 @@ pub struct MissionTemplateDef {
     pub faction: String,
     pub map_recipe: String,
     pub materials_reward: i32,
+    #[serde(default)]
+    pub biomass_reward: i32,
+    #[serde(default)]
+    pub power_reward: i32,
     pub round_limit: u32,
 }
 

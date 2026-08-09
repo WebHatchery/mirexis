@@ -39,6 +39,8 @@ pub struct MissionOutcome {
     pub colonists_incapacitated: Vec<CharacterConsequence>,
     pub hostiles_neutralised: usize,
     pub materials_awarded: i32,
+    pub biomass_awarded: i32,
+    pub power_awarded: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -370,6 +372,16 @@ impl GameSession {
                 .count(),
             materials_awarded: if self.tactical.objective_state == ObjectiveState::Victory {
                 mission.materials_reward
+            } else {
+                0
+            },
+            biomass_awarded: if self.tactical.objective_state == ObjectiveState::Victory {
+                mission.biomass_reward
+            } else {
+                0
+            },
+            power_awarded: if self.tactical.objective_state == ObjectiveState::Victory {
+                mission.power_reward
             } else {
                 0
             },
@@ -1208,5 +1220,7 @@ mod tests {
         assert_eq!(outcome.colonists_deployed, 4);
         assert_eq!(outcome.colonists_incapacitated[0].id, "ilya_reed");
         assert_eq!(outcome.materials_awarded, data.mission.materials_reward);
+        assert_eq!(outcome.biomass_awarded, data.mission.biomass_reward);
+        assert_eq!(outcome.power_awarded, data.mission.power_reward);
     }
 }

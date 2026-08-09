@@ -27,7 +27,7 @@ The completed roadmap slice includes:
   and a defense map generated from the saved layout
 - Directorate, Brood, and Ascendant attention; a telegraphed assault; persistent
   research doctrines and character-event legacies; seeded mission generation; and
-  faction-pressure battlefield modifiers
+  faction-pressure battlefield modifiers with materials, biomass, and power recovery
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

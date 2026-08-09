@@ -7,6 +7,8 @@
   "hostile_faction": "brood",
   "round_limit": 8,
   "materials_reward": 30,
+  "biomass_reward": 4,
+  "power_reward": 0,
   "seed": 1296651091,
   "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]],
   "objective_tile": [10, 4],

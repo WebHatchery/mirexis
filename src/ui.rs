@@ -191,6 +191,27 @@ pub fn draw_mission_briefing(
         );
     }
     draw_ui_text_ex(
+        "MISSION RECOVERY",
+        880.0,
+        238.0,
+        TextStyle::new(15.0, dark::ACCENT).params(),
+    );
+    for (index, line) in [
+        format!("{} MATERIALS", mission.materials_reward),
+        format!("{} BIOMASS", mission.biomass_reward),
+        format!("{} POWER", mission.power_reward),
+    ]
+    .iter()
+    .enumerate()
+    {
+        draw_ui_text_ex(
+            line,
+            880.0,
+            262.0 + index as f32 * 22.0,
+            TextStyle::new(15.0, dark::TEXT_DIM).params(),
+        );
+    }
+    draw_ui_text_ex(
         &format!(
             "DEPLOYMENT // {}/{} SELECTED",
             campaign.selected_squad_count(),
@@ -307,7 +328,10 @@ pub fn draw_debrief(
         ),
         injuries,
         format!("Hostiles neutralised: {}", outcome.hostiles_neutralised),
-        format!("Materials recovered: {}", outcome.materials_awarded),
+        format!(
+            "Recovered: {} materials · {} biomass · {} power",
+            outcome.materials_awarded, outcome.biomass_awarded, outcome.power_awarded
+        ),
     ];
     for (index, line) in report.iter().enumerate() {
         draw_text(line, 280.0, 305.0 + index as f32 * 30.0, 21.0, dark::TEXT);
