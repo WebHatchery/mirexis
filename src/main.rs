@@ -14,6 +14,7 @@ mod class_actions;
 mod class_training;
 mod colony;
 mod colony_ui;
+mod combat_feedback;
 mod cover_actions;
 mod cover_ui;
 mod danger_rating;

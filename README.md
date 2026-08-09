@@ -44,6 +44,8 @@ The completed roadmap slice includes:
   pressure in both deployment intelligence and the live tactical objective panel
 - orange on-grid insertion markers during the round before a queued hostile wave arrives,
   pairing exact preferred tiles with the live round warning
+- short-lived on-unit combat callouts for damage, healing, and newly applied statuses,
+  derived from ordered battle events without entering tactical saves
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

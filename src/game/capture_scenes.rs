@@ -73,6 +73,7 @@ impl Game {
                 self.session.end_player_phase(&self.data.config);
                 self.show_battle_log = true;
             }
+            "combat_feedback" => self.capture_combat_feedback(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,
@@ -166,7 +167,7 @@ impl Game {
         }
     }
 
-    fn reset_capture_session(&mut self, state: AppState) {
+    pub(super) fn reset_capture_session(&mut self, state: AppState) {
         self.session = GameSession::new(
             &self.data.config,
             &self.active_mission,

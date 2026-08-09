@@ -1,11 +1,34 @@
 //! Deterministic tactical mechanic showcase scenes.
 
-use super::Game;
+use super::{AppState, Game};
 use crate::data::{OperationModifier, Team};
-use crate::state::{Command, TacticalPhase};
+use crate::state::{BattleEvent, Command, StatusKind, TacticalPhase};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_combat_feedback(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.combat_feedback.record_for(
+            &[
+                BattleEvent::DamageApplied {
+                    target_id: "kira_voss".to_owned(),
+                    amount: 3,
+                    remaining: 6,
+                },
+                BattleEvent::UnitHealed {
+                    unit_id: "mara_venn".to_owned(),
+                    amount: 2,
+                    remaining: 12,
+                },
+                BattleEvent::StatusApplied {
+                    unit_id: "ilya_reed".to_owned(),
+                    status: StatusKind::Guarded,
+                },
+            ],
+            100.0,
+        );
+    }
+
     pub(super) fn capture_enemy_ability(&mut self, template_id: &str, faction: &str, seed: u64) {
         self.capture_template_operation(template_id, seed, OperationModifier::None);
         let colonist = self

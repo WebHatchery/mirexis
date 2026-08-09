@@ -5,6 +5,7 @@ mod capture_tactical;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;
+use crate::combat_feedback::CombatFeedback;
 use crate::data::{GameData, MissionDef};
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, MissionOutcome, SaveData};
@@ -58,6 +59,8 @@ pub struct Game {
     targeting: Option<TacticalTargeting>,
     show_tactical_help: bool,
     show_battle_log: bool,
+    combat_feedback: CombatFeedback,
+    observed_event_count: usize,
 }
 
 impl Game {
@@ -100,11 +103,14 @@ impl Game {
             targeting: None,
             show_tactical_help: false,
             show_battle_log: false,
+            combat_feedback: CombatFeedback::default(),
+            observed_event_count: 0,
         }
     }
 
     pub fn update(&mut self, dt: f32) {
         self.notifications.update(dt);
+        self.combat_feedback.update(dt);
         let input = InputState::capture();
         match self.state {
             AppState::Title => {
@@ -176,6 +182,10 @@ impl Game {
         for action in actions {
             self.apply_action(action);
         }
+        self.combat_feedback.sync(
+            (self.state == AppState::Tactical).then_some(&self.session.tactical.event_log),
+            &mut self.observed_event_count,
+        );
     }
 
     pub fn draw(&mut self) {
@@ -197,6 +207,7 @@ impl Game {
                 &virtual_ui,
             ),
             AppState::Tactical => ui::draw_tactical(UiContext {
+                feedback: &self.combat_feedback,
                 data: &self.data,
                 mission: &self.active_mission,
                 session: &self.session,

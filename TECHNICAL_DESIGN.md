@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.44.0
+Save/content version: 1.45.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -69,6 +69,7 @@ Important transition payloads:
 | `action_preview.rs` | Read-only validated movement and attack consequence projection | State mutation or drawing |
 | `action_preview_ui.rs` | Hover/keyboard tactical command preview banner | Command execution |
 | `battle_log_ui.rs` | Command-blocking recent ordered-event history panel | Simulation mutation |
+| `combat_feedback.rs` | Bounded transient damage, healing, and status callouts | Simulation mutation or persistence |
 | `briefing_intel_ui.rs` | Materialized contract, hostile, ability, and hazard briefing summary | Mission generation |
 | `briefing_loadout_ui.rs` | Selected colonist derived combat/loadout summary in briefing | Campaign mutation |
 | `danger_rating.rs` | Deterministic shared offer/briefing danger score and bands | Save state or rendering |
@@ -610,6 +611,7 @@ Migration coverage:
 | 1.41.0 | No new fields; danger ratings derive from mission definitions and realized geometry |
 | 1.42.0 | No new fields; forecasts derive from mission rules and serialized reinforcement queues |
 | 1.43.0 | No new fields; entry markers read the existing queued unit positions one round early |
+| 1.44.0 | No new fields; transient combat feedback derives from newly appended battle events |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -647,7 +649,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`, `combat_feedback`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -661,8 +663,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (140 domain/migration tests plus the shared source-size gate)
-- deterministic seventy-scene capture with visual inspection
+- `cargo test` (141 domain/migration tests plus the shared source-size gate)
+- deterministic seventy-one-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -718,5 +720,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is transient combat feedback for damage, healing, and
-new statuses, making fast phase resolution readable directly on affected battlefield units.
+The recommended next vertical slice is explicit hostile-phase pacing, stepping enemy
+activations through brief visual beats while preserving deterministic command resolution.

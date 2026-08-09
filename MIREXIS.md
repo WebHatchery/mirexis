@@ -432,6 +432,11 @@ During the round immediately before arrival, each queued unit's preferred insert
 is outlined in orange and names the arrival round. These markers sit beneath battlefield
 units, remain read-only, and disappear when the wave deploys or its warning window passes.
 
+New damage, healing, and status events also produce short-lived callouts over the affected
+battlefield unit. Red loss, green recovery, and amber status labels remain visible long
+enough to read after a fast hostile phase, while a bounded presentation queue prevents old
+events from accumulating or changing deterministic combat and save state.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

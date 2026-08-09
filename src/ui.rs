@@ -58,6 +58,7 @@ pub enum TargetingView<'a> {
 }
 
 pub struct UiContext<'a> {
+    pub feedback: &'a crate::combat_feedback::CombatFeedback,
     pub data: &'a GameData,
     pub mission: &'a MissionDef,
     pub session: &'a GameSession,
@@ -457,6 +458,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             targetable,
         );
     }
+    ctx.feedback.draw(ctx.session, view);
     crate::action_preview_ui::draw(
         ctx.session,
         view.tile_at(mouse)
