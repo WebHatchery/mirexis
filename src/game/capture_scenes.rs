@@ -74,6 +74,7 @@ impl Game {
                 self.show_battle_log = true;
             }
             "combat_feedback" => self.capture_combat_feedback(),
+            "phase_replay" => self.capture_phase_replay(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,

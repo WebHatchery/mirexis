@@ -6,6 +6,31 @@ use crate::state::{BattleEvent, Command, StatusKind, TacticalPhase};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_phase_replay(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.phase_replay.hold_for_capture(&[
+            BattleEvent::EnemyAbilityActivated {
+                unit_id: "brood_stalker_a".to_owned(),
+                ability: "Predatory Surge".to_owned(),
+            },
+            BattleEvent::UnitMoved {
+                unit_id: "brood_stalker_a".to_owned(),
+                path: vec![TilePos::new(9, 2), TilePos::new(8, 2)],
+                cost: 2,
+            },
+            BattleEvent::AttackRolled {
+                attacker_id: "brood_stalker_b".to_owned(),
+                target_id: "kira_voss".to_owned(),
+                roll: 41,
+                hit_chance: 64,
+            },
+            BattleEvent::PhaseStarted {
+                phase: TacticalPhase::Player,
+                round: 2,
+            },
+        ]);
+    }
+
     pub(super) fn capture_combat_feedback(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.combat_feedback.record_for(

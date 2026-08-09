@@ -437,6 +437,11 @@ battlefield unit. Red loss, green recovery, and amber status labels remain visib
 enough to read after a fast hostile phase, while a bounded presentation queue prevents old
 events from accumulating or changing deterministic combat and save state.
 
+Ending the colony phase still resolves hostile simulation atomically, but important enemy
+events then play through a short presentation queue. Movement, attacks, reactions, faction
+abilities, reinforcements, incapacitations, and the phase handoff each receive a readable
+beat while commands are paused; Space or Escape skips the remaining playback immediately.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

@@ -2,12 +2,14 @@
 
 mod capture_scenes;
 mod capture_tactical;
+mod input;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;
 use crate::combat_feedback::CombatFeedback;
 use crate::data::{GameData, MissionDef};
 use crate::persistence::migrate_save_value;
+use crate::phase_replay::PhaseReplay;
 use crate::state::{GameSession, MissionOutcome, SaveData};
 use crate::ui::{self, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
@@ -20,7 +22,7 @@ use macroquad_toolkit::persistence::{
     delete_slot, load_from_slot_with_migration, save_to_slot_with_version, slot_exists,
     AutoSaveManager,
 };
-use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
+use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AppState {
@@ -61,6 +63,7 @@ pub struct Game {
     show_battle_log: bool,
     combat_feedback: CombatFeedback,
     observed_event_count: usize,
+    phase_replay: PhaseReplay,
 }
 
 impl Game {
@@ -105,77 +108,16 @@ impl Game {
             show_battle_log: false,
             combat_feedback: CombatFeedback::default(),
             observed_event_count: 0,
+            phase_replay: PhaseReplay::default(),
         }
     }
 
     pub fn update(&mut self, dt: f32) {
         self.notifications.update(dt);
         self.combat_feedback.update(dt);
-        let input = InputState::capture();
-        match self.state {
-            AppState::Title => {
-                if input.space_pressed || is_key_pressed(KeyCode::Enter) {
-                    self.events.push(UiAction::StartMission);
-                }
-            }
-            AppState::Colony => {
-                if input.escape_pressed {
-                    self.events.push(UiAction::ReturnToTitle);
-                }
-            }
-            AppState::Roster | AppState::GeneLab => {
-                if input.escape_pressed {
-                    self.events.push(UiAction::ReturnToColony);
-                }
-            }
-            AppState::MissionBriefing => {
-                if input.escape_pressed {
-                    self.events.push(UiAction::ReturnToColony);
-                }
-                if input.space_pressed || is_key_pressed(KeyCode::Enter) {
-                    self.events.push(UiAction::DeployMission);
-                }
-            }
-            AppState::Tactical => {
-                if input.escape_pressed {
-                    self.events.push(if self.show_tactical_help {
-                        UiAction::ToggleTacticalHelp
-                    } else if self.show_battle_log {
-                        UiAction::ToggleBattleLog
-                    } else if self.targeting.is_some() {
-                        UiAction::CancelTargeting
-                    } else {
-                        UiAction::ReturnToTitle
-                    });
-                }
-                if is_key_pressed(KeyCode::H) {
-                    self.events.push(UiAction::ToggleTacticalHelp);
-                }
-                if is_key_pressed(KeyCode::B) {
-                    self.events.push(UiAction::ToggleBattleLog);
-                }
-                if !self.show_tactical_help && !self.show_battle_log {
-                    if is_key_pressed(KeyCode::S) {
-                        self.events.push(UiAction::Save);
-                    }
-                    if is_key_pressed(KeyCode::L) {
-                        self.events.push(UiAction::Load);
-                    }
-                    if is_key_pressed(KeyCode::Enter) {
-                        self.events.push(UiAction::EndPhase);
-                    }
-                    if self.targeting.is_none() {
-                        if let Some((dx, dy)) = ui::tile_move_from_keys() {
-                            self.session.move_selection(dx, dy);
-                        }
-                    }
-                }
-            }
-            AppState::Debrief => {
-                if input.space_pressed || is_key_pressed(KeyCode::Enter) {
-                    self.events.push(UiAction::ReturnToColony);
-                }
-            }
+        self.phase_replay.update(dt);
+        if self.capture_input() {
+            return;
         }
 
         let actions: Vec<_> = self.events.drain().collect();
@@ -208,6 +150,7 @@ impl Game {
             ),
             AppState::Tactical => ui::draw_tactical(UiContext {
                 feedback: &self.combat_feedback,
+                phase_replay: &self.phase_replay,
                 data: &self.data,
                 mission: &self.active_mission,
                 session: &self.session,
@@ -628,7 +571,10 @@ impl Game {
             }
             UiAction::EndPhase => {
                 self.targeting = None;
+                let first_event = self.session.tactical.event_log.len();
                 self.session.end_player_phase(&self.data.config);
+                self.phase_replay
+                    .start(&self.session.tactical.event_log[first_event..]);
                 self.notifications.info(format!(
                     "Enemy activity resolved — round {}",
                     self.session.tactical.round

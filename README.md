@@ -46,6 +46,8 @@ The completed roadmap slice includes:
   pairing exact preferred tiles with the live round warning
 - short-lived on-unit combat callouts for damage, healing, and newly applied statuses,
   derived from ordered battle events without entering tactical saves
+- a bounded, skippable hostile-activity replay that pauses tactical input and presents
+  important enemy movements, attacks, abilities, reinforcements, and phase handoff in beats
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

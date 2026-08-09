@@ -59,6 +59,7 @@ pub enum TargetingView<'a> {
 
 pub struct UiContext<'a> {
     pub feedback: &'a crate::combat_feedback::CombatFeedback,
+    pub phase_replay: &'a crate::phase_replay::PhaseReplay,
     pub data: &'a GameData,
     pub mission: &'a MissionDef,
     pub session: &'a GameSession,
@@ -289,6 +290,10 @@ pub fn draw_tactical(ctx: UiContext<'_>) -> Vec<UiAction> {
     } else if ctx.show_battle_log {
         actions.clear();
         crate::battle_log_ui::draw(ctx.session, mouse, &mut actions);
+    }
+    if ctx.phase_replay.is_active() {
+        actions.clear();
+        ctx.phase_replay.draw();
     }
     actions
 }
