@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.42.0
+Save/content version: 1.43.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -83,7 +83,7 @@ Important transition payloads:
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
-| `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
+| `reinforcements.rs` | Holdout wave construction, placement, deployment, and read-only forecasts | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
 | `class_training.rs` | Training costs, advanced-class gates, switching, and class-definition validation | UI state |
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
@@ -99,7 +99,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
-| `objective_ui.rs` | Objective-specific tactical progress summaries | Objective mutation |
+| `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |
 | `phase_refresh.rs` | Team AP, regeneration, temporary-stat, and per-phase-use reset | Command validation or drawing |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
@@ -607,6 +607,7 @@ Migration coverage:
 | 1.39.0 | No save fields; briefing threat intel derives from materialized mission data |
 | 1.40.0 | No new fields; briefing loadouts derive from persistent colonist records |
 | 1.41.0 | No new fields; danger ratings derive from mission definitions and realized geometry |
+| 1.42.0 | No new fields; forecasts derive from mission rules and serialized reinforcement queues |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -658,7 +659,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (138 domain/migration tests plus the shared source-size gate)
+- `cargo test` (139 domain/migration tests plus the shared source-size gate)
 - deterministic sixty-nine-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -715,5 +716,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is reinforcement-wave forecasting in briefings and
-the tactical objective panel, exposing arrival rounds, likely roles, and entry pressure.
+The recommended next vertical slice is on-grid reinforcement entry telegraphing during the
+round before arrival, turning forecasted east-edge pressure into an exact tactical warning.

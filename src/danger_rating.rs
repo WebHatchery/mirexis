@@ -96,7 +96,7 @@ fn rate(
     };
     let reinforcement_pressure = matches!(
         objective,
-        ObjectiveKind::Holdout | ObjectiveKind::SignalTrace | ObjectiveKind::DefendAsset
+        ObjectiveKind::Holdout | ObjectiveKind::SignalTrace
     ) as u8
         * 2;
     let deadline_pressure = match round_limit {

@@ -423,6 +423,11 @@ the band and exact score. Hostile strength, multiple enemy powers, reinforcement
 contracts, short deadlines, battlefield hazards, and escalation modifiers all raise the
 same shared rating, so risk can be compared before committing to deployment.
 
+Holdout and signal-trace briefings forecast reinforcement rounds, likely roles, and their
+east-edge approach. Once deployed, the objective panel reads the serialized wave queue and
+keeps the next arrival visible until it enters, so surviving a timed contract involves
+planning for the second line rather than discovering it after ending a phase.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

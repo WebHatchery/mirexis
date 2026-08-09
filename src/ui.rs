@@ -526,25 +526,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         TextStyle::new(17.0, dark::TEXT),
     );
     let x = panel.x + 18.0;
-    draw_ui_text_ex(
-        &format!(
-            "OBJECTIVE // {}",
-            crate::objective_ui::progress(ctx.session, ctx.mission)
-        ),
-        x,
-        panel.y + 78.0,
-        TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
-    );
-    draw_text_block(
-        &ctx.mission.objective,
-        x,
-        panel.y + 92.0,
-        panel.w - 36.0,
-        60.0,
-        17.0,
-        4.0,
-        dark::TEXT_DIM,
-    );
+    crate::objective_ui::draw_summary(ctx.session, ctx.mission, x, panel);
     let selected = ctx.session.selected_unit();
     if !crate::enemy_intent_ui::draw_inspector(
         ctx.session,

@@ -17,8 +17,8 @@ pub(crate) fn draw(data: &GameData, mission: &MissionDef, origin: Vec2) {
         draw_text_ex(
             line,
             origin.x,
-            origin.y + 24.0 + index as f32 * 20.0,
-            TextStyle::new(13.0, dark::TEXT_DIM).params(),
+            origin.y + 24.0 + index as f32 * 17.0,
+            TextStyle::new(12.5, dark::TEXT_DIM).params(),
         );
     }
 }
@@ -77,6 +77,10 @@ fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
         } else {
             format!("HAZARDS // {}", hazards)
         },
+        crate::reinforcements::briefing_forecast(data, mission).map_or_else(
+            || "WAVES // NONE".to_owned(),
+            |wave| format!("WAVES // {}", wave),
+        ),
     ]
 }
 
