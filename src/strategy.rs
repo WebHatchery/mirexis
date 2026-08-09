@@ -109,6 +109,10 @@ pub struct StrategyState {
     pub adaptation_operation_completed: bool,
     #[serde(default)]
     pub adaptation_complete: bool,
+    #[serde(default)]
+    pub escalation_operation_completed: bool,
+    #[serde(default)]
+    pub escalation_response_id: String,
     rng: SeededRng,
 }
 
@@ -180,6 +184,8 @@ impl StrategyState {
             contact_complete: false,
             adaptation_operation_completed: false,
             adaptation_complete: false,
+            escalation_operation_completed: false,
+            escalation_response_id: String::new(),
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -217,7 +223,7 @@ impl StrategyState {
             .find(|recipe| recipe.id == instance.map_recipe);
         let layout =
             recipe.map(|recipe| crate::map_variants::materialize(recipe, data, instance.seed));
-        let contact_bonus = self.contact_reward_bonus(data);
+        let strategic_bonus = self.strategic_reward_bonus(data);
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
@@ -232,9 +238,9 @@ impl StrategyState {
                 } else {
                     0
                 }
-                + contact_bonus.0,
-            biomass_reward: instance.biomass_reward + contact_bonus.1,
-            power_reward: instance.power_reward + contact_bonus.2,
+                + strategic_bonus.0,
+            biomass_reward: instance.biomass_reward + strategic_bonus.1,
+            power_reward: instance.power_reward + strategic_bonus.2,
             operation_modifier: instance.operation_modifier,
             cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
                 10
@@ -317,6 +323,15 @@ impl StrategyState {
                 .is_some_and(|template| template.required_phase == "adaptation")
             {
                 self.adaptation_operation_completed = true;
+            }
+            if data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.id == mission.template_id)
+                .is_some_and(|template| template.required_phase == "escalation")
+            {
+                self.escalation_operation_completed = true;
             }
         }
         if let Some(faction) = self
@@ -467,8 +482,51 @@ impl StrategyState {
         true
     }
 
-    fn contact_reward_bonus(&self, data: &GameData) -> (i32, i32, i32) {
-        data.campaign
+    pub fn choose_escalation_response(
+        &mut self,
+        response_id: &str,
+        colony: &mut ColonyState,
+        data: &GameData,
+    ) -> Result<String, String> {
+        if !self.escalation_operation_completed {
+            return Err("Escalation responses unlock after Three Knives".to_owned());
+        }
+        if !self.escalation_response_id.is_empty() {
+            return Err("The colony has already answered the convergence".to_owned());
+        }
+        let response = data
+            .campaign
+            .escalation_responses
+            .iter()
+            .find(|response| response.id == response_id)
+            .ok_or_else(|| format!("Unknown Escalation response: {}", response_id))?;
+        if colony.resources.materials < response.materials_cost
+            || colony.resources.biomass < response.biomass_cost
+            || colony.resources.power < response.power_cost
+        {
+            return Err(format!(
+                "{} requires {} materials, {} biomass, and {} power",
+                response.name, response.materials_cost, response.biomass_cost, response.power_cost
+            ));
+        }
+        colony.resources.materials -= response.materials_cost;
+        colony.resources.biomass -= response.biomass_cost;
+        colony.resources.power -= response.power_cost;
+        for faction in &mut self.factions {
+            faction.attention = (faction.attention + response.attention_change_all).clamp(0, 100);
+        }
+        for threat in &mut self.threats {
+            threat.operations_until = threat
+                .operations_until
+                .saturating_add(response.threat_delay);
+        }
+        self.escalation_response_id = response.id.clone();
+        Ok(response.name.clone())
+    }
+
+    fn strategic_reward_bonus(&self, data: &GameData) -> (i32, i32, i32) {
+        let contact = data
+            .campaign
             .contact_protocols
             .iter()
             .find(|protocol| protocol.id == self.contact_protocol_id)
@@ -478,7 +536,14 @@ impl StrategyState {
                     protocol.biomass_bonus,
                     protocol.power_bonus,
                 )
-            })
+            });
+        let escalation_materials = data
+            .campaign
+            .escalation_responses
+            .iter()
+            .find(|response| response.id == self.escalation_response_id)
+            .map_or(0, |response| response.materials_bonus);
+        (contact.0 + escalation_materials, contact.1, contact.2)
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
@@ -1031,6 +1096,69 @@ mod tests {
             strategy.mission_offers[0].operation_modifier,
             OperationModifier::EscalationCrossfire
         );
+        let mission = strategy.mission_offers[0].clone();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: mission.materials_reward,
+            biomass_awarded: mission.biomass_reward,
+            power_awarded: mission.power_reward,
+        };
+        strategy.resolve_mission(&outcome, &mission, &data);
+        assert!(strategy.escalation_operation_completed);
+    }
+
+    #[test]
+    fn escalation_responses_trade_distinct_resources_for_distinct_strategy_effects() {
+        let data = GameData::load().unwrap();
+
+        let mut bastion = StrategyState::new(&data);
+        let mut colony = ColonyState::new();
+        assert!(bastion
+            .choose_escalation_response("bastion_beacon", &mut colony, &data)
+            .is_err());
+        bastion.escalation_operation_completed = true;
+        let materials_before = colony.resources.materials;
+        let threat_before = bastion.threats[0].operations_until;
+        bastion
+            .choose_escalation_response("bastion_beacon", &mut colony, &data)
+            .unwrap();
+        assert_eq!(colony.resources.materials, materials_before - 30);
+        assert_eq!(bastion.threats[0].operations_until, threat_before + 2);
+
+        let mut decoy = StrategyState::new(&data);
+        let mut colony = ColonyState::new();
+        decoy.escalation_operation_completed = true;
+        colony.resources.biomass = 20;
+        let attention_before = decoy.factions[0].attention;
+        decoy
+            .choose_escalation_response("living_decoy", &mut colony, &data)
+            .unwrap();
+        assert_eq!(colony.resources.biomass, 12);
+        assert_eq!(decoy.factions[0].attention, attention_before - 8);
+
+        let mut lattice = StrategyState::new(&data);
+        let mut colony = ColonyState::new();
+        lattice.escalation_operation_completed = true;
+        lattice.phase_id = "escalation".to_owned();
+        lattice.regenerate_missions(&data);
+        let base_reward = lattice.selected_mission().unwrap().materials_reward;
+        let power_before = colony.resources.power;
+        lattice
+            .choose_escalation_response("weaponized_lattice", &mut colony, &data)
+            .unwrap();
+        assert_eq!(colony.resources.power, power_before - 4);
+        assert_eq!(
+            lattice
+                .materialize_selected(&data, &colony)
+                .materials_reward,
+            base_reward + 8
+        );
+        assert!(lattice
+            .choose_escalation_response("living_decoy", &mut colony, &data)
+            .is_err());
     }
 
     #[test]

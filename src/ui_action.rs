@@ -10,6 +10,7 @@ pub enum UiAction {
     SelectMission(String),
     CompleteResearch(String),
     ChooseContactProtocol(String),
+    ChooseEscalationResponse(String),
     ChooseMutationEvolution(String, String),
     ResolveCharacterEvent,
     DeployMission,

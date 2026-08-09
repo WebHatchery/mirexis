@@ -22,6 +22,7 @@ impl Game {
             "sol_evolution" => self.capture_sol_evolution(),
             "escalation" => self.capture_escalation(),
             "escalation_operation" => self.capture_escalation_operation(),
+            "escalation_response" => self.capture_escalation_response(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -226,6 +227,15 @@ impl Game {
             .strategy
             .materialize_selected(&self.data, &self.campaign.colony);
         self.reset_capture_session(AppState::MissionBriefing);
+    }
+
+    fn capture_escalation_response(&mut self) {
+        self.capture_escalation();
+        self.campaign.strategy.escalation_operation_completed = true;
+        self.campaign.colony.resources.materials = 60;
+        self.campaign.colony.resources.biomass = 20;
+        self.campaign.colony.resources.power = 8;
+        self.state = AppState::Colony;
     }
 
     fn capture_adaptation_operation(&mut self) {

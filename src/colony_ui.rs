@@ -248,7 +248,20 @@ fn draw_operations(
         .iter()
         .any(|research| research.completed);
     let phase_progress = if campaign.strategy.adaptation_complete {
-        "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
+        if !campaign.strategy.escalation_operation_completed {
+            "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
+        } else {
+            data.campaign
+                .escalation_responses
+                .iter()
+                .find(|response| response.id == campaign.strategy.escalation_response_id)
+                .map_or_else(
+                    || "ESCALATION // THREE KNIVES WON // RESPONSE REQUIRED".to_owned(),
+                    |response| {
+                        format!("ESCALATION // RESPONSE // {}", response.name.to_uppercase())
+                    },
+                )
+        }
     } else if campaign.strategy.contact_complete {
         let (operation, evolved, lab) = campaign.adaptation_completion_progress();
         format!(
@@ -387,6 +400,8 @@ fn draw_operations(
     }
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
+    let choosing_escalation = campaign.strategy.escalation_operation_completed
+        && campaign.strategy.escalation_response_id.is_empty();
     let evolution_pending = campaign.strategy.contact_complete
         && campaign.roster.iter().any(|character| {
             character.mutation_evolution_id.is_empty()
@@ -418,6 +433,42 @@ fn draw_operations(
                 mouse,
             ) {
                 actions.push(UiAction::ChooseContactProtocol(protocol.id.clone()));
+            }
+        }
+    } else if choosing_escalation {
+        draw_ui_text_ex(
+            "CONVERGENCE CAPTURED // CHOOSE ONE RESPONSE",
+            878.0,
+            514.0,
+            TextStyle::new(11.0, dark::ACCENT).params(),
+        );
+        for (index, response) in data.campaign.escalation_responses.iter().enumerate() {
+            let effect = if response.threat_delay > 0 {
+                format!(
+                    "{} MAT // DELAY ASSAULT +{}",
+                    response.materials_cost, response.threat_delay
+                )
+            } else if response.attention_change_all < 0 {
+                format!(
+                    "{} BIOMASS // ATTENTION {}",
+                    response.biomass_cost, response.attention_change_all
+                )
+            } else {
+                format!(
+                    "{} POWER // +{} MAT / ATTENTION +{}",
+                    response.power_cost, response.materials_bonus, response.attention_change_all
+                )
+            };
+            let affordable = campaign.colony.resources.materials >= response.materials_cost
+                && campaign.colony.resources.biomass >= response.biomass_cost
+                && campaign.colony.resources.power >= response.power_cost;
+            if colony_button(
+                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
+                &format!("{} // {}", response.name.to_uppercase(), effect),
+                affordable,
+                mouse,
+            ) {
+                actions.push(UiAction::ChooseEscalationResponse(response.id.clone()));
             }
         }
     } else if evolution_pending {
@@ -462,7 +513,7 @@ fn draw_operations(
             draw_character_event(campaign, data, event, mouse, actions);
         }
     }
-    if !choosing_contact && !evolution_pending {
+    if !choosing_contact && !choosing_escalation && !evolution_pending {
         draw_ui_text_ex(
             "ACTIVE DOCTRINES",
             878.0,

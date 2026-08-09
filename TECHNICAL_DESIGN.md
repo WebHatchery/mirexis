@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Four — Escalation crossfire operation
-Save/content version: 1.19.0
+Current campaign slice: Phase Four — Escalation convergence response
+Save/content version: 1.20.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -412,6 +412,14 @@ the three faction-specific modifiers. Its recovery includes materials, biomass, 
 power. Migrating an already transitioned 1.18 save regenerates offers so Phase Four is
 immediately playable.
 
+Winning Three Knives persists `escalation_operation_completed` and exposes one
+irreversible, data-backed convergence response in the colony hub. Bastion Beacon spends
+30 materials and adds two operations to active assault countdowns. Living Decoy spends
+8 biomass and removes 8 attention from every faction. Weaponized Lattice spends 4 power,
+adds 5 attention to every faction, and adds 8 materials to all later victorious mission
+recovery. The selected response ID is saved, the resource and pressure effects apply
+once, and the hub keeps the committed response visible afterward.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -485,6 +493,7 @@ Migration coverage:
 | 1.16.0 | Data-backed Elastic Musculature evolution paths for unevolved Sol saves |
 | 1.17.0 | Persistent Glass Nerve and Adaptation completion gates |
 | 1.18.0 | Phase-gated Escalation operation offers for transitioned campaigns |
+| 1.19.0 | Persistent Three Knives victory and convergence-response choice state |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -517,7 +526,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
@@ -533,8 +542,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (87 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-seven-scene capture with visual inspection
+- `cargo test` (89 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-eight-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -576,11 +585,11 @@ boundaries when continuing:
   first irreversible gift/complication evolution and its own scavenging operation;
   two evolved colonists and an operational Gene Lab complete Adaptation and enter
   Escalation. Three Knives makes that phase immediately playable with a compound
-  three-power pressure modifier; additional Escalation operations and later phases
-  remain future content.
+  three-power pressure modifier, and its convergence response creates the first
+  persistent Phase Four strategic tradeoff; additional Escalation operations and later
+  phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an Escalation strategic response to Three
-Knives, letting the colony choose how it exploits, contains, or redirects the open
-three-faction contest before the next operation.
+The recommended next vertical slice is a second Escalation operation whose faction,
+recovery, or assault pressure changes according to the committed convergence response.

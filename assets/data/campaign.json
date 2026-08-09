@@ -17,6 +17,11 @@
     { "id": "brood_cultivation", "name": "Brood Cultivation", "faction": "brood", "description": "A contained living culture adds 4 biomass to every successful operation.", "alien_components_cost": 2, "materials_bonus": 0, "biomass_bonus": 4, "power_bonus": 0 },
     { "id": "ascendant_capacitor", "name": "Ascendant Capacitor", "faction": "ascendants", "description": "A harmonic storage lattice adds 2 power to every successful operation.", "alien_components_cost": 2, "materials_bonus": 0, "biomass_bonus": 0, "power_bonus": 2 }
   ],
+  "escalation_responses": [
+    { "id": "bastion_beacon", "name": "Bastion Beacon", "description": "Spend 30 materials to armour the captured network and delay the next colony assault by two operations.", "materials_cost": 30, "biomass_cost": 0, "power_cost": 0, "attention_change_all": 0, "threat_delay": 2, "materials_bonus": 0 },
+    { "id": "living_decoy", "name": "Living Decoy", "description": "Spend 8 biomass to seed false colonies around the rift and reduce all three powers' attention by 8.", "materials_cost": 0, "biomass_cost": 8, "power_cost": 0, "attention_change_all": -8, "threat_delay": 0, "materials_bonus": 0 },
+    { "id": "weaponized_lattice", "name": "Weaponized Lattice", "description": "Spend 4 power to keep the targeting lattice active: later victories recover 8 materials, but every power gains 5 attention.", "materials_cost": 0, "biomass_cost": 0, "power_cost": 4, "attention_change_all": 5, "threat_delay": 0, "materials_bonus": 8 }
+  ],
   "events": [
     { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Spend 2 food to protect the isolated survey family; their route knowledge gives Sol +1 movement.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2, "legacy_name": "Survey Family Routes", "legacy_character_id": "sol_cairn", "legacy_stat": "movement", "legacy_amount": 1 },
     { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Document Mara's accelerating chitin growth; the treatment gives her +1 armour.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1, "legacy_name": "Documented Carapace", "legacy_character_id": "mara_venn", "legacy_stat": "armour", "legacy_amount": 1 },

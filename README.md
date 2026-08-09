@@ -64,6 +64,9 @@ The completed roadmap slice includes:
 - an Escalation-only Three Knives holdout on a contested-rift battlefield, where a
   forced three-power crossfire makes hostiles faster and more accurate while disrupting
   colonist accuracy
+- a post-victory Escalation response: spend materials to delay the next assault, spend
+  biomass to misdirect every faction, or spend power to trade higher attention for
+  recurring material recovery
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -102,5 +105,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the first Escalation operation, and the texture manifest. `GameData::load()`
+content through the first Escalation strategy decision, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.
