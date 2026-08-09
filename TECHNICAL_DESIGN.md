@@ -262,6 +262,12 @@ advances when an operation resolves; it never depends on wall-clock time.
 objectives from completed buildings. An expired assault materializes those values
 into the tactical mission, so colony placement and defense geometry share one source.
 
+A failed colony-defense outcome deterministically damages one saved operational
+facility, falling back to other structures only when every facility is already down.
+Damaged Barracks, Infirmary, and Workshop buildings stop satisfying their gameplay
+gates. The layout marks damage and its material cost directly; clicking the building
+repairs it and autosaves the restored facility.
+
 ## 8. Phase One Strategy Contract
 
 `StrategyState` owns Phase One: Isolation:
@@ -337,7 +343,7 @@ saves include it. Textures, UI layout, derived deployment stats, path caches, an
 derived defense maps are never serialized.
 
 Autosaves occur at new-colony creation, colony entry, mission selection, construction,
-training, treatment, crafting, research, character-event resolution, deployment, and
+training, treatment, crafting, repair, research, character-event resolution, deployment, and
 debrief completion. Manual tactical save/load remains available.
 
 Migration coverage:
@@ -386,7 +392,7 @@ Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
 translated into `UiAction` or tactical commands before simulation mutation. Tactical
 units use labels as well as faction color, and colony buildings use text labels.
 
-`scripts/capture_ui.ps1` captures `title`, `colony`, `research`, `roster`, `legacy`,
+`scripts/capture_ui.ps1` captures `title`, `colony`, `damage`, `research`, `roster`, `legacy`,
 `briefing`, `pressure`, `gameplay`, `extraction`, `variant`, `sporefield`, `vault`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
@@ -399,8 +405,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (52 domain/migration tests plus the shared source-size gate)
-- deterministic sixteen-scene capture with visual inspection
+- `cargo test` (54 domain/migration tests plus the shared source-size gate)
+- deterministic seventeen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -432,7 +438,7 @@ boundaries when continuing:
 - The six current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
-  building damage/repair, power demand, and free placement for every building remain.
+  power demand, facility construction, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
   equipment families need content beyond the starter roster screen.
 - Isolation is a repeatable Phase One loop. Story gates and Phases Two–Five remain

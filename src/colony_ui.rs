@@ -49,7 +49,7 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
     let panel = Rect::new(18.0, 96.0, 820.0, 580.0);
     draw_surface_with_title(
         panel,
-        Some("SETTLEMENT LAYOUT // CLICK AN EMPTY PLOT TO PLAN A BARRICADE"),
+        Some("SETTLEMENT LAYOUT // PLAN BARRICADES · CLICK DAMAGED BUILDINGS TO REPAIR"),
         &SurfaceStyle::new(Color::new(0.035, 0.052, 0.062, 0.98))
             .with_border(1.0, Color::new(0.19, 0.40, 0.40, 0.9))
             .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
@@ -75,7 +75,10 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
                 .construction_queue
                 .iter()
                 .find(|project| project.position == [x, y]);
-            let fill = if building.is_some() {
+            let damaged = building.is_some_and(|building| building.damaged);
+            let fill = if damaged {
+                Color::new(0.34, 0.10, 0.10, 1.0)
+            } else if building.is_some() {
                 Color::new(0.10, 0.30, 0.26, 1.0)
             } else if project.is_some() {
                 Color::new(0.36, 0.27, 0.10, 1.0)
@@ -86,10 +89,29 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
             };
             draw_surface(
                 rect,
-                &SurfaceStyle::new(fill).with_border(1.0, Color::new(0.18, 0.38, 0.36, 0.8)),
+                &SurfaceStyle::new(fill).with_border(
+                    1.0,
+                    if damaged {
+                        dark::NEGATIVE
+                    } else {
+                        Color::new(0.18, 0.38, 0.36, 0.8)
+                    },
+                ),
             );
             if let Some(building) = building {
                 draw_building_label(rect, building.kind.name());
+                if building.damaged {
+                    draw_text(
+                        format!("REPAIR {} MAT", building.kind.repair_cost()),
+                        rect.x + 7.0,
+                        rect.y + 66.0,
+                        10.0,
+                        dark::NEGATIVE,
+                    );
+                    if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
+                        actions.push(UiAction::RepairBuilding(building.id.clone()));
+                    }
+                }
             } else if let Some(project) = project {
                 draw_building_label(rect, &format!("{}\nPLANNED", project.kind.name()));
             } else if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {

@@ -203,6 +203,9 @@ impl CampaignState {
         self.colony.resources.materials += outcome.materials_awarded;
         self.colony.resources.biomass += outcome.biomass_awarded;
         self.colony.resources.power += outcome.power_awarded;
+        if mission.map_recipe == "colony_defense" && outcome.result == ObjectiveState::Failed {
+            self.colony.damage_for_failed_defense(mission.seed);
+        }
         self.strategy.resolve_mission(outcome, mission, data);
         let xp = if outcome.result == ObjectiveState::Victory {
             20
@@ -761,6 +764,29 @@ mod tests {
         assert_eq!(campaign.colony.resources.materials, before.materials + 7);
         assert_eq!(campaign.colony.resources.biomass, before.biomass + 5);
         assert_eq!(campaign.colony.resources.power, before.power + 3);
+    }
+
+    #[test]
+    fn failed_colony_defense_damages_a_saved_facility() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let mut mission = campaign.strategy.selected_mission().unwrap().clone();
+        mission.map_recipe = "colony_defense".to_owned();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Failed,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 0,
+            materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
+        };
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert!(campaign
+            .colony
+            .buildings
+            .iter()
+            .any(|building| building.damaged));
     }
 
     #[test]

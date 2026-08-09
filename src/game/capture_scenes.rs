@@ -26,6 +26,7 @@ impl Game {
                 5,
                 OperationModifier::AscendantInterference,
             ),
+            "damage" => self.capture_colony_damage(),
             "extraction" => self.capture_extraction(),
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
@@ -111,6 +112,17 @@ impl Game {
         self.active_mission.terrain_costs = layout.terrain_costs;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
+    }
+
+    fn capture_colony_damage(&mut self) {
+        self.campaign
+            .colony
+            .buildings
+            .iter_mut()
+            .find(|building| building.id == "workshop")
+            .expect("capture colony has a workshop")
+            .damaged = true;
+        self.state = AppState::Colony;
     }
 
     fn capture_equipment_target(&mut self) {

@@ -26,7 +26,8 @@ The completed roadmap slice includes:
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,
-  and a defense map generated from the saved layout
+  a defense map generated from the saved layout, and repairable facility damage after
+  failed colony defenses
 - Directorate, Brood, and Ascendant attention; a telegraphed assault; persistent
   research doctrines and character-event legacies; seeded mission generation; and
   faction-pressure battlefield modifiers with materials, biomass, and power recovery

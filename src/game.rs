@@ -328,6 +328,16 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::RepairBuilding(building_id) => {
+                match self.campaign.colony.repair_building(&building_id) {
+                    Ok((name, cost)) => {
+                        self.notifications
+                            .success(format!("{} repaired for {} materials", name, cost));
+                        self.autosave_campaign_only("Colony repair autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::TrainSelected(class_id) => {
                 let character_id = self.campaign.selected_character_id.clone();
                 match self

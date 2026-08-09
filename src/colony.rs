@@ -36,6 +36,14 @@ impl BuildingKind {
             _ => 0,
         }
     }
+
+    pub fn repair_cost(self) -> i32 {
+        match self {
+            Self::Barricade => 10,
+            Self::CommandCentre => 35,
+            _ => 25,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -159,6 +167,53 @@ impl ColonyState {
             }));
     }
 
+    pub fn damage_for_failed_defense(&mut self, seed: u64) -> Option<String> {
+        let mut candidates = self
+            .buildings
+            .iter()
+            .enumerate()
+            .filter(|(_, building)| {
+                !building.damaged
+                    && !matches!(
+                        building.kind,
+                        BuildingKind::CommandCentre | BuildingKind::Barricade
+                    )
+            })
+            .map(|(index, _)| index)
+            .collect::<Vec<_>>();
+        if candidates.is_empty() {
+            candidates = self
+                .buildings
+                .iter()
+                .enumerate()
+                .filter(|(_, building)| !building.damaged)
+                .map(|(index, _)| index)
+                .collect();
+        }
+        let index = *candidates.get(seed as usize % candidates.len().max(1))?;
+        let building = &mut self.buildings[index];
+        building.damaged = true;
+        Some(building.kind.name().to_owned())
+    }
+
+    pub fn repair_building(&mut self, building_id: &str) -> Result<(String, i32), String> {
+        let building = self
+            .buildings
+            .iter_mut()
+            .find(|building| building.id == building_id)
+            .ok_or_else(|| format!("Unknown colony building: {}", building_id))?;
+        if !building.damaged {
+            return Err(format!("{} does not need repair", building.kind.name()));
+        }
+        let cost = building.kind.repair_cost();
+        if self.resources.materials < cost {
+            return Err(format!("Repair requires {} materials", cost));
+        }
+        self.resources.materials -= cost;
+        building.damaged = false;
+        Ok((building.kind.name().to_owned(), cost))
+    }
+
     pub fn defense_map(&self) -> ColonyDefenseMap {
         let mut blocked_tiles = Vec::new();
         let mut cover_tiles = Vec::new();
@@ -233,5 +288,23 @@ mod tests {
         let map = colony.defense_map();
         assert!(map.cover_tiles.contains(&TilePos::new(3, 2)));
         assert!(map.critical_objectives.contains(&TilePos::new(5, 3)));
+    }
+
+    #[test]
+    fn failed_defense_damage_disables_a_facility_until_repaired() {
+        let mut colony = ColonyState::new();
+        let name = colony.damage_for_failed_defense(1).unwrap();
+        let damaged = colony
+            .buildings
+            .iter()
+            .find(|building| building.kind.name() == name)
+            .unwrap();
+        let kind = damaged.kind;
+        let id = damaged.id.clone();
+        assert!(!colony.has_facility(kind));
+        let materials = colony.resources.materials;
+        let (_, cost) = colony.repair_building(&id).unwrap();
+        assert_eq!(colony.resources.materials, materials - cost);
+        assert!(colony.has_facility(kind));
     }
 }

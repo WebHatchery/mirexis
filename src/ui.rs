@@ -30,6 +30,7 @@ pub enum UiAction {
     TrainSelected(String),
     CraftSelected(String),
     ConstructBarricade([i32; 2]),
+    RepairBuilding(String),
     TreatInjury,
     SelectTile(TilePos),
     MoveSelected(TilePos),
