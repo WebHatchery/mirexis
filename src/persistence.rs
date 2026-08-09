@@ -68,6 +68,22 @@ pub fn migrate_save_value(
             .map(|character| character.id.clone())
             .unwrap_or_default();
     }
+    if detected_version.as_deref() != Some(data.config.version.as_str()) {
+        if let Some(tactical) = &mut save.tactical {
+            for unit in &mut tactical.units {
+                if unit.equipment_ids.is_empty() {
+                    if let Some(character) = save
+                        .campaign
+                        .roster
+                        .iter()
+                        .find(|character| character.id == unit.id)
+                    {
+                        unit.equipment_ids = character.equipment_ids.clone();
+                    }
+                }
+            }
+        }
+    }
     save.version = data.config.version.clone();
     Ok(save)
 }
@@ -184,7 +200,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -221,7 +237,7 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 
@@ -245,7 +261,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
         let tactical = migrated.tactical.as_ref().unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert!(!tactical.units[0].mutation_gift_used);
         assert_eq!(tactical.units[0].temporary_armour, 0);
     }
@@ -267,7 +283,7 @@ mod tests {
             mission.as_object_mut().unwrap().remove("objective_kind");
         }
         let migrated = migrate_save_value(Some("0.6.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert_eq!(
             migrated.tactical.unwrap().objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
@@ -291,7 +307,7 @@ mod tests {
             unit.remove("statuses");
         }
         let migrated = migrate_save_value(Some("0.8.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         let kira = migrated
             .tactical
             .unwrap()
@@ -315,7 +331,7 @@ mod tests {
             .unwrap()
             .remove("reinforcement_waves");
         let migrated = migrate_save_value(Some("0.9.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert!(migrated.tactical.unwrap().reinforcement_waves.is_empty());
     }
 
@@ -332,7 +348,7 @@ mod tests {
                 .remove("deployment_selected");
         }
         let migrated = migrate_save_value(Some("1.0.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert_eq!(
             migrated
                 .campaign
@@ -355,7 +371,32 @@ mod tests {
             .unwrap()
             .remove("selected_character_id");
         let migrated = migrate_save_value(Some("1.1.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert_eq!(migrated.campaign.selected_character_id, "kira_voss");
+    }
+
+    #[test]
+    fn roster_save_gains_tactical_equipment_actions() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let roster = campaign.deployment_roster(&data, &data.mission);
+        let session = GameSession::new(&data.config, &data.mission, &roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.2.0", &campaign)).unwrap();
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            let unit = unit.as_object_mut().unwrap();
+            unit.remove("equipment_ids");
+            unit.remove("used_equipment_ids");
+        }
+        let migrated = migrate_save_value(Some("1.2.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "1.3.0");
+        let kira = migrated
+            .tactical
+            .unwrap()
+            .units
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap();
+        assert!(kira.equipment_ids.contains(&"survey_harness".to_owned()));
+        assert!(kira.used_equipment_ids.is_empty());
     }
 }

@@ -37,6 +37,9 @@ pub enum UiAction {
     InteractObjective,
     ActivateMutation,
     ActivateClassAction,
+    ArmEquipment(String),
+    CancelEquipmentTargeting,
+    UseEquipmentOn(String),
     EndPhase,
     Save,
     Load,
@@ -50,6 +53,8 @@ pub struct UiContext<'a> {
     pub save_exists: bool,
     pub loaded_assets: usize,
     pub ui: &'a VirtualUi,
+    pub equipment_user: Option<&'a str>,
+    pub targeted_equipment: Option<&'a str>,
 }
 
 pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiAction> {
@@ -408,14 +413,37 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         }
     }
     for unit in &ctx.session.tactical.units {
+        let targetable =
+            ctx.equipment_user
+                .zip(ctx.targeted_equipment)
+                .is_some_and(|(user, equipment)| {
+                    ctx.session.can_use_equipment(user, equipment, &unit.id)
+                });
         draw_unit(
             view,
             unit,
             ctx.session.tactical.selected_unit.as_deref() == Some(&unit.id),
+            targetable,
         );
     }
     if is_mouse_button_released(MouseButton::Left) {
         if let Some(tile) = view.tile_at(mouse) {
+            if let Some((user, equipment)) = ctx.equipment_user.zip(ctx.targeted_equipment) {
+                let target = ctx
+                    .session
+                    .tactical
+                    .units
+                    .iter()
+                    .find(|unit| unit.position == tile);
+                if let Some(target) = target
+                    .filter(|target| ctx.session.can_use_equipment(user, equipment, &target.id))
+                {
+                    actions.push(UiAction::UseEquipmentOn(target.id.clone()));
+                } else {
+                    actions.push(UiAction::CancelEquipmentTargeting);
+                }
+                return;
+            }
             let hostile = ctx
                 .session
                 .tactical
@@ -434,7 +462,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
 }
 
-fn draw_unit(view: GridView, unit: &UnitState, selected: bool) {
+fn draw_unit(view: GridView, unit: &UnitState, selected: bool, targetable: bool) {
     let rect = view.tile_rect(unit.position);
     let color = match unit.team {
         Team::Colony => Color::new(0.22, 0.75, 0.63, 1.0),
@@ -458,6 +486,16 @@ fn draw_unit(view: GridView, unit: &UnitState, selected: bool) {
             Color::new(0.04, 0.08, 0.08, 1.0)
         },
     );
+    if targetable {
+        draw_rectangle_lines(
+            rect.x + 5.0,
+            rect.y + 5.0,
+            rect.w - 10.0,
+            rect.h - 10.0,
+            3.0,
+            Color::new(0.95, 0.74, 0.24, 1.0),
+        );
+    }
     let initials = unit
         .name
         .split_whitespace()
@@ -571,7 +609,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         "Symbiotic Organism" => "FEEDING FRENZY",
         _ => "MUTATION GIFT",
     });
-    let action_width = (panel.w - 44.0) * 0.5;
+    let action_width = (panel.w - 52.0) / 3.0;
     if button(
         Rect::new(x, panel.bottom() - 144.0, action_width, 38.0),
         mutation_label,
@@ -596,6 +634,18 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     ) {
         actions.push(UiAction::ActivateClassAction);
     }
+    crate::equipment_ui::draw_action_button(
+        ctx,
+        selected,
+        Rect::new(
+            x + (action_width + 8.0) * 2.0,
+            panel.bottom() - 144.0,
+            action_width,
+            38.0,
+        ),
+        mouse,
+        actions,
+    );
     if button(
         Rect::new(x, panel.bottom() - 100.0, panel.w - 36.0, 44.0),
         "END COLONY PHASE",

@@ -8,6 +8,8 @@ mod class_actions;
 mod colony;
 mod colony_ui;
 mod data;
+mod equipment_actions;
+mod equipment_ui;
 mod game;
 mod grid_ui;
 mod persistence;

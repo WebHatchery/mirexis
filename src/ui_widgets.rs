@@ -18,6 +18,11 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
         BattleEvent::MutationActivated { gift, .. } => gift.clone(),
         BattleEvent::ClassActionActivated { action, .. } => action.clone(),
+        BattleEvent::EquipmentUsed {
+            equipment_id,
+            target_id,
+            ..
+        } => format!("{} used on {}", equipment_id, target_id),
         BattleEvent::StatusApplied { status, .. } => format!("{:?} status applied", status),
         BattleEvent::ReinforcementsArrived { count, .. } => {
             format!("{} hostile reinforcements arrived", count)

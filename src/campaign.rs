@@ -409,6 +409,7 @@ fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
 
 fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
     let mut unit = base.clone();
+    unit.equipment_ids = character.equipment_ids.clone();
     let class = data
         .classes
         .iter()

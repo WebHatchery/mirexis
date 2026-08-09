@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.2.0
+Save/content version: 1.3.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -73,6 +73,7 @@ Important transition payloads:
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
 | `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
+| `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
@@ -82,6 +83,7 @@ Important transition payloads:
 | `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
+| `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
 multi-objective logic that would push it toward the source limit.
@@ -93,6 +95,8 @@ multi-objective logic that would push it toward the source limit.
 `TacticalState` owns the grid, occupancy, terrain costs, edge cover, units, phase,
 round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
 commands are move, attack, interact, activate mutation, and activate class action.
+Carried field equipment also grants validated target commands whose per-mission use is
+serialized with the unit.
 Ending a phase is a session operation that resolves timed statuses, runs hostile
 commands, and advances the round.
 
@@ -173,6 +177,12 @@ Defender braces through the hostile phase; Scout converts Surge into action poin
 movement; Medic dresses the squad's worst wound; Engineer launches an armour-ignoring
 shock drone; Psionic disrupts the nearest hostile; and Biotech grants short-lived squad
 regeneration. Class identity is carried into `UnitState` rather than inferred from text.
+
+The Field Medkit restores five vitality to a chosen wounded colonist within three
+tiles. The Field Toolkit grants Guarded to a chosen nearby colonist, and the Survey
+Harness applies Disrupted to a chosen hostile within six tiles. Each costs one action
+point and may be used once per mission. Arming an item highlights only targets accepted
+by the same command validator used at execution time.
 
 Focused, Guarded, Quickened, Disrupted, Hindered, and Regenerating are serialized timed statuses.
 Their modifiers feed the same effective-stat methods used by command validation,
@@ -297,6 +307,7 @@ Migration coverage:
 | 0.9.0 | Serialized holdout reinforcement queue |
 | 1.0.0 | Persistent deployment selection, normalized to the three-colonist limit |
 | 1.1.0 | Persistent roster-screen character selection |
+| 1.2.0 | Tactical equipment identity and once-per-mission item usage |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -328,7 +339,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
-and `debrief` by default. `Game::begin_capture_scene()` seeds each scene deterministically.
+`equipment`, and `debrief` by default. `Game::begin_capture_scene()` seeds each scene
+deterministically, including a valid equipment target for the targeting-mode reference.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -337,8 +349,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (38 domain/migration tests plus the shared source-size gate)
-- deterministic six-scene capture with visual inspection
+- `cargo test` (40 domain/migration tests plus the shared source-size gate)
+- deterministic seven-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -365,8 +377,9 @@ boundaries when continuing:
 
 - Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
   beyond the three implemented objective types.
-- Elevation, destructible cover, player-targeted abilities, items, long-lived injuries
-  as tactical statuses, reactions, and animation/audio consumers are not yet implemented.
+- Elevation, destructible cover, additional player-targeted class abilities, long-lived
+  injuries as tactical statuses, reactions, and animation/audio consumers are not yet
+  implemented.
 - The three current map recipes are fixed authored layouts. Procedural variation,
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
@@ -378,6 +391,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is player-targeted abilities and equipment actions,
-followed by destructible cover. Those additions should deepen squad identity and map
-interaction without requiring a strategic rewrite.
+The recommended next vertical slice is destructible cover, followed by explicitly
+targeted class abilities. Those additions should deepen map interaction and squad
+identity without requiring a strategic rewrite.

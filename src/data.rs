@@ -95,6 +95,8 @@ pub struct UnitDef {
     pub team: Team,
     #[serde(default)]
     pub faction: Option<String>,
+    #[serde(default)]
+    pub equipment_ids: Vec<String>,
     pub position: [i32; 2],
     pub max_health: i32,
     pub move_range: u8,

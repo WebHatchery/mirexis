@@ -160,6 +160,11 @@ impl GameSession {
             Command::ActivateClassAction { unit_id } => {
                 crate::class_actions::validate(self, unit_id)
             }
+            Command::UseEquipment {
+                unit_id,
+                equipment_id,
+                target_id,
+            } => crate::equipment_actions::validate(self, unit_id, equipment_id, target_id),
         }
     }
 
@@ -176,6 +181,11 @@ impl GameSession {
             Command::ActivateClassAction { unit_id } => {
                 crate::class_actions::execute(self, &unit_id)
             }
+            Command::UseEquipment {
+                unit_id,
+                equipment_id,
+                target_id,
+            } => crate::equipment_actions::execute(self, &unit_id, &equipment_id, &target_id),
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -274,6 +284,28 @@ impl GameSession {
                 unit_id: unit_id.clone(),
             })
             .is_ok()
+        })
+    }
+
+    pub fn can_use_equipment(&self, unit_id: &str, equipment_id: &str, target_id: &str) -> bool {
+        self.validate(&Command::UseEquipment {
+            unit_id: unit_id.to_owned(),
+            equipment_id: equipment_id.to_owned(),
+            target_id: target_id.to_owned(),
+        })
+        .is_ok()
+    }
+
+    pub fn use_equipment(
+        &mut self,
+        unit_id: &str,
+        equipment_id: &str,
+        target_id: &str,
+    ) -> Result<Vec<BattleEvent>, RuleError> {
+        self.execute(Command::UseEquipment {
+            unit_id: unit_id.to_owned(),
+            equipment_id: equipment_id.to_owned(),
+            target_id: target_id.to_owned(),
         })
     }
 
@@ -1081,7 +1113,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "1.2.0");
+        assert_eq!(migrated.version, "1.3.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

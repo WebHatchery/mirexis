@@ -50,6 +50,8 @@ pub struct UnitState {
     pub role: String,
     #[serde(default)]
     pub class_id: String,
+    #[serde(default)]
+    pub equipment_ids: Vec<String>,
     pub mutation: String,
     pub team: Team,
     pub position: TilePos,
@@ -77,6 +79,8 @@ pub struct UnitState {
     #[serde(default)]
     pub class_action_used: bool,
     #[serde(default)]
+    pub used_equipment_ids: Vec<String>,
+    #[serde(default)]
     pub statuses: Vec<StatusEffect>,
 }
 
@@ -87,6 +91,7 @@ impl UnitState {
             name: def.name.clone(),
             role: def.role.clone(),
             class_id: def.class_id.clone(),
+            equipment_ids: def.equipment_ids.clone(),
             mutation: def.mutation.clone(),
             team: def.team,
             position: TilePos::new(def.position[0], def.position[1]),
@@ -107,6 +112,7 @@ impl UnitState {
             temporary_move_range: 0,
             temporary_weapon_damage: 0,
             class_action_used: false,
+            used_equipment_ids: Vec::new(),
             statuses: Vec::new(),
         }
     }
@@ -179,6 +185,11 @@ pub enum Command {
     ActivateClassAction {
         unit_id: String,
     },
+    UseEquipment {
+        unit_id: String,
+        equipment_id: String,
+        target_id: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -201,6 +212,7 @@ pub enum RuleError {
     ObjectiveUnavailable,
     MutationUnavailable,
     ClassActionUnavailable,
+    EquipmentUnavailable,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -234,6 +246,11 @@ pub enum BattleEvent {
     ClassActionActivated {
         unit_id: String,
         action: String,
+    },
+    EquipmentUsed {
+        unit_id: String,
+        equipment_id: String,
+        target_id: String,
     },
     StatusApplied {
         unit_id: String,
