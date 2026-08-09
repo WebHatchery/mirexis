@@ -96,6 +96,7 @@ pub enum ObjectiveKind {
     EliminateAll,
     Holdout,
     Extraction,
+    SignalTrace,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -262,6 +263,8 @@ pub struct MissionTemplateDef {
     pub objective_kind: ObjectiveKind,
     pub faction: String,
     pub map_recipe: String,
+    #[serde(default)]
+    pub required_protocol: String,
     pub materials_reward: i32,
     #[serde(default)]
     pub biomass_reward: i32,
@@ -428,6 +431,18 @@ impl GameData {
                 return Err(format!(
                     "Mission template {} references missing faction {}",
                     template.id, template.faction
+                ));
+            }
+            if !template.required_protocol.is_empty()
+                && !self
+                    .campaign
+                    .contact_protocols
+                    .iter()
+                    .any(|protocol| protocol.id == template.required_protocol)
+            {
+                return Err(format!(
+                    "Mission template {} references missing Contact protocol {}",
+                    template.id, template.required_protocol
                 ));
             }
             if !self
@@ -601,6 +616,6 @@ mod tests {
             .iter()
             .map(|mission| mission.objective_kind)
             .collect::<std::collections::HashSet<_>>();
-        assert_eq!(objective_kinds.len(), 4);
+        assert_eq!(objective_kinds.len(), 5);
     }
 }

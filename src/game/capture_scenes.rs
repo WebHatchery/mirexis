@@ -27,6 +27,22 @@ impl Game {
                 5,
                 OperationModifier::AscendantInterference,
             ),
+            "black_channel" => self.capture_template_operation(
+                "directorate_contact_trace",
+                8,
+                OperationModifier::DirectorateFireControl,
+            ),
+            "living_chorus" => self.capture_template_operation(
+                "brood_contact_trace",
+                10,
+                OperationModifier::BroodFrenzy,
+            ),
+            "open_circuit" => self.capture_template_operation(
+                "ascendant_contact_trace",
+                12,
+                OperationModifier::AscendantInterference,
+            ),
+            "trace_active" => self.capture_active_trace(),
             "damage" => self.capture_colony_damage(),
             "power" => self.capture_power_outage(),
             "construction" => self.capture_power_construction(),
@@ -107,10 +123,17 @@ impl Game {
         let layout = crate::map_variants::materialize(recipe, &self.data, seed);
         self.active_mission.id = format!("capture_{}", template.id);
         self.active_mission.name = template.name.clone();
-        self.active_mission.briefing = format!(
-            "Pressure intelligence confirms {} resistance.",
-            template.faction
-        );
+        self.active_mission.briefing = if template.required_protocol.is_empty() {
+            format!(
+                "Pressure intelligence confirms {} resistance.",
+                template.faction
+            )
+        } else {
+            format!(
+                "Contact intelligence confirms {} resistance.",
+                template.faction
+            )
+        };
         self.active_mission.objective = template.objective.clone();
         self.active_mission.objective_kind = template.objective_kind;
         self.active_mission.hostile_faction = template.faction.clone();
@@ -125,6 +148,31 @@ impl Game {
         self.active_mission.terrain_costs = layout.terrain_costs;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
+    }
+
+    fn capture_active_trace(&mut self) {
+        self.capture_template_operation(
+            "directorate_contact_trace",
+            8,
+            OperationModifier::DirectorateFireControl,
+        );
+        let relay = self.session.tactical.objective_tile;
+        let selected = self
+            .session
+            .tactical
+            .selected_unit
+            .clone()
+            .expect("capture trace has a selected colonist");
+        self.session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == selected)
+            .expect("selected capture colonist exists")
+            .position = TilePos::new(relay.x - 1, relay.y);
+        self.session
+            .interact_selected()
+            .expect("capture colonist activates relay");
     }
 
     fn capture_colony_damage(&mut self) {

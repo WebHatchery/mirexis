@@ -10,7 +10,10 @@ pub(crate) fn create_waves(
     mission: &MissionDef,
     units: &[UnitState],
 ) -> Vec<ReinforcementWave> {
-    if mission.objective_kind != ObjectiveKind::Holdout {
+    if !matches!(
+        mission.objective_kind,
+        ObjectiveKind::Holdout | ObjectiveKind::SignalTrace
+    ) {
         return Vec::new();
     }
     let templates = units

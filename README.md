@@ -12,10 +12,11 @@ The completed roadmap slice includes:
 - a title → colony → briefing → tactical → debrief campaign loop
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
-- secure-and-clear, elimination, holdout, and extraction objectives with live progress
+- secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
+  trace objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- six generated operation templates, including a Brood sporefield extraction and
-  an Ascendant fractured-vault purge
+- nine generated operation templates, including a Brood sporefield extraction, an
+  Ascendant fractured-vault purge, and three protocol-gated Contact signal traces
 - save-stable authored and vertically mirrored variants for every mission map family
 - seven class actions, explicit Medic/Engineer/Psionic targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
@@ -33,7 +34,8 @@ The completed roadmap slice includes:
 - a visible Isolation completion contract—three victories, one doctrine, and one
   repelled colony assault—that advances the persistent campaign into Contact
 - a mutually exclusive Contact protocol that spends recovered Alien Components on
-  Directorate material supply, Brood biomass cultivation, or Ascendant power recovery
+  Directorate material supply, Brood biomass cultivation, or Ascendant power recovery,
+  then unlocks that protocol's own Contact battlefield
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

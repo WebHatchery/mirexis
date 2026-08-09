@@ -323,7 +323,10 @@ impl GameSession {
         }
         self.tactical.round += 1;
         if self.tactical.round > self.tactical.round_limit && !self.battle_is_over() {
-            self.finish_battle(if self.tactical.objective_kind == ObjectiveKind::Holdout {
+            let timed_success = self.tactical.objective_kind == ObjectiveKind::Holdout
+                || (self.tactical.objective_kind == ObjectiveKind::SignalTrace
+                    && self.tactical.objective_state == ObjectiveState::Secured);
+            self.finish_battle(if timed_success {
                 ObjectiveState::Victory
             } else {
                 ObjectiveState::Failed
@@ -442,7 +445,7 @@ impl GameSession {
         let unit = self.active_unit_for_phase(unit_id)?;
         if !matches!(
             self.tactical.objective_kind,
-            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction
+            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction | ObjectiveKind::SignalTrace
         ) || self.tactical.objective_state != ObjectiveState::Active
             || manhattan(unit.position, self.tactical.objective_tile) > 1
         {
@@ -711,6 +714,13 @@ impl GameSession {
                 }
                 ObjectiveKind::Extraction
                     if self.tactical.objective_state == ObjectiveState::Secured =>
+                {
+                    Some(ObjectiveState::Victory)
+                }
+                ObjectiveKind::SignalTrace
+                    if self.tactical.objective_state == ObjectiveState::Secured
+                        && !hostiles_alive
+                        && self.tactical.reinforcement_waves.is_empty() =>
                 {
                     Some(ObjectiveState::Victory)
                 }
@@ -1046,6 +1056,48 @@ mod tests {
         }
         holdout.end_player_phase(&config);
         assert_eq!(holdout.tactical.objective_state, ObjectiveState::Victory);
+    }
+
+    #[test]
+    fn signal_trace_must_be_activated_before_the_squad_can_outlast_it() {
+        let (config, base) = session();
+        let mut failed = base.clone();
+        failed.tactical.objective_kind = ObjectiveKind::SignalTrace;
+        failed.tactical.round_limit = 1;
+        failed.end_player_phase(&config);
+        assert_eq!(failed.tactical.objective_state, ObjectiveState::Failed);
+
+        let mut traced = base;
+        traced.tactical.objective_kind = ObjectiveKind::SignalTrace;
+        traced.tactical.round_limit = 1;
+        let colonist_id = traced.tactical.selected_unit.clone().unwrap();
+        traced
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == colonist_id)
+            .unwrap()
+            .position = TilePos::new(
+            traced.tactical.objective_tile.x - 1,
+            traced.tactical.objective_tile.y,
+        );
+        for colonist in traced
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == Team::Colony)
+        {
+            colonist.health = 100;
+            colonist.max_health = 100;
+        }
+        traced
+            .execute(Command::Interact {
+                unit_id: colonist_id,
+            })
+            .unwrap();
+        assert_eq!(traced.tactical.objective_state, ObjectiveState::Secured);
+        traced.end_player_phase(&config);
+        assert_eq!(traced.tactical.objective_state, ObjectiveState::Victory);
     }
 
     #[test]

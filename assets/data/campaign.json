@@ -27,7 +27,10 @@
     { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "map_recipe": "ascendant_ruin", "materials_reward": 24, "biomass_reward": 0, "power_reward": 2, "round_limit": 6 },
     { "id": "courier_extraction", "name": "ISOLATION: LAST TRANSMISSION", "objective": "Break through the Directorate cordon and get any colonist carrying the stolen coordinates to extraction.", "objective_kind": "extraction", "faction": "directorate", "map_recipe": "directorate_checkpoint", "materials_reward": 30, "biomass_reward": 0, "power_reward": 0, "round_limit": 6 },
     { "id": "sporefield_extraction", "name": "ISOLATION: RED HARVEST", "objective": "Carry a viable Brood culture through the sporefield and reach the marked extraction channel.", "objective_kind": "extraction", "faction": "brood", "map_recipe": "brood_sporefield", "materials_reward": 22, "biomass_reward": 8, "power_reward": 0, "round_limit": 6 },
-    { "id": "vault_purge", "name": "ISOLATION: SILENT CHOIR", "objective": "Eliminate every Ascendant echo inside the fractured vault before the harmonic field stabilises.", "objective_kind": "eliminate_all", "faction": "ascendants", "map_recipe": "ascendant_vault", "materials_reward": 22, "biomass_reward": 0, "power_reward": 3, "round_limit": 7 }
+    { "id": "vault_purge", "name": "ISOLATION: SILENT CHOIR", "objective": "Eliminate every Ascendant echo inside the fractured vault before the harmonic field stabilises.", "objective_kind": "eliminate_all", "faction": "ascendants", "map_recipe": "ascendant_vault", "materials_reward": 22, "biomass_reward": 0, "power_reward": 3, "round_limit": 7 },
+    { "id": "directorate_contact_trace", "name": "CONTACT: BLACK CHANNEL", "objective": "Reach the captured relay, activate the trace, and hold it through the Directorate counterattack.", "objective_kind": "signal_trace", "faction": "directorate", "map_recipe": "directorate_array", "required_protocol": "directorate_requisition", "materials_reward": 34, "biomass_reward": 0, "power_reward": 0, "round_limit": 5 },
+    { "id": "brood_contact_trace", "name": "CONTACT: LIVING CHORUS", "objective": "Bind the relay to the Brood synapse, then survive while it translates the colony's first answer.", "objective_kind": "signal_trace", "faction": "brood", "map_recipe": "brood_synapse", "required_protocol": "brood_cultivation", "materials_reward": 20, "biomass_reward": 10, "power_reward": 0, "round_limit": 5 },
+    { "id": "ascendant_contact_trace", "name": "CONTACT: OPEN CIRCUIT", "objective": "Wake the buried conduit and defend it until Mirexis resolves the Ascendant transmission.", "objective_kind": "signal_trace", "faction": "ascendants", "map_recipe": "ascendant_conduit", "required_protocol": "ascendant_capacitor", "materials_reward": 20, "biomass_reward": 0, "power_reward": 5, "round_limit": 5 }
   ],
   "map_recipes": [
     {
@@ -71,6 +74,27 @@
       "objective_tile": [8, 4],
       "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [4, 5], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [6, 4], "cost": 2 }, { "position": [9, 4], "cost": 2 }],
       "cover_edges": [{ "position": [6, 2], "direction": "south", "strength": 30 }, { "position": [8, 3], "direction": "east", "strength": 30 }, { "position": [9, 5], "direction": "west", "strength": 30 }]
+    },
+    {
+      "id": "directorate_array",
+      "blocked_tiles": [[4, 1], [4, 2], [4, 5], [4, 6], [6, 0], [6, 7], [8, 3], [8, 4]],
+      "objective_tile": [6, 3],
+      "terrain_costs": [{ "position": [5, 3], "cost": 2 }, { "position": [5, 4], "cost": 2 }, { "position": [7, 2], "cost": 2 }, { "position": [7, 5], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 2], "direction": "east", "strength": 25 }, { "position": [7, 4], "direction": "west", "strength": 25 }, { "position": [9, 5], "direction": "north", "strength": 25 }]
+    },
+    {
+      "id": "brood_synapse",
+      "blocked_tiles": [[3, 0], [3, 3], [3, 7], [5, 2], [5, 5], [7, 1], [7, 6], [9, 3], [9, 4]],
+      "objective_tile": [7, 4],
+      "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [4, 5], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [6, 4], "cost": 2 }, { "position": [8, 5], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 4], "direction": "east", "strength": 20 }, { "position": [6, 2], "direction": "south", "strength": 20 }, { "position": [8, 4], "direction": "west", "strength": 20 }]
+    },
+    {
+      "id": "ascendant_conduit",
+      "blocked_tiles": [[4, 1], [4, 6], [6, 2], [6, 5], [8, 0], [8, 3], [8, 7], [10, 3], [10, 6]],
+      "objective_tile": [6, 4],
+      "terrain_costs": [{ "position": [5, 2], "cost": 2 }, { "position": [5, 5], "cost": 2 }, { "position": [7, 3], "cost": 2 }, { "position": [7, 4], "cost": 2 }, { "position": [9, 2], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 4], "direction": "north", "strength": 30 }, { "position": [7, 2], "direction": "east", "strength": 30 }, { "position": [9, 4], "direction": "west", "strength": 30 }]
     }
   ]
 }

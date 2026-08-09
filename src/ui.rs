@@ -419,7 +419,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         }
         if matches!(
             ctx.mission.objective_kind,
-            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction
+            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction | ObjectiveKind::SignalTrace
         ) && position == ctx.session.tactical.objective_tile
             && ctx.session.tactical.objective_state == ObjectiveState::Active
         {
@@ -598,6 +598,12 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
         ObjectiveKind::Holdout => "HOLD THE PERIMETER",
         ObjectiveKind::Extraction => "EXTRACT COLONIST",
+        ObjectiveKind::SignalTrace
+            if ctx.session.tactical.objective_state != ObjectiveState::Active =>
+        {
+            "SIGNAL RELAY ACTIVE"
+        }
+        ObjectiveKind::SignalTrace => "ACTIVATE SIGNAL RELAY",
     };
     if button(
         Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
@@ -709,6 +715,20 @@ fn objective_progress(ctx: &UiContext<'_>) -> String {
             ObjectiveState::Failed => "EVACUATION FAILED".to_owned(),
             ObjectiveState::Secured => "EVACUATION CONFIRMED".to_owned(),
         },
+        ObjectiveKind::SignalTrace => match ctx.session.tactical.objective_state {
+            ObjectiveState::Active => format!("RELAY OFFLINE · {} HOSTILES", hostiles),
+            ObjectiveState::Secured => format!(
+                "TRACE {} ROUNDS · {} HOSTILES · {} WAVES",
+                ctx.mission
+                    .round_limit
+                    .saturating_sub(ctx.session.tactical.round)
+                    + 1,
+                hostiles,
+                ctx.session.tactical.reinforcement_waves.len()
+            ),
+            ObjectiveState::Victory => "CONTACT TRACE COMPLETE".to_owned(),
+            ObjectiveState::Failed => "CONTACT TRACE LOST".to_owned(),
+        },
     }
 }
 
@@ -738,7 +758,12 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     draw_ui_text_ex(
         &format!(
-            "Isolation campaign  //  {} assets  //  click a hostile to attack",
+            "{} campaign  //  {} assets  //  click a hostile to attack",
+            if ctx.mission.name.starts_with("CONTACT:") {
+                "Contact"
+            } else {
+                "Isolation"
+            },
             ctx.loaded_assets
         ),
         620.0,

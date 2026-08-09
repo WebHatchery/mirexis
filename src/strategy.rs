@@ -393,6 +393,7 @@ impl StrategyState {
         }
         colony.resources.alien_components -= protocol.alien_components_cost;
         self.contact_protocol_id = protocol.id.clone();
+        self.generate_missions(data);
         Ok(protocol.name.clone())
     }
 
@@ -470,9 +471,18 @@ impl StrategyState {
             .iter()
             .max_by_key(|faction| (faction.attention, faction.id.clone()))
             .map(|faction| faction.id.as_str());
-        let mut templates = data.campaign.mission_templates.iter().collect::<Vec<_>>();
+        let mut templates = data
+            .campaign
+            .mission_templates
+            .iter()
+            .filter(|template| {
+                template.required_protocol.is_empty()
+                    || template.required_protocol == self.contact_protocol_id
+            })
+            .collect::<Vec<_>>();
         templates.sort_by_key(|template| {
             (
+                template.required_protocol != self.contact_protocol_id,
                 template.faction.as_str() != highest_faction.unwrap_or(""),
                 template.id.clone(),
             )
@@ -480,8 +490,12 @@ impl StrategyState {
         if templates.len() > 1 {
             let rotate = self.rng.below(templates.len());
             templates.rotate_left(rotate);
-            templates
-                .sort_by_key(|template| template.faction.as_str() != highest_faction.unwrap_or(""));
+            templates.sort_by_key(|template| {
+                (
+                    template.required_protocol != self.contact_protocol_id,
+                    template.faction.as_str() != highest_faction.unwrap_or(""),
+                )
+            });
         }
         self.mission_offers = templates
             .into_iter()
@@ -514,10 +528,18 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: format!(
-                "Isolation intelligence identifies a {} operation beyond the floodlights.",
-                template.faction
-            ),
+            briefing: if template.required_protocol.is_empty() {
+                format!(
+                    "Isolation intelligence identifies a {} operation beyond the floodlights.",
+                    template.faction
+                )
+            } else {
+                format!(
+                    "The {} Contact protocol has exposed a signal route into this {} operation.",
+                    template.required_protocol.replace('_', " "),
+                    template.faction
+                )
+            },
             objective: template.objective.clone(),
             objective_kind: template.objective_kind,
             faction_id: template.faction.clone(),
@@ -616,11 +638,25 @@ mod tests {
             strategy.first_assault_repulsed = true;
             strategy.research[0].completed = true;
             assert!(strategy.refresh_isolation_completion(&mut colony));
-            let base = strategy.selected_mission().unwrap().clone();
             strategy
                 .choose_contact_protocol(protocol_id, &mut colony, &data)
                 .unwrap();
             assert_eq!(colony.resources.alien_components, 0);
+            let base = strategy.selected_mission().unwrap().clone();
+            assert_eq!(
+                base.template_id,
+                format!("{}_contact_trace", protocol_id.split('_').next().unwrap())
+            );
+            assert!(strategy.mission_offers.iter().all(|offer| {
+                data.campaign
+                    .mission_templates
+                    .iter()
+                    .find(|template| template.id == offer.template_id)
+                    .is_none_or(|template| {
+                        template.required_protocol.is_empty()
+                            || template.required_protocol == protocol_id
+                    })
+            }));
             assert!(strategy
                 .choose_contact_protocol(protocol_id, &mut colony, &data)
                 .is_err());

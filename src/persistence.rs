@@ -521,4 +521,37 @@ mod tests {
         assert!(migrated.campaign.strategy.contact_protocol_id.is_empty());
         assert_eq!(migrated.campaign.colony.resources.alien_components, 2);
     }
+
+    #[test]
+    fn protocol_save_preserves_its_contact_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        campaign
+            .strategy
+            .choose_contact_protocol("brood_cultivation", &mut campaign.colony, &data)
+            .unwrap();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.7.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.7.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(
+            migrated.campaign.strategy.contact_protocol_id,
+            "brood_cultivation"
+        );
+        assert_eq!(
+            migrated
+                .campaign
+                .strategy
+                .selected_mission()
+                .unwrap()
+                .template_id,
+            "brood_contact_trace"
+        );
+    }
 }

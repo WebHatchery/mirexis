@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase Two — Contact entry
-Save/content version: 1.7.0
+Save/content version: 1.8.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -146,7 +146,7 @@ integrity the cover and any attached directional edge are removed, emitting an o
 destruction event. Strategic colony structures are unchanged after the operation;
 persistent building damage remains a separate campaign concern.
 
-`ObjectiveKind` selects one of four victory contracts. `SecureAndClear` requires an
+`ObjectiveKind` selects one of five victory contracts. `SecureAndClear` requires an
 adjacent interaction followed by neutralizing all hostiles. `EliminateAll` resolves as
 soon as the last hostile falls. `Holdout` resolves when the squad survives beyond the
 round limit, or earlier if it neutralizes every attacker. Every contract still fails if
@@ -156,6 +156,11 @@ all colonists are incapacitated; non-holdout missions also fail at their deadlin
 spend one action point to end the operation immediately, even while hostiles remain.
 The shorter Directorate courier template uses this rule to turn movement, cover
 breaching, and defensive abilities into an alternate route to victory.
+
+`SignalTrace` is the first two-stage contract. The squad must reach and activate a
+relay, then survive through the round limit while deterministic waves reinforce the
+defenders. Reaching the deadline before activation fails; activating and outlasting it
+wins even with enemies present, while clearing every queued wave can finish early.
 
 ### 5.4 Enemy AI
 
@@ -168,7 +173,8 @@ suppression drones disrupt accuracy. Mission faction filters deployment to Brood
 Directorate riflemen and a suppression drone, or Ascendant sentinels and a rift
 warden; factions no longer borrow the authored Glassroot enemy squad.
 
-Holdout missions prebuild deterministic reinforcement waves for rounds three and five.
+Holdout and SignalTrace missions prebuild deterministic reinforcement waves for rounds
+three and five.
 Queued units are part of `TacticalState`, so saves preserve future pressure exactly.
 Arrival chooses the nearest valid edge tile, emits a battle event, and prevents an early
 elimination victory while waves remain. The sidebar reports pending waves.
@@ -321,14 +327,18 @@ stronger. This is the first escalation loop, not the full five-phase campaign.
 Isolation now has a persistent completion contract: win three operations, complete
 any research doctrine, and repel a colony-defense assault. Meeting all three gates
 advances the campaign header to Phase Two: Contact and grants two Alien Components
-once. The colony loop remains playable after the transition; Contact-specific
-operations, research, and story consequences are the next content layer.
+once. The colony loop remains playable after the transition and exposes the Contact
+protocol and operation layer described below.
 
 The first Contact decision spends those two components on one mutually exclusive,
 data-backed protocol. Directorate Requisition adds 10 materials, Brood Cultivation
 adds 4 biomass, or Ascendant Capacitor adds 2 power to every later successful
 operation. The chosen protocol is saved, cannot be replaced, and is applied while
 mission rewards are materialized so briefing and debrief values remain honest.
+
+Choosing a protocol regenerates the saved offer set with one guaranteed matching
+Contact operation. Black Channel, Living Chorus, and Open Circuit each use a distinct
+map family and the SignalTrace contract; non-matching Contact templates remain locked.
 
 ## 9. Content Registry
 
@@ -343,7 +353,7 @@ Current embedded files under `assets/data/` are:
 | `classes.json` | Class families and deployment modifiers |
 | `mutations.json` | Gift and complication hooks |
 | `equipment.json` | Starter equipment modifiers |
-| `campaign.json` | Isolation factions, research, events, mission and map recipes |
+| `campaign.json` | Isolation/Contact factions, protocols, research, events, missions, and maps |
 | `texture_manifest.json` | Runtime texture declarations |
 
 `GameData::load()` rejects duplicate IDs, missing character/class/mutation/equipment
@@ -391,6 +401,7 @@ Migration coverage:
 | 1.4.0 | Hydroponics, Power Plant, construction selection, and power-model rebasing |
 | 1.5.0 | Persistent Isolation victory, doctrine, and repelled-assault phase progress |
 | 1.6.0 | Persistent mutually exclusive Contact protocol choice |
+| 1.7.0 | Protocol-gated Contact offers and the SignalTrace objective contract |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -422,8 +433,9 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`, `extraction`,
-`variant`, `sporefield`, `vault`,
+`construction`, `research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`,
+`extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
+`open_circuit`, `trace_active`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
@@ -435,8 +447,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (62 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-scene capture with visual inspection
+- `cargo test` (64 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-four-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -461,21 +473,21 @@ project-standard publisher.
 The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
 boundaries when continuing:
 
-- Escort, defense-target integrity, and multi-stage mission contracts remain beyond the
-  four implemented objective types.
+- Escort, defense-target integrity, and additional multi-stage contracts remain beyond
+  the five implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The six current map recipes support authored and safe mirrored layouts. Additional
+- The nine current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades/Power Plants;
   population, other facility construction, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
   equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
-  state with one faction-flavoured economic protocol. Contact-specific story,
-  operations, relationships, and later phases remain future campaign content.
+  state with one faction-flavoured economic protocol and matching signal-trace
+  operation. Further Contact story, relationships, and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a Contact operation whose objective and
-faction consequence make the phase transition tactically and narratively distinct.
+The recommended next vertical slice is a persistent consequence for completing the
+first Contact trace, such as a faction relationship, recruit, or follow-up event.
