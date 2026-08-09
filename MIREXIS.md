@@ -462,6 +462,11 @@ actions that remain without requiring selection, while a colonist at zero action
 labelled `SPENT`; incapacitated units omit the readiness treatment because their existing
 state already explains why they cannot act.
 
+Every colony and hostile token carries a compact vitality bar whose colour shifts from
+green through amber to red as health falls. Combatants with armour also show an `A#` label
+for their current effective protection, including temporary and status-derived bonuses, so
+attrition and hard targets can be read across the grid without changing selection.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

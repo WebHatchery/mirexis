@@ -78,8 +78,43 @@ pub(crate) fn draw_unit(
         15.0,
         Color::new(0.03, 0.07, 0.07, 1.0),
     );
+    draw_vitality(rect, unit);
     if unit.team == Team::Colony && !unit.incapacitated {
         draw_readiness(rect, unit.action_points, max_action_points);
+    }
+}
+
+fn draw_vitality(rect: Rect, unit: &UnitState) {
+    let bar = Rect::new(rect.x + 8.0, rect.y + 3.0, rect.w - 16.0, 4.0);
+    let ratio = if unit.max_health > 0 {
+        (unit.health.max(0) as f32 / unit.max_health as f32).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    draw_rectangle(
+        bar.x,
+        bar.y,
+        bar.w,
+        bar.h,
+        Color::new(0.08, 0.12, 0.12, 1.0),
+    );
+    let health_color = if ratio > 0.6 {
+        Color::new(0.35, 0.82, 0.43, 1.0)
+    } else if ratio > 0.3 {
+        Color::new(0.96, 0.68, 0.24, 1.0)
+    } else {
+        Color::new(0.93, 0.28, 0.25, 1.0)
+    };
+    draw_rectangle(bar.x, bar.y, bar.w * ratio, bar.h, health_color);
+
+    let armour = unit.effective_armour().max(0);
+    if armour > 0 && !unit.incapacitated {
+        draw_text_ex(
+            format!("A{armour}"),
+            rect.x + 4.0,
+            rect.y + 17.0,
+            TextStyle::new(9.0, Color::new(0.48, 0.78, 1.0, 1.0)).params(),
+        );
     }
 }
 

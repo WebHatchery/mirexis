@@ -80,6 +80,7 @@ impl Game {
                 self.end_phase_armed = true;
             }
             "readiness_markers" => self.capture_readiness_markers(),
+            "vitality_markers" => self.capture_vitality_markers(),
             "line_formation" => self.capture_line_formation(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",

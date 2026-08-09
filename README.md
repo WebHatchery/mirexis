@@ -56,6 +56,8 @@ The completed roadmap slice includes:
   fully spent squad members and synchronizing both selected unit and grid focus
 - on-grid action-point pips for every active colonist, with an explicit `SPENT` marker
   when that unit can no longer act during the current colony phase
+- compact on-grid vitality bars for every combatant plus `A#` effective-armour labels,
+  exposing damage and defensive strength without changing the current selection
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses
