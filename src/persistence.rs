@@ -51,6 +51,16 @@ pub fn migrate_save_value(
         detected_version.as_deref() != Some(data.config.version.as_str()),
     );
     save.campaign.refresh_contact_completion(data);
+    if detected_version.as_deref() == Some("1.12.0")
+        && save.campaign.strategy.contact_complete
+        && save
+            .campaign
+            .roster
+            .iter()
+            .any(|character| !character.mutation_evolution_id.is_empty())
+    {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -662,5 +672,24 @@ mod tests {
             .roster
             .iter()
             .all(|character| character.mutation_evolution_id.is_empty()));
+    }
+
+    #[test]
+    fn evolution_save_gains_the_adaptation_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.roster[0].mutation_evolution_id = "expanded_cortex".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.12.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.12.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .any(|mission| mission.template_id == "adaptation_glass_nerve"));
     }
 }

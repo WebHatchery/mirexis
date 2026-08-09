@@ -549,12 +549,15 @@ impl StrategyState {
             .mission_templates
             .iter()
             .filter(|template| {
-                template.required_protocol.is_empty()
-                    || template.required_protocol == self.contact_protocol_id
+                (template.required_protocol.is_empty()
+                    || template.required_protocol == self.contact_protocol_id)
+                    && (template.required_phase.is_empty()
+                        || template.required_phase == self.phase_id)
             })
             .collect::<Vec<_>>();
         templates.sort_by_key(|template| {
             (
+                template.required_phase != self.phase_id,
                 template.required_protocol != self.contact_protocol_id,
                 template.faction.as_str() != highest_faction.unwrap_or(""),
                 template.id.clone(),
@@ -565,6 +568,7 @@ impl StrategyState {
             templates.rotate_left(rotate);
             templates.sort_by_key(|template| {
                 (
+                    template.required_phase != self.phase_id,
                     template.required_protocol != self.contact_protocol_id,
                     template.faction.as_str() != highest_faction.unwrap_or(""),
                 )
@@ -601,7 +605,12 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: if template.required_protocol.is_empty() {
+            briefing: if !template.required_phase.is_empty() {
+                format!(
+                    "Kira's evolved Neural Bloom has located a scavenging route through this {} site.",
+                    template.faction
+                )
+            } else if template.required_protocol.is_empty() {
                 format!(
                     "Isolation intelligence identifies a {} operation beyond the floodlights.",
                     template.faction
@@ -624,6 +633,10 @@ impl StrategyState {
             power_reward: template.power_reward,
             operation_modifier,
         }
+    }
+
+    pub fn regenerate_missions(&mut self, data: &GameData) {
+        self.generate_missions(data);
     }
 }
 
@@ -943,6 +956,23 @@ mod tests {
         assert_eq!(vault.objective_kind, ObjectiveKind::EliminateAll);
         assert_eq!(vault.power_reward, 3);
         assert_ne!(sporefield.map_recipe, vault.map_recipe);
+    }
+
+    #[test]
+    fn adaptation_operation_is_phase_gated_and_prioritized() {
+        let data = GameData::load().unwrap();
+        let mut strategy = StrategyState::new(&data);
+        strategy.regenerate_missions(&data);
+        assert!(strategy
+            .mission_offers
+            .iter()
+            .all(|mission| mission.template_id != "adaptation_glass_nerve"));
+        strategy.phase_id = "adaptation".to_owned();
+        strategy.regenerate_missions(&data);
+        assert_eq!(
+            strategy.mission_offers[0].template_id,
+            "adaptation_glass_nerve"
+        );
     }
 
     #[test]

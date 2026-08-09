@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — Adaptation mutation evolution
-Save/content version: 1.12.0
+Current campaign slice: Phase Three — Adaptation operations
+Save/content version: 1.13.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -360,6 +360,14 @@ the unlocked prototype is equipped on any colonist. These gates are visible in t
 colony hub. Meeting all three advances the saved header and summary to Phase Three:
 Adaptation once; the campaign sandbox remains available afterward.
 
+Choosing Kira's first mutation evolution regenerates the saved offer set with
+`ADAPTATION: GLASS NERVE` first. The phase-gated operation uses its own Ascendant
+cradle recipe and a six-round SecureAndClear contract: reach the regulator, interact
+with it, and eliminate all echoes. Its briefing makes Expanded Cortex's extra
+deployment-food burden visible, while either evolution changes Kira's derived combat
+stats. Migrating an already evolved 1.12 save regenerates its offers so the new
+operation cannot remain hidden behind serialized Contact-era content.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -373,7 +381,7 @@ Current embedded files under `assets/data/` are:
 | `classes.json` | Class families and deployment modifiers |
 | `mutations.json` | Gift and complication hooks |
 | `equipment.json` | Starter and protocol-gated Contact equipment modifiers |
-| `campaign.json` | Isolation/Contact factions, protocols, research, events, missions, and maps |
+| `campaign.json` | Isolation through Adaptation factions, protocols, research, events, missions, and maps |
 | `texture_manifest.json` | Runtime texture declarations |
 
 `GameData::load()` rejects duplicate IDs, missing character/class/mutation/equipment
@@ -426,6 +434,7 @@ Migration coverage:
 | 1.9.0 | Protocol-gated aftermath events with faction and character consequences |
 | 1.10.0 | Persistent Contact completion and Adaptation transition |
 | 1.11.0 | Persistent mutation evolution choice and derived gift/complication fields |
+| 1.12.0 | Phase-gated Adaptation operation offers for already evolved campaigns |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -457,7 +466,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `evolution`, `legacy`,
+`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `evolution`,
+`adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
@@ -472,8 +482,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (73 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-eight-scene capture with visual inspection
+- `cargo test` (75 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -502,7 +512,7 @@ boundaries when continuing:
   the five implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The nine current map recipes support authored and safe mirrored layouts. Additional
+- The ten current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades/Power Plants;
   population, other facility construction, and free placement for every building remain.
@@ -512,10 +522,12 @@ boundaries when continuing:
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
   Completing all three Contact gates advances into Adaptation. Neural Bloom has the
-  first irreversible gift/complication evolution; Adaptation-specific operations,
-  evolution options for the remaining mutations, and later phases remain future content.
+  first irreversible gift/complication evolution and its own scavenging operation;
+  more Adaptation operations, evolution options for the remaining mutations, and later
+  phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an Adaptation operation that puts the selected
-Neural Bloom evolution's tactical gift and strategic complication under visible pressure.
+The recommended next vertical slice is the Gene Lab: a visible colony facility that
+owns mutation research, stabilization, and future evolution access rather than leaving
+Adaptation choices in the generic operations panel.

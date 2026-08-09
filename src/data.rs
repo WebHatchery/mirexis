@@ -287,6 +287,8 @@ pub struct MissionTemplateDef {
     pub map_recipe: String,
     #[serde(default)]
     pub required_protocol: String,
+    #[serde(default)]
+    pub required_phase: String,
     pub materials_reward: i32,
     #[serde(default)]
     pub biomass_reward: i32,
@@ -492,6 +494,15 @@ impl GameData {
                 return Err(format!(
                     "Mission template {} references missing Contact protocol {}",
                     template.id, template.required_protocol
+                ));
+            }
+            if !template.required_phase.is_empty()
+                && !["isolation", "contact", "adaptation"]
+                    .contains(&template.required_phase.as_str())
+            {
+                return Err(format!(
+                    "Mission template {} references unknown phase {}",
+                    template.id, template.required_phase
                 ));
             }
             if !self

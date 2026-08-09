@@ -526,6 +526,7 @@ impl CampaignState {
             .find(|character| character.id == character_id)
             .expect("evolution character was validated")
             .mutation_evolution_id = evolution.id.clone();
+        self.strategy.regenerate_missions(data);
         Ok(evolution.name.clone())
     }
 

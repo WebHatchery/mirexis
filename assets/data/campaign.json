@@ -33,7 +33,8 @@
     { "id": "vault_purge", "name": "ISOLATION: SILENT CHOIR", "objective": "Eliminate every Ascendant echo inside the fractured vault before the harmonic field stabilises.", "objective_kind": "eliminate_all", "faction": "ascendants", "map_recipe": "ascendant_vault", "materials_reward": 22, "biomass_reward": 0, "power_reward": 3, "round_limit": 7 },
     { "id": "directorate_contact_trace", "name": "CONTACT: BLACK CHANNEL", "objective": "Reach the captured relay, activate the trace, and hold it through the Directorate counterattack.", "objective_kind": "signal_trace", "faction": "directorate", "map_recipe": "directorate_array", "required_protocol": "directorate_requisition", "materials_reward": 34, "biomass_reward": 0, "power_reward": 0, "round_limit": 5 },
     { "id": "brood_contact_trace", "name": "CONTACT: LIVING CHORUS", "objective": "Bind the relay to the Brood synapse, then survive while it translates the colony's first answer.", "objective_kind": "signal_trace", "faction": "brood", "map_recipe": "brood_synapse", "required_protocol": "brood_cultivation", "materials_reward": 20, "biomass_reward": 10, "power_reward": 0, "round_limit": 5 },
-    { "id": "ascendant_contact_trace", "name": "CONTACT: OPEN CIRCUIT", "objective": "Wake the buried conduit and defend it until Mirexis resolves the Ascendant transmission.", "objective_kind": "signal_trace", "faction": "ascendants", "map_recipe": "ascendant_conduit", "required_protocol": "ascendant_capacitor", "materials_reward": 20, "biomass_reward": 0, "power_reward": 5, "round_limit": 5 }
+    { "id": "ascendant_contact_trace", "name": "CONTACT: OPEN CIRCUIT", "objective": "Wake the buried conduit and defend it until Mirexis resolves the Ascendant transmission.", "objective_kind": "signal_trace", "faction": "ascendants", "map_recipe": "ascendant_conduit", "required_protocol": "ascendant_capacitor", "materials_reward": 20, "biomass_reward": 0, "power_reward": 5, "round_limit": 5 },
+    { "id": "adaptation_glass_nerve", "name": "ADAPTATION: GLASS NERVE", "objective": "Reach the Ascendant regulator, tear its control lattice free, and clear every echo before the cradle seals.", "objective_kind": "secure_and_clear", "faction": "ascendants", "map_recipe": "ascendant_cradle", "required_phase": "adaptation", "materials_reward": 26, "biomass_reward": 6, "power_reward": 4, "round_limit": 6 }
   ],
   "map_recipes": [
     {
@@ -98,6 +99,13 @@
       "objective_tile": [6, 4],
       "terrain_costs": [{ "position": [5, 2], "cost": 2 }, { "position": [5, 5], "cost": 2 }, { "position": [7, 3], "cost": 2 }, { "position": [7, 4], "cost": 2 }, { "position": [9, 2], "cost": 2 }],
       "cover_edges": [{ "position": [5, 4], "direction": "north", "strength": 30 }, { "position": [7, 2], "direction": "east", "strength": 30 }, { "position": [9, 4], "direction": "west", "strength": 30 }]
+    },
+    {
+      "id": "ascendant_cradle",
+      "blocked_tiles": [[3, 1], [3, 6], [5, 2], [5, 5], [7, 0], [7, 3], [7, 7], [9, 2], [9, 5]],
+      "objective_tile": [8, 4],
+      "terrain_costs": [{ "position": [4, 3], "cost": 2 }, { "position": [4, 4], "cost": 2 }, { "position": [6, 1], "cost": 2 }, { "position": [6, 6], "cost": 2 }, { "position": [8, 3], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 2], "direction": "south", "strength": 30 }, { "position": [6, 4], "direction": "east", "strength": 30 }, { "position": [8, 5], "direction": "west", "strength": 30 }]
     }
   ]
 }

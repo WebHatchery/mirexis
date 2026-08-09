@@ -15,8 +15,9 @@ The completed roadmap slice includes:
 - secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
   trace objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- nine generated operation templates, including a Brood sporefield extraction, an
-  Ascendant fractured-vault purge, and three protocol-gated Contact signal traces
+- ten generated operation templates, including a Brood sporefield extraction, an
+  Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
+  phase-gated Adaptation scavenging operation
 - save-stable authored and vertically mirrored variants for every mission map family
 - seven class actions, explicit Medic/Engineer/Psionic targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
@@ -45,6 +46,9 @@ The completed roadmap slice includes:
 - an irreversible, biomass-funded Neural Bloom evolution for Kira: Expanded Cortex
   trades higher accuracy for food upkeep, while Echo Mind trades weapon damage for
   movement; the chosen gift and complication both affect later deployments
+- an Adaptation-only Glass Nerve operation generated immediately after evolution,
+  with a distinct Ascendant cradle battlefield, a six-round secure-and-clear contract,
+  and visible materials, biomass, and power recovery
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -83,5 +87,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the Adaptation entry, and the texture manifest. `GameData::load()` validates IDs and
-cross-references before the game starts.
+content through the Adaptation entry, and the texture manifest. `GameData::load()`
+validates IDs and cross-references before the game starts.
