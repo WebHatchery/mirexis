@@ -62,7 +62,8 @@ The completed roadmap slice includes:
   and an operational Gene Lab—that advances the persisted campaign into Phase Four:
   Escalation
 - an Escalation-only Three Knives holdout on a contested-rift battlefield, where a
-  forced three-power crossfire makes hostiles faster and more accurate while disrupting
+  Directorate rifleman, Brood sporecaster, and Ascendant warden deploy together under
+  a forced crossfire that makes hostiles faster and more accurate while disrupting
   colonist accuracy
 - a post-victory Escalation response: spend materials to delay the next assault, spend
   biomass to misdirect every faction, or spend power to trade higher attention for

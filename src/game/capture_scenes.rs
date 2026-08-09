@@ -340,6 +340,7 @@ impl Game {
         self.active_mission.objective = template.objective.clone();
         self.active_mission.objective_kind = template.objective_kind;
         self.active_mission.hostile_faction = template.faction.clone();
+        self.active_mission.hostile_unit_ids = template.hostile_unit_ids.clone();
         self.active_mission.round_limit = template.round_limit;
         self.active_mission.materials_reward = template.materials_reward;
         self.active_mission.biomass_reward = template.biomass_reward;

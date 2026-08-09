@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Four — response-branched Escalation operations
-Save/content version: 1.21.0
+Current campaign slice: Phase Four — mixed-power Escalation operations
+Save/content version: 1.22.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -412,6 +412,14 @@ the three faction-specific modifiers. Its recovery includes materials, biomass, 
 power. Migrating an already transitioned 1.18 save regenerates offers so Phase Four is
 immediately playable.
 
+Three Knives overrides the usual single-faction roster with explicit hostile unit IDs:
+one Directorate rifleman, one Brood sporecaster, and one Ascendant rift warden. The
+selection persists on generated mission offers and materializes into the tactical
+mission, while ordinary operations continue selecting all hostiles from their primary
+faction. Mixed units share the hostile AI and crossfire modifier but retain their own
+roles, stats, names, positions, and specialist effects. Older Phase Four offers are
+regenerated so an unstarted Three Knives battle gains the mixed deployment.
+
 Winning Three Knives persists `escalation_operation_completed` and exposes one
 irreversible, data-backed convergence response in the colony hub. Bastion Beacon spends
 30 materials and adds two operations to active assault countdowns. Living Decoy spends
@@ -503,6 +511,7 @@ Migration coverage:
 | 1.18.0 | Phase-gated Escalation operation offers for transitioned campaigns |
 | 1.19.0 | Persistent Three Knives victory and convergence-response choice state |
 | 1.20.0 | Response-locked Escalation offers for already committed campaigns |
+| 1.21.0 | Explicit mixed-power hostile deployment for saved Escalation offers |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -551,7 +560,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (90 domain/migration tests plus the shared source-size gate)
+- `cargo test` (92 domain/migration tests plus the shared source-size gate)
 - deterministic forty-one-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -593,13 +602,13 @@ boundaries when continuing:
   Completing all three Contact gates advances into Adaptation. Neural Bloom has the
   first irreversible gift/complication evolution and its own scavenging operation;
   two evolved colonists and an operational Gene Lab complete Adaptation and enter
-  Escalation. Three Knives makes that phase immediately playable with a compound
-  three-power pressure modifier, and its convergence response creates the first
+  Escalation. Three Knives fields all three enemy powers under a compound pressure
+  modifier, and its convergence response creates the first
   persistent Phase Four strategic tradeoff with a matching follow-up operation;
   Escalation completion and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a true mixed-faction hostile deployment for
-Three Knives, so the convergence battle visibly fields Directorate, Brood, and
-Ascendant units instead of representing the contest only through its compound modifier.
+The recommended next vertical slice is a visible Escalation completion contract based
+on winning Three Knives, committing a convergence response, and winning its matching
+follow-up operation before the campaign approaches Phase Five.

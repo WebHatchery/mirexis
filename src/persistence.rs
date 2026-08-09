@@ -78,6 +78,11 @@ pub fn migrate_save_value(
     {
         save.campaign.strategy.regenerate_missions(data);
     }
+    if detected_version.as_deref() == Some("1.21.0")
+        && save.campaign.strategy.phase_id == "escalation"
+    {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -888,5 +893,33 @@ mod tests {
             .mission_offers
             .iter()
             .any(|mission| mission.template_id == "escalation_bastion_breakwater"));
+    }
+
+    #[test]
+    fn escalation_save_gains_mixed_power_deployment() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.phase_id = "escalation".to_owned();
+        campaign.strategy.adaptation_complete = true;
+        campaign.strategy.regenerate_missions(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.21.0", &campaign)).unwrap();
+        for offer in legacy["campaign"]["strategy"]["mission_offers"]
+            .as_array_mut()
+            .unwrap()
+        {
+            offer.as_object_mut().unwrap().remove("hostile_unit_ids");
+        }
+        let migrated = migrate_save_value(Some("1.21.0".to_owned()), legacy, &data).unwrap();
+        let three_knives = migrated
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .find(|mission| mission.template_id == "escalation_three_knives")
+            .unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(three_knives.hostile_unit_ids.len(), 3);
     }
 }

@@ -134,8 +134,14 @@ impl CampaignState {
             data.roster
                 .iter()
                 .filter(|base| {
-                    base.team == Team::Hostile
-                        && base.faction.as_deref() == Some(&mission.hostile_faction)
+                    if base.team != Team::Hostile {
+                        return false;
+                    }
+                    if mission.hostile_unit_ids.is_empty() {
+                        base.faction.as_deref() == Some(&mission.hostile_faction)
+                    } else {
+                        mission.hostile_unit_ids.contains(&base.id)
+                    }
                 })
                 .cloned(),
         );
@@ -772,6 +778,37 @@ mod tests {
                 .iter()
                 .all(|unit| unit.faction.as_deref() == Some(faction)));
         }
+    }
+
+    #[test]
+    fn three_knives_deploys_one_hostile_from_each_power() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.phase_id = "escalation".to_owned();
+        campaign.strategy.regenerate_missions(&data);
+        let mission_id = campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .find(|mission| mission.template_id == "escalation_three_knives")
+            .unwrap()
+            .id
+            .clone();
+        campaign.strategy.select_mission(&mission_id).unwrap();
+        let mission = campaign
+            .strategy
+            .materialize_selected(&data, &campaign.colony);
+        let hostile_factions = campaign
+            .deployment_roster(&data, &mission)
+            .into_iter()
+            .filter(|unit| unit.team == Team::Hostile)
+            .filter_map(|unit| unit.faction)
+            .collect::<std::collections::HashSet<_>>();
+
+        assert_eq!(hostile_factions.len(), 3);
+        assert!(hostile_factions.contains("directorate"));
+        assert!(hostile_factions.contains("brood"));
+        assert!(hostile_factions.contains("ascendants"));
     }
 
     #[test]

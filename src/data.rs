@@ -35,6 +35,8 @@ pub struct MissionDef {
     #[serde(default)]
     pub objective_kind: ObjectiveKind,
     pub hostile_faction: String,
+    #[serde(default)]
+    pub hostile_unit_ids: Vec<String>,
     pub round_limit: u32,
     pub materials_reward: i32,
     #[serde(default)]
@@ -303,6 +305,8 @@ pub struct MissionTemplateDef {
     pub objective: String,
     pub objective_kind: ObjectiveKind,
     pub faction: String,
+    #[serde(default)]
+    pub hostile_unit_ids: Vec<String>,
     pub map_recipe: String,
     #[serde(default)]
     pub required_protocol: String,
@@ -384,6 +388,18 @@ impl GameData {
                     "Mission template {} references missing Escalation response {}",
                     template.id, template.required_response
                 ));
+            }
+            for unit_id in &template.hostile_unit_ids {
+                if !self
+                    .roster
+                    .iter()
+                    .any(|unit| unit.id == *unit_id && unit.team == Team::Hostile)
+                {
+                    return Err(format!(
+                        "Mission template {} references missing hostile unit {}",
+                        template.id, unit_id
+                    ));
+                }
             }
         }
         for equipment in &self.equipment {

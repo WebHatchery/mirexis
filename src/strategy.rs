@@ -70,6 +70,8 @@ pub struct MissionInstance {
     #[serde(default)]
     pub objective_kind: ObjectiveKind,
     pub faction_id: String,
+    #[serde(default)]
+    pub hostile_unit_ids: Vec<String>,
     pub map_recipe: String,
     pub seed: u64,
     pub round_limit: u32,
@@ -126,6 +128,7 @@ impl StrategyState {
             objective: data.mission.objective.clone(),
             objective_kind: data.mission.objective_kind,
             faction_id: "brood".to_owned(),
+            hostile_unit_ids: Vec::new(),
             map_recipe: "outer_mire".to_owned(),
             seed: data.config.battle_seed,
             round_limit: data.mission.round_limit,
@@ -231,6 +234,7 @@ impl StrategyState {
             objective: instance.objective.clone(),
             objective_kind: instance.objective_kind,
             hostile_faction: instance.faction_id.clone(),
+            hostile_unit_ids: instance.hostile_unit_ids.clone(),
             round_limit: instance.round_limit,
             materials_reward: instance.materials_reward
                 + if self.research_completed("salvage_doctrine") {
@@ -630,6 +634,7 @@ impl StrategyState {
                     .to_owned(),
                 objective_kind: ObjectiveKind::EliminateAll,
                 faction_id: threat.faction_id.clone(),
+                hostile_unit_ids: Vec::new(),
                 map_recipe: "colony_defense".to_owned(),
                 seed: self.rng.next_u64(),
                 round_limit: 8,
@@ -743,6 +748,7 @@ impl StrategyState {
             objective: template.objective.clone(),
             objective_kind: template.objective_kind,
             faction_id: template.faction.clone(),
+            hostile_unit_ids: template.hostile_unit_ids.clone(),
             map_recipe: template.map_recipe.clone(),
             seed,
             round_limit: template.round_limit,
