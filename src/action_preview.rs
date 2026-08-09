@@ -1,7 +1,7 @@
 //! Read-only player command costs and consequences for tactical inspection.
 
 use crate::data::HazardKind;
-use crate::state::{Command, GameSession};
+use crate::state::{Command, GameSession, RuleError};
 use macroquad_toolkit::grid::TilePos;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18,23 +18,38 @@ pub(crate) enum ActionPreview {
         damage: i32,
         critical_damage: i32,
     },
+    Invalid {
+        action: &'static str,
+        reason: RuleError,
+    },
 }
 
 pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPreview> {
     let unit_id = session.tactical.selected_unit.as_ref()?;
+    let selected = session.unit(unit_id)?;
     if let Some(target) = session
         .tactical
         .units
         .iter()
         .find(|unit| unit.position == tile && !unit.incapacitated)
     {
-        let cost = session
-            .validate(&Command::Attack {
-                attacker_id: unit_id.clone(),
-                target_id: target.id.clone(),
-            })
-            .ok()?;
-        let attacker = session.unit(unit_id)?;
+        if target.team == selected.team {
+            return None;
+        }
+        let command = Command::Attack {
+            attacker_id: unit_id.clone(),
+            target_id: target.id.clone(),
+        };
+        let cost = match session.validate(&command) {
+            Ok(cost) => cost,
+            Err(reason) => {
+                return Some(ActionPreview::Invalid {
+                    action: "ATTACK",
+                    reason,
+                });
+            }
+        };
+        let attacker = selected;
         let damage = (attacker.effective_weapon_damage() - target.effective_armour()).max(1);
         let critical_damage =
             (attacker.effective_weapon_damage() + 2 - target.effective_armour()).max(1);
@@ -46,12 +61,22 @@ pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPre
             critical_damage,
         });
     }
-    let cost = session
-        .validate(&Command::Move {
-            unit_id: unit_id.clone(),
-            to: tile,
-        })
-        .ok()?;
+    if tile == selected.position {
+        return None;
+    }
+    let command = Command::Move {
+        unit_id: unit_id.clone(),
+        to: tile,
+    };
+    let cost = match session.validate(&command) {
+        Ok(cost) => cost,
+        Err(reason) => {
+            return Some(ActionPreview::Invalid {
+                action: "MOVE",
+                reason,
+            });
+        }
+    };
     let hazard = session
         .tactical
         .hazards
@@ -111,5 +136,43 @@ mod tests {
             for_tile(&session, hostile_tile),
             Some(ActionPreview::Attack { hit_chance, damage, .. }) if hit_chance > 0 && damage > 0
         ));
+    }
+
+    #[test]
+    fn invalid_preview_explains_blocked_shots_and_moves() {
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let selected_id = session.tactical.selected_unit.clone().unwrap();
+        session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == selected_id)
+            .unwrap()
+            .position = TilePos::new(3, 3);
+        let hostile = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(5, 3);
+        let hostile_tile = hostile.position;
+        session.tactical.blocked.insert(TilePos::new(4, 3));
+
+        assert_eq!(
+            for_tile(&session, hostile_tile),
+            Some(ActionPreview::Invalid {
+                action: "ATTACK",
+                reason: RuleError::NoLineOfFire,
+            })
+        );
+        assert_eq!(
+            for_tile(&session, TilePos::new(4, 3)),
+            Some(ActionPreview::Invalid {
+                action: "MOVE",
+                reason: RuleError::NoPath,
+            })
+        );
     }
 }

@@ -32,6 +32,8 @@ The completed roadmap slice includes:
   hit chance, normal/critical damage range, and weapon AP before commands are committed
 - cyan movement-route previews that trace the validated detour around blockers and label
   every entered tile with its individual terrain AP cost before relocation
+- red invalid-command previews that explain obstructed shots, missing paths, occupied
+  destinations, range failures, wrong phases, and insufficient AP on the focused tile
 - a command-blocking tactical field manual available from the footer, `H`, or Escape,
   covering the turn loop, selection, previews, hostile intent, hazards, and objectives
 - an expandable recent battle-history panel available from `LOG` or `B`, preserving the

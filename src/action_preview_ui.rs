@@ -4,6 +4,7 @@ use crate::action_preview::{self, ActionPreview};
 use crate::data::HazardKind;
 use crate::grid_ui::GridView;
 use crate::state::GameSession;
+use crate::state::RuleError;
 use crate::tactical::terrain_cost;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
@@ -12,6 +13,7 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
     let Some(preview) = action_preview::for_tile(session, tile) else {
         return;
     };
+    let invalid = matches!(preview, ActionPreview::Invalid { .. });
     let label = match preview {
         ActionPreview::Move { cost, hazard, .. } => match hazard {
             Some(kind) => format!("MOVE // {} AP // {}", cost, hazard_effect(kind)),
@@ -31,12 +33,21 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
             critical_damage,
             cost
         ),
+        ActionPreview::Invalid { action, reason } => {
+            format!("{action} BLOCKED // {}", rule_error_label(&reason))
+        }
     };
     let rect = Rect::new(panel.x + 18.0, panel.bottom() - 34.0, panel.w - 36.0, 28.0);
     draw_surface(
         rect,
-        &SurfaceStyle::new(Color::new(0.06, 0.10, 0.11, 0.96))
-            .with_border(1.0, Color::new(0.48, 0.84, 0.63, 0.9)),
+        &SurfaceStyle::new(Color::new(0.06, 0.10, 0.11, 0.96)).with_border(
+            1.0,
+            if invalid {
+                Color::new(0.92, 0.42, 0.28, 0.95)
+            } else {
+                Color::new(0.48, 0.84, 0.63, 0.9)
+            },
+        ),
     );
     draw_text_ex(
         label,
@@ -44,6 +55,28 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
         rect.y + 19.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
+}
+
+fn rule_error_label(error: &RuleError) -> &'static str {
+    match error {
+        RuleError::WrongPhase => "WRONG PHASE",
+        RuleError::UnknownUnit => "UNKNOWN UNIT",
+        RuleError::WrongTeam => "WRONG TEAM",
+        RuleError::Incapacitated => "UNIT INCAPACITATED",
+        RuleError::Occupied => "TILE OCCUPIED",
+        RuleError::NoPath => "NO PATH",
+        RuleError::NoLineOfFire => "NO LINE OF FIRE",
+        RuleError::OutOfRange => "OUT OF RANGE",
+        RuleError::InsufficientActionPoints => "INSUFFICIENT AP",
+        RuleError::InvalidTarget => "INVALID TARGET",
+        RuleError::ObjectiveUnavailable => "OBJECTIVE UNAVAILABLE",
+        RuleError::MutationUnavailable => "MUTATION UNAVAILABLE",
+        RuleError::ClassActionUnavailable => "CLASS ACTION UNAVAILABLE",
+        RuleError::EquipmentUnavailable => "EQUIPMENT UNAVAILABLE",
+        RuleError::CoverUnavailable => "COVER UNAVAILABLE",
+        RuleError::OverwatchUnavailable => "OVERWATCH UNAVAILABLE",
+        RuleError::EnemyAbilityUnavailable => "ABILITY UNAVAILABLE",
+    }
 }
 
 pub(crate) fn draw_route(

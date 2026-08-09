@@ -412,6 +412,11 @@ Directional cover is drawn as a reinforced cyan edge on the protected side of it
 The nearby number names the accuracy penalty imposed from that facing, so stronger cover
 and exposed flanks can be read directly from battlefield geometry before units exchange fire.
 
+When a focused hostile or destination cannot accept the implied attack or move, the command
+preview remains visible with a red border and names the validation failure. Blocked line of
+fire, missing paths, occupied tiles, range, phase, incapacitation, and insufficient AP are
+therefore explained before the player clicks rather than represented by a silent omission.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.
