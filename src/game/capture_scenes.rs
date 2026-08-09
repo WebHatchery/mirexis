@@ -24,6 +24,7 @@ impl Game {
             "escalation_operation" => self.capture_escalation_operation(),
             "escalation_response" => self.capture_escalation_response(),
             "mirexis" => self.capture_mirexis(),
+            "mirexis_path" => self.capture_mirexis_path(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -262,6 +263,15 @@ impl Game {
             .expect("Mirexis capture can commit its convergence response");
         self.campaign.strategy.escalation_branch_completed = true;
         assert!(self.campaign.refresh_escalation_completion(&self.data));
+        self.state = AppState::Colony;
+    }
+
+    fn capture_mirexis_path(&mut self) {
+        self.capture_mirexis();
+        self.campaign
+            .strategy
+            .choose_mirexis_path("open_threshold", &mut self.campaign.colony, &self.data)
+            .expect("Mirexis capture can choose the open threshold");
         self.state = AppState::Colony;
     }
 

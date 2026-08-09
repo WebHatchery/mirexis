@@ -122,6 +122,8 @@ pub struct StrategyState {
     pub escalation_branch_completed: bool,
     #[serde(default)]
     pub escalation_complete: bool,
+    #[serde(default)]
+    pub mirexis_path_id: String,
     rng: SeededRng,
 }
 
@@ -198,6 +200,7 @@ impl StrategyState {
             escalation_response_id: String::new(),
             escalation_branch_completed: false,
             escalation_complete: false,
+            mirexis_path_id: String::new(),
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -238,8 +241,15 @@ impl StrategyState {
         let strategic_bonus = crate::strategy_rewards::bonus(
             &self.contact_protocol_id,
             &self.escalation_response_id,
+            &self.mirexis_path_id,
             data,
         );
+        let mirexis_cover_bonus = data
+            .campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == self.mirexis_path_id)
+            .map_or(0, |path| path.defense_cover_bonus);
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
@@ -259,8 +269,12 @@ impl StrategyState {
             biomass_reward: instance.biomass_reward + strategic_bonus.1,
             power_reward: instance.power_reward + strategic_bonus.2,
             operation_modifier: instance.operation_modifier,
-            cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
-                10
+            cover_integrity: if colony_defense {
+                (if self.research_completed("field_fortifications") {
+                    10
+                } else {
+                    base.cover_integrity
+                }) + mirexis_cover_bonus
             } else {
                 base.cover_integrity
             },
@@ -509,49 +523,6 @@ impl StrategyState {
             "Mirexis has learned to direct its changes. The three powers now move openly against it."
                 .to_owned();
         true
-    }
-
-    pub fn choose_escalation_response(
-        &mut self,
-        response_id: &str,
-        colony: &mut ColonyState,
-        data: &GameData,
-    ) -> Result<String, String> {
-        if !self.escalation_operation_completed {
-            return Err("Escalation responses unlock after Three Knives".to_owned());
-        }
-        if !self.escalation_response_id.is_empty() {
-            return Err("The colony has already answered the convergence".to_owned());
-        }
-        let response = data
-            .campaign
-            .escalation_responses
-            .iter()
-            .find(|response| response.id == response_id)
-            .ok_or_else(|| format!("Unknown Escalation response: {}", response_id))?;
-        if colony.resources.materials < response.materials_cost
-            || colony.resources.biomass < response.biomass_cost
-            || colony.resources.power < response.power_cost
-        {
-            return Err(format!(
-                "{} requires {} materials, {} biomass, and {} power",
-                response.name, response.materials_cost, response.biomass_cost, response.power_cost
-            ));
-        }
-        colony.resources.materials -= response.materials_cost;
-        colony.resources.biomass -= response.biomass_cost;
-        colony.resources.power -= response.power_cost;
-        for faction in &mut self.factions {
-            faction.attention = (faction.attention + response.attention_change_all).clamp(0, 100);
-        }
-        for threat in &mut self.threats {
-            threat.operations_until = threat
-                .operations_until
-                .saturating_add(response.threat_delay);
-        }
-        self.escalation_response_id = response.id.clone();
-        self.generate_missions(data);
-        Ok(response.name.clone())
     }
 
     pub fn refresh_escalation_completion(&mut self) -> bool {

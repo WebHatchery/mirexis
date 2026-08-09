@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase Five — Mirexis Entry
+## Current Slice: Phase Five — Mirexis Identity
 
 The completed roadmap slice includes:
 
@@ -74,6 +74,9 @@ The completed roadmap slice includes:
 - a visible Escalation completion contract—Three Knives victory, one committed
   response, and victory in its matching branch—that advances the persisted campaign
   into Phase Five: Mirexis while keeping the operation loop playable
+- an irreversible Phase Five identity choice: Human Redoubt strengthens colony-defense
+  cover, Living Commonwealth reduces deployment food, or Open Threshold increases
+  power recovered from every later victory
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -112,5 +115,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the Phase Five campaign entry, and the texture manifest. `GameData::load()`
+content through the first Phase Five identity decision, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.

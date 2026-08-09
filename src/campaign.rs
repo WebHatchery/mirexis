@@ -159,7 +159,8 @@ impl CampaignState {
     }
 
     pub fn deployment_food_cost(&self, data: &GameData) -> i32 {
-        self.roster
+        let base = self
+            .roster
             .iter()
             .filter(|character| {
                 character.availability == Availability::Ready && character.deployment_selected
@@ -172,7 +173,17 @@ impl CampaignState {
                     .unwrap_or(0)
                     .max(0)
             })
-            .sum()
+            .sum::<i32>();
+        if base == 0 {
+            return 0;
+        }
+        let discount = data
+            .campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == self.strategy.mirexis_path_id)
+            .map_or(0, |path| path.deployment_food_discount);
+        (base - discount).max(1)
     }
 
     pub fn prepare_deployment(&mut self, data: &GameData) -> Result<i32, String> {
@@ -1324,5 +1335,64 @@ mod tests {
         assert!(campaign.strategy.escalation_branch_completed);
         assert!(campaign.strategy.escalation_complete);
         assert_eq!(campaign.strategy.phase_id, "mirexis");
+    }
+
+    #[test]
+    fn mirexis_paths_change_defense_supply_and_recovery() {
+        let data = GameData::load().unwrap();
+
+        let mut redoubt = CampaignState::new(&data);
+        assert!(redoubt
+            .strategy
+            .choose_mirexis_path("human_redoubt", &mut redoubt.colony, &data)
+            .is_err());
+        redoubt.strategy.escalation_complete = true;
+        redoubt.colony.resources.materials = 100;
+        redoubt
+            .strategy
+            .choose_mirexis_path("human_redoubt", &mut redoubt.colony, &data)
+            .unwrap();
+        redoubt.strategy.threats[0].operations_until = 0;
+        redoubt.strategy.regenerate_missions(&data);
+        assert_eq!(
+            redoubt
+                .strategy
+                .materialize_selected(&data, &redoubt.colony)
+                .cover_integrity,
+            data.mission.cover_integrity + 4
+        );
+
+        let mut commonwealth = CampaignState::new(&data);
+        commonwealth.strategy.escalation_complete = true;
+        commonwealth.colony.resources.biomass = 20;
+        let food_before = commonwealth.deployment_food_cost(&data);
+        commonwealth
+            .strategy
+            .choose_mirexis_path("living_commonwealth", &mut commonwealth.colony, &data)
+            .unwrap();
+        assert_eq!(commonwealth.deployment_food_cost(&data), food_before - 1);
+
+        let mut threshold = CampaignState::new(&data);
+        threshold.strategy.escalation_complete = true;
+        threshold.colony.resources.power = 10;
+        let power_before = threshold
+            .strategy
+            .materialize_selected(&data, &threshold.colony)
+            .power_reward;
+        threshold
+            .strategy
+            .choose_mirexis_path("open_threshold", &mut threshold.colony, &data)
+            .unwrap();
+        assert_eq!(
+            threshold
+                .strategy
+                .materialize_selected(&data, &threshold.colony)
+                .power_reward,
+            power_before + 3
+        );
+        assert!(threshold
+            .strategy
+            .choose_mirexis_path("human_redoubt", &mut threshold.colony, &data)
+            .is_err());
     }
 }

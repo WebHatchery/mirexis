@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Five — Mirexis entry
-Save/content version: 1.23.0
+Current campaign slice: Phase Five — Mirexis identity choice
+Save/content version: 1.24.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -82,6 +82,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
+| `strategy_choices.rs` | Irreversible Contact-independent strategic choice transactions | Mission generation or rendering |
 | `strategy_events.rs` | Campaign-event projection and availability rules | Event consequences or UI |
 | `strategy_rewards.rs` | Contact and Escalation mission-recovery bonuses | Mission generation or colony mutation |
 | `map_variants.rs` | Seed-driven safe transforms of authored battlefield geometry | Mission selection |
@@ -444,6 +445,13 @@ hub exposes the operation, response, and branch state. Meeting all three gates a
 the saved campaign to `PHASE FIVE // MIREXIS`, updates its summary, and regenerates a
 playable generic offer pool while dedicated Phase Five content is developed.
 
+Phase Five immediately exposes one irreversible, data-backed identity choice. Human
+Redoubt spends 45 materials and adds 4 integrity to colony-defense cover. Living
+Commonwealth spends 14 biomass and removes 1 food from each deployment cost. Open
+Threshold spends 6 power and adds 3 power to every later victorious mission recovery.
+Costs, effects, and affordability are visible in the colony hub; the chosen path ID is
+saved and continues to modify the existing defense, supply, or recovery calculation.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -521,6 +529,7 @@ Migration coverage:
 | 1.20.0 | Response-locked Escalation offers for already committed campaigns |
 | 1.21.0 | Explicit mixed-power hostile deployment for saved Escalation offers |
 | 1.22.0 | Persistent response-branch victory and Escalation completion gates |
+| 1.23.0 | Persistent Phase Five Mirexis identity path selection |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -553,7 +562,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
@@ -569,8 +578,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (94 domain/migration tests plus the shared source-size gate)
-- deterministic forty-two-scene capture with visual inspection
+- `cargo test` (96 domain/migration tests plus the shared source-size gate)
+- deterministic forty-three-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -614,10 +623,12 @@ boundaries when continuing:
   Escalation. Three Knives fields all three enemy powers under a compound pressure
   modifier, and its convergence response creates the first
   persistent Phase Four strategic tradeoff with a matching follow-up operation. Winning
-  that branch completes Escalation and enters Phase Five; dedicated Mirexis operations,
-  revelations, and end-state decisions remain future content.
+  that branch completes Escalation and enters Phase Five, where one identity path changes
+  an existing colony economy; dedicated Mirexis operations, further revelations, and
+  end-state resolution remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is the first Phase Five revelation and colony
-decision, turning the Mirexis entry from a campaign header into a new strategic layer.
+The recommended next vertical slice is one path-locked Phase Five operation per Mirexis
+identity, making the colony's final direction visible on the battlefield as well as in
+its economy.

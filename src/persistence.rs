@@ -938,4 +938,20 @@ mod tests {
         assert!(!migrated.campaign.strategy.escalation_branch_completed);
         assert!(!migrated.campaign.strategy.escalation_complete);
     }
+
+    #[test]
+    fn phase_five_save_gains_an_uncommitted_mirexis_path() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.23.0", &campaign)).unwrap();
+        legacy["campaign"]["strategy"]
+            .as_object_mut()
+            .unwrap()
+            .remove("mirexis_path_id");
+        let migrated = migrate_save_value(Some("1.23.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.campaign.strategy.mirexis_path_id.is_empty());
+    }
 }

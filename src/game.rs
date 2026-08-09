@@ -293,6 +293,20 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::ChooseMirexisPath(path_id) => {
+                match self.campaign.strategy.choose_mirexis_path(
+                    &path_id,
+                    &mut self.campaign.colony,
+                    &self.data,
+                ) {
+                    Ok(name) => {
+                        self.notifications
+                            .success(format!("Mirexis path committed: {}", name));
+                        self.autosave_campaign_only("Mirexis path autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::ChooseMutationEvolution(character_id, evolution_id) => {
                 match self.campaign.choose_mutation_evolution(
                     &character_id,

@@ -22,6 +22,11 @@
     { "id": "living_decoy", "name": "Living Decoy", "description": "Spend 8 biomass to seed false colonies around the rift and reduce all three powers' attention by 8.", "materials_cost": 0, "biomass_cost": 8, "power_cost": 0, "attention_change_all": -8, "threat_delay": 0, "materials_bonus": 0 },
     { "id": "weaponized_lattice", "name": "Weaponized Lattice", "description": "Spend 4 power to keep the targeting lattice active: later victories recover 8 materials, but every power gains 5 attention.", "materials_cost": 0, "biomass_cost": 0, "power_cost": 4, "attention_change_all": 5, "threat_delay": 0, "materials_bonus": 8 }
   ],
+  "mirexis_paths": [
+    { "id": "human_redoubt", "name": "Human Redoubt", "description": "Spend 45 materials to harden the colony's identity and add 4 integrity to defense cover.", "materials_cost": 45, "biomass_cost": 0, "power_cost": 0, "defense_cover_bonus": 4, "deployment_food_discount": 0, "power_bonus": 0 },
+    { "id": "living_commonwealth", "name": "Living Commonwealth", "description": "Spend 14 biomass to weave adapted tissue into colony life and reduce deployment food costs by 1.", "materials_cost": 0, "biomass_cost": 14, "power_cost": 0, "defense_cover_bonus": 0, "deployment_food_discount": 1, "power_bonus": 0 },
+    { "id": "open_threshold", "name": "Open Threshold", "description": "Spend 6 power to keep the Ascendant threshold open and recover 3 additional power from later victories.", "materials_cost": 0, "biomass_cost": 0, "power_cost": 6, "defense_cover_bonus": 0, "deployment_food_discount": 0, "power_bonus": 3 }
+  ],
   "events": [
     { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Spend 2 food to protect the isolated survey family; their route knowledge gives Sol +1 movement.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2, "legacy_name": "Survey Family Routes", "legacy_character_id": "sol_cairn", "legacy_stat": "movement", "legacy_amount": 1 },
     { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Document Mara's accelerating chitin growth; the treatment gives her +1 armour.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1, "legacy_name": "Documented Carapace", "legacy_character_id": "mara_venn", "legacy_stat": "armour", "legacy_amount": 1 },

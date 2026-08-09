@@ -248,7 +248,22 @@ fn draw_operations(
         .iter()
         .any(|research| research.completed);
     let phase_progress = if campaign.strategy.escalation_complete {
-        "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING // PHASE FIVE".to_owned()
+        data.campaign
+            .mirexis_paths
+            .iter()
+            .find(|path| path.id == campaign.strategy.mirexis_path_id)
+            .map_or_else(
+                || {
+                    "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING // PHASE FIVE"
+                        .to_owned()
+                },
+                |path| {
+                    format!(
+                        "ESCALATION // ADAPTATION COMPLETE // PHASE FIVE // {}",
+                        path.name.to_uppercase()
+                    )
+                },
+            )
     } else if campaign.strategy.adaptation_complete {
         if !campaign.strategy.escalation_operation_completed {
             "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
@@ -412,6 +427,8 @@ fn draw_operations(
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
     let choosing_escalation = campaign.strategy.escalation_operation_completed
         && campaign.strategy.escalation_response_id.is_empty();
+    let choosing_mirexis =
+        campaign.strategy.escalation_complete && campaign.strategy.mirexis_path_id.is_empty();
     let evolution_pending = campaign.strategy.contact_complete
         && campaign.roster.iter().any(|character| {
             character.mutation_evolution_id.is_empty()
@@ -481,6 +498,42 @@ fn draw_operations(
                 actions.push(UiAction::ChooseEscalationResponse(response.id.clone()));
             }
         }
+    } else if choosing_mirexis {
+        draw_ui_text_ex(
+            "MIREXIS REVEALED // CHOOSE WHAT THE COLONY BECOMES",
+            878.0,
+            514.0,
+            TextStyle::new(11.0, dark::ACCENT).params(),
+        );
+        for (index, path) in data.campaign.mirexis_paths.iter().enumerate() {
+            let effect = if path.defense_cover_bonus > 0 {
+                format!(
+                    "{} MAT // DEFENCE COVER +{}",
+                    path.materials_cost, path.defense_cover_bonus
+                )
+            } else if path.deployment_food_discount > 0 {
+                format!(
+                    "{} BIO // FOOD -{}",
+                    path.biomass_cost, path.deployment_food_discount
+                )
+            } else {
+                format!(
+                    "{} POWER // VICTORY POWER +{}",
+                    path.power_cost, path.power_bonus
+                )
+            };
+            let affordable = campaign.colony.resources.materials >= path.materials_cost
+                && campaign.colony.resources.biomass >= path.biomass_cost
+                && campaign.colony.resources.power >= path.power_cost;
+            if colony_button(
+                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
+                &format!("{} // {}", path.name.to_uppercase(), effect),
+                affordable,
+                mouse,
+            ) {
+                actions.push(UiAction::ChooseMirexisPath(path.id.clone()));
+            }
+        }
     } else if evolution_pending {
         let lab_exists = campaign
             .colony
@@ -523,7 +576,7 @@ fn draw_operations(
             draw_character_event(campaign, data, event, mouse, actions);
         }
     }
-    if !choosing_contact && !choosing_escalation && !evolution_pending {
+    if !choosing_contact && !choosing_escalation && !choosing_mirexis && !evolution_pending {
         draw_ui_text_ex(
             "ACTIVE DOCTRINES",
             878.0,

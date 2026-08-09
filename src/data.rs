@@ -232,6 +232,7 @@ pub struct CampaignDef {
     pub research: Vec<ResearchDef>,
     pub contact_protocols: Vec<ContactProtocolDef>,
     pub escalation_responses: Vec<EscalationResponseDef>,
+    pub mirexis_paths: Vec<MirexisPathDef>,
     pub events: Vec<CharacterEventDef>,
     pub mission_templates: Vec<MissionTemplateDef>,
     pub map_recipes: Vec<MapRecipeDef>,
@@ -248,6 +249,19 @@ pub struct EscalationResponseDef {
     pub attention_change_all: i32,
     pub threat_delay: u8,
     pub materials_bonus: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MirexisPathDef {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub materials_cost: i32,
+    pub biomass_cost: i32,
+    pub power_cost: i32,
+    pub defense_cover_bonus: i32,
+    pub deployment_food_discount: i32,
+    pub power_bonus: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -442,6 +456,21 @@ impl GameData {
             response.materials_cost < 0 || response.biomass_cost < 0 || response.power_cost < 0
         }) {
             return Err("Escalation responses cannot refund their selection cost".to_owned());
+        }
+        ensure_unique(
+            "Mirexis path",
+            self.campaign
+                .mirexis_paths
+                .iter()
+                .map(|entry| entry.id.as_str()),
+        )?;
+        if self
+            .campaign
+            .mirexis_paths
+            .iter()
+            .any(|path| path.materials_cost < 0 || path.biomass_cost < 0 || path.power_cost < 0)
+        {
+            return Err("Mirexis paths cannot refund their selection cost".to_owned());
         }
         ensure_unique(
             "campaign event",
