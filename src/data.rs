@@ -62,6 +62,7 @@ pub enum OperationModifier {
     DirectorateFireControl,
     BroodFrenzy,
     AscendantInterference,
+    EscalationCrossfire,
 }
 
 impl OperationModifier {
@@ -71,6 +72,7 @@ impl OperationModifier {
             Self::DirectorateFireControl => "DIRECTORATE FIRE-CONTROL",
             Self::BroodFrenzy => "BROOD FRENZY",
             Self::AscendantInterference => "ASCENDANT INTERFERENCE",
+            Self::EscalationCrossfire => "THREE-POWER CROSSFIRE",
         }
     }
 
@@ -80,6 +82,9 @@ impl OperationModifier {
             Self::DirectorateFireControl => "Hostile attacks gain 10 accuracy.",
             Self::BroodFrenzy => "Hostile units gain 1 movement.",
             Self::AscendantInterference => "Colonist attacks lose 10 accuracy.",
+            Self::EscalationCrossfire => {
+                "Hostiles gain 5 accuracy and 1 movement; colonists lose 5 accuracy."
+            }
         }
     }
 }
@@ -497,7 +502,7 @@ impl GameData {
                 ));
             }
             if !template.required_phase.is_empty()
-                && !["isolation", "contact", "adaptation"]
+                && !["isolation", "contact", "adaptation", "escalation"]
                     .contains(&template.required_phase.as_str())
             {
                 return Err(format!(

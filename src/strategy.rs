@@ -628,7 +628,9 @@ impl StrategyState {
             .iter()
             .find(|faction| faction.id == template.faction)
             .map_or(0, |faction| faction.attention);
-        let operation_modifier = if attention < 20 {
+        let operation_modifier = if template.required_phase == "escalation" {
+            OperationModifier::EscalationCrossfire
+        } else if attention < 20 {
             OperationModifier::None
         } else {
             match template.faction.as_str() {
@@ -642,7 +644,10 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: if !template.required_phase.is_empty() {
+            briefing: if template.required_phase == "escalation" {
+                "All three powers have converged on the same targeting beacon; holding it means fighting inside their crossfire."
+                    .to_owned()
+            } else if !template.required_phase.is_empty() {
                 format!(
                     "Gene Lab telemetry has located a scavenging route through this {} site.",
                     template.faction
@@ -1009,6 +1014,22 @@ mod tests {
         assert_eq!(
             strategy.mission_offers[0].template_id,
             "adaptation_glass_nerve"
+        );
+    }
+
+    #[test]
+    fn escalation_operation_is_phase_gated_and_forces_crossfire() {
+        let data = GameData::load().unwrap();
+        let mut strategy = StrategyState::new(&data);
+        strategy.phase_id = "escalation".to_owned();
+        strategy.regenerate_missions(&data);
+        assert_eq!(
+            strategy.mission_offers[0].template_id,
+            "escalation_three_knives"
+        );
+        assert_eq!(
+            strategy.mission_offers[0].operation_modifier,
+            OperationModifier::EscalationCrossfire
         );
     }
 

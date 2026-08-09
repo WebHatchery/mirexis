@@ -1,9 +1,7 @@
 //! Deterministic tactical command simulation and persistence model.
 
 use crate::campaign::CampaignState;
-use crate::data::{
-    EdgeDirection, GameConfig, MissionDef, ObjectiveKind, OperationModifier, Team, UnitDef,
-};
+use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
     BattleEvent, Command, CommandCost, DestructibleCover, ObjectiveState, ReinforcementWave,
@@ -62,18 +60,7 @@ impl GameSession {
             .map(|unit| UnitState::from_def(unit, config.max_action_points))
             .collect::<Vec<_>>();
         for unit in &mut units {
-            match mission.operation_modifier {
-                OperationModifier::DirectorateFireControl if unit.team == Team::Hostile => {
-                    unit.accuracy += 10;
-                }
-                OperationModifier::BroodFrenzy if unit.team == Team::Hostile => {
-                    unit.move_range = unit.move_range.saturating_add(1);
-                }
-                OperationModifier::AscendantInterference if unit.team == Team::Colony => {
-                    unit.accuracy -= 10;
-                }
-                _ => {}
-            }
+            crate::operation_modifiers::apply(mission.operation_modifier, unit);
         }
         let selected_unit = units
             .iter()
@@ -795,6 +782,7 @@ fn mutation_gift_name(mutation: &str) -> Option<&'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::data::OperationModifier;
 
     fn session() -> (GameConfig, GameSession) {
         let data = crate::data::GameData::load().unwrap();
@@ -870,6 +858,21 @@ mod tests {
         assert_eq!(
             session.unit(&hostile.id).unwrap().accuracy,
             hostile.accuracy
+        );
+
+        mission.operation_modifier = OperationModifier::EscalationCrossfire;
+        let session = GameSession::new(&data.config, &mission, &data.roster);
+        assert_eq!(
+            session.unit(&colony.id).unwrap().accuracy,
+            colony.accuracy - 5
+        );
+        assert_eq!(
+            session.unit(&hostile.id).unwrap().accuracy,
+            hostile.accuracy + 5
+        );
+        assert_eq!(
+            session.unit(&hostile.id).unwrap().move_range,
+            hostile.move_range + 1
         );
     }
 

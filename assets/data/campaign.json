@@ -34,7 +34,8 @@
     { "id": "directorate_contact_trace", "name": "CONTACT: BLACK CHANNEL", "objective": "Reach the captured relay, activate the trace, and hold it through the Directorate counterattack.", "objective_kind": "signal_trace", "faction": "directorate", "map_recipe": "directorate_array", "required_protocol": "directorate_requisition", "materials_reward": 34, "biomass_reward": 0, "power_reward": 0, "round_limit": 5 },
     { "id": "brood_contact_trace", "name": "CONTACT: LIVING CHORUS", "objective": "Bind the relay to the Brood synapse, then survive while it translates the colony's first answer.", "objective_kind": "signal_trace", "faction": "brood", "map_recipe": "brood_synapse", "required_protocol": "brood_cultivation", "materials_reward": 20, "biomass_reward": 10, "power_reward": 0, "round_limit": 5 },
     { "id": "ascendant_contact_trace", "name": "CONTACT: OPEN CIRCUIT", "objective": "Wake the buried conduit and defend it until Mirexis resolves the Ascendant transmission.", "objective_kind": "signal_trace", "faction": "ascendants", "map_recipe": "ascendant_conduit", "required_protocol": "ascendant_capacitor", "materials_reward": 20, "biomass_reward": 0, "power_reward": 5, "round_limit": 5 },
-    { "id": "adaptation_glass_nerve", "name": "ADAPTATION: GLASS NERVE", "objective": "Reach the Ascendant regulator, tear its control lattice free, and clear every echo before the cradle seals.", "objective_kind": "secure_and_clear", "faction": "ascendants", "map_recipe": "ascendant_cradle", "required_phase": "adaptation", "materials_reward": 26, "biomass_reward": 6, "power_reward": 4, "round_limit": 6 }
+    { "id": "adaptation_glass_nerve", "name": "ADAPTATION: GLASS NERVE", "objective": "Reach the Ascendant regulator, tear its control lattice free, and clear every echo before the cradle seals.", "objective_kind": "secure_and_clear", "faction": "ascendants", "map_recipe": "ascendant_cradle", "required_phase": "adaptation", "materials_reward": 26, "biomass_reward": 6, "power_reward": 4, "round_limit": 6 },
+    { "id": "escalation_three_knives", "name": "ESCALATION: THREE KNIVES", "objective": "Hold the convergence beacon for six rounds while all three powers contest its targeting solution.", "objective_kind": "holdout", "faction": "directorate", "map_recipe": "contested_rift", "required_phase": "escalation", "materials_reward": 36, "biomass_reward": 8, "power_reward": 5, "round_limit": 6 }
   ],
   "map_recipes": [
     {
@@ -106,6 +107,13 @@
       "objective_tile": [8, 4],
       "terrain_costs": [{ "position": [4, 3], "cost": 2 }, { "position": [4, 4], "cost": 2 }, { "position": [6, 1], "cost": 2 }, { "position": [6, 6], "cost": 2 }, { "position": [8, 3], "cost": 2 }],
       "cover_edges": [{ "position": [4, 2], "direction": "south", "strength": 30 }, { "position": [6, 4], "direction": "east", "strength": 30 }, { "position": [8, 5], "direction": "west", "strength": 30 }]
+    },
+    {
+      "id": "contested_rift",
+      "blocked_tiles": [[3, 0], [3, 3], [3, 7], [5, 1], [5, 6], [7, 2], [7, 5], [9, 0], [9, 4], [11, 2]],
+      "objective_tile": [6, 4],
+      "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [4, 5], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [6, 4], "cost": 2 }, { "position": [8, 1], "cost": 2 }, { "position": [8, 6], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 4], "direction": "east", "strength": 25 }, { "position": [6, 2], "direction": "south", "strength": 25 }, { "position": [8, 4], "direction": "west", "strength": 25 }, { "position": [10, 6], "direction": "north", "strength": 25 }]
     }
   ]
 }

@@ -70,6 +70,9 @@ pub fn migrate_save_value(
     {
         save.campaign.colony.ensure_gene_lab();
     }
+    if detected_version.as_deref() == Some("1.18.0") && save.campaign.strategy.adaptation_complete {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -821,5 +824,27 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(!migrated.campaign.strategy.adaptation_operation_completed);
         assert!(!migrated.campaign.strategy.adaptation_complete);
+    }
+
+    #[test]
+    fn adaptation_completion_save_gains_the_escalation_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.adaptation_operation_completed = true;
+        campaign.strategy.adaptation_complete = true;
+        campaign.strategy.phase_id = "escalation".to_owned();
+        campaign.strategy.phase_name = "PHASE FOUR: ESCALATION".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.18.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.18.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .any(|mission| mission.template_id == "escalation_three_knives"));
     }
 }

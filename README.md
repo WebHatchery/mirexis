@@ -15,7 +15,7 @@ The completed roadmap slice includes:
 - secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
   trace objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- ten generated operation templates, including a Brood sporefield extraction, an
+- eleven generated operation templates, including a Brood sporefield extraction, an
   Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
   phase-gated Adaptation scavenging operation
 - save-stable authored and vertically mirrored variants for every mission map family
@@ -61,6 +61,9 @@ The completed roadmap slice includes:
 - a visible Adaptation completion contract—Glass Nerve victory, two evolved colonists,
   and an operational Gene Lab—that advances the persisted campaign into Phase Four:
   Escalation
+- an Escalation-only Three Knives holdout on a contested-rift battlefield, where a
+  forced three-power crossfire makes hostiles faster and more accurate while disrupting
+  colonist accuracy
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -99,5 +102,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the Adaptation entry, and the texture manifest. `GameData::load()`
+content through the first Escalation operation, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.

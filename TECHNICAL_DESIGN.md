@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Four — Escalation entry
-Save/content version: 1.18.0
+Current campaign slice: Phase Four — Escalation crossfire operation
+Save/content version: 1.19.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -403,6 +403,15 @@ regenerates mission offers without the Adaptation-only operation, and leaves unf
 Gene Lab paths available. A transition can occur after either the operation or the
 second evolution, so both orderings share one idempotent refresh path.
 
+Escalation begins with the phase-gated `ESCALATION: THREE KNIVES` holdout. Its
+contested-rift map supports safe mirrored variants and keeps a convergence beacon under
+pressure for six rounds. The operation always applies Three-Power Crossfire: hostiles
+gain 5 accuracy and 1 movement while colonists lose 5 accuracy. This compound modifier
+is disclosed before deployment and applied through the same tactical pressure path as
+the three faction-specific modifiers. Its recovery includes materials, biomass, and
+power. Migrating an already transitioned 1.18 save regenerates offers so Phase Four is
+immediately playable.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -475,6 +484,7 @@ Migration coverage:
 | 1.15.0 | Data-backed Regenerative Tissue evolution paths for unevolved Ilya saves |
 | 1.16.0 | Data-backed Elastic Musculature evolution paths for unevolved Sol saves |
 | 1.17.0 | Persistent Glass Nerve and Adaptation completion gates |
+| 1.18.0 | Phase-gated Escalation operation offers for transitioned campaigns |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -507,10 +517,10 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
-`extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
+`extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
@@ -523,8 +533,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (85 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-five-scene capture with visual inspection
+- `cargo test` (87 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-seven-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -553,7 +563,7 @@ boundaries when continuing:
   the five implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The ten current map recipes support authored and safe mirrored layouts. Additional
+- The eleven current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
@@ -565,10 +575,12 @@ boundaries when continuing:
   Completing all three Contact gates advances into Adaptation. Neural Bloom has the
   first irreversible gift/complication evolution and its own scavenging operation;
   two evolved colonists and an operational Gene Lab complete Adaptation and enter
-  Escalation. Escalation-specific operations and later phases remain future content.
+  Escalation. Three Knives makes that phase immediately playable with a compound
+  three-power pressure modifier; additional Escalation operations and later phases
+  remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is the first Escalation-specific operation, with
-open three-faction contest pressure and a battlefield objective that distinguishes the
-new phase from the Contact and Adaptation mission pools.
+The recommended next vertical slice is an Escalation strategic response to Three
+Knives, letting the colony choose how it exploits, contains, or redirects the open
+three-faction contest before the next operation.

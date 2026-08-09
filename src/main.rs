@@ -17,6 +17,7 @@ mod game;
 mod gene_lab_ui;
 mod grid_ui;
 mod map_variants;
+mod operation_modifiers;
 mod persistence;
 mod reinforcements;
 mod roster_ui;

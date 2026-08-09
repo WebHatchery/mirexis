@@ -759,7 +759,9 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_ui_text_ex(
         &format!(
             "{} campaign  //  {} assets  //  click a hostile to attack",
-            if ctx.mission.name.starts_with("ADAPTATION:") {
+            if ctx.mission.name.starts_with("ESCALATION:") {
+                "Escalation"
+            } else if ctx.mission.name.starts_with("ADAPTATION:") {
                 "Adaptation"
             } else if ctx.mission.name.starts_with("CONTACT:") {
                 "Contact"

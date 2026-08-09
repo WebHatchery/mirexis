@@ -21,11 +21,17 @@ impl Game {
             "ilya_evolution" => self.capture_ilya_evolution(),
             "sol_evolution" => self.capture_sol_evolution(),
             "escalation" => self.capture_escalation(),
+            "escalation_operation" => self.capture_escalation_operation(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
                 14,
                 OperationModifier::AscendantInterference,
+            ),
+            "three_knives" => self.capture_template_operation(
+                "escalation_three_knives",
+                16,
+                OperationModifier::EscalationCrossfire,
             ),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
@@ -200,6 +206,28 @@ impl Game {
         self.state = AppState::Colony;
     }
 
+    fn capture_escalation_operation(&mut self) {
+        self.capture_escalation();
+        let mission_id = self
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .find(|mission| mission.template_id == "escalation_three_knives")
+            .expect("Escalation capture operation is offered")
+            .id
+            .clone();
+        self.campaign
+            .strategy
+            .select_mission(&mission_id)
+            .expect("Escalation capture operation can be selected");
+        self.active_mission = self
+            .campaign
+            .strategy
+            .materialize_selected(&self.data, &self.campaign.colony);
+        self.reset_capture_session(AppState::MissionBriefing);
+    }
+
     fn capture_adaptation_operation(&mut self) {
         self.capture_evolution();
         let mission_id = self
@@ -261,7 +289,9 @@ impl Game {
         let layout = crate::map_variants::materialize(recipe, &self.data, seed);
         self.active_mission.id = format!("capture_{}", template.id);
         self.active_mission.name = template.name.clone();
-        self.active_mission.briefing = if !template.required_phase.is_empty() {
+        self.active_mission.briefing = if template.required_phase == "escalation" {
+            "Escalation intelligence confirms three-power crossfire.".to_owned()
+        } else if !template.required_phase.is_empty() {
             format!(
                 "Adaptation intelligence confirms {} resistance.",
                 template.faction
