@@ -424,6 +424,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             );
         }
     }
+    crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
     for unit in &ctx.session.tactical.units {
         let targetable = match ctx.targeting {
             Some(TargetingView::Equipment {
@@ -528,72 +529,78 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         dark::TEXT_DIM,
     );
     let selected = ctx.session.selected_unit();
-    draw_ui_text_ex(
-        "SELECTED COLONIST",
-        x,
-        panel.y + 164.0,
-        TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
-    );
-    if let Some(unit) = selected {
-        let weapon_name = unit
-            .equipment_ids
-            .iter()
-            .filter_map(|id| ctx.data.equipment.iter().find(|item| &item.id == id))
-            .find(|item| item.slot == "primary")
-            .map_or("Unarmed", |item| item.name.as_str());
+    if !crate::enemy_intent_ui::draw_inspector(
+        ctx.session,
+        ctx.data.config.max_action_points,
+        panel,
+    ) {
         draw_ui_text_ex(
-            &unit.name,
+            "SELECTED COLONIST",
             x,
-            panel.y + 196.0,
-            TextStyle::new(25.0, dark::TEXT_BRIGHT).params(),
+            panel.y + 164.0,
+            TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
         );
-        draw_ui_text_ex(
-            &format!("{}  //  {}", unit.role, unit.mutation),
-            x,
-            panel.y + 222.0,
-            TextStyle::new(16.0, dark::TEXT_DIM).params(),
-        );
-        draw_ui_text_ex(
-            &format!(
-                "{} // {} DMG · R{} · {} AP · A{} · M{}",
-                weapon_name,
-                unit.effective_weapon_damage(),
-                unit.weapon_range,
-                unit.weapon_ap_cost,
-                unit.effective_armour(),
-                unit.move_range
-            ),
-            x,
-            panel.y + 242.0,
-            TextStyle::new(13.0, dark::ACCENT).params(),
-        );
-        meter(
-            Rect::new(x, panel.y + 250.0, panel.w - 36.0, 22.0),
-            unit.health as f32,
-            unit.max_health as f32,
-            dark::POSITIVE,
-            Some(&format!("VITALS {}/{}", unit.health, unit.max_health)),
-        );
-        draw_ui_text_ex(
-            &action_status(unit),
-            x,
-            panel.y + 316.0,
-            TextStyle::new(14.0, dark::TEXT_DIM).params(),
-        );
-        meter(
-            Rect::new(x, panel.y + 280.0, panel.w - 36.0, 22.0),
-            unit.action_points as f32,
-            ctx.data.config.max_action_points as f32,
-            Color::new(0.33, 0.65, 0.92, 1.0),
-            Some(&format!("ACTION POINTS {}", unit.action_points)),
-        );
-    } else {
-        draw_ui_text_ex(
-            "Select a colony unit",
-            x,
-            panel.y + 200.0,
-            TextStyle::new(18.0, dark::TEXT_DIM).params(),
-        );
+        if let Some(unit) = selected {
+            let weapon_name = unit
+                .equipment_ids
+                .iter()
+                .filter_map(|id| ctx.data.equipment.iter().find(|item| &item.id == id))
+                .find(|item| item.slot == "primary")
+                .map_or("Unarmed", |item| item.name.as_str());
+            draw_ui_text_ex(
+                &unit.name,
+                x,
+                panel.y + 196.0,
+                TextStyle::new(25.0, dark::TEXT_BRIGHT).params(),
+            );
+            draw_ui_text_ex(
+                &format!("{}  //  {}", unit.role, unit.mutation),
+                x,
+                panel.y + 222.0,
+                TextStyle::new(16.0, dark::TEXT_DIM).params(),
+            );
+            draw_ui_text_ex(
+                &format!(
+                    "{} // {} DMG · R{} · {} AP · A{} · M{}",
+                    weapon_name,
+                    unit.effective_weapon_damage(),
+                    unit.weapon_range,
+                    unit.weapon_ap_cost,
+                    unit.effective_armour(),
+                    unit.move_range
+                ),
+                x,
+                panel.y + 242.0,
+                TextStyle::new(13.0, dark::ACCENT).params(),
+            );
+            meter(
+                Rect::new(x, panel.y + 250.0, panel.w - 36.0, 22.0),
+                unit.health as f32,
+                unit.max_health as f32,
+                dark::POSITIVE,
+                Some(&format!("VITALS {}/{}", unit.health, unit.max_health)),
+            );
+            draw_ui_text_ex(
+                &action_status(unit),
+                x,
+                panel.y + 316.0,
+                TextStyle::new(14.0, dark::TEXT_DIM).params(),
+            );
+            meter(
+                Rect::new(x, panel.y + 280.0, panel.w - 36.0, 22.0),
+                unit.action_points as f32,
+                ctx.data.config.max_action_points as f32,
+                Color::new(0.33, 0.65, 0.92, 1.0),
+                Some(&format!("ACTION POINTS {}", unit.action_points)),
+            );
+        } else {
+            draw_ui_text_ex(
+                "Select a colony unit",
+                x,
+                panel.y + 200.0,
+                TextStyle::new(18.0, dark::TEXT_DIM).params(),
+            );
+        }
     }
     let objective_action = match ctx.mission.objective_kind {
         ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",

@@ -394,6 +394,11 @@ Combat is turn-based.
 
 The preferred initial model is alternating player and enemy phases.
 
+During the colony phase, selecting a hostile reveals its current vitals, weapon profile,
+faction ability, and deterministic first-action forecast. An orange line marks the
+predicted attack target or next movement step without changing the active colonist, so
+enemy pressure can be read before committing to end the phase.
+
 ### Player Phase
 
 The player activates characters in any order.

@@ -26,6 +26,8 @@ The completed roadmap slice includes:
   and Ascendant Phase Ward, each surfaced through status markers and the battle log
 - visible faction terrain hazards across nine battlefields: damaging Directorate fire
   lanes, hindering Brood spore blooms, and accuracy-disrupting Ascendant static rifts
+- click-to-inspect hostile intent previews that expose enemy vitals, weapon profiles,
+  faction abilities, likely targets, and the predicted first move or attack on the grid
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

@@ -1,6 +1,7 @@
 //! Application state machine, persistence, and toolkit integration.
 
 mod capture_scenes;
+mod capture_tactical;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;

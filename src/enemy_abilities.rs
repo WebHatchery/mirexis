@@ -6,6 +6,15 @@ use crate::tactical::{manhattan, BattleEvent, Command, CommandCost, RuleError, S
 
 const ABILITY_COST: u8 = 1;
 
+pub(crate) fn ability_name(faction: Option<&str>) -> Option<&'static str> {
+    match faction {
+        Some("brood") => Some("PREDATORY SURGE"),
+        Some("directorate") => Some("SUPPRESSION LOCK"),
+        Some("ascendants") => Some("PHASE WARD"),
+        _ => None,
+    }
+}
+
 pub(crate) fn try_activate(session: &mut GameSession, unit_id: &str) {
     let faction = session
         .unit(unit_id)

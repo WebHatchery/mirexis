@@ -1195,4 +1195,20 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(migrated.tactical.unwrap().hazards.is_empty());
     }
+
+    #[test]
+    fn hazard_save_keeps_realized_tiles_when_intent_preview_is_added() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        session.tactical.hazards.push(crate::tactical::HazardTile {
+            position: macroquad_toolkit::grid::TilePos::new(2, 2),
+            kind: crate::data::HazardKind::StaticRift,
+        });
+        let legacy = serde_json::to_value(session.to_save("1.35.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.35.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(migrated.tactical.unwrap().hazards, session.tactical.hazards);
+    }
 }

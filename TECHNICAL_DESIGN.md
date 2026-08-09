@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.35.0
+Save/content version: 1.36.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -68,6 +68,7 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
+| `game/capture_tactical.rs` | Tactical mechanic showcase capture construction | Runtime input handling |
 | `ui_debrief.rs` | Operation results and campaign-finale presentation | Outcome or campaign mutation |
 | `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
@@ -82,6 +83,8 @@ Important transition payloads:
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `enemy_abilities.rs` | Faction ability validation, target choice, effects, and AI activation | General hostile movement or rendering |
+| `enemy_intent.rs` | Read-only hostile first-action forecasts using live AI selectors | State mutation or drawing |
+| `enemy_intent_ui.rs` | Hostile inspection sidebar and on-grid forecast line | AI policy or state mutation |
 | `hazards.rs` | Landing-triggered faction hazard damage, statuses, immunity, and events | Pathfinding or drawing |
 | `hazard_ui.rs` | Grid hazard symbols and compact tactical legend | Simulation mutation |
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
@@ -193,6 +196,11 @@ distance/coordinate ordering. Sporecasters and rift wardens hinder movement on a
 suppression drones disrupt accuracy. Mission faction filters deployment to Brood organisms,
 Directorate riflemen and a suppression drone, or Ascendant sentinels and a rift
 warden; factions no longer borrow the authored Glassroot enemy squad.
+
+During the player phase, selecting a hostile derives a read-only forecast from a cloned
+enemy-phase view of the battle. It reuses the live attack and movement selectors, exposes
+the faction ability and likely target, and draws the predicted attack line or first step.
+Forecast state is never serialized and never consumes tactical RNG.
 
 Holdout and SignalTrace missions prebuild deterministic reinforcement waves for rounds
 three and five.
@@ -580,6 +588,7 @@ Migration coverage:
 | 1.32.0 | Defense-asset integrity fields, inactive by default for older tactical saves |
 | 1.33.0 | Tactical faction identity and once-per-phase hostile ability use state |
 | 1.34.0 | Save-stable realized hazard tiles, defaulting older active battles to none |
+| 1.35.0 | No new fields; enemy intent remains derived from existing tactical state |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -617,7 +626,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`,
+`briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -631,8 +640,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (129 domain/migration tests plus the shared source-size gate)
-- deterministic sixty-three-scene capture with visual inspection
+- `cargo test` (132 domain/migration tests plus the shared source-size gate)
+- deterministic sixty-four-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -688,5 +697,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is enemy-intent previewing that exposes likely targets,
-movement pressure, and faction abilities before the colony commits to ending its phase.
+The recommended next vertical slice is player-action previewing for movement cost, landing
+hazard consequences, and attack hit chance before a command is committed.

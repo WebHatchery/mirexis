@@ -46,7 +46,7 @@ pub(crate) fn resolve_enemy_phase(session: &mut GameSession) {
     }
 }
 
-fn best_attack_target(session: &GameSession, attacker_id: &str) -> Option<String> {
+pub(crate) fn best_attack_target(session: &GameSession, attacker_id: &str) -> Option<String> {
     let mut targets = session
         .tactical
         .units
@@ -66,7 +66,7 @@ fn best_attack_target(session: &GameSession, attacker_id: &str) -> Option<String
     targets.first().map(|unit| unit.id.clone())
 }
 
-fn best_enemy_move(session: &GameSession, enemy_id: &str) -> Option<TilePos> {
+pub(crate) fn best_enemy_move(session: &GameSession, enemy_id: &str) -> Option<TilePos> {
     let enemy = session.unit(enemy_id)?;
     let target_position = if session.tactical.objective_kind == ObjectiveKind::DefendAsset
         && session.tactical.objective_state == ObjectiveState::Active

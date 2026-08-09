@@ -14,6 +14,8 @@ mod cover_ui;
 mod data;
 mod defense_objective;
 mod enemy_abilities;
+mod enemy_intent;
+mod enemy_intent_ui;
 mod equipment_actions;
 mod equipment_catalog;
 mod equipment_ui;
