@@ -28,6 +28,8 @@ The completed roadmap slice includes:
   lanes, hindering Brood spore blooms, and accuracy-disrupting Ascendant static rifts
 - click-to-inspect hostile intent previews that expose enemy vitals, weapon profiles,
   faction abilities, likely targets, and the predicted first move or attack on the grid
+- player action previews for validated movement AP, landing-hazard consequences, attack
+  hit chance, normal/critical damage range, and weapon AP before commands are committed
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

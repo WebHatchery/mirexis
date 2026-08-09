@@ -49,6 +49,7 @@ impl Game {
             "ascendant_ability" => self.capture_enemy_ability("vault_purge", "ascendants", 11),
             "hazard" => self.capture_hazard(),
             "intent" => self.capture_enemy_intent(),
+            "action_preview" => self.capture_player_action_preview(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,

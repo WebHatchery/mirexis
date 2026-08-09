@@ -3,6 +3,8 @@
 use macroquad::prelude::*;
 use macroquad_toolkit::capture;
 
+mod action_preview;
+mod action_preview_ui;
 mod campaign;
 mod class_action_ui;
 mod class_actions;

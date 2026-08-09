@@ -445,6 +445,12 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             targetable,
         );
     }
+    crate::action_preview_ui::draw(
+        ctx.session,
+        view.tile_at(mouse)
+            .unwrap_or(ctx.session.tactical.selected_tile),
+        panel,
+    );
     if is_mouse_button_released(MouseButton::Left) {
         if let Some(tile) = view.tile_at(mouse) {
             if let Some(targeting) = ctx.targeting {

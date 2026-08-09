@@ -399,6 +399,11 @@ faction ability, and deterministic first-action forecast. An orange line marks t
 predicted attack target or next movement step without changing the active colonist, so
 enemy pressure can be read before committing to end the phase.
 
+Hovering a reachable tile—or focusing it with keyboard navigation—previews its validated
+movement AP and any landing hazard consequence. An attackable hostile instead previews
+the exact hit chance, normal-to-critical damage range, and weapon AP before the attack is
+committed.
+
 ### Player Phase
 
 The player activates characters in any order.

@@ -64,4 +64,24 @@ impl Game {
             .unwrap();
         self.session.tactical.selected_tile = hostile.position;
     }
+
+    pub(super) fn capture_player_action_preview(&mut self) {
+        self.capture_template_operation("nest_suppression", 7, OperationModifier::BroodFrenzy);
+        self.session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap()
+            .position = TilePos::new(4, 3);
+        let hostile = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(5, 3);
+        self.session.tactical.selected_tile = hostile.position;
+    }
 }
