@@ -23,6 +23,7 @@ impl Game {
             "escalation" => self.capture_escalation(),
             "escalation_operation" => self.capture_escalation_operation(),
             "escalation_response" => self.capture_escalation_response(),
+            "mirexis" => self.capture_mirexis(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -250,6 +251,17 @@ impl Game {
         self.campaign.colony.resources.materials = 60;
         self.campaign.colony.resources.biomass = 20;
         self.campaign.colony.resources.power = 8;
+        self.state = AppState::Colony;
+    }
+
+    fn capture_mirexis(&mut self) {
+        self.capture_escalation_response();
+        self.campaign
+            .strategy
+            .choose_escalation_response("bastion_beacon", &mut self.campaign.colony, &self.data)
+            .expect("Mirexis capture can commit its convergence response");
+        self.campaign.strategy.escalation_branch_completed = true;
+        assert!(self.campaign.refresh_escalation_completion(&self.data));
         self.state = AppState::Colony;
     }
 

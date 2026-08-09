@@ -247,7 +247,9 @@ fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
-    let phase_progress = if campaign.strategy.adaptation_complete {
+    let phase_progress = if campaign.strategy.escalation_complete {
+        "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING // PHASE FIVE".to_owned()
+    } else if campaign.strategy.adaptation_complete {
         if !campaign.strategy.escalation_operation_completed {
             "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
         } else {
@@ -258,7 +260,15 @@ fn draw_operations(
                 .map_or_else(
                     || "ESCALATION // THREE KNIVES WON // RESPONSE REQUIRED".to_owned(),
                     |response| {
-                        format!("ESCALATION // RESPONSE // {}", response.name.to_uppercase())
+                        format!(
+                            "ESCALATION // {} // BRANCH {}",
+                            response.name.to_uppercase(),
+                            if campaign.strategy.escalation_branch_completed {
+                                "WON"
+                            } else {
+                                "PENDING"
+                            }
+                        )
                     },
                 )
         }

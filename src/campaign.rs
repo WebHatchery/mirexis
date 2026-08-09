@@ -276,6 +276,7 @@ impl CampaignState {
         }
         self.refresh_contact_completion(data);
         self.refresh_adaptation_completion(data);
+        self.refresh_escalation_completion(data);
     }
 
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
@@ -558,6 +559,14 @@ impl CampaignState {
         let changed = self
             .strategy
             .refresh_adaptation_completion(evolved >= 2, lab);
+        if changed {
+            self.strategy.regenerate_missions(data);
+        }
+        changed
+    }
+
+    pub fn refresh_escalation_completion(&mut self, data: &GameData) -> bool {
+        let changed = self.strategy.refresh_escalation_completion();
         if changed {
             self.strategy.regenerate_missions(data);
         }
@@ -1284,5 +1293,36 @@ mod tests {
         assert!(campaign.strategy.adaptation_operation_completed);
         assert!(campaign.strategy.adaptation_complete);
         assert_eq!(campaign.strategy.phase_id, "escalation");
+    }
+
+    #[test]
+    fn escalation_completion_requires_the_matching_response_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.adaptation_complete = true;
+        campaign.strategy.phase_id = "escalation".to_owned();
+        campaign.strategy.escalation_operation_completed = true;
+        campaign.colony.resources.biomass = 20;
+        campaign
+            .strategy
+            .choose_escalation_response("living_decoy", &mut campaign.colony, &data)
+            .unwrap();
+        assert!(!campaign.strategy.escalation_complete);
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        assert_eq!(mission.template_id, "escalation_living_false_heart");
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: mission.materials_reward,
+            biomass_awarded: mission.biomass_reward,
+            power_awarded: mission.power_reward,
+        };
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+
+        assert!(campaign.strategy.escalation_branch_completed);
+        assert!(campaign.strategy.escalation_complete);
+        assert_eq!(campaign.strategy.phase_id, "mirexis");
     }
 }

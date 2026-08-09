@@ -6,6 +6,9 @@ use crate::data::{
     OperationModifier,
 };
 use crate::state::{MissionOutcome, ObjectiveState};
+use crate::strategy_events::{
+    from_definition as character_event_from_def, is_available as event_is_available,
+};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
 
@@ -115,6 +118,10 @@ pub struct StrategyState {
     pub escalation_operation_completed: bool,
     #[serde(default)]
     pub escalation_response_id: String,
+    #[serde(default)]
+    pub escalation_branch_completed: bool,
+    #[serde(default)]
+    pub escalation_complete: bool,
     rng: SeededRng,
 }
 
@@ -189,6 +196,8 @@ impl StrategyState {
             adaptation_complete: false,
             escalation_operation_completed: false,
             escalation_response_id: String::new(),
+            escalation_branch_completed: false,
+            escalation_complete: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -226,7 +235,11 @@ impl StrategyState {
             .find(|recipe| recipe.id == instance.map_recipe);
         let layout =
             recipe.map(|recipe| crate::map_variants::materialize(recipe, data, instance.seed));
-        let strategic_bonus = self.strategic_reward_bonus(data);
+        let strategic_bonus = crate::strategy_rewards::bonus(
+            &self.contact_protocol_id,
+            &self.escalation_response_id,
+            data,
+        );
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
@@ -336,6 +349,18 @@ impl StrategyState {
                 .is_some_and(|template| template.required_phase == "escalation")
             {
                 self.escalation_operation_completed = true;
+            }
+            if data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.id == mission.template_id)
+                .is_some_and(|template| {
+                    !template.required_response.is_empty()
+                        && template.required_response == self.escalation_response_id
+                })
+            {
+                self.escalation_branch_completed = true;
             }
         }
         if let Some(faction) = self
@@ -529,26 +554,22 @@ impl StrategyState {
         Ok(response.name.clone())
     }
 
-    fn strategic_reward_bonus(&self, data: &GameData) -> (i32, i32, i32) {
-        let contact = data
-            .campaign
-            .contact_protocols
-            .iter()
-            .find(|protocol| protocol.id == self.contact_protocol_id)
-            .map_or((0, 0, 0), |protocol| {
-                (
-                    protocol.materials_bonus,
-                    protocol.biomass_bonus,
-                    protocol.power_bonus,
-                )
-            });
-        let escalation_materials = data
-            .campaign
-            .escalation_responses
-            .iter()
-            .find(|response| response.id == self.escalation_response_id)
-            .map_or(0, |response| response.materials_bonus);
-        (contact.0 + escalation_materials, contact.1, contact.2)
+    pub fn refresh_escalation_completion(&mut self) -> bool {
+        if self.escalation_complete
+            || !self.adaptation_complete
+            || !self.escalation_operation_completed
+            || self.escalation_response_id.is_empty()
+            || !self.escalation_branch_completed
+        {
+            return false;
+        }
+        self.escalation_complete = true;
+        self.phase_id = "mirexis".to_owned();
+        self.phase_name = "PHASE FIVE // MIREXIS".to_owned();
+        self.phase_summary =
+            "The convergence has broken open. Mirexis must decide what the colony will become."
+                .to_owned();
+        true
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
@@ -762,35 +783,6 @@ impl StrategyState {
     pub fn regenerate_missions(&mut self, data: &GameData) {
         self.generate_missions(data);
     }
-}
-
-fn character_event_from_def(event: &crate::data::CharacterEventDef) -> CharacterEventState {
-    CharacterEventState {
-        id: event.id.clone(),
-        title: event.title.clone(),
-        description: event.description.clone(),
-        participants: event.participants.clone(),
-        food_cost: event.food_cost,
-        attention_change: event.attention_change,
-        attention_faction: event.attention_faction.clone(),
-        legacy_name: event.legacy_name.clone(),
-        legacy_character_id: event.legacy_character_id.clone(),
-        legacy_stat: event.legacy_stat.clone(),
-        legacy_amount: event.legacy_amount,
-        required_protocol: event.required_protocol.clone(),
-        requires_contact_trace: event.requires_contact_trace,
-        resolved: false,
-    }
-}
-
-fn event_is_available(
-    event: &CharacterEventState,
-    protocol_id: &str,
-    trace_complete: bool,
-) -> bool {
-    !event.resolved
-        && (event.required_protocol.is_empty() || event.required_protocol == protocol_id)
-        && (!event.requires_contact_trace || trace_complete)
 }
 
 #[cfg(test)]
@@ -1190,6 +1182,21 @@ mod tests {
         assert!(lattice
             .choose_escalation_response("living_decoy", &mut colony, &data)
             .is_err());
+        let branch = lattice.selected_mission().unwrap().clone();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: branch.materials_reward,
+            biomass_awarded: branch.biomass_reward,
+            power_awarded: branch.power_reward,
+        };
+        lattice.adaptation_complete = true;
+        lattice.resolve_mission(&outcome, &branch, &data);
+        assert!(lattice.escalation_branch_completed);
+        assert!(lattice.refresh_escalation_completion());
+        assert_eq!(lattice.phase_id, "mirexis");
     }
 
     #[test]

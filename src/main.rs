@@ -23,6 +23,8 @@ mod reinforcements;
 mod roster_ui;
 mod state;
 mod strategy;
+mod strategy_events;
+mod strategy_rewards;
 mod tactical;
 mod tactical_ai;
 mod tactical_unit_ui;

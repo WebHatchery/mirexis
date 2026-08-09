@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Four — mixed-power Escalation operations
-Save/content version: 1.22.0
+Current campaign slice: Phase Five — Mirexis entry
+Save/content version: 1.23.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -82,6 +82,8 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
+| `strategy_events.rs` | Campaign-event projection and availability rules | Event consequences or UI |
+| `strategy_rewards.rs` | Contact and Escalation mission-recovery bonuses | Mission generation or colony mutation |
 | `map_variants.rs` | Seed-driven safe transforms of authored battlefield geometry | Mission selection |
 | `persistence.rs` | Project schema migrations inside toolkit slots | Platform storage paths |
 | `ui.rs` | Title, briefing, tactical, debrief rendering and intents | Direct state mutation |
@@ -436,6 +438,12 @@ trace inside a lattice storm. All three retain the Phase Four crossfire modifier
 changing faction, objective, recovery, and map family. Response-locked templates remain
 unavailable before the choice and mutually exclusive afterward.
 
+Escalation has a persistent three-gate completion contract: win Three Knives, commit
+one convergence response, and win the response-locked follow-up operation. The colony
+hub exposes the operation, response, and branch state. Meeting all three gates advances
+the saved campaign to `PHASE FIVE // MIREXIS`, updates its summary, and regenerates a
+playable generic offer pool while dedicated Phase Five content is developed.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -512,6 +520,7 @@ Migration coverage:
 | 1.19.0 | Persistent Three Knives victory and convergence-response choice state |
 | 1.20.0 | Response-locked Escalation offers for already committed campaigns |
 | 1.21.0 | Explicit mixed-power hostile deployment for saved Escalation offers |
+| 1.22.0 | Persistent response-branch victory and Escalation completion gates |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -544,7 +553,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`,
 `adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
@@ -560,8 +569,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (92 domain/migration tests plus the shared source-size gate)
-- deterministic forty-one-scene capture with visual inspection
+- `cargo test` (94 domain/migration tests plus the shared source-size gate)
+- deterministic forty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -604,11 +613,11 @@ boundaries when continuing:
   two evolved colonists and an operational Gene Lab complete Adaptation and enter
   Escalation. Three Knives fields all three enemy powers under a compound pressure
   modifier, and its convergence response creates the first
-  persistent Phase Four strategic tradeoff with a matching follow-up operation;
-  Escalation completion and later phases remain future content.
+  persistent Phase Four strategic tradeoff with a matching follow-up operation. Winning
+  that branch completes Escalation and enters Phase Five; dedicated Mirexis operations,
+  revelations, and end-state decisions remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a visible Escalation completion contract based
-on winning Three Knives, committing a convergence response, and winning its matching
-follow-up operation before the campaign approaches Phase Five.
+The recommended next vertical slice is the first Phase Five revelation and colony
+decision, turning the Mirexis entry from a campaign header into a new strategic layer.

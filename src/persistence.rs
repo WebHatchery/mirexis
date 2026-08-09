@@ -922,4 +922,20 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert_eq!(three_knives.hostile_unit_ids.len(), 3);
     }
+
+    #[test]
+    fn mixed_power_save_gains_escalation_completion_gates() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.22.0", &campaign)).unwrap();
+        let strategy = legacy["campaign"]["strategy"].as_object_mut().unwrap();
+        strategy.remove("escalation_branch_completed");
+        strategy.remove("escalation_complete");
+        let migrated = migrate_save_value(Some("1.22.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(!migrated.campaign.strategy.escalation_branch_completed);
+        assert!(!migrated.campaign.strategy.escalation_complete);
+    }
 }

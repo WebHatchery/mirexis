@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase Four — Escalation
+## Current Slice: Phase Five — Mirexis Entry
 
 The completed roadmap slice includes:
 
@@ -71,6 +71,9 @@ The completed roadmap slice includes:
 - three response-locked follow-up operations: a Directorate elimination siege for
   Bastion Beacon, a Brood extraction corridor for Living Decoy, or an Ascendant signal
   trace for Weaponized Lattice, each on its own battlefield family
+- a visible Escalation completion contract—Three Knives victory, one committed
+  response, and victory in its matching branch—that advances the persisted campaign
+  into Phase Five: Mirexis while keeping the operation loop playable
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -109,5 +112,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the response-branched Escalation operations, and the texture manifest. `GameData::load()`
+content through the Phase Five campaign entry, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.
