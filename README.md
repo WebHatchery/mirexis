@@ -40,6 +40,8 @@ The completed roadmap slice includes:
   unlock permanently after the matching signal trace is won
 - protocol-gated Contact aftermath events that alter the contacted faction's attention
   and leave a permanent character legacy on Kira, Mara, or Sol
+- a visible Contact completion contract—trace, aftermath, and fielded prototype—that
+  advances the persistent campaign into Phase Three: Adaptation
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

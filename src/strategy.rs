@@ -103,6 +103,8 @@ pub struct StrategyState {
     pub contact_protocol_id: String,
     #[serde(default)]
     pub contact_trace_completed: bool,
+    #[serde(default)]
+    pub contact_complete: bool,
     rng: SeededRng,
 }
 
@@ -171,6 +173,7 @@ impl StrategyState {
             isolation_complete: false,
             contact_protocol_id: String::new(),
             contact_trace_completed: false,
+            contact_complete: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -404,6 +407,27 @@ impl StrategyState {
         self.contact_protocol_id = protocol.id.clone();
         self.generate_missions(data);
         Ok(protocol.name.clone())
+    }
+
+    pub fn refresh_contact_completion(
+        &mut self,
+        aftermath_resolved: bool,
+        prototype_equipped: bool,
+    ) -> bool {
+        if self.contact_complete
+            || !self.contact_trace_completed
+            || !aftermath_resolved
+            || !prototype_equipped
+        {
+            return false;
+        }
+        self.contact_complete = true;
+        self.phase_id = "adaptation".to_owned();
+        self.phase_name = "PHASE THREE: ADAPTATION".to_owned();
+        self.phase_summary =
+            "Contact changed Mirexis. The colony must now decide which changes it can survive."
+                .to_owned();
+        true
     }
 
     fn contact_reward_bonus(&self, data: &GameData) -> (i32, i32, i32) {
@@ -775,6 +799,23 @@ mod tests {
         assert!(!strategy.contact_trace_completed);
         strategy.resolve_mission(&outcome, &mission, &data);
         assert!(strategy.contact_trace_completed);
+    }
+
+    #[test]
+    fn contact_completion_requires_trace_aftermath_and_prototype() {
+        let data = GameData::load().unwrap();
+        let mut strategy = StrategyState::new(&data);
+        let mut colony = ColonyState::new();
+        strategy.isolation_victories = 3;
+        strategy.first_assault_repulsed = true;
+        strategy.research[0].completed = true;
+        strategy.refresh_isolation_completion(&mut colony);
+        strategy.contact_trace_completed = true;
+        assert!(!strategy.refresh_contact_completion(false, false));
+        assert!(!strategy.refresh_contact_completion(true, false));
+        assert!(strategy.refresh_contact_completion(true, true));
+        assert_eq!(strategy.phase_id, "adaptation");
+        assert!(!strategy.refresh_contact_completion(true, true));
     }
 
     #[test]

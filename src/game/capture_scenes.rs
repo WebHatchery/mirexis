@@ -14,6 +14,7 @@ impl Game {
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),
+            "adaptation" => self.capture_adaptation(),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -104,6 +105,17 @@ impl Game {
         self.campaign
             .resolve_first_character_event(&self.data)
             .expect("second Isolation capture event resolves");
+        self.state = AppState::Colony;
+    }
+
+    fn capture_adaptation(&mut self) {
+        self.capture_contact_event();
+        self.campaign
+            .resolve_first_character_event(&self.data)
+            .expect("Contact capture event resolves");
+        self.campaign
+            .craft_equipment("sol_cairn", "ascendant_phase_lens", &self.data)
+            .expect("Contact capture prototype is crafted");
         self.state = AppState::Colony;
     }
 

@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Two — Contact entry
-Save/content version: 1.10.0
+Current campaign slice: Phase Three — Adaptation entry
+Save/content version: 1.11.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -348,6 +348,11 @@ reduces the contacted faction's attention, and gives a permanent accuracy, healt
 movement legacy to the named participant. Migration backfills newly authored event
 states into old campaigns without replaying resolved events.
 
+Contact completes after the signal trace is won, its aftermath event is resolved, and
+the unlocked prototype is equipped on any colonist. These gates are visible in the
+colony hub. Meeting all three advances the saved header and summary to Phase Three:
+Adaptation once; the campaign sandbox remains available afterward.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -412,6 +417,7 @@ Migration coverage:
 | 1.7.0 | Protocol-gated Contact offers and the SignalTrace objective contract |
 | 1.8.0 | Persistent trace aftermath and protocol-gated workshop prototypes |
 | 1.9.0 | Protocol-gated aftermath events with faction and character consequences |
+| 1.10.0 | Persistent Contact completion and Adaptation transition |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -443,7 +449,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `legacy`,
+`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
@@ -458,8 +464,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (69 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-six-scene capture with visual inspection
+- `cargo test` (71 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-seven-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -497,9 +503,10 @@ boundaries when continuing:
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
-  Deeper Contact relationships and later phases remain future content.
+  Completing all three Contact gates advances into Adaptation. Adaptation-specific
+  mutation evolution, operations, and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a visible Contact completion contract leading
-into Adaptation after the trace, prototype, and aftermath have all been confronted.
+The recommended next vertical slice is the first Adaptation mechanic: a visible,
+player-chosen mutation evolution with a tactical gift and a strategic complication.

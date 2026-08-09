@@ -229,22 +229,22 @@ fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
-    let phase_progress = if campaign.strategy.isolation_complete {
+    let phase_progress = if campaign.strategy.contact_complete {
+        "ADAPTATION // CONTACT COMPLETE // MUTATION PRESSURE RISING".to_owned()
+    } else if campaign.strategy.isolation_complete {
         data.campaign
             .contact_protocols
             .iter()
             .find(|protocol| protocol.id == campaign.strategy.contact_protocol_id)
             .map_or_else(
                 || "CONTACT // CHOOSE A PROTOCOL // 2 COMPONENTS AVAILABLE".to_owned(),
-                |protocol| {
+                |_protocol| {
+                    let (trace, aftermath, prototype) = campaign.contact_completion_progress(data);
                     format!(
-                        "CONTACT // {} ACTIVE{}",
-                        protocol.name.to_uppercase(),
-                        if campaign.strategy.contact_trace_completed {
-                            " // TRACE COMPLETE"
-                        } else {
-                            ""
-                        }
+                        "CONTACT // TRACE {} // AFTERMATH {} // PROTOTYPE {}",
+                        if trace { "READY" } else { "PENDING" },
+                        if aftermath { "READY" } else { "PENDING" },
+                        if prototype { "READY" } else { "PENDING" }
                     )
                 },
             )

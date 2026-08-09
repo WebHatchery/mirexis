@@ -50,6 +50,7 @@ pub fn migrate_save_value(
     save.campaign.colony.ensure_phase_one_infrastructure(
         detected_version.as_deref() != Some(data.config.version.as_str()),
     );
+    save.campaign.refresh_contact_completion(data);
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -607,5 +608,38 @@ mod tests {
             .character_events
             .iter()
             .any(|event| event.id == "brood_contact_aftermath"));
+    }
+
+    #[test]
+    fn aftermath_save_recovers_adaptation_completion() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        campaign
+            .strategy
+            .choose_contact_protocol("directorate_requisition", &mut campaign.colony, &data)
+            .unwrap();
+        campaign.strategy.contact_trace_completed = true;
+        campaign.resolve_first_character_event(&data).unwrap();
+        campaign.resolve_first_character_event(&data).unwrap();
+        campaign.resolve_first_character_event(&data).unwrap();
+        campaign
+            .craft_equipment("kira_voss", "directorate_smartlink", &data)
+            .unwrap();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.10.0", &campaign)).unwrap();
+        legacy["campaign"]["strategy"]
+            .as_object_mut()
+            .unwrap()
+            .remove("contact_complete");
+        let migrated = migrate_save_value(Some("1.10.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.campaign.strategy.contact_complete);
+        assert_eq!(migrated.campaign.strategy.phase_id, "adaptation");
     }
 }

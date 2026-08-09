@@ -265,6 +265,7 @@ impl CampaignState {
                 character.availability = Availability::Recovering;
             }
         }
+        self.refresh_contact_completion(data);
     }
 
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
@@ -325,6 +326,7 @@ impl CampaignState {
                 });
             }
         }
+        self.refresh_contact_completion(data);
         Ok(title)
     }
 
@@ -437,7 +439,43 @@ impl CampaignState {
         });
         self.colony.resources.materials -= cost as i32;
         character.equipment_ids.push(equipment.id.clone());
+        self.refresh_contact_completion(data);
         Ok(cost)
+    }
+
+    pub fn refresh_contact_completion(&mut self, data: &GameData) -> bool {
+        let (_, aftermath_resolved, prototype_equipped) = self.contact_completion_progress(data);
+        self.strategy
+            .refresh_contact_completion(aftermath_resolved, prototype_equipped)
+    }
+
+    pub fn contact_completion_progress(&self, data: &GameData) -> (bool, bool, bool) {
+        let protocol_id = self.strategy.contact_protocol_id.as_str();
+        let aftermath_resolved = data
+            .campaign
+            .events
+            .iter()
+            .find(|event| event.required_protocol == protocol_id)
+            .is_some_and(|definition| {
+                self.strategy
+                    .character_events
+                    .iter()
+                    .any(|event| event.id == definition.id && event.resolved)
+            });
+        let prototype_equipped = data
+            .equipment
+            .iter()
+            .filter(|equipment| equipment.required_protocol == protocol_id)
+            .any(|equipment| {
+                self.roster
+                    .iter()
+                    .any(|character| character.equipment_ids.contains(&equipment.id))
+            });
+        (
+            self.strategy.contact_trace_completed,
+            aftermath_resolved,
+            prototype_equipped,
+        )
     }
 
     pub fn equipment_is_unlocked(&self, equipment: &EquipmentDef) -> bool {
@@ -960,5 +998,10 @@ mod tests {
             .event_legacies
             .iter()
             .any(|legacy| legacy.id == "ascendant_contact_aftermath"));
+        campaign
+            .craft_equipment("sol_cairn", "ascendant_phase_lens", &data)
+            .unwrap();
+        assert!(campaign.strategy.contact_complete);
+        assert_eq!(campaign.strategy.phase_id, "adaptation");
     }
 }
