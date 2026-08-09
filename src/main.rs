@@ -25,6 +25,7 @@ mod tactical;
 mod tactical_ai;
 mod tactical_unit_ui;
 mod ui;
+mod ui_action;
 mod ui_widgets;
 
 use game::Game;

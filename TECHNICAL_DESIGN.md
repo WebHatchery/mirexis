@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase One — Isolation
-Save/content version: 1.6.0
+Current campaign slice: Phase Two — Contact entry
+Save/content version: 1.7.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -68,6 +68,7 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
+| `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
@@ -281,7 +282,7 @@ Damaged Barracks, Infirmary, and Workshop buildings stop satisfying their gamepl
 gates. The layout marks damage and its material cost directly; clicking the building
 repairs it and autosaves the restored facility.
 
-## 8. Phase One Strategy Contract
+## 8. Phase One and Contact Strategy Contract
 
 `StrategyState` owns Phase One: Isolation:
 
@@ -322,6 +323,12 @@ any research doctrine, and repel a colony-defense assault. Meeting all three gat
 advances the campaign header to Phase Two: Contact and grants two Alien Components
 once. The colony loop remains playable after the transition; Contact-specific
 operations, research, and story consequences are the next content layer.
+
+The first Contact decision spends those two components on one mutually exclusive,
+data-backed protocol. Directorate Requisition adds 10 materials, Brood Cultivation
+adds 4 biomass, or Ascendant Capacitor adds 2 power to every later successful
+operation. The chosen protocol is saved, cannot be replaced, and is applied while
+mission rewards are materialized so briefing and debrief values remain honest.
 
 ## 9. Content Registry
 
@@ -383,6 +390,7 @@ Migration coverage:
 | 1.3.0 | Battle-local destructible-cover integrity |
 | 1.4.0 | Hydroponics, Power Plant, construction selection, and power-model rebasing |
 | 1.5.0 | Persistent Isolation victory, doctrine, and repelled-assault phase progress |
+| 1.6.0 | Persistent mutually exclusive Contact protocol choice |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -427,7 +435,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (60 domain/migration tests plus the shared source-size gate)
+- `cargo test` (62 domain/migration tests plus the shared source-size gate)
 - deterministic twenty-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -464,11 +472,10 @@ boundaries when continuing:
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
   equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
-  state. Contact-specific story, operations, research, and later phases remain future
-  campaign content.
+  state with one faction-flavoured economic protocol. Contact-specific story,
+  operations, relationships, and later phases remain future campaign content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is the first Contact content: spend recovered
-Alien Components on a consequential doctrine or facility and introduce an operation
-whose objective makes the phase transition mechanically distinct.
+The recommended next vertical slice is a Contact operation whose objective and
+faction consequence make the phase transition tactically and narratively distinct.

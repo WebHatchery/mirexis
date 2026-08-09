@@ -1,56 +1,18 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::campaign::CampaignState;
-use crate::colony::BuildingKind;
 use crate::data::{GameData, MissionDef, ObjectiveKind, Team};
 use crate::grid_ui::GridView;
 use crate::state::{GameSession, MissionOutcome, ObjectiveState, TacticalPhase};
 use crate::ui_widgets::{action_status, button, event_summary};
 use macroquad::prelude::*;
-use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
+pub use crate::ui_action::UiAction;
+
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum UiAction {
-    StartMission,
-    OpenMissionBriefing,
-    SelectMission(String),
-    CompleteResearch(String),
-    ResolveCharacterEvent,
-    DeployMission,
-    ToggleDeployment(String),
-    Continue,
-    ReturnToTitle,
-    ReturnToColony,
-    OpenRoster,
-    SelectColonist(String),
-    TrainSelected(String),
-    CraftSelected(String),
-    SelectConstruction(BuildingKind),
-    ConstructBuilding(BuildingKind, [i32; 2]),
-    RepairBuilding(String),
-    TreatInjury,
-    SelectTile(TilePos),
-    MoveSelected(TilePos),
-    AttackSelected(String),
-    AttackCover(TilePos),
-    InteractObjective,
-    ActivateMutation,
-    ActivateClassAction,
-    ArmClassAction,
-    UseClassActionOn(String),
-    ArmEquipment(String),
-    CancelTargeting,
-    UseEquipmentOn(String),
-    EndPhase,
-    Save,
-    Load,
-    DeleteSave,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetingView<'a> {

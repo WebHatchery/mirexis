@@ -261,6 +261,20 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::ChooseContactProtocol(protocol_id) => {
+                match self.campaign.strategy.choose_contact_protocol(
+                    &protocol_id,
+                    &mut self.campaign.colony,
+                    &self.data,
+                ) {
+                    Ok(name) => {
+                        self.notifications
+                            .success(format!("Contact protocol active: {}", name));
+                        self.autosave_campaign_only("Contact protocol autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::ResolveCharacterEvent => {
                 match self.campaign.resolve_first_character_event(&self.data) {
                     Ok(title) => {

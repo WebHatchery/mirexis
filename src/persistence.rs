@@ -499,4 +499,26 @@ mod tests {
         assert_eq!(migrated.campaign.strategy.phase_id, "contact");
         assert_eq!(migrated.campaign.colony.resources.alien_components, 2);
     }
+
+    #[test]
+    fn contact_save_gains_an_uncommitted_protocol_choice() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.6.0", &campaign)).unwrap();
+        legacy["campaign"]["strategy"]
+            .as_object_mut()
+            .unwrap()
+            .remove("contact_protocol_id");
+        let migrated = migrate_save_value(Some("1.6.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.campaign.strategy.contact_protocol_id.is_empty());
+        assert_eq!(migrated.campaign.colony.resources.alien_components, 2);
+    }
 }

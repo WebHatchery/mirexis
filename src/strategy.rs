@@ -93,6 +93,8 @@ pub struct StrategyState {
     pub first_assault_repulsed: bool,
     #[serde(default)]
     pub isolation_complete: bool,
+    #[serde(default)]
+    pub contact_protocol_id: String,
     rng: SeededRng,
 }
 
@@ -171,6 +173,7 @@ impl StrategyState {
             isolation_victories: 0,
             first_assault_repulsed: false,
             isolation_complete: false,
+            contact_protocol_id: String::new(),
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -208,6 +211,7 @@ impl StrategyState {
             .find(|recipe| recipe.id == instance.map_recipe);
         let layout =
             recipe.map(|recipe| crate::map_variants::materialize(recipe, data, instance.seed));
+        let contact_bonus = self.contact_reward_bonus(data);
         MissionDef {
             id: instance.id.clone(),
             name: instance.name.clone(),
@@ -221,9 +225,10 @@ impl StrategyState {
                     8
                 } else {
                     0
-                },
-            biomass_reward: instance.biomass_reward,
-            power_reward: instance.power_reward,
+                }
+                + contact_bonus.0,
+            biomass_reward: instance.biomass_reward + contact_bonus.1,
+            power_reward: instance.power_reward + contact_bonus.2,
             operation_modifier: instance.operation_modifier,
             cover_integrity: if colony_defense && self.research_completed("field_fortifications") {
                 10
@@ -360,6 +365,49 @@ impl StrategyState {
             "Mirexis survived isolation. Enemy signals now answer the colony by name.".to_owned();
         colony.resources.alien_components += 2;
         true
+    }
+
+    pub fn choose_contact_protocol(
+        &mut self,
+        protocol_id: &str,
+        colony: &mut ColonyState,
+        data: &GameData,
+    ) -> Result<String, String> {
+        if !self.isolation_complete {
+            return Err("Contact protocols unlock after Isolation".to_owned());
+        }
+        if !self.contact_protocol_id.is_empty() {
+            return Err("A Contact protocol is already active".to_owned());
+        }
+        let protocol = data
+            .campaign
+            .contact_protocols
+            .iter()
+            .find(|protocol| protocol.id == protocol_id)
+            .ok_or_else(|| format!("Unknown Contact protocol: {}", protocol_id))?;
+        if colony.resources.alien_components < protocol.alien_components_cost {
+            return Err(format!(
+                "{} requires {} Alien Components",
+                protocol.name, protocol.alien_components_cost
+            ));
+        }
+        colony.resources.alien_components -= protocol.alien_components_cost;
+        self.contact_protocol_id = protocol.id.clone();
+        Ok(protocol.name.clone())
+    }
+
+    fn contact_reward_bonus(&self, data: &GameData) -> (i32, i32, i32) {
+        data.campaign
+            .contact_protocols
+            .iter()
+            .find(|protocol| protocol.id == self.contact_protocol_id)
+            .map_or((0, 0, 0), |protocol| {
+                (
+                    protocol.materials_bonus,
+                    protocol.biomass_bonus,
+                    protocol.power_bonus,
+                )
+            })
     }
 
     pub fn resolve_first_event(&mut self, colony: &mut ColonyState) -> Result<String, String> {
@@ -549,6 +597,43 @@ mod tests {
         assert_eq!(colony.resources.alien_components, 2);
         assert!(!strategy.refresh_isolation_completion(&mut colony));
         assert_eq!(colony.resources.alien_components, 2);
+    }
+
+    #[test]
+    fn contact_protocols_spend_the_reward_and_change_future_recovery() {
+        let data = GameData::load().unwrap();
+        for (protocol_id, expected_bonus) in [
+            ("directorate_requisition", (10, 0, 0)),
+            ("brood_cultivation", (0, 4, 0)),
+            ("ascendant_capacitor", (0, 0, 2)),
+        ] {
+            let mut strategy = StrategyState::new(&data);
+            let mut colony = ColonyState::new();
+            assert!(strategy
+                .choose_contact_protocol(protocol_id, &mut colony, &data)
+                .is_err());
+            strategy.isolation_victories = 3;
+            strategy.first_assault_repulsed = true;
+            strategy.research[0].completed = true;
+            assert!(strategy.refresh_isolation_completion(&mut colony));
+            let base = strategy.selected_mission().unwrap().clone();
+            strategy
+                .choose_contact_protocol(protocol_id, &mut colony, &data)
+                .unwrap();
+            assert_eq!(colony.resources.alien_components, 0);
+            assert!(strategy
+                .choose_contact_protocol(protocol_id, &mut colony, &data)
+                .is_err());
+            let mission = strategy.materialize_selected(&data, &colony);
+            assert_eq!(
+                (
+                    mission.materials_reward - base.materials_reward,
+                    mission.biomass_reward - base.biomass_reward,
+                    mission.power_reward - base.power_reward,
+                ),
+                expected_bonus
+            );
+        }
     }
 
     #[test]

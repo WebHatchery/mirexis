@@ -229,25 +229,33 @@ fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
-    draw_ui_text_ex(
-        &if campaign.strategy.isolation_complete {
-            "CONTACT // ISOLATION BROKEN // 2 ALIEN COMPONENTS RECOVERED".to_owned()
-        } else {
-            format!(
-                "ISOLATION // VICTORIES {}/3 · DOCTRINE {} · ASSAULT {}",
-                campaign.strategy.isolation_victories,
-                if doctrine_complete {
-                    "READY"
-                } else {
-                    "PENDING"
-                },
-                if campaign.strategy.first_assault_repulsed {
-                    "REPELLED"
-                } else {
-                    "PENDING"
-                }
+    let phase_progress = if campaign.strategy.isolation_complete {
+        data.campaign
+            .contact_protocols
+            .iter()
+            .find(|protocol| protocol.id == campaign.strategy.contact_protocol_id)
+            .map_or_else(
+                || "CONTACT // CHOOSE A PROTOCOL // 2 COMPONENTS AVAILABLE".to_owned(),
+                |protocol| format!("CONTACT // {} ACTIVE", protocol.name.to_uppercase()),
             )
-        },
+    } else {
+        format!(
+            "ISOLATION // VICTORIES {}/3 · DOCTRINE {} · ASSAULT {}",
+            campaign.strategy.isolation_victories,
+            if doctrine_complete {
+                "READY"
+            } else {
+                "PENDING"
+            },
+            if campaign.strategy.first_assault_repulsed {
+                "REPELLED"
+            } else {
+                "PENDING"
+            }
+        )
+    };
+    draw_ui_text_ex(
+        &phase_progress,
         878.0,
         232.0,
         TextStyle::new(
@@ -341,111 +349,90 @@ fn draw_operations(
     ) {
         actions.push(UiAction::OpenMissionBriefing);
     }
-    if let Some(research) = campaign
-        .strategy
-        .research
-        .iter()
-        .find(|entry| !entry.completed)
-    {
-        if colony_button(
-            Rect::new(878.0, 510.0, 362.0, 32.0),
-            &format!(
-                "RESEARCH {} · {} MAT",
-                research.name, research.materials_cost
-            ),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::CompleteResearch(research.id.clone()));
+    let choosing_contact =
+        campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
+    if choosing_contact {
+        draw_ui_text_ex(
+            "FIRST CONTACT // SPEND 2 COMPONENTS // CHOOSE ONE",
+            878.0,
+            514.0,
+            TextStyle::new(11.0, dark::ACCENT).params(),
+        );
+        for (index, protocol) in data.campaign.contact_protocols.iter().enumerate() {
+            let bonus = if protocol.materials_bonus > 0 {
+                format!("+{} MATERIALS", protocol.materials_bonus)
+            } else if protocol.biomass_bonus > 0 {
+                format!("+{} BIOMASS", protocol.biomass_bonus)
+            } else {
+                format!("+{} POWER", protocol.power_bonus)
+            };
+            if colony_button(
+                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
+                &format!("{} // {}", protocol.name.to_uppercase(), bonus),
+                campaign.colony.resources.alien_components >= protocol.alien_components_cost,
+                mouse,
+            ) {
+                actions.push(UiAction::ChooseContactProtocol(protocol.id.clone()));
+            }
+        }
+    } else {
+        if let Some(research) = campaign
+            .strategy
+            .research
+            .iter()
+            .find(|entry| !entry.completed)
+        {
+            if colony_button(
+                Rect::new(878.0, 510.0, 362.0, 32.0),
+                &format!(
+                    "RESEARCH {} · {} MAT",
+                    research.name, research.materials_cost
+                ),
+                true,
+                mouse,
+            ) {
+                actions.push(UiAction::CompleteResearch(research.id.clone()));
+            }
+        }
+        if let Some(event) = campaign
+            .strategy
+            .character_events
+            .iter()
+            .find(|entry| !entry.resolved)
+        {
+            draw_character_event(campaign, data, event, mouse, actions);
         }
     }
-    if let Some(event) = campaign
-        .strategy
-        .character_events
-        .iter()
-        .find(|entry| !entry.resolved)
-    {
-        let definition = data
-            .campaign
-            .events
+    if !choosing_contact {
+        draw_ui_text_ex(
+            "ACTIVE DOCTRINES",
+            878.0,
+            600.0,
+            TextStyle::new(12.0, dark::ACCENT).params(),
+        );
+        let mut doctrine_y = 614.0;
+        for research in campaign
+            .strategy
+            .research
             .iter()
-            .find(|definition| definition.id == event.id);
-        let legacy_character_id = if event.legacy_character_id.is_empty() {
-            definition.map_or("", |definition| definition.legacy_character_id.as_str())
-        } else {
-            event.legacy_character_id.as_str()
-        };
-        let legacy_stat = if event.legacy_stat.is_empty() {
-            definition.map_or("", |definition| definition.legacy_stat.as_str())
-        } else {
-            event.legacy_stat.as_str()
-        };
-        let legacy_amount = if event.legacy_amount == 0 {
-            definition.map_or(0, |definition| definition.legacy_amount)
-        } else {
-            event.legacy_amount
-        };
-        if colony_button(
-            Rect::new(878.0, 548.0, 362.0, 32.0),
-            &format!("EVENT: {}", event.title),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::ResolveCharacterEvent);
+            .filter(|entry| entry.completed)
+        {
+            draw_ui_text_ex(
+                &format!("{} // {}", research.name, research.description),
+                878.0,
+                doctrine_y,
+                TextStyle::new(10.0, dark::TEXT_DIM).params(),
+            );
+            doctrine_y += 11.0;
         }
-        let recipient = campaign
-            .roster
-            .iter()
-            .find(|character| character.id == legacy_character_id)
-            .map_or("UNKNOWN", |character| {
-                character
-                    .name
-                    .split_whitespace()
-                    .next()
-                    .unwrap_or("UNKNOWN")
-            });
-        draw_ui_text_ex(
-            &format!(
-                "CHOICE EFFECT // {} {:+} {} · {} FOOD · DIRECTORATE {:+}",
-                recipient.to_uppercase(),
-                legacy_amount,
-                legacy_stat.to_uppercase(),
-                event.food_cost,
-                event.attention_change
-            ),
-            878.0,
-            588.0,
-            TextStyle::new(10.0, dark::TEXT_DIM).params(),
-        );
-    }
-    draw_ui_text_ex(
-        "ACTIVE DOCTRINES",
-        878.0,
-        600.0,
-        TextStyle::new(12.0, dark::ACCENT).params(),
-    );
-    let mut doctrine_y = 614.0;
-    for research in campaign
-        .strategy
-        .research
-        .iter()
-        .filter(|entry| entry.completed)
-    {
-        draw_ui_text_ex(
-            &format!("{} // {}", research.name, research.description),
-            878.0,
-            doctrine_y,
-            TextStyle::new(10.0, dark::TEXT_DIM).params(),
-        );
-        doctrine_y += 11.0;
-    }
-    if doctrine_y == 614.0 {
-        draw_ui_text_ex(
-            "No completed field doctrine",
-            878.0,
-            doctrine_y,
-            TextStyle::new(10.0, dark::TEXT_DIM).params(),
-        );
+        if doctrine_y == 614.0 {
+            draw_ui_text_ex(
+                "No completed field doctrine",
+                878.0,
+                doctrine_y,
+                TextStyle::new(10.0, dark::TEXT_DIM).params(),
+            );
+        }
     }
     draw_ui_text_ex(
         &format!(
@@ -457,6 +444,67 @@ fn draw_operations(
         878.0,
         650.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
+    );
+}
+
+fn draw_character_event(
+    campaign: &CampaignState,
+    data: &GameData,
+    event: &crate::strategy::CharacterEventState,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    let definition = data
+        .campaign
+        .events
+        .iter()
+        .find(|definition| definition.id == event.id);
+    let legacy_character_id = if event.legacy_character_id.is_empty() {
+        definition.map_or("", |definition| definition.legacy_character_id.as_str())
+    } else {
+        event.legacy_character_id.as_str()
+    };
+    let legacy_stat = if event.legacy_stat.is_empty() {
+        definition.map_or("", |definition| definition.legacy_stat.as_str())
+    } else {
+        event.legacy_stat.as_str()
+    };
+    let legacy_amount = if event.legacy_amount == 0 {
+        definition.map_or(0, |definition| definition.legacy_amount)
+    } else {
+        event.legacy_amount
+    };
+    if colony_button(
+        Rect::new(878.0, 548.0, 362.0, 32.0),
+        &format!("EVENT: {}", event.title),
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ResolveCharacterEvent);
+    }
+    let recipient = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == legacy_character_id)
+        .map_or("UNKNOWN", |character| {
+            character
+                .name
+                .split_whitespace()
+                .next()
+                .unwrap_or("UNKNOWN")
+        });
+    draw_ui_text_ex(
+        &format!(
+            "CHOICE EFFECT // {} {:+} {} · {} FOOD · DIRECTORATE {:+}",
+            recipient.to_uppercase(),
+            legacy_amount,
+            legacy_stat.to_uppercase(),
+            event.food_cost,
+            event.attention_change
+        ),
+        878.0,
+        588.0,
+        TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
 }
 

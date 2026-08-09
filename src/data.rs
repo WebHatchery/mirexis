@@ -206,9 +206,22 @@ pub struct CampaignDef {
     pub summary: String,
     pub factions: Vec<FactionDef>,
     pub research: Vec<ResearchDef>,
+    pub contact_protocols: Vec<ContactProtocolDef>,
     pub events: Vec<CharacterEventDef>,
     pub mission_templates: Vec<MissionTemplateDef>,
     pub map_recipes: Vec<MapRecipeDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContactProtocolDef {
+    pub id: String,
+    pub name: String,
+    pub faction: String,
+    pub description: String,
+    pub alien_components_cost: i32,
+    pub materials_bonus: i32,
+    pub biomass_bonus: i32,
+    pub power_bonus: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -320,6 +333,13 @@ impl GameData {
             self.campaign.research.iter().map(|entry| entry.id.as_str()),
         )?;
         ensure_unique(
+            "contact protocol",
+            self.campaign
+                .contact_protocols
+                .iter()
+                .map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
             "campaign event",
             self.campaign.events.iter().map(|entry| entry.id.as_str()),
         )?;
@@ -419,6 +439,35 @@ impl GameData {
                 return Err(format!(
                     "Mission template {} references missing map recipe {}",
                     template.id, template.map_recipe
+                ));
+            }
+        }
+        for protocol in &self.campaign.contact_protocols {
+            if !self
+                .campaign
+                .factions
+                .iter()
+                .any(|faction| faction.id == protocol.faction)
+            {
+                return Err(format!(
+                    "Contact protocol {} references missing faction {}",
+                    protocol.id, protocol.faction
+                ));
+            }
+            if protocol.alien_components_cost <= 0
+                || [
+                    protocol.materials_bonus,
+                    protocol.biomass_bonus,
+                    protocol.power_bonus,
+                ]
+                .into_iter()
+                .filter(|bonus| *bonus > 0)
+                .count()
+                    != 1
+            {
+                return Err(format!(
+                    "Contact protocol {} must have a cost and one positive reward bonus",
+                    protocol.id
                 ));
             }
         }

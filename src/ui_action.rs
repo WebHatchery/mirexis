@@ -1,0 +1,43 @@
+//! State-changing intents emitted by immediate-mode screens.
+
+use crate::colony::BuildingKind;
+use macroquad_toolkit::grid::TilePos;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum UiAction {
+    StartMission,
+    OpenMissionBriefing,
+    SelectMission(String),
+    CompleteResearch(String),
+    ChooseContactProtocol(String),
+    ResolveCharacterEvent,
+    DeployMission,
+    ToggleDeployment(String),
+    Continue,
+    ReturnToTitle,
+    ReturnToColony,
+    OpenRoster,
+    SelectColonist(String),
+    TrainSelected(String),
+    CraftSelected(String),
+    SelectConstruction(BuildingKind),
+    ConstructBuilding(BuildingKind, [i32; 2]),
+    RepairBuilding(String),
+    TreatInjury,
+    SelectTile(TilePos),
+    MoveSelected(TilePos),
+    AttackSelected(String),
+    AttackCover(TilePos),
+    InteractObjective,
+    ActivateMutation,
+    ActivateClassAction,
+    ArmClassAction,
+    UseClassActionOn(String),
+    ArmEquipment(String),
+    CancelTargeting,
+    UseEquipmentOn(String),
+    EndPhase,
+    Save,
+    Load,
+    DeleteSave,
+}

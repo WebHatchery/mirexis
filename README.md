@@ -32,6 +32,8 @@ The completed roadmap slice includes:
   faction-pressure battlefield modifiers with materials, biomass, and power recovery
 - a visible Isolation completion contract—three victories, one doctrine, and one
   repelled colony assault—that advances the persistent campaign into Contact
+- a mutually exclusive Contact protocol that spends recovered Alien Components on
+  Directorate material supply, Brood biomass cultivation, or Ascendant power recovery
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

@@ -12,6 +12,11 @@
     { "id": "xeno_triage", "name": "Xeno-Triage", "description": "New injuries recover one operation sooner.", "materials_cost": 30, "power_reward": 0 },
     { "id": "salvage_doctrine", "name": "Salvage Doctrine", "description": "Successful operations recover 8 additional materials.", "materials_cost": 40, "power_reward": 2 }
   ],
+  "contact_protocols": [
+    { "id": "directorate_requisition", "name": "Directorate Requisition", "faction": "directorate", "description": "Spoofed requisition codes add 10 materials to every successful operation.", "alien_components_cost": 2, "materials_bonus": 10, "biomass_bonus": 0, "power_bonus": 0 },
+    { "id": "brood_cultivation", "name": "Brood Cultivation", "faction": "brood", "description": "A contained living culture adds 4 biomass to every successful operation.", "alien_components_cost": 2, "materials_bonus": 0, "biomass_bonus": 4, "power_bonus": 0 },
+    { "id": "ascendant_capacitor", "name": "Ascendant Capacitor", "faction": "ascendants", "description": "A harmonic storage lattice adds 2 power to every successful operation.", "alien_components_cost": 2, "materials_bonus": 0, "biomass_bonus": 0, "power_bonus": 2 }
+  ],
   "events": [
     { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Spend 2 food to protect the isolated survey family; their route knowledge gives Sol +1 movement.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2, "legacy_name": "Survey Family Routes", "legacy_character_id": "sol_cairn", "legacy_stat": "movement", "legacy_amount": 1 },
     { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Document Mara's accelerating chitin growth; the treatment gives her +1 armour.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1, "legacy_name": "Documented Carapace", "legacy_character_id": "mara_venn", "legacy_stat": "armour", "legacy_amount": 1 }
