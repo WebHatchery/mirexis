@@ -26,6 +26,7 @@ mod gene_lab_ui;
 mod grid_ui;
 mod hazard_ui;
 mod hazards;
+mod help_ui;
 mod map_variants;
 mod objective_ui;
 mod operation_modifiers;

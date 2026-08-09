@@ -8,6 +8,7 @@ use macroquad_toolkit::grid::TilePos;
 impl Game {
     pub fn begin_capture_scene(&mut self, scene: &str) {
         self.targeting = None;
+        self.show_tactical_help = false;
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
@@ -50,6 +51,10 @@ impl Game {
             "hazard" => self.capture_hazard(),
             "intent" => self.capture_enemy_intent(),
             "action_preview" => self.capture_player_action_preview(),
+            "help" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.show_tactical_help = true;
+            }
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,

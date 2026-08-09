@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.37.0
+Save/content version: 1.38.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -89,6 +89,7 @@ Important transition payloads:
 | `enemy_intent_ui.rs` | Hostile inspection sidebar and on-grid forecast line | AI policy or state mutation |
 | `hazards.rs` | Landing-triggered faction hazard damage, statuses, immunity, and events | Pathfinding or drawing |
 | `hazard_ui.rs` | Grid hazard symbols and compact tactical legend | Simulation mutation |
+| `help_ui.rs` | Command-blocking tactical quick-reference overlay | Game rules or persistence |
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
@@ -597,6 +598,7 @@ Migration coverage:
 | 1.34.0 | Save-stable realized hazard tiles, defaulting older active battles to none |
 | 1.35.0 | No new fields; enemy intent remains derived from existing tactical state |
 | 1.36.0 | No new fields; player action previews remain derived from tactical state |
+| 1.37.0 | No save fields; tactical help visibility is battle-screen UI state only |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -634,7 +636,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`,
+`briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -649,7 +651,7 @@ The completion baseline is:
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test` (134 domain/migration tests plus the shared source-size gate)
-- deterministic sixty-five-scene capture with visual inspection
+- deterministic sixty-six-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -705,5 +707,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a compact in-game help overlay that teaches the
-turn loop, objective icons, hazards, inspection, and action previews without leaving play.
+The recommended next vertical slice is an expandable battle-history panel so players can
+review more than the latest combat event after a dense hostile phase.

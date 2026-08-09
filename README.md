@@ -30,6 +30,8 @@ The completed roadmap slice includes:
   faction abilities, likely targets, and the predicted first move or attack on the grid
 - player action previews for validated movement AP, landing-hazard consequences, attack
   hit chance, normal/critical damage range, and weapon AP before commands are committed
+- a command-blocking tactical field manual available from the footer, `H`, or Escape,
+  covering the turn loop, selection, previews, hostile intent, hazards, and objectives
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

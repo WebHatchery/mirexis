@@ -56,6 +56,7 @@ pub struct Game {
     last_outcome: Option<MissionOutcome>,
     autosave: AutoSaveManager,
     targeting: Option<TacticalTargeting>,
+    show_tactical_help: bool,
 }
 
 impl Game {
@@ -96,6 +97,7 @@ impl Game {
             last_outcome: None,
             autosave: AutoSaveManager::default(),
             targeting: None,
+            show_tactical_help: false,
         }
     }
 
@@ -128,24 +130,31 @@ impl Game {
             }
             AppState::Tactical => {
                 if input.escape_pressed {
-                    self.events.push(if self.targeting.is_some() {
+                    self.events.push(if self.show_tactical_help {
+                        UiAction::ToggleTacticalHelp
+                    } else if self.targeting.is_some() {
                         UiAction::CancelTargeting
                     } else {
                         UiAction::ReturnToTitle
                     });
                 }
-                if is_key_pressed(KeyCode::S) {
-                    self.events.push(UiAction::Save);
+                if is_key_pressed(KeyCode::H) {
+                    self.events.push(UiAction::ToggleTacticalHelp);
                 }
-                if is_key_pressed(KeyCode::L) {
-                    self.events.push(UiAction::Load);
-                }
-                if is_key_pressed(KeyCode::Enter) {
-                    self.events.push(UiAction::EndPhase);
-                }
-                if self.targeting.is_none() {
-                    if let Some((dx, dy)) = ui::tile_move_from_keys() {
-                        self.session.move_selection(dx, dy);
+                if !self.show_tactical_help {
+                    if is_key_pressed(KeyCode::S) {
+                        self.events.push(UiAction::Save);
+                    }
+                    if is_key_pressed(KeyCode::L) {
+                        self.events.push(UiAction::Load);
+                    }
+                    if is_key_pressed(KeyCode::Enter) {
+                        self.events.push(UiAction::EndPhase);
+                    }
+                    if self.targeting.is_none() {
+                        if let Some((dx, dy)) = ui::tile_move_from_keys() {
+                            self.session.move_selection(dx, dy);
+                        }
                     }
                 }
             }
@@ -199,6 +208,7 @@ impl Game {
                         TargetingView::ClassAction { unit_id }
                     }
                 }),
+                show_help: self.show_tactical_help,
             }),
             AppState::Debrief => crate::ui_debrief::draw_debrief(
                 &self.active_mission,
@@ -336,6 +346,7 @@ impl Game {
             UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
                 Ok(food_cost) => {
                     self.targeting = None;
+                    self.show_tactical_help = false;
                     self.session = GameSession::new(
                         &self.data.config,
                         &self.active_mission,
@@ -368,6 +379,7 @@ impl Game {
             UiAction::Continue => self.load_game(),
             UiAction::ReturnToTitle => {
                 self.targeting = None;
+                self.show_tactical_help = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
@@ -599,6 +611,10 @@ impl Game {
                     "Enemy activity resolved — round {}",
                     self.session.tactical.round
                 ));
+            }
+            UiAction::ToggleTacticalHelp => {
+                self.show_tactical_help = !self.show_tactical_help;
+                self.targeting = None;
             }
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
