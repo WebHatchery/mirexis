@@ -76,8 +76,6 @@ pub struct ColonyState {
     pub resources: Resources,
     pub buildings: Vec<BuildingState>,
     pub construction_queue: Vec<ConstructionProject>,
-    pub mission_offers: Vec<String>,
-    pub selected_mission: Option<String>,
     next_building_serial: u32,
 }
 
@@ -98,8 +96,6 @@ impl ColonyState {
                 building("workshop", BuildingKind::Workshop, [3, 4]),
             ],
             construction_queue: Vec::new(),
-            mission_offers: vec!["operation_glassroot".to_owned()],
-            selected_mission: Some("operation_glassroot".to_owned()),
             next_building_serial: 1,
         }
     }

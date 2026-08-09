@@ -2,13 +2,12 @@
 
 use crate::campaign::{Availability, CampaignState};
 use crate::colony::{COLONY_HEIGHT, COLONY_WIDTH};
-use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
-pub fn draw_colony(data: &GameData, campaign: &CampaignState, ui: &VirtualUi) -> Vec<UiAction> {
+pub fn draw_colony(campaign: &CampaignState, ui: &VirtualUi) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
     draw_rectangle(
@@ -20,7 +19,7 @@ pub fn draw_colony(data: &GameData, campaign: &CampaignState, ui: &VirtualUi) ->
     );
     draw_header(campaign);
     draw_layout(campaign, mouse, &mut actions);
-    draw_operations(data, campaign, mouse, &mut actions);
+    draw_operations(campaign, mouse, &mut actions);
     actions
 }
 
@@ -116,12 +115,7 @@ fn draw_building_label(rect: Rect, label: &str) {
     }
 }
 
-fn draw_operations(
-    data: &GameData,
-    campaign: &CampaignState,
-    mouse: Vec2,
-    actions: &mut Vec<UiAction>,
-) {
+fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let panel = Rect::new(856.0, 96.0, 406.0, 580.0);
     draw_surface_with_title(
         panel,
@@ -150,6 +144,30 @@ fn draw_operations(
         192.0,
         TextStyle::new(15.0, dark::TEXT).params(),
     );
+    let attention = campaign
+        .strategy
+        .factions
+        .iter()
+        .map(|faction| format!("{} {}", faction.name, faction.attention))
+        .collect::<Vec<_>>()
+        .join("  /  ");
+    draw_ui_text_ex(
+        &attention,
+        878.0,
+        218.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
+    );
+    if let Some(threat) = campaign.strategy.active_threat() {
+        draw_ui_text_ex(
+            &format!(
+                "{}  //  {} OPERATIONS  //  STRENGTH {}",
+                threat.name, threat.operations_until, threat.strength
+            ),
+            878.0,
+            242.0,
+            TextStyle::new(12.0, dark::WARNING).params(),
+        );
+    }
     let ready = campaign
         .roster
         .iter()
@@ -166,11 +184,11 @@ fn draw_operations(
             defense.critical_objectives.len()
         ),
         878.0,
-        230.0,
-        TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        262.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
     if colony_button(
-        Rect::new(878.0, 252.0, 362.0, 42.0),
+        Rect::new(878.0, 274.0, 362.0, 32.0),
         "BARRACKS: TRAIN KIRA AS SOLDIER",
         campaign.roster[0].active_class != "soldier",
         mouse,
@@ -178,7 +196,7 @@ fn draw_operations(
         actions.push(UiAction::TrainKira);
     }
     if colony_button(
-        Rect::new(878.0, 304.0, 362.0, 42.0),
+        Rect::new(878.0, 312.0, 362.0, 32.0),
         "INFIRMARY: PRIORITY TREATMENT",
         recovering > 0,
         mouse,
@@ -186,7 +204,7 @@ fn draw_operations(
         actions.push(UiAction::TreatInjury);
     }
     if colony_button(
-        Rect::new(878.0, 356.0, 362.0, 42.0),
+        Rect::new(878.0, 350.0, 362.0, 32.0),
         "WORKSHOP: CRAFT KIRA ARMOUR",
         !campaign.roster[0]
             .equipment_ids
@@ -197,28 +215,62 @@ fn draw_operations(
         actions.push(UiAction::CraftKiraArmour);
     }
     draw_ui_text_ex(
-        "MISSION OFFER",
+        "MISSION OFFERS",
         878.0,
-        450.0,
+        410.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
-    draw_ui_text_ex(
-        &data.mission.name,
-        878.0,
-        482.0,
-        TextStyle::new(23.0, dark::TEXT_BRIGHT).params(),
-    );
+    for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
+        let selected = mission.id == campaign.strategy.selected_mission_id;
+        if colony_button(
+            Rect::new(878.0, 422.0 + index as f32 * 38.0, 362.0, 32.0),
+            &format!("{}{}", if selected { "> " } else { "" }, mission.name),
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::SelectMission(mission.id.clone()));
+        }
+    }
     if colony_button(
-        Rect::new(878.0, 520.0, 362.0, 50.0),
-        "SELECT OPERATION GLASSROOT",
-        campaign
-            .colony
-            .mission_offers
-            .iter()
-            .any(|id| id == &data.mission.id),
+        Rect::new(878.0, 500.0, 362.0, 36.0),
+        "BRIEF SELECTED MISSION",
+        campaign.strategy.selected_mission().is_some(),
         mouse,
     ) {
         actions.push(UiAction::OpenMissionBriefing);
+    }
+    if let Some(research) = campaign
+        .strategy
+        .research
+        .iter()
+        .find(|entry| !entry.completed)
+    {
+        if colony_button(
+            Rect::new(878.0, 548.0, 362.0, 32.0),
+            &format!(
+                "RESEARCH {} · {} MAT",
+                research.name, research.materials_cost
+            ),
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::CompleteResearch(research.id.clone()));
+        }
+    }
+    if let Some(event) = campaign
+        .strategy
+        .character_events
+        .iter()
+        .find(|entry| !entry.resolved)
+    {
+        if colony_button(
+            Rect::new(878.0, 586.0, 362.0, 32.0),
+            &format!("EVENT: {}", event.title),
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::ResolveCharacterEvent);
+        }
     }
     draw_ui_text_ex(
         &format!(
@@ -226,8 +278,8 @@ fn draw_operations(
             defense.blocked_tiles.len()
         ),
         878.0,
-        626.0,
-        TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        650.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
 }
 

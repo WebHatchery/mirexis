@@ -3,7 +3,7 @@
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 use crate::colony_ui;
-use crate::data::GameData;
+use crate::data::{GameData, MissionDef};
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, MissionOutcome, SaveData};
 use crate::ui::{self, UiAction, UiContext};
@@ -32,6 +32,7 @@ pub struct Game {
     data: GameData,
     session: GameSession,
     campaign: CampaignState,
+    active_mission: MissionDef,
     state: AppState,
     assets: AssetManager,
     notifications: NotificationManager,
@@ -51,9 +52,12 @@ impl Game {
         let _ = assets.load_asset_pack("assets.zip").await;
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
         let campaign = CampaignState::new(&data);
+        let active_mission = campaign
+            .strategy
+            .materialize_selected(&data.mission, &campaign.colony);
         let session = GameSession::new(
             &data.config,
-            &data.mission,
+            &active_mission,
             &campaign.deployment_roster(&data),
         );
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
@@ -67,6 +71,7 @@ impl Game {
             data,
             session,
             campaign,
+            active_mission,
             state: AppState::Title,
             assets,
             notifications,
@@ -137,7 +142,7 @@ impl Game {
             "debrief" => {
                 self.session = GameSession::new(
                     &self.data.config,
-                    &self.data.mission,
+                    &self.active_mission,
                     &self.campaign.deployment_roster(&self.data),
                 );
                 self.session.tactical.objective_state = crate::state::ObjectiveState::Victory;
@@ -147,13 +152,13 @@ impl Game {
                         unit.health = 0;
                     }
                 }
-                self.last_outcome = self.session.mission_outcome(&self.data.mission);
+                self.last_outcome = self.session.mission_outcome(&self.active_mission);
                 self.state = AppState::Debrief;
             }
             _ => {
                 self.session = GameSession::new(
                     &self.data.config,
-                    &self.data.mission,
+                    &self.active_mission,
                     &self.campaign.deployment_roster(&self.data),
                 );
                 self.state = AppState::Tactical;
@@ -166,19 +171,23 @@ impl Game {
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
-            AppState::Colony => colony_ui::draw_colony(&self.data, &self.campaign, &virtual_ui),
-            AppState::MissionBriefing => {
-                ui::draw_mission_briefing(&self.data, &self.campaign, &virtual_ui)
-            }
+            AppState::Colony => colony_ui::draw_colony(&self.campaign, &virtual_ui),
+            AppState::MissionBriefing => ui::draw_mission_briefing(
+                &self.data,
+                &self.campaign,
+                &self.active_mission,
+                &virtual_ui,
+            ),
             AppState::Tactical => ui::draw_tactical(UiContext {
                 data: &self.data,
+                mission: &self.active_mission,
                 session: &self.session,
                 save_exists: self.save_exists,
                 loaded_assets: self.assets.len(),
                 ui: &virtual_ui,
             }),
             AppState::Debrief => ui::draw_debrief(
-                &self.data,
+                &self.active_mission,
                 self.last_outcome
                     .as_ref()
                     .expect("debrief requires an outcome"),
@@ -200,15 +209,66 @@ impl Game {
         match action {
             UiAction::StartMission => {
                 self.campaign = CampaignState::new(&self.data);
+                self.active_mission = self
+                    .campaign
+                    .strategy
+                    .materialize_selected(&self.data.mission, &self.campaign.colony);
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
             }
-            UiAction::OpenMissionBriefing => self.state = AppState::MissionBriefing,
+            UiAction::OpenMissionBriefing => {
+                self.active_mission = self
+                    .campaign
+                    .strategy
+                    .materialize_selected(&self.data.mission, &self.campaign.colony);
+                self.state = AppState::MissionBriefing;
+            }
+            UiAction::SelectMission(mission_id) => {
+                match self.campaign.strategy.select_mission(&mission_id) {
+                    Ok(()) => {
+                        self.active_mission = self
+                            .campaign
+                            .strategy
+                            .materialize_selected(&self.data.mission, &self.campaign.colony);
+                        self.notifications.success("Mission selected");
+                        self.autosave_campaign_only("Mission selection autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
+            UiAction::CompleteResearch(research_id) => {
+                match self
+                    .campaign
+                    .strategy
+                    .complete_research(&research_id, &mut self.campaign.colony)
+                {
+                    Ok(name) => {
+                        self.notifications
+                            .success(format!("Research complete: {}", name));
+                        self.autosave_campaign_only("Research autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
+            UiAction::ResolveCharacterEvent => {
+                match self
+                    .campaign
+                    .strategy
+                    .resolve_first_event(&mut self.campaign.colony)
+                {
+                    Ok(title) => {
+                        self.notifications
+                            .success(format!("Event resolved: {}", title));
+                        self.autosave_campaign_only("Character event autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::DeployMission => {
                 self.session = GameSession::new(
                     &self.data.config,
-                    &self.data.mission,
+                    &self.active_mission,
                     &self.campaign.deployment_roster(&self.data),
                 );
                 self.state = AppState::Tactical;
@@ -281,10 +341,10 @@ impl Game {
                 Err(_) => self.notifications.warning("No valid firing solution"),
             },
             UiAction::InteractObjective => match self.session.interact_selected() {
-                Ok(_) => self.notifications.success("Survey refuge stabilised"),
+                Ok(_) => self.notifications.success("Mission objective secured"),
                 Err(_) => self
                     .notifications
-                    .warning("A colonist must reach the beacon"),
+                    .warning("A colonist must reach the objective"),
             },
             UiAction::EndPhase => {
                 self.session.end_player_phase(&self.data.config);
@@ -304,11 +364,18 @@ impl Game {
         if self.state != AppState::Tactical {
             return;
         }
-        if let Some(outcome) = self.session.mission_outcome(&self.data.mission) {
+        if let Some(outcome) = self.session.mission_outcome(&self.active_mission) {
             self.last_outcome = Some(outcome);
             self.campaign.advance_recovery();
+            let mission = self
+                .campaign
+                .strategy
+                .selected_mission()
+                .expect("a deployed mission remains selected")
+                .clone();
             self.campaign.apply_mission_outcome(
                 self.last_outcome.as_ref().expect("outcome was just stored"),
+                &mission,
                 &self.data,
             );
             self.state = AppState::Debrief;
@@ -384,6 +451,10 @@ impl Game {
         match loaded {
             Ok(save) => {
                 self.campaign = save.campaign;
+                self.active_mission = self
+                    .campaign
+                    .strategy
+                    .materialize_selected(&self.data.mission, &self.campaign.colony);
                 if let Some(tactical) = save.tactical {
                     self.session = GameSession::from_tactical(tactical);
                     self.state = if self.session.battle_is_over() {
@@ -394,7 +465,7 @@ impl Game {
                 } else {
                     self.session = GameSession::new(
                         &self.data.config,
-                        &self.data.mission,
+                        &self.active_mission,
                         &self.campaign.deployment_roster(&self.data),
                     );
                     self.state = AppState::Colony;

@@ -4,6 +4,7 @@ use crate::campaign::CampaignState;
 use crate::colony::ColonyState;
 use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
+use crate::strategy::StrategyState;
 use macroquad_toolkit::rng::SeededRng;
 use serde_json::Value;
 
@@ -27,15 +28,18 @@ pub fn migrate_save_value(
         );
         add_character_runtime_defaults(&mut payload)?;
     }
-    if detected_version.as_deref() == Some("0.3.0") {
+    if matches!(detected_version.as_deref(), Some("0.3.0" | "0.4.0")) {
         let campaign = payload
             .get_mut("campaign")
             .and_then(Value::as_object_mut)
             .ok_or_else(|| "Character save is missing campaign state".to_owned())?;
-        campaign.insert(
-            "colony".to_owned(),
+        campaign.entry("colony".to_owned()).or_insert(
             serde_json::to_value(ColonyState::new())
                 .map_err(|err| format!("Could not create migrated colony: {}", err))?,
+        );
+        campaign.entry("strategy".to_owned()).or_insert(
+            serde_json::to_value(StrategyState::new(data))
+                .map_err(|err| format!("Could not create migrated strategy: {}", err))?,
         );
     }
     let mut save = serde_json::from_value::<SaveData>(payload)
@@ -123,7 +127,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.4.0");
+        assert_eq!(migrated.version, "0.5.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -136,11 +140,31 @@ mod tests {
         let session = GameSession::new(&data.config, &data.mission, &data.roster);
         let mut legacy = serde_json::to_value(session.to_save("0.3.0", &campaign)).unwrap();
         legacy["campaign"].as_object_mut().unwrap().remove("colony");
+        legacy["campaign"]
+            .as_object_mut()
+            .unwrap()
+            .remove("strategy");
         let migrated = migrate_save_value(Some("0.3.0".to_owned()), legacy, &data).unwrap();
         assert_eq!(migrated.campaign.roster[0].experience, 44);
         assert!(migrated
             .campaign
             .colony
             .has_facility(crate::colony::BuildingKind::Workshop));
+        assert_eq!(migrated.campaign.strategy.phase_id, "isolation");
+    }
+
+    #[test]
+    fn colony_save_gains_isolation_strategy() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.4.0", &campaign)).unwrap();
+        legacy["campaign"]
+            .as_object_mut()
+            .unwrap()
+            .remove("strategy");
+        let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "0.5.0");
+        assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 }

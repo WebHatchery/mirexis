@@ -11,6 +11,7 @@ const CHARACTERS_JSON: &str = include_str!("../assets/data/characters.json");
 const CLASSES_JSON: &str = include_str!("../assets/data/classes.json");
 const MUTATIONS_JSON: &str = include_str!("../assets/data/mutations.json");
 const EQUIPMENT_JSON: &str = include_str!("../assets/data/equipment.json");
+const CAMPAIGN_JSON: &str = include_str!("../assets/data/campaign.json");
 const TEXTURE_MANIFEST_JSON: &str = include_str!("../assets/data/texture_manifest.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +34,7 @@ pub struct MissionDef {
     pub objective: String,
     pub round_limit: u32,
     pub materials_reward: i32,
+    pub seed: u64,
     pub blocked_tiles: Vec<[i32; 2]>,
     pub objective_tile: [i32; 2],
     #[serde(default)]
@@ -136,6 +138,53 @@ pub struct EquipmentDef {
     pub damage: i32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CampaignDef {
+    pub phase_id: String,
+    pub phase_name: String,
+    pub summary: String,
+    pub factions: Vec<FactionDef>,
+    pub research: Vec<ResearchDef>,
+    pub events: Vec<CharacterEventDef>,
+    pub mission_templates: Vec<MissionTemplateDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FactionDef {
+    pub id: String,
+    pub name: String,
+    pub initial_attention: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResearchDef {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub materials_cost: i32,
+    pub power_reward: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CharacterEventDef {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub participants: Vec<String>,
+    pub food_cost: i32,
+    pub attention_change: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MissionTemplateDef {
+    pub id: String,
+    pub name: String,
+    pub objective: String,
+    pub faction: String,
+    pub materials_reward: i32,
+    pub round_limit: u32,
+}
+
 #[derive(Debug, Clone)]
 pub struct GameData {
     pub config: GameConfig,
@@ -145,6 +194,7 @@ pub struct GameData {
     pub classes: Vec<ClassDef>,
     pub mutations: Vec<MutationDef>,
     pub equipment: Vec<EquipmentDef>,
+    pub campaign: CampaignDef,
     pub texture_manifest: Vec<TextureConfig>,
 }
 
@@ -157,6 +207,7 @@ impl GameData {
         let classes = load_embedded_json_labeled("classes", CLASSES_JSON)?;
         let mutations = load_embedded_json_labeled("mutations", MUTATIONS_JSON)?;
         let equipment = load_embedded_json_labeled("equipment", EQUIPMENT_JSON)?;
+        let campaign = load_embedded_json_labeled("campaign", CAMPAIGN_JSON)?;
         let texture_manifest = load_embedded_json(TEXTURE_MANIFEST_JSON)?;
 
         let data = Self {
@@ -167,6 +218,7 @@ impl GameData {
             classes,
             mutations,
             equipment,
+            campaign,
             texture_manifest,
         };
         data.validate_registry()?;
@@ -177,6 +229,25 @@ impl GameData {
         ensure_unique(
             "character",
             self.characters.iter().map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "faction",
+            self.campaign.factions.iter().map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "research",
+            self.campaign.research.iter().map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "campaign event",
+            self.campaign.events.iter().map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "mission template",
+            self.campaign
+                .mission_templates
+                .iter()
+                .map(|entry| entry.id.as_str()),
         )?;
         ensure_unique("class", self.classes.iter().map(|entry| entry.id.as_str()))?;
         ensure_unique(
@@ -239,6 +310,33 @@ impl GameData {
                 ));
             }
         }
+        for template in &self.campaign.mission_templates {
+            if !self
+                .campaign
+                .factions
+                .iter()
+                .any(|faction| faction.id == template.faction)
+            {
+                return Err(format!(
+                    "Mission template {} references missing faction {}",
+                    template.id, template.faction
+                ));
+            }
+        }
+        for event in &self.campaign.events {
+            for participant in &event.participants {
+                if !self
+                    .characters
+                    .iter()
+                    .any(|character| &character.id == participant)
+                {
+                    return Err(format!(
+                        "Campaign event {} references missing character {}",
+                        event.id, participant
+                    ));
+                }
+            }
+        }
         Ok(())
     }
 }
@@ -284,5 +382,7 @@ mod tests {
         assert_eq!(data.characters.len(), 4);
         assert!(data.classes.len() >= 7);
         assert!(data.mutations.len() >= 5);
+        assert_eq!(data.campaign.phase_id, "isolation");
+        assert!(data.campaign.mission_templates.len() >= 3);
     }
 }

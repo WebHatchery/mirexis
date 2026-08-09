@@ -5,6 +5,7 @@
   "objective": "Reach and stabilise the marked survey refuge before round 8, then neutralise the remaining Brood so the trapped team can evacuate.",
   "round_limit": 8,
   "materials_reward": 30,
+  "seed": 1296651091,
   "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]],
   "objective_tile": [10, 4],
   "terrain_costs": [

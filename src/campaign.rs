@@ -3,6 +3,7 @@
 use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, ClassDef, GameData, MutationDef, Team, UnitDef};
 use crate::state::{MissionOutcome, ObjectiveState};
+use crate::strategy::{MissionInstance, StrategyState};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -64,6 +65,7 @@ impl CharacterRecord {
 pub struct CampaignState {
     pub roster: Vec<CharacterRecord>,
     pub colony: ColonyState,
+    pub strategy: StrategyState,
     pub operations_completed: u32,
 }
 
@@ -76,6 +78,7 @@ impl CampaignState {
                 .map(CharacterRecord::from_def)
                 .collect(),
             colony: ColonyState::new(),
+            strategy: StrategyState::new(data),
             operations_completed: 0,
         }
     }
@@ -94,10 +97,16 @@ impl CampaignState {
             .collect()
     }
 
-    pub fn apply_mission_outcome(&mut self, outcome: &MissionOutcome, data: &GameData) {
+    pub fn apply_mission_outcome(
+        &mut self,
+        outcome: &MissionOutcome,
+        mission: &MissionInstance,
+        data: &GameData,
+    ) {
         self.operations_completed += 1;
         self.colony.advance_operation();
         self.colony.resources.materials += outcome.materials_awarded;
+        self.strategy.resolve_mission(outcome, mission, data);
         let xp = if outcome.result == ObjectiveState::Victory {
             20
         } else {
@@ -393,7 +402,8 @@ mod tests {
             hostiles_neutralised: 0,
             materials_awarded: 0,
         };
-        campaign.apply_mission_outcome(&outcome, &data);
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
         assert_eq!(campaign.roster[2].availability, Availability::Recovering);
         assert!(!campaign
             .deployment_roster(&data)

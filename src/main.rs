@@ -10,6 +10,7 @@ mod data;
 mod game;
 mod persistence;
 mod state;
+mod strategy;
 mod ui;
 
 use game::Game;

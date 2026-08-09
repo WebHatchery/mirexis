@@ -1,7 +1,7 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::campaign::CampaignState;
-use crate::data::{GameData, Team};
+use crate::data::{GameData, MissionDef, Team};
 use crate::state::{
     BattleEvent, GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState,
 };
@@ -17,6 +17,9 @@ pub const LOGICAL_HEIGHT: f32 = 720.0;
 pub enum UiAction {
     StartMission,
     OpenMissionBriefing,
+    SelectMission(String),
+    CompleteResearch(String),
+    ResolveCharacterEvent,
     DeployMission,
     Continue,
     ReturnToTitle,
@@ -37,6 +40,7 @@ pub enum UiAction {
 
 pub struct UiContext<'a> {
     pub data: &'a GameData,
+    pub mission: &'a MissionDef,
     pub session: &'a GameSession,
     pub save_exists: bool,
     pub loaded_assets: usize,
@@ -104,7 +108,7 @@ pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiA
         actions.push(UiAction::Continue);
     }
     draw_ui_text_ex(
-        "PHASE 0  //  TACTICAL READINESS PROTOTYPE",
+        "PHASE ONE: ISOLATION  //  KEEP THE COLONY ALIVE",
         106.0,
         626.0,
         TextStyle::new(16.0, Color::new(0.38, 0.52, 0.55, 1.0)).params(),
@@ -115,6 +119,7 @@ pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiA
 pub fn draw_mission_briefing(
     data: &GameData,
     campaign: &CampaignState,
+    mission: &MissionDef,
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
@@ -136,13 +141,13 @@ pub fn draw_mission_briefing(
         TextStyle::new(18.0, dark::TEXT),
     );
     draw_ui_text_ex(
-        &data.mission.name,
+        &mission.name,
         200.0,
         190.0,
         TextStyle::new(34.0, dark::TEXT_BRIGHT).params(),
     );
     draw_text_block(
-        &data.mission.briefing,
+        &mission.briefing,
         200.0,
         230.0,
         640.0,
@@ -201,7 +206,11 @@ pub fn draw_mission_briefing(
     actions
 }
 
-pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -> Vec<UiAction> {
+pub fn draw_debrief(
+    mission: &MissionDef,
+    outcome: &MissionOutcome,
+    ui: &VirtualUi,
+) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
     draw_rectangle(
@@ -228,9 +237,9 @@ pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -
     draw_text("OPERATION DEBRIEF", 535.0, 132.0, 18.0, dark::TEXT);
     draw_text(
         if won {
-            "SURVEY TEAM RECOVERED"
+            "OPERATION SUCCESS"
         } else {
-            "REFUGE LOST"
+            "OPERATION FAILED"
         },
         280.0,
         220.0,
@@ -251,7 +260,7 @@ pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -
         )
     };
     let report = [
-        format!("Operation: {}", data.mission.name),
+        format!("Operation: {}", mission.name),
         format!(
             "Squad returned: {}/{}",
             outcome.colonists_deployed - outcome.colonists_incapacitated.len(),
@@ -300,7 +309,7 @@ fn draw_header(ctx: &UiContext<'_>) {
         TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
-        &ctx.data.mission.name,
+        &ctx.mission.name,
         rect.x + 190.0,
         rect.y + 38.0,
         TextStyle::new(18.0, dark::TEXT_DIM).params(),
@@ -455,7 +464,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let panel = Rect::new(856.0, 96.0, 406.0, 530.0);
     draw_surface_with_title(
         panel,
-        Some("OPERATION GLASSROOT"),
+        Some(ctx.mission.name.as_str()),
         &SurfaceStyle::new(Color::new(0.055, 0.07, 0.08, 0.98))
             .with_border(1.0, Color::new(0.25, 0.38, 0.40, 0.8))
             .with_header(42.0, Color::new(0.08, 0.105, 0.115, 1.0)),
@@ -469,7 +478,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
     );
     draw_text_block(
-        &ctx.data.mission.objective,
+        &ctx.mission.objective,
         x,
         panel.y + 92.0,
         panel.w - 36.0,
@@ -522,7 +531,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     if button(
         Rect::new(x, panel.bottom() - 166.0, panel.w - 36.0, 38.0),
-        "STABILISE REFUGE",
+        "COMPLETE OBJECTIVE",
         ctx.session.can_interact_selected(),
         mouse,
     ) {
@@ -539,7 +548,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_ui_text_ex(
         &format!(
             "Materials: {}   Round limit: {}",
-            ctx.session.tactical.materials, ctx.data.mission.round_limit
+            ctx.session.tactical.materials, ctx.mission.round_limit
         ),
         x,
         panel.bottom() - 48.0,
@@ -581,7 +590,7 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     draw_ui_text_ex(
         &format!(
-            "Phase 1A tactical rules  //  {} assets  //  click a hostile to attack",
+            "Isolation campaign  //  {} assets  //  click a hostile to attack",
             ctx.loaded_assets
         ),
         620.0,
@@ -604,7 +613,7 @@ fn event_summary(event: &BattleEvent) -> String {
             format!("{} damage · {} vitality remains", amount, remaining)
         }
         BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
-        BattleEvent::ObjectiveSecured { .. } => "Survey refuge stabilised".to_owned(),
+        BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
         BattleEvent::PhaseStarted { phase, round } => {
             format!("{:?} phase · round {}", phase, round)
         }

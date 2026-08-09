@@ -230,7 +230,7 @@ impl GameSession {
                 round: 1,
                 round_limit: mission.round_limit,
                 materials: 20,
-                rng: SeededRng::new(config.battle_seed),
+                rng: SeededRng::new(mission.seed),
                 event_log: vec![BattleEvent::PhaseStarted {
                     phase: TacticalPhase::Player,
                     round: 1,
@@ -940,7 +940,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.4.0");
+        assert_eq!(migrated.version, "0.5.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 
