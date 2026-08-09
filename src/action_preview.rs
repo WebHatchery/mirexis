@@ -13,8 +13,11 @@ pub(crate) enum ActionPreview {
     },
     Attack {
         target_name: String,
+        attacker_position: TilePos,
+        target_position: TilePos,
         cost: u8,
         hit_chance: u8,
+        cover_penalty: i32,
         damage: i32,
         critical_damage: i32,
     },
@@ -55,8 +58,11 @@ pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPre
             (attacker.effective_weapon_damage() + 2 - target.effective_armour()).max(1);
         return Some(ActionPreview::Attack {
             target_name: target.name.clone(),
+            attacker_position: attacker.position,
+            target_position: target.position,
             cost: cost.action_points,
             hit_chance: session.hit_chance(attacker, target),
+            cover_penalty: session.cover_penalty(attacker, target),
             damage,
             critical_damage,
         });

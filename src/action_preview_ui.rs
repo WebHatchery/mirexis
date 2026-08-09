@@ -23,12 +23,19 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
             target_name,
             cost,
             hit_chance,
+            cover_penalty,
             damage,
             critical_damage,
+            ..
         } => format!(
-            "ATTACK {} // {}% // {}-{} DMG // {} AP",
+            "ATTACK {} // {}%{} // {}-{} DMG // {} AP",
             target_name.to_uppercase(),
             hit_chance,
+            if cover_penalty > 0 {
+                format!(" // COVER -{cover_penalty}")
+            } else {
+                String::new()
+            },
             damage,
             critical_damage,
             cost
@@ -84,7 +91,26 @@ pub(crate) fn draw_route(
     tile: macroquad_toolkit::grid::TilePos,
     view: GridView,
 ) {
-    let Some(ActionPreview::Move { path, .. }) = action_preview::for_tile(session, tile) else {
+    let Some(preview) = action_preview::for_tile(session, tile) else {
+        return;
+    };
+    if let ActionPreview::Attack {
+        attacker_position,
+        target_position,
+        ..
+    } = preview
+    {
+        let from = tile_center(view, attacker_position);
+        let to = tile_center(view, target_position);
+        draw_line(from.x, from.y, to.x, to.y, 3.0, shot_color());
+        for step in 1..6 {
+            let amount = step as f32 / 6.0;
+            let point = from.lerp(to, amount);
+            draw_circle(point.x, point.y, 2.0, shot_color());
+        }
+        return;
+    }
+    let ActionPreview::Move { path, .. } = preview else {
         return;
     };
     let mut previous: Option<Vec2> = None;
@@ -108,6 +134,15 @@ pub(crate) fn draw_route(
         }
         previous = Some(center);
     }
+}
+
+fn tile_center(view: GridView, tile: macroquad_toolkit::grid::TilePos) -> Vec2 {
+    let rect = view.tile_rect(tile);
+    vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5)
+}
+
+fn shot_color() -> Color {
+    Color::new(0.55, 0.94, 0.58, 0.95)
 }
 
 fn route_color() -> Color {

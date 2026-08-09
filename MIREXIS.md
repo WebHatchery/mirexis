@@ -417,6 +417,11 @@ preview remains visible with a red border and names the validation failure. Bloc
 fire, missing paths, occupied tiles, range, phase, incapacitation, and insufficient AP are
 therefore explained before the player clicks rather than represented by a silent omission.
 
+A valid attack traces a colony-green firing line from the selected colonist to the focused
+hostile. The command banner separates any directional cover penalty from the final hit
+chance, while hostile-intent forecasts remain orange, so both plans can coexist without
+sharing an ambiguous colour.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.

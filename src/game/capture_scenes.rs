@@ -84,6 +84,7 @@ impl Game {
             "movement_route" => self.capture_movement_route(),
             "cover_edges" => self.capture_cover_edges(),
             "invalid_command" => self.capture_invalid_command(),
+            "valid_shot" => self.capture_valid_shot(),
             "line_formation" => self.capture_line_formation(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",

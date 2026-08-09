@@ -1,7 +1,7 @@
 //! Deterministic tactical command simulation and persistence model.
 
 use crate::campaign::CampaignState;
-use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
+use crate::data::{GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
     BattleEvent, Command, CommandCost, DestructibleCover, HazardTile, ObjectiveState,
@@ -650,23 +650,12 @@ impl GameSession {
             .all(|position| !self.tactical.blocked.contains(&position))
     }
 
+    pub(crate) fn cover_penalty(&self, attacker: &UnitState, target: &UnitState) -> i32 {
+        self.cover_against(target.position, attacker.position)
+    }
+
     fn cover_against(&self, target: TilePos, attacker: TilePos) -> i32 {
-        let direction = if (attacker.x - target.x).abs() >= (attacker.y - target.y).abs() {
-            if attacker.x < target.x {
-                EdgeDirection::West
-            } else {
-                EdgeDirection::East
-            }
-        } else if attacker.y < target.y {
-            EdgeDirection::North
-        } else {
-            EdgeDirection::South
-        };
-        self.tactical
-            .cover_edges
-            .iter()
-            .find(|edge| tile(edge.position) == target && edge.direction == direction)
-            .map_or(0, |edge| i32::from(edge.strength))
+        crate::cover_rules::penalty(&self.tactical.cover_edges, target, attacker)
     }
 
     fn path_for(&self, start: TilePos, goal: TilePos, mover: Option<&str>) -> Option<Vec<TilePos>> {
