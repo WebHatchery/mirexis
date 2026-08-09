@@ -6,6 +6,7 @@ use macroquad_toolkit::capture;
 mod action_preview;
 mod action_preview_ui;
 mod battle_log_ui;
+mod briefing_intel_ui;
 mod campaign;
 mod class_action_ui;
 mod class_actions;

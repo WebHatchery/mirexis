@@ -34,6 +34,8 @@ The completed roadmap slice includes:
   covering the turn loop, selection, previews, hostile intent, hazards, and objectives
 - an expandable recent battle-history panel available from `LOG` or `B`, preserving the
   ordered movement, attacks, damage, statuses, abilities, hazards, and phase transitions
+- materialized mission-briefing intelligence for contract/deadline, hostile role
+  composition, faction ability, and known hazard counts before squad deployment
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

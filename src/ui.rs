@@ -210,6 +210,7 @@ pub fn draw_mission_briefing(
             TextStyle::new(15.0, dark::TEXT_DIM).params(),
         );
     }
+    crate::briefing_intel_ui::draw(data, mission, vec2(880.0, 342.0));
     draw_ui_text_ex(
         &format!(
             "DEPLOYMENT // {}/{} SELECTED // SUPPLY {} FOOD",

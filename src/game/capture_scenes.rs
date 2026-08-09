@@ -99,6 +99,14 @@ impl Game {
             "trauma" => self.capture_trauma(),
             "bonded_briefing" => self.capture_relationships(AppState::MissionBriefing),
             "briefing" => self.state = AppState::MissionBriefing,
+            "threat_briefing" => {
+                self.capture_template_operation(
+                    "sporefield_extraction",
+                    4,
+                    OperationModifier::BroodFrenzy,
+                );
+                self.state = AppState::MissionBriefing;
+            }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",

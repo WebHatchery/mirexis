@@ -413,6 +413,11 @@ recent ordered simulation events. It lets players reconstruct dense hostile phas
 attacks, damage, statuses, faction abilities, hazards, and phase transitions—rather than
 relying only on the latest-event line.
 
+Mission briefing now includes threat intelligence derived from the materialized operation:
+objective contract and deadline, deployed hostile count and roles, the primary faction
+ability, and known hazard types/counts. This information sits beside recovery rewards so
+squad selection can answer the mission actually being deployed.
+
 ### Player Phase
 
 The player activates characters in any order.
