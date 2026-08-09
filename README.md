@@ -24,6 +24,8 @@ The completed roadmap slice includes:
 - persistent three-colonist squad selection with a visible reserve
 - roster-wide class training, four level/phase/mastery-gated advanced disciplines,
   and slot-replacing workshop equipment
+- inspectable equipment effects plus Breach Scattergun and Needle Carbine profiles that
+  alter tactical weapon range, damage, accuracy, and attack-point economy
 - player-targeted medkit, toolkit, and survey-harness actions in tactical missions
 - destructible battlefield cover that opens movement routes and firing lanes
 - five persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,

@@ -1052,4 +1052,29 @@ mod tests {
             None
         );
     }
+
+    #[test]
+    fn advanced_class_save_preserves_new_weapon_profiles() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let kira = campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .unwrap();
+        kira.equipment_ids.retain(|id| id != "frontier_rifle");
+        kira.equipment_ids.push("needle_carbine".to_owned());
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.28.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.28.0".to_owned()), legacy, &data).unwrap();
+        let kira = migrated
+            .campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "kira_voss")
+            .unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(kira.equipment_ids.contains(&"needle_carbine".to_owned()));
+    }
 }

@@ -31,7 +31,7 @@ pub(crate) fn draw_action_button(
     };
     if !button(
         rect,
-        if targeting { "CANCEL TARGET" } else { label },
+        if targeting { "CANCEL" } else { label },
         enabled,
         mouse,
     ) {

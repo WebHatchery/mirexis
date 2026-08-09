@@ -13,6 +13,7 @@ mod cover_actions;
 mod cover_ui;
 mod data;
 mod equipment_actions;
+mod equipment_catalog;
 mod equipment_ui;
 mod game;
 mod gene_lab_ui;

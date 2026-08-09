@@ -662,6 +662,13 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
                 (item.armour + traits.get("heavy_armour_efficiency").copied().unwrap_or(0)).max(0);
             unit.max_health += item.health;
             unit.weapon_damage += item.damage;
+            unit.move_range = add_signed(unit.move_range, item.move_bonus);
+            if item.weapon_range_override > 0 {
+                unit.weapon_range = item.weapon_range_override;
+            }
+            if item.weapon_ap_cost_override > 0 {
+                unit.weapon_ap_cost = item.weapon_ap_cost_override;
+            }
         }
     }
     for legacy in &character.event_legacies {
@@ -770,6 +777,42 @@ mod tests {
         let mara = roster.iter().find(|unit| unit.id == "mara_venn").unwrap();
         assert!(mara.armour >= 5);
         assert_eq!(mara.role, "Defender");
+    }
+
+    #[test]
+    fn primary_weapon_families_override_range_and_action_economy() {
+        let data = GameData::load().unwrap();
+        let mut scatter_campaign = CampaignState::new(&data);
+        let kira = scatter_campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .unwrap();
+        kira.equipment_ids.retain(|id| id != "frontier_rifle");
+        kira.equipment_ids.push("breach_scattergun".to_owned());
+        let scatter = scatter_campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap();
+        assert_eq!(scatter.weapon_range, 3);
+        assert_eq!(scatter.weapon_ap_cost, 2);
+
+        let kira = scatter_campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .unwrap();
+        kira.equipment_ids.retain(|id| id != "breach_scattergun");
+        kira.equipment_ids.push("needle_carbine".to_owned());
+        let carbine = scatter_campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap();
+        assert_eq!(carbine.weapon_range, 6);
+        assert_eq!(carbine.weapon_ap_cost, 1);
+        assert!(carbine.weapon_damage < scatter.weapon_damage);
     }
 
     #[test]

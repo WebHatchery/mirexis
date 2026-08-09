@@ -113,6 +113,9 @@ impl CampaignState {
 
 pub(crate) fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
     for class in classes {
+        if class.description.trim().is_empty() {
+            return Err(format!("Class {} has no tactical description", class.id));
+        }
         if class.advanced && class.prerequisite_classes.is_empty() {
             return Err(format!("Advanced class {} has no prerequisites", class.id));
         }

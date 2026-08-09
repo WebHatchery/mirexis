@@ -27,11 +27,7 @@ pub(crate) fn draw_action_button(
     );
     if !button(
         rect,
-        if targeting {
-            "CANCEL TARGET"
-        } else {
-            equipment_label
-        },
+        if targeting { "CANCEL" } else { equipment_label },
         equipment_id.as_deref().is_some_and(|equipment_id| {
             selected.is_some_and(|unit| {
                 crate::equipment_actions::has_valid_target(ctx.session, &unit.id, equipment_id)

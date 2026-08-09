@@ -2,7 +2,9 @@
 
 use crate::state::{BattleEvent, UnitState};
 use macroquad::prelude::*;
-use macroquad_toolkit::prelude::{dark, draw_surface, draw_text_centered_in_box, SurfaceStyle};
+use macroquad_toolkit::prelude::{
+    dark, draw_surface, draw_text_centered_in_box_ex, SurfaceStyle, TextStyle,
+};
 use macroquad_toolkit::ui::RectExt;
 
 pub(crate) fn event_summary(event: &BattleEvent) -> String {
@@ -86,14 +88,14 @@ pub(crate) fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> boo
             },
         ),
     );
-    draw_text_centered_in_box(
+    draw_text_centered_in_box_ex(
         label,
         rect.x,
         rect.y,
         rect.w,
         rect.h,
-        16.0,
-        if enabled { dark::TEXT } else { dark::TEXT_DIM },
+        TextStyle::new(16.0, if enabled { dark::TEXT } else { dark::TEXT_DIM })
+            .with_macroquad_font(),
     );
     hovered && is_mouse_button_released(MouseButton::Left)
 }

@@ -1039,6 +1039,12 @@ Characters can equip:
 
 Equipment families may include:
 
+The current workshop exposes every item's exact tactical function before crafting.
+Primary weapons can override handling rather than only modifying statistics: the Breach
+Scattergun compresses range for armour-breaking damage, while the Needle Carbine trades
+damage and accuracy for one-action-point repeated fire. These join the balanced Frontier
+Rifle, heavy Mire LMG, and unmodified Service Pistol as the first complete weapon family.
+
 ## Human
 
 Reliable and adaptable.

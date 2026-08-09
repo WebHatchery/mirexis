@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.28.0
+Save/content version: 1.29.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -80,6 +80,7 @@ Important transition payloads:
 | `class_training.rs` | Training costs, advanced-class gates, switching, and class-definition validation | UI state |
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
+| `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
@@ -558,6 +559,7 @@ Migration coverage:
 | 1.25.0 | Persistent final-operation and campaign-completion gates |
 | 1.26.0 | Nadi Vale reserve recruitment and Symbiotic Organism evolution paths |
 | 1.27.0 | Data-backed advanced classes; existing class history and level remain valid |
+| 1.28.0 | Inspectable equipment definitions and weapon-profile overrides |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -643,8 +645,8 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
-- Advanced classes, relationships, permanent death, and additional equipment families
-  remain future content.
+- Relationships, permanent death, and broader armour/tool equipment families remain
+  future content.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
@@ -661,6 +663,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is advanced class progression and equipment families
-that create materially different five-person roster builds before the three final
-operations.
+The recommended next vertical slice is persistent character relationships that make the
+five-person roster interact outside combat and influence squad composition.

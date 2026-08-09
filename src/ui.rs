@@ -7,12 +7,44 @@ use crate::state::{GameSession, ObjectiveState, TacticalPhase};
 use crate::ui_widgets::{action_status, button, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
-use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
+use macroquad_toolkit::ui::VirtualUi;
 
 pub use crate::ui_action::UiAction;
 
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
+
+// Tactical screens combine dense prose, meters, fitted controls, and notifications.
+// Split ordinary labels and prose onto Macroquad's built-in atlas so neither font atlas
+// is exhausted by a long-running operation or deterministic capture.
+fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -> TextDimensions {
+    params.font = None;
+    draw_text_ex(text, x, y, params)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_text_block(
+    text: &str,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    font_size: f32,
+    line_gap: f32,
+    color: Color,
+) -> TextLayoutResult {
+    draw_text_block_ex(
+        text,
+        x,
+        y,
+        w,
+        h,
+        TextStyle::new(font_size, color)
+            .with_line_gap(line_gap)
+            .with_macroquad_font(),
+        12.0,
+    )
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetingView<'a> {
@@ -468,24 +500,44 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_ui_text_ex(
         "SELECTED COLONIST",
         x,
-        panel.y + 178.0,
+        panel.y + 164.0,
         TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
     );
     if let Some(unit) = selected {
+        let weapon_name = unit
+            .equipment_ids
+            .iter()
+            .filter_map(|id| ctx.data.equipment.iter().find(|item| &item.id == id))
+            .find(|item| item.slot == "primary")
+            .map_or("Unarmed", |item| item.name.as_str());
         draw_ui_text_ex(
             &unit.name,
             x,
-            panel.y + 212.0,
+            panel.y + 196.0,
             TextStyle::new(25.0, dark::TEXT_BRIGHT).params(),
         );
         draw_ui_text_ex(
             &format!("{}  //  {}", unit.role, unit.mutation),
             x,
-            panel.y + 239.0,
+            panel.y + 222.0,
             TextStyle::new(16.0, dark::TEXT_DIM).params(),
         );
+        draw_ui_text_ex(
+            &format!(
+                "{} // {} DMG · R{} · {} AP · A{} · M{}",
+                weapon_name,
+                unit.effective_weapon_damage(),
+                unit.weapon_range,
+                unit.weapon_ap_cost,
+                unit.effective_armour(),
+                unit.move_range
+            ),
+            x,
+            panel.y + 242.0,
+            TextStyle::new(13.0, dark::ACCENT).params(),
+        );
         meter(
-            Rect::new(x, panel.y + 260.0, panel.w - 36.0, 22.0),
+            Rect::new(x, panel.y + 250.0, panel.w - 36.0, 22.0),
             unit.health as f32,
             unit.max_health as f32,
             dark::POSITIVE,
@@ -494,11 +546,11 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         draw_ui_text_ex(
             &action_status(unit),
             x,
-            panel.y + 332.0,
+            panel.y + 316.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
         );
         meter(
-            Rect::new(x, panel.y + 292.0, panel.w - 36.0, 22.0),
+            Rect::new(x, panel.y + 280.0, panel.w - 36.0, 22.0),
             unit.action_points as f32,
             ctx.data.config.max_action_points as f32,
             Color::new(0.33, 0.65, 0.92, 1.0),
@@ -508,7 +560,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         draw_ui_text_ex(
             "Select a colony unit",
             x,
-            panel.y + 216.0,
+            panel.y + 200.0,
             TextStyle::new(18.0, dark::TEXT_DIM).params(),
         );
     }

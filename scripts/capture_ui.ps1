@@ -12,7 +12,7 @@
     ./scripts/capture_ui.ps1 -Frames 60 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("title", "colony", "contact", "contact_gear", "contact_event", "adaptation", "gene_lab", "evolution", "mara_evolution", "ilya_evolution", "sol_evolution", "nadi_evolution", "escalation", "escalation_operation", "escalation_response", "mirexis", "mirexis_path", "redoubt_end", "commonwealth_end", "threshold_end", "finale_debrief", "adaptation_operation", "glass_nerve", "three_knives", "breakwater", "false_heart", "live_wire", "last_wall", "root_choir", "door_of_light", "damage", "power", "construction", "research", "roster", "advanced_roster", "legacy", "briefing", "pressure", "gameplay", "extraction", "variant", "sporefield", "vault", "black_channel", "living_chorus", "open_circuit", "trace_active", "equipment", "class_target", "breach", "debrief"),
+    [string[]]$Scenes = @("title", "colony", "contact", "contact_gear", "contact_event", "adaptation", "gene_lab", "evolution", "mara_evolution", "ilya_evolution", "sol_evolution", "nadi_evolution", "escalation", "escalation_operation", "escalation_response", "mirexis", "mirexis_path", "redoubt_end", "commonwealth_end", "threshold_end", "finale_debrief", "adaptation_operation", "glass_nerve", "three_knives", "breakwater", "false_heart", "live_wire", "last_wall", "root_choir", "door_of_light", "damage", "power", "construction", "research", "roster", "advanced_roster", "legacy", "briefing", "pressure", "gameplay", "extraction", "variant", "sporefield", "vault", "black_channel", "living_chorus", "open_circuit", "trace_active", "equipment", "weapon_profile", "class_target", "breach", "debrief"),
     [int]$Frames = 150,
     [string]$OutputDir = "docs\verification",
     [switch]$SkipBuild

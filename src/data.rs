@@ -175,6 +175,7 @@ pub struct CharacterDef {
 pub struct ClassDef {
     pub id: String,
     pub name: String,
+    pub description: String,
     pub primary_aptitude: String,
     pub health_bonus: i32,
     pub accuracy_bonus: i32,
@@ -220,11 +221,18 @@ pub struct StatModifier {
 pub struct EquipmentDef {
     pub id: String,
     pub name: String,
+    pub description: String,
     pub slot: String,
     pub accuracy: i32,
     pub armour: i32,
     pub health: i32,
     pub damage: i32,
+    #[serde(default)]
+    pub move_bonus: i8,
+    #[serde(default)]
+    pub weapon_range_override: u8,
+    #[serde(default)]
+    pub weapon_ap_cost_override: u8,
     #[serde(default)]
     pub required_protocol: String,
     #[serde(default)]
@@ -538,6 +546,7 @@ impl GameData {
             "equipment",
             self.equipment.iter().map(|entry| entry.id.as_str()),
         )?;
+        crate::equipment_catalog::validate_definitions(&self.equipment)?;
         for character in &self.characters {
             if !self
                 .classes

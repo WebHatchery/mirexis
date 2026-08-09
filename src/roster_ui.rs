@@ -198,6 +198,10 @@ fn draw_selected_character(
         322.0,
         TextStyle::new(13.0, dark::ACCENT).params(),
     );
+    let mut inspected_class = data
+        .classes
+        .iter()
+        .find(|class| class.id == character.active_class);
     for (index, class) in data.classes.iter().enumerate() {
         let cost = campaign.training_cost(&character.id, class).unwrap_or(100);
         let lock = campaign.class_training_lock_reason(&character.id, class);
@@ -207,13 +211,17 @@ fn draw_selected_character(
             && campaign.colony.resources.materials >= cost as i32;
         let column = index % 3;
         let row = index / 3;
+        let rect = Rect::new(
+            344.0 + column as f32 * 296.0,
+            334.0 + row as f32 * 36.0,
+            282.0,
+            30.0,
+        );
+        if rect.contains(mouse) {
+            inspected_class = Some(class);
+        }
         if button(
-            Rect::new(
-                344.0 + column as f32 * 296.0,
-                334.0 + row as f32 * 36.0,
-                282.0,
-                30.0,
-            ),
+            rect,
             &if character.active_class == class.id {
                 format!("ACTIVE: {}", class.name)
             } else if let Some(reason) = lock {
@@ -227,10 +235,45 @@ fn draw_selected_character(
             actions.push(UiAction::TrainSelected(class.id.clone()));
         }
     }
+    let inspected_equipment = data.equipment.iter().enumerate().find_map(|(index, item)| {
+        let column = index % 3;
+        let row = index / 3;
+        Rect::new(
+            344.0 + column as f32 * 296.0,
+            518.0 + row as f32 * 36.0,
+            282.0,
+            30.0,
+        )
+        .contains(mouse)
+        .then_some(item)
+    });
+    if let Some(item) = inspected_equipment {
+        draw_text_block(
+            &format!("{} // {}", item.name.to_uppercase(), item.description),
+            344.0,
+            474.0,
+            870.0,
+            28.0,
+            11.0,
+            2.0,
+            dark::TEXT_DIM,
+        );
+    } else if let Some(class) = inspected_class {
+        draw_text_block(
+            &format!("{} // {}", class.name.to_uppercase(), class.description),
+            344.0,
+            474.0,
+            870.0,
+            28.0,
+            11.0,
+            2.0,
+            dark::TEXT_DIM,
+        );
+    }
     draw_ui_text_ex(
         "WORKSHOP // EQUIPMENT",
         344.0,
-        488.0,
+        506.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     for (index, item) in data.equipment.iter().enumerate() {
@@ -246,7 +289,7 @@ fn draw_selected_character(
         if button(
             Rect::new(
                 344.0 + column as f32 * 296.0,
-                500.0 + row as f32 * 36.0,
+                518.0 + row as f32 * 36.0,
                 282.0,
                 30.0,
             ),
@@ -264,7 +307,7 @@ fn draw_selected_character(
         }
     }
     if button(
-        Rect::new(1020.0, 624.0, 214.0, 38.0),
+        Rect::new(1020.0, 103.0, 214.0, 28.0),
         "RETURN TO COLONY",
         true,
         mouse,

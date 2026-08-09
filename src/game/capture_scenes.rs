@@ -109,6 +109,7 @@ impl Game {
             "extraction" => self.capture_extraction(),
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
+            "weapon_profile" => self.capture_weapon_profile(),
             "class_target" => self.capture_class_target(),
             "breach" => self.capture_breach(),
             "debrief" => self.capture_debrief(),
@@ -551,6 +552,23 @@ impl Game {
             unit_id: "kira_voss".to_owned(),
             equipment_id: "survey_harness".to_owned(),
         });
+    }
+
+    fn capture_weapon_profile(&mut self) {
+        let kira = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .expect("weapon capture roster includes Kira");
+        kira.equipment_ids.retain(|equipment_id| {
+            !matches!(
+                equipment_id.as_str(),
+                "frontier_rifle" | "mire_lmg" | "service_pistol" | "breach_scattergun"
+            )
+        });
+        kira.equipment_ids.push("needle_carbine".to_owned());
+        self.reset_capture_session(AppState::Tactical);
     }
 
     fn capture_extraction(&mut self) {
