@@ -418,6 +418,11 @@ objective contract and deadline, deployed hostile count and roles, the primary f
 ability, and known hazard types/counts. This information sits beside recovery rewards so
 squad selection can answer the mission actually being deployed.
 
+Every mission offer also carries a deterministic danger band, while its briefing names
+the band and exact score. Hostile strength, multiple enemy powers, reinforcement-bearing
+contracts, short deadlines, battlefield hazards, and escalation modifiers all raise the
+same shared rating, so risk can be compared before committing to deployment.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

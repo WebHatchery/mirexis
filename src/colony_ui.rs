@@ -418,18 +418,14 @@ fn draw_operations(
     );
     for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
         let selected = mission.id == campaign.strategy.selected_mission_id;
-        let pressure = if mission.operation_modifier == crate::data::OperationModifier::None {
-            ""
-        } else {
-            " [PRESSURE]"
-        };
+        let danger = crate::danger_rating::for_instance(mission, data);
         if colony_button(
             Rect::new(878.0, 384.0 + index as f32 * 38.0, 362.0, 32.0),
             &format!(
-                "{}{}{}",
+                "{}{} // {}",
                 if selected { "> " } else { "" },
                 mission.name,
-                pressure
+                danger.label()
             ),
             true,
             mouse,

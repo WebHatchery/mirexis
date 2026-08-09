@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.41.0
+Save/content version: 1.42.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -71,6 +71,7 @@ Important transition payloads:
 | `battle_log_ui.rs` | Command-blocking recent ordered-event history panel | Simulation mutation |
 | `briefing_intel_ui.rs` | Materialized contract, hostile, ability, and hazard briefing summary | Mission generation |
 | `briefing_loadout_ui.rs` | Selected colonist derived combat/loadout summary in briefing | Campaign mutation |
+| `danger_rating.rs` | Deterministic shared offer/briefing danger score and bands | Save state or rendering |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
 | `game/capture_tactical.rs` | Tactical mechanic showcase capture construction | Runtime input handling |
@@ -605,6 +606,7 @@ Migration coverage:
 | 1.38.0 | No save fields; battle-log visibility is battle-screen UI state only |
 | 1.39.0 | No save fields; briefing threat intel derives from materialized mission data |
 | 1.40.0 | No new fields; briefing loadouts derive from persistent colonist records |
+| 1.41.0 | No new fields; danger ratings derive from mission definitions and realized geometry |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -656,7 +658,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (136 domain/migration tests plus the shared source-size gate)
+- `cargo test` (138 domain/migration tests plus the shared source-size gate)
 - deterministic sixty-nine-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -713,5 +715,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is explicit operation difficulty and danger ratings
-derived from hostile count, reinforcements, modifiers, deadlines, and battlefield hazards.
+The recommended next vertical slice is reinforcement-wave forecasting in briefings and
+the tactical objective panel, exposing arrival rounds, likely roles, and entry pressure.

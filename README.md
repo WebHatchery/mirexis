@@ -38,6 +38,8 @@ The completed roadmap slice includes:
   composition, faction ability, and known hazard counts before squad deployment
 - briefing-side selected-colonist loadout inspection for derived mutation/weapon stats,
   armour, movement, action economy, and scars, with unobstructed five-person roster rows
+- deterministic operation danger ratings on mission offers and threat briefings, derived
+  from hostiles, mixed powers, reinforcement contracts, deadlines, hazards, and modifiers
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

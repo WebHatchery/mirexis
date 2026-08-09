@@ -5,8 +5,9 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
 pub(crate) fn draw(data: &GameData, mission: &MissionDef, origin: Vec2) {
+    let danger = crate::danger_rating::for_mission(mission, data);
     draw_text_ex(
-        "THREAT INTELLIGENCE",
+        format!("THREAT INTELLIGENCE // {} {}", danger.label(), danger.score),
         origin.x,
         origin.y,
         TextStyle::new(15.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),

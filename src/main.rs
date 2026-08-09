@@ -16,6 +16,7 @@ mod colony;
 mod colony_ui;
 mod cover_actions;
 mod cover_ui;
+mod danger_rating;
 mod data;
 mod defense_objective;
 mod enemy_abilities;
