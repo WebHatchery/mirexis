@@ -7,9 +7,7 @@ use macroquad_toolkit::grid::TilePos;
 
 impl Game {
     pub fn begin_capture_scene(&mut self, scene: &str) {
-        self.targeting = None;
-        self.show_tactical_help = false;
-        self.show_battle_log = false;
+        self.reset_capture_world();
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,

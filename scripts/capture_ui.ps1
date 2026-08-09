@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Headless screenshot harness for Mirexis.
+    Single-window background screenshot harness for Mirexis.
 
 .DESCRIPTION
     Thin wrapper around the shared macroquad-toolkit capture script. Builds the
-    debug exe and drives it through the env-var capture hook
+    debug exe once and drives every scene through the manifest capture hook
     (MIREXIS_CAPTURE_*) provided by macroquad_toolkit::capture in src/main.rs.
 
 .EXAMPLE

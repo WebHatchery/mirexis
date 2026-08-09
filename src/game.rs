@@ -1,5 +1,6 @@
 //! Application state machine, persistence, and toolkit integration.
 
+mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
 mod input;
