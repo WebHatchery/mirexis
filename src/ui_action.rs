@@ -43,6 +43,7 @@ pub enum UiAction {
     SetOverwatch,
     EndPhase,
     ToggleTacticalHelp,
+    ToggleBattleLog,
     Save,
     Load,
     DeleteSave,

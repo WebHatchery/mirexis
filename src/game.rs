@@ -57,6 +57,7 @@ pub struct Game {
     autosave: AutoSaveManager,
     targeting: Option<TacticalTargeting>,
     show_tactical_help: bool,
+    show_battle_log: bool,
 }
 
 impl Game {
@@ -98,6 +99,7 @@ impl Game {
             autosave: AutoSaveManager::default(),
             targeting: None,
             show_tactical_help: false,
+            show_battle_log: false,
         }
     }
 
@@ -132,6 +134,8 @@ impl Game {
                 if input.escape_pressed {
                     self.events.push(if self.show_tactical_help {
                         UiAction::ToggleTacticalHelp
+                    } else if self.show_battle_log {
+                        UiAction::ToggleBattleLog
                     } else if self.targeting.is_some() {
                         UiAction::CancelTargeting
                     } else {
@@ -141,7 +145,10 @@ impl Game {
                 if is_key_pressed(KeyCode::H) {
                     self.events.push(UiAction::ToggleTacticalHelp);
                 }
-                if !self.show_tactical_help {
+                if is_key_pressed(KeyCode::B) {
+                    self.events.push(UiAction::ToggleBattleLog);
+                }
+                if !self.show_tactical_help && !self.show_battle_log {
                     if is_key_pressed(KeyCode::S) {
                         self.events.push(UiAction::Save);
                     }
@@ -209,6 +216,7 @@ impl Game {
                     }
                 }),
                 show_help: self.show_tactical_help,
+                show_battle_log: self.show_battle_log,
             }),
             AppState::Debrief => crate::ui_debrief::draw_debrief(
                 &self.active_mission,
@@ -347,6 +355,7 @@ impl Game {
                 Ok(food_cost) => {
                     self.targeting = None;
                     self.show_tactical_help = false;
+                    self.show_battle_log = false;
                     self.session = GameSession::new(
                         &self.data.config,
                         &self.active_mission,
@@ -380,6 +389,7 @@ impl Game {
             UiAction::ReturnToTitle => {
                 self.targeting = None;
                 self.show_tactical_help = false;
+                self.show_battle_log = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
@@ -614,6 +624,12 @@ impl Game {
             }
             UiAction::ToggleTacticalHelp => {
                 self.show_tactical_help = !self.show_tactical_help;
+                self.show_battle_log = false;
+                self.targeting = None;
+            }
+            UiAction::ToggleBattleLog => {
+                self.show_battle_log = !self.show_battle_log;
+                self.show_tactical_help = false;
                 self.targeting = None;
             }
             UiAction::Save => self.save_game(),

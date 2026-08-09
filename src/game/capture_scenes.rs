@@ -9,6 +9,7 @@ impl Game {
     pub fn begin_capture_scene(&mut self, scene: &str) {
         self.targeting = None;
         self.show_tactical_help = false;
+        self.show_battle_log = false;
         match scene {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
@@ -54,6 +55,11 @@ impl Game {
             "help" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.show_tactical_help = true;
+            }
+            "battle_log" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.session.end_player_phase(&self.data.config);
+                self.show_battle_log = true;
             }
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",

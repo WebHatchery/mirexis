@@ -32,6 +32,8 @@ The completed roadmap slice includes:
   hit chance, normal/critical damage range, and weapon AP before commands are committed
 - a command-blocking tactical field manual available from the footer, `H`, or Escape,
   covering the turn loop, selection, previews, hostile intent, hazards, and objectives
+- an expandable recent battle-history panel available from `LOG` or `B`, preserving the
+  ordered movement, attacks, damage, statuses, abilities, hazards, and phase transitions
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

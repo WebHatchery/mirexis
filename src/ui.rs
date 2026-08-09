@@ -66,6 +66,7 @@ pub struct UiContext<'a> {
     pub ui: &'a VirtualUi,
     pub targeting: Option<TargetingView<'a>>,
     pub show_help: bool,
+    pub show_battle_log: bool,
 }
 
 pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiAction> {
@@ -282,6 +283,9 @@ pub fn draw_tactical(ctx: UiContext<'_>) -> Vec<UiAction> {
     if ctx.show_help {
         actions.clear();
         crate::help_ui::draw(mouse, &mut actions);
+    } else if ctx.show_battle_log {
+        actions.clear();
+        crate::battle_log_ui::draw(ctx.session, mouse, &mut actions);
     }
     actions
 }
@@ -743,6 +747,9 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if button(Rect::new(606.0, y, 100.0, 44.0), "HELP", true, mouse) {
         actions.push(UiAction::ToggleTacticalHelp);
     }
+    if button(Rect::new(718.0, y, 90.0, 44.0), "LOG", true, mouse) {
+        actions.push(UiAction::ToggleBattleLog);
+    }
     draw_ui_text_ex(
         &format!(
             "{} campaign  //  {} assets  //  click a hostile to attack",
@@ -757,7 +764,7 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             },
             ctx.loaded_assets
         ),
-        724.0,
+        824.0,
         y + 28.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );

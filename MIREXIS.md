@@ -408,6 +408,11 @@ The tactical footer also opens a field manual that pauses command input and summ
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.
 
+The tactical footer's battle log opens a command-pausing history of the fifteen most
+recent ordered simulation events. It lets players reconstruct dense hostile phases—moves,
+attacks, damage, statuses, faction abilities, hazards, and phase transitions—rather than
+relying only on the latest-event line.
+
 ### Player Phase
 
 The player activates characters in any order.

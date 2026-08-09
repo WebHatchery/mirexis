@@ -72,7 +72,7 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         ],
     );
     text(
-        "KEYS // ARROWS inspect tiles · ENTER end phase · S save · L load · H help",
+        "KEYS // ARROWS inspect · ENTER end phase · S save · L load · H help · B log",
         230.0,
         526.0,
         15.0,
