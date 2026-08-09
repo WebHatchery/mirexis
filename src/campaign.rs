@@ -1347,11 +1347,16 @@ mod tests {
             .choose_mirexis_path("human_redoubt", &mut redoubt.colony, &data)
             .is_err());
         redoubt.strategy.escalation_complete = true;
+        redoubt.strategy.phase_id = "mirexis".to_owned();
         redoubt.colony.resources.materials = 100;
         redoubt
             .strategy
             .choose_mirexis_path("human_redoubt", &mut redoubt.colony, &data)
             .unwrap();
+        assert_eq!(
+            redoubt.strategy.selected_mission().unwrap().template_id,
+            "mirexis_redoubt_last_wall"
+        );
         redoubt.strategy.threats[0].operations_until = 0;
         redoubt.strategy.regenerate_missions(&data);
         assert_eq!(
@@ -1364,6 +1369,7 @@ mod tests {
 
         let mut commonwealth = CampaignState::new(&data);
         commonwealth.strategy.escalation_complete = true;
+        commonwealth.strategy.phase_id = "mirexis".to_owned();
         commonwealth.colony.resources.biomass = 20;
         let food_before = commonwealth.deployment_food_cost(&data);
         commonwealth
@@ -1371,18 +1377,28 @@ mod tests {
             .choose_mirexis_path("living_commonwealth", &mut commonwealth.colony, &data)
             .unwrap();
         assert_eq!(commonwealth.deployment_food_cost(&data), food_before - 1);
+        assert_eq!(
+            commonwealth
+                .strategy
+                .selected_mission()
+                .unwrap()
+                .template_id,
+            "mirexis_commonwealth_root_choir"
+        );
 
         let mut threshold = CampaignState::new(&data);
         threshold.strategy.escalation_complete = true;
+        threshold.strategy.phase_id = "mirexis".to_owned();
         threshold.colony.resources.power = 10;
-        let power_before = threshold
-            .strategy
-            .materialize_selected(&data, &threshold.colony)
-            .power_reward;
         threshold
             .strategy
             .choose_mirexis_path("open_threshold", &mut threshold.colony, &data)
             .unwrap();
+        assert_eq!(
+            threshold.strategy.selected_mission().unwrap().template_id,
+            "mirexis_threshold_door_of_light"
+        );
+        let power_before = threshold.strategy.selected_mission().unwrap().power_reward;
         assert_eq!(
             threshold
                 .strategy

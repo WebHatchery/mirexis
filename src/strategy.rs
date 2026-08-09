@@ -655,12 +655,15 @@ impl StrategyState {
                         || template.required_phase == self.phase_id)
                     && (template.required_response.is_empty()
                         || template.required_response == self.escalation_response_id)
+                    && (template.required_mirexis_path.is_empty()
+                        || template.required_mirexis_path == self.mirexis_path_id)
             })
             .collect::<Vec<_>>();
         templates.sort_by_key(|template| {
             (
                 template.required_phase != self.phase_id,
                 template.required_response != self.escalation_response_id,
+                template.required_mirexis_path != self.mirexis_path_id,
                 template.required_protocol != self.contact_protocol_id,
                 template.faction.as_str() != highest_faction.unwrap_or(""),
                 template.id.clone(),
@@ -673,6 +676,7 @@ impl StrategyState {
                 (
                     template.required_phase != self.phase_id,
                     template.required_response != self.escalation_response_id,
+                    template.required_mirexis_path != self.mirexis_path_id,
                     template.required_protocol != self.contact_protocol_id,
                     template.faction.as_str() != highest_faction.unwrap_or(""),
                 )
@@ -711,7 +715,13 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: if !template.required_response.is_empty() {
+            briefing: if !template.required_mirexis_path.is_empty() {
+                format!(
+                    "The {} path has exposed a final {} battlefield beyond the convergence.",
+                    template.required_mirexis_path.replace('_', " "),
+                    template.faction
+                )
+            } else if !template.required_response.is_empty() {
                 format!(
                     "The {} response has opened a new {} route through the convergence war.",
                     template.required_response.replace('_', " "),

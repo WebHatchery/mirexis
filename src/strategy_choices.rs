@@ -79,6 +79,7 @@ impl StrategyState {
         colony.resources.biomass -= path.biomass_cost;
         colony.resources.power -= path.power_cost;
         self.mirexis_path_id = path.id.clone();
+        self.regenerate_missions(data);
         Ok(path.name.clone())
     }
 }

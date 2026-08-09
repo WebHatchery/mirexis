@@ -51,6 +51,21 @@ impl Game {
                 20,
                 OperationModifier::EscalationCrossfire,
             ),
+            "last_wall" => self.capture_template_operation(
+                "mirexis_redoubt_last_wall",
+                22,
+                OperationModifier::DirectorateFireControl,
+            ),
+            "root_choir" => self.capture_template_operation(
+                "mirexis_commonwealth_root_choir",
+                23,
+                OperationModifier::BroodFrenzy,
+            ),
+            "door_of_light" => self.capture_template_operation(
+                "mirexis_threshold_door_of_light",
+                24,
+                OperationModifier::AscendantInterference,
+            ),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -336,7 +351,12 @@ impl Game {
         let layout = crate::map_variants::materialize(recipe, &self.data, seed);
         self.active_mission.id = format!("capture_{}", template.id);
         self.active_mission.name = template.name.clone();
-        self.active_mission.briefing = if !template.required_response.is_empty() {
+        self.active_mission.briefing = if !template.required_mirexis_path.is_empty() {
+            format!(
+                "The committed {} path opens this battlefield.",
+                template.required_mirexis_path.replace('_', " ")
+            )
+        } else if !template.required_response.is_empty() {
             format!(
                 "The committed {} response opens this battlefield.",
                 template.required_response.replace('_', " ")

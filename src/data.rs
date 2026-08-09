@@ -328,6 +328,8 @@ pub struct MissionTemplateDef {
     pub required_phase: String,
     #[serde(default)]
     pub required_response: String,
+    #[serde(default)]
+    pub required_mirexis_path: String,
     pub materials_reward: i32,
     #[serde(default)]
     pub biomass_reward: i32,
@@ -414,6 +416,18 @@ impl GameData {
                         template.id, unit_id
                     ));
                 }
+            }
+            if !template.required_mirexis_path.is_empty()
+                && !self
+                    .campaign
+                    .mirexis_paths
+                    .iter()
+                    .any(|path| path.id == template.required_mirexis_path)
+            {
+                return Err(format!(
+                    "Mission template {} references missing Mirexis path {}",
+                    template.id, template.required_mirexis_path
+                ));
             }
         }
         for equipment in &self.equipment {
@@ -589,8 +603,14 @@ impl GameData {
                 ));
             }
             if !template.required_phase.is_empty()
-                && !["isolation", "contact", "adaptation", "escalation"]
-                    .contains(&template.required_phase.as_str())
+                && ![
+                    "isolation",
+                    "contact",
+                    "adaptation",
+                    "escalation",
+                    "mirexis",
+                ]
+                .contains(&template.required_phase.as_str())
             {
                 return Err(format!(
                     "Mission template {} references unknown phase {}",

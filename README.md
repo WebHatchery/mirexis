@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase Five — Mirexis Identity
+## Current Slice: Phase Five — Identity-Branched Operations
 
 The completed roadmap slice includes:
 
@@ -15,7 +15,7 @@ The completed roadmap slice includes:
 - secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
   trace objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- fourteen generated operation templates, including a Brood sporefield extraction, an
+- seventeen generated operation templates, including a Brood sporefield extraction, an
   Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
   phase-gated Adaptation scavenging operation
 - save-stable authored and vertically mirrored variants for every mission map family
@@ -77,6 +77,9 @@ The completed roadmap slice includes:
 - an irreversible Phase Five identity choice: Human Redoubt strengthens colony-defense
   cover, Living Commonwealth reduces deployment food, or Open Threshold increases
   power recovered from every later victory
+- three identity-locked Phase Five operations: defend the Human Redoubt's Last Wall
+  from a Directorate breach, awaken the Living Commonwealth's Root Choir under Brood
+  attack, or secure the Open Threshold's Door of Light against Ascendant claimants
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -115,5 +118,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the first Phase Five identity decision, and the texture manifest. `GameData::load()`
+content through the identity-branched Phase Five operations, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.

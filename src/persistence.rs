@@ -83,6 +83,11 @@ pub fn migrate_save_value(
     {
         save.campaign.strategy.regenerate_missions(data);
     }
+    if detected_version.as_deref() == Some("1.24.0")
+        && !save.campaign.strategy.mirexis_path_id.is_empty()
+    {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -953,5 +958,25 @@ mod tests {
 
         assert_eq!(migrated.version, data.config.version);
         assert!(migrated.campaign.strategy.mirexis_path_id.is_empty());
+    }
+
+    #[test]
+    fn mirexis_path_save_gains_its_phase_five_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.phase_id = "mirexis".to_owned();
+        campaign.strategy.escalation_complete = true;
+        campaign.strategy.mirexis_path_id = "open_threshold".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.24.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.24.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .any(|mission| mission.template_id == "mirexis_threshold_door_of_light"));
     }
 }

@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Five — Mirexis identity choice
-Save/content version: 1.24.0
+Current campaign slice: Phase Five — identity-branched operations
+Save/content version: 1.25.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -443,7 +443,7 @@ Escalation has a persistent three-gate completion contract: win Three Knives, co
 one convergence response, and win the response-locked follow-up operation. The colony
 hub exposes the operation, response, and branch state. Meeting all three gates advances
 the saved campaign to `PHASE FIVE // MIREXIS`, updates its summary, and regenerates a
-playable generic offer pool while dedicated Phase Five content is developed.
+playable offer pool while dedicated Phase Five content is developed.
 
 Phase Five immediately exposes one irreversible, data-backed identity choice. Human
 Redoubt spends 45 materials and adds 4 integrity to colony-defense cover. Living
@@ -451,6 +451,14 @@ Commonwealth spends 14 biomass and removes 1 food from each deployment cost. Ope
 Threshold spends 6 power and adds 3 power to every later victorious mission recovery.
 Costs, effects, and affordability are visible in the colony hub; the chosen path ID is
 saved and continues to modify the existing defense, supply, or recovery calculation.
+
+Committing that choice immediately regenerates mission offers around one path-locked
+Phase Five operation. Human Redoubt opens `LAST WALL`, a Directorate elimination battle
+through a breached settlement perimeter. Living Commonwealth opens `ROOT CHOIR`, a
+Brood signal trace in a living garden. Open Threshold opens `DOOR OF LIGHT`, an
+Ascendant secure-and-clear operation at the colony's new gate. These templates remain
+mutually exclusive, carry distinct objectives and map families, and are prioritized
+for both new campaigns and migrated saves that already committed an identity.
 
 ## 9. Content Registry
 
@@ -530,6 +538,7 @@ Migration coverage:
 | 1.21.0 | Explicit mixed-power hostile deployment for saved Escalation offers |
 | 1.22.0 | Persistent response-branch victory and Escalation completion gates |
 | 1.23.0 | Persistent Phase Five Mirexis identity path selection |
+| 1.24.0 | Path-locked Phase Five offers for already committed identities |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -563,7 +572,8 @@ units use labels as well as faction color, and colony buildings use text labels.
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
-`adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `legacy`,
+`adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
+`root_choir`, `door_of_light`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
@@ -578,8 +588,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (96 domain/migration tests plus the shared source-size gate)
-- deterministic forty-three-scene capture with visual inspection
+- `cargo test` (97 domain/migration tests plus the shared source-size gate)
+- deterministic forty-six-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -608,7 +618,7 @@ boundaries when continuing:
   the five implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The fourteen current map recipes support authored and safe mirrored layouts. Additional
+- The seventeen current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
@@ -624,11 +634,12 @@ boundaries when continuing:
   modifier, and its convergence response creates the first
   persistent Phase Four strategic tradeoff with a matching follow-up operation. Winning
   that branch completes Escalation and enters Phase Five, where one identity path changes
-  an existing colony economy; dedicated Mirexis operations, further revelations, and
-  end-state resolution remain future content.
+  an existing colony economy and opens a dedicated operation against one of the three
+  powers. Later path-specific revelations, aftermath, and end-state resolution remain
+  future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is one path-locked Phase Five operation per Mirexis
-identity, making the colony's final direction visible on the battlefield as well as in
-its economy.
+The recommended next vertical slice is a persistent completion and aftermath contract
+for the three identity operations, carrying each chosen future into a distinct final
+revelation and campaign end-state.
