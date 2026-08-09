@@ -1,7 +1,7 @@
 //! Colony hub presentation and strategic intent production.
 
 use crate::campaign::{Availability, CampaignState};
-use crate::colony::{COLONY_HEIGHT, COLONY_WIDTH};
+use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH};
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
@@ -49,7 +49,7 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
     let panel = Rect::new(18.0, 96.0, 820.0, 580.0);
     draw_surface_with_title(
         panel,
-        Some("SETTLEMENT LAYOUT // PLAN BARRICADES · CLICK DAMAGED BUILDINGS TO REPAIR"),
+        Some("SETTLEMENT LAYOUT // PLAN CONSTRUCTION · CLICK DAMAGED BUILDINGS TO REPAIR"),
         &SurfaceStyle::new(Color::new(0.035, 0.052, 0.062, 0.98))
             .with_border(1.0, Color::new(0.19, 0.40, 0.40, 0.9))
             .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
@@ -76,8 +76,13 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
                 .iter()
                 .find(|project| project.position == [x, y]);
             let damaged = building.is_some_and(|building| building.damaged);
+            let unpowered = building.is_some_and(|building| {
+                !building.damaged && !campaign.colony.building_is_powered(&building.id)
+            });
             let fill = if damaged {
                 Color::new(0.34, 0.10, 0.10, 1.0)
+            } else if unpowered {
+                Color::new(0.13, 0.15, 0.20, 1.0)
             } else if building.is_some() {
                 Color::new(0.10, 0.30, 0.26, 1.0)
             } else if project.is_some() {
@@ -111,12 +116,36 @@ fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction
                     if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
                         actions.push(UiAction::RepairBuilding(building.id.clone()));
                     }
+                } else if unpowered {
+                    draw_text("NO POWER", rect.x + 7.0, rect.y + 66.0, 10.0, dark::WARNING);
                 }
             } else if let Some(project) = project {
                 draw_building_label(rect, &format!("{}\nPLANNED", project.kind.name()));
             } else if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
-                actions.push(UiAction::ConstructBarricade([x, y]));
+                actions.push(UiAction::ConstructBuilding(
+                    campaign.colony.planned_construction,
+                    [x, y],
+                ));
             }
+        }
+    }
+    for (index, kind) in [BuildingKind::Barricade, BuildingKind::PowerPlant]
+        .into_iter()
+        .enumerate()
+    {
+        let selected = campaign.colony.planned_construction == kind;
+        if colony_button(
+            Rect::new(105.0 + index as f32 * 260.0, 640.0, 246.0, 30.0),
+            &format!(
+                "{}PLAN {} · {} MAT",
+                if selected { "> " } else { "" },
+                kind.name().to_uppercase(),
+                kind.material_cost()
+            ),
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::SelectConstruction(kind));
         }
     }
 }
@@ -125,6 +154,7 @@ fn draw_building_label(rect: Rect, label: &str) {
     let short = match label {
         "Command Centre" => "COMMAND\nCENTRE",
         "Power Plant" => "POWER\nPLANT",
+        "Hydroponics" => "HYDRO\nPONICS",
         other => other,
     };
     for (index, line) in short.lines().enumerate() {
@@ -156,8 +186,11 @@ fn draw_operations(
     let resources = &campaign.colony.resources;
     draw_ui_text_ex(
         &format!(
-            "MATERIALS {:>3}  //  POWER {:>2}  //  FOOD {:>3}",
-            resources.materials, resources.power, resources.food
+            "MATERIALS {:>3}  //  POWER {:>2}/{:>2}  //  FOOD {:>3}",
+            resources.materials,
+            campaign.colony.power_supply(),
+            campaign.colony.power_demand(),
+            resources.food
         ),
         878.0,
         166.0,
@@ -374,7 +407,9 @@ fn draw_operations(
     }
     draw_ui_text_ex(
         &format!(
-            "Barricade: 20 materials · one operation · {} structures mapped",
+            "Plan: {} · {} materials · one operation · {} structures mapped",
+            campaign.colony.planned_construction.name(),
+            campaign.colony.planned_construction.material_cost(),
             defense.blocked_tiles.len()
         ),
         878.0,

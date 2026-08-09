@@ -149,6 +149,35 @@ impl CampaignState {
             .min(SQUAD_LIMIT)
     }
 
+    pub fn deployment_food_cost(&self, data: &GameData) -> i32 {
+        self.roster
+            .iter()
+            .filter(|character| {
+                character.availability == Availability::Ready && character.deployment_selected
+            })
+            .take(SQUAD_LIMIT)
+            .map(|character| {
+                1 + derived_mutation_traits(character, data)
+                    .get("food_upkeep")
+                    .copied()
+                    .unwrap_or(0)
+                    .max(0)
+            })
+            .sum()
+    }
+
+    pub fn prepare_deployment(&mut self, data: &GameData) -> Result<i32, String> {
+        let cost = self.deployment_food_cost(data);
+        if cost == 0 {
+            return Err("At least one ready colonist must deploy".to_owned());
+        }
+        if self.colony.resources.food < cost {
+            return Err(format!("Deployment requires {} food", cost));
+        }
+        self.colony.resources.food -= cost;
+        Ok(cost)
+    }
+
     pub fn selected_character(&self) -> Option<&CharacterRecord> {
         self.roster
             .iter()
@@ -787,6 +816,28 @@ mod tests {
             .buildings
             .iter()
             .any(|building| building.damaged));
+    }
+
+    #[test]
+    fn deployment_rations_include_mutation_upkeep_and_hydroponics_recovery() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.roster[0].mutation_id = "symbiotic_organism".to_owned();
+        let starting_food = campaign.colony.resources.food;
+        assert_eq!(campaign.deployment_food_cost(&data), 4);
+        assert_eq!(campaign.prepare_deployment(&data).unwrap(), 4);
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
+        };
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert_eq!(campaign.colony.resources.food, starting_food - 1);
     }
 
     #[test]

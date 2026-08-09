@@ -1,6 +1,7 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::campaign::CampaignState;
+use crate::colony::BuildingKind;
 use crate::data::{GameData, MissionDef, ObjectiveKind, Team};
 use crate::grid_ui::GridView;
 use crate::state::{GameSession, MissionOutcome, ObjectiveState, TacticalPhase};
@@ -29,7 +30,8 @@ pub enum UiAction {
     SelectColonist(String),
     TrainSelected(String),
     CraftSelected(String),
-    ConstructBarricade([i32; 2]),
+    SelectConstruction(BuildingKind),
+    ConstructBuilding(BuildingKind, [i32; 2]),
     RepairBuilding(String),
     TreatInjury,
     SelectTile(TilePos),
@@ -214,9 +216,10 @@ pub fn draw_mission_briefing(
     }
     draw_ui_text_ex(
         &format!(
-            "DEPLOYMENT // {}/{} SELECTED",
+            "DEPLOYMENT // {}/{} SELECTED // SUPPLY {} FOOD",
             campaign.selected_squad_count(),
-            crate::campaign::SQUAD_LIMIT
+            crate::campaign::SQUAD_LIMIT,
+            campaign.deployment_food_cost(data)
         ),
         200.0,
         370.0,
@@ -250,8 +253,12 @@ pub fn draw_mission_briefing(
     }
     if button(
         Rect::new(820.0, 520.0, 250.0, 48.0),
-        "DEPLOY SQUAD",
-        campaign.selected_squad_count() > 0,
+        &format!(
+            "DEPLOY SQUAD · {} FOOD",
+            campaign.deployment_food_cost(data)
+        ),
+        campaign.selected_squad_count() > 0
+            && campaign.colony.resources.food >= campaign.deployment_food_cost(data),
         mouse,
     ) {
         actions.push(UiAction::DeployMission);

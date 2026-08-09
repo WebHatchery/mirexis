@@ -25,9 +25,8 @@ The completed roadmap slice includes:
 - destructible battlefield cover that opens movement routes and firing lanes
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
-- colony resources, barracks, infirmary, workshop, physical construction placement,
-  a defense map generated from the saved layout, and repairable facility damage after
-  failed colony defenses
+- colony resources, powered facilities, operation rations, Hydroponics production,
+  selectable barricade/Power Plant construction, layout-derived defenses, and repairs
 - Directorate, Brood, and Ascendant attention; a telegraphed assault; persistent
   research doctrines and character-event legacies; seeded mission generation; and
   faction-pressure battlefield modifiers with materials, biomass, and power recovery
@@ -57,7 +56,8 @@ Capture all application scenes with:
 
 ## Controls
 
-- Mouse: use colony actions, select missions, select colonists, move, attack,
+- Mouse: choose and place colony construction, repair facilities, select missions and
+  colonists, move, attack,
   complete tactical objectives, or activate mutation and class actions
 - Arrow keys: move the tactical cursor
 - Enter: confirm title/briefing/debrief or end the colony tactical phase

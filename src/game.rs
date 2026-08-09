@@ -3,7 +3,6 @@
 mod capture_scenes;
 
 use crate::campaign::CampaignState;
-use crate::colony::BuildingKind;
 use crate::colony_ui;
 use crate::data::{GameData, MissionDef};
 use crate::persistence::migrate_save_value;
@@ -272,19 +271,25 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
-            UiAction::DeployMission => {
-                self.targeting = None;
-                self.session = GameSession::new(
-                    &self.data.config,
-                    &self.active_mission,
-                    &self
-                        .campaign
-                        .deployment_roster(&self.data, &self.active_mission),
-                );
-                self.state = AppState::Tactical;
-                self.autosave_current("Deployment autosaved");
-                self.notifications.success("Operation Glassroot deployed");
-            }
+            UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
+                Ok(food_cost) => {
+                    self.targeting = None;
+                    self.session = GameSession::new(
+                        &self.data.config,
+                        &self.active_mission,
+                        &self
+                            .campaign
+                            .deployment_roster(&self.data, &self.active_mission),
+                    );
+                    self.state = AppState::Tactical;
+                    self.autosave_current("Deployment autosaved");
+                    self.notifications.success(format!(
+                        "{} deployed · {} food committed",
+                        self.active_mission.name, food_cost
+                    ));
+                }
+                Err(err) => self.notifications.warning(err),
+            },
             UiAction::ToggleDeployment(character_id) => {
                 match self.campaign.toggle_deployment(&character_id) {
                     Ok(selected) => {
@@ -315,14 +320,17 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
-            UiAction::ConstructBarricade(position) => {
-                match self
-                    .campaign
-                    .colony
-                    .place_construction(BuildingKind::Barricade, position)
-                {
+            UiAction::SelectConstruction(kind) => {
+                match self.campaign.colony.select_construction(kind) {
+                    Ok(()) => self.notifications.info(format!("Planning {}", kind.name())),
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
+            UiAction::ConstructBuilding(kind, position) => {
+                match self.campaign.colony.place_construction(kind, position) {
                     Ok(_) => {
-                        self.notifications.success("Barricade construction planned");
+                        self.notifications
+                            .success(format!("{} construction planned", kind.name()));
                         self.autosave_campaign_only("Construction plan autosaved");
                     }
                     Err(err) => self.notifications.warning(err),

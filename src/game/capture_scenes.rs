@@ -27,6 +27,8 @@ impl Game {
                 OperationModifier::AscendantInterference,
             ),
             "damage" => self.capture_colony_damage(),
+            "power" => self.capture_power_outage(),
+            "construction" => self.capture_power_construction(),
             "extraction" => self.capture_extraction(),
             "variant" => self.capture_map_variant(),
             "equipment" => self.capture_equipment_target(),
@@ -122,6 +124,29 @@ impl Game {
             .find(|building| building.id == "workshop")
             .expect("capture colony has a workshop")
             .damaged = true;
+        self.state = AppState::Colony;
+    }
+
+    fn capture_power_outage(&mut self) {
+        self.campaign
+            .colony
+            .buildings
+            .iter_mut()
+            .find(|building| building.id == "power_plant")
+            .expect("capture colony has a power plant")
+            .damaged = true;
+        self.state = AppState::Colony;
+    }
+
+    fn capture_power_construction(&mut self) {
+        self.campaign
+            .colony
+            .select_construction(crate::colony::BuildingKind::PowerPlant)
+            .expect("power plants are constructible");
+        self.campaign
+            .colony
+            .place_construction(crate::colony::BuildingKind::PowerPlant, [1, 1])
+            .expect("capture plot is open");
         self.state = AppState::Colony;
     }
 

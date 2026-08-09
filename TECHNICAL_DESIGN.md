@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.4.0
+Save/content version: 1.5.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -244,8 +244,9 @@ first active recovery.
 
 ## 7. Colony Contract
 
-`ColonyState` owns materials, power, food, biomass, alien components, completed
-buildings, construction reservations, and a monotonic building serial.
+`ColonyState` owns materials, base power, food, biomass, alien components, completed
+buildings, the selected construction plan, construction reservations, and a monotonic
+building serial.
 
 Initial facilities have stable coordinates:
 
@@ -253,10 +254,22 @@ Initial facilities have stable coordinates:
 - Barracks: aptitude-priced class training.
 - Infirmary: injury treatment.
 - Workshop: equipment crafting.
+- Hydroponics: three food after each resolved operation while powered.
+- Power Plant: four power supply and a critical defense objective.
 
-Clicking an empty colony plot reserves a barricade, deducts 20 materials, and queues
-one operation of construction. Reserved plots cannot be reused. Campaign time only
-advances when an operation resolves; it never depends on wall-clock time.
+The colony grid selects and places either a 20-material Barricade or a 45-material
+Power Plant. Both reserve their plot and complete after one resolved operation.
+Reserved plots cannot be reused. Campaign time never depends on wall-clock time.
+
+Power is a derived capacity model. Base recovered power and operational Power Plants
+form supply; undamaged facilities form demand. A 7-demand/8-supply starting grid has
+one unit of headroom. When supply falls short, stable building order determines which
+later facilities display `NO POWER` and stop satisfying their gameplay gates.
+
+Deployment commits one food per ready squad member plus positive mutation upkeep.
+Powered Hydroponics returns three food after an operation, sustaining the standard
+three-person squad. If Hydroponics is offline, a powered Command Centre recovers one
+emergency ration so a smaller squad can keep the campaign moving.
 
 `ColonyState::defense_map()` derives blocked tiles, cover tiles, and critical
 objectives from completed buildings. An expired assault materializes those values
@@ -362,6 +375,7 @@ Migration coverage:
 | 1.1.0 | Persistent roster-screen character selection |
 | 1.2.0 | Tactical equipment identity and once-per-mission item usage |
 | 1.3.0 | Battle-local destructible-cover integrity |
+| 1.4.0 | Hydroponics, Power Plant, construction selection, and power-model rebasing |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -392,8 +406,9 @@ Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
 translated into `UiAction` or tactical commands before simulation mutation. Tactical
 units use labels as well as faction color, and colony buildings use text labels.
 
-`scripts/capture_ui.ps1` captures `title`, `colony`, `damage`, `research`, `roster`, `legacy`,
-`briefing`, `pressure`, `gameplay`, `extraction`, `variant`, `sporefield`, `vault`,
+`scripts/capture_ui.ps1` captures `title`, `colony`, `damage`, `power`, `construction`,
+`research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`, `extraction`,
+`variant`, `sporefield`, `vault`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
@@ -405,8 +420,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (54 domain/migration tests plus the shared source-size gate)
-- deterministic seventeen-scene capture with visual inspection
+- `cargo test` (58 domain/migration tests plus the shared source-size gate)
+- deterministic nineteen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -437,8 +452,8 @@ boundaries when continuing:
   consumers are not yet implemented.
 - The six current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
-- The colony has fixed initial facilities and placeable barricades; population,
-  power demand, facility construction, and free placement for every building remain.
+- The colony has fixed core facilities and placeable Barricades/Power Plants;
+  population, other facility construction, and free placement for every building remain.
 - Mutation evolution, advanced classes, relationships, permanent death, and additional
   equipment families need content beyond the starter roster screen.
 - Isolation is a repeatable Phase One loop. Story gates and Phases Two–Five remain

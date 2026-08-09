@@ -6,14 +6,16 @@ use serde::{Deserialize, Serialize};
 pub const COLONY_WIDTH: i32 = 8;
 pub const COLONY_HEIGHT: i32 = 6;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BuildingKind {
     CommandCentre,
     Barracks,
     Infirmary,
     Workshop,
+    #[default]
     Barricade,
+    Hydroponics,
     PowerPlant,
 }
 
@@ -25,6 +27,7 @@ impl BuildingKind {
             Self::Infirmary => "Infirmary",
             Self::Workshop => "Workshop",
             Self::Barricade => "Barricade",
+            Self::Hydroponics => "Hydroponics",
             Self::PowerPlant => "Power Plant",
         }
     }
@@ -35,6 +38,18 @@ impl BuildingKind {
             Self::PowerPlant => 45,
             _ => 0,
         }
+    }
+
+    pub fn power_demand(self) -> i32 {
+        match self {
+            Self::CommandCentre | Self::Barracks | Self::Infirmary => 1,
+            Self::Workshop | Self::Hydroponics => 2,
+            Self::Barricade | Self::PowerPlant => 0,
+        }
+    }
+
+    pub fn power_output(self) -> i32 {
+        i32::from(self == Self::PowerPlant) * 4
     }
 
     pub fn repair_cost(self) -> i32 {
@@ -84,6 +99,8 @@ pub struct ColonyState {
     pub resources: Resources,
     pub buildings: Vec<BuildingState>,
     pub construction_queue: Vec<ConstructionProject>,
+    #[serde(default)]
+    pub planned_construction: BuildingKind,
     next_building_serial: u32,
 }
 
@@ -92,7 +109,7 @@ impl ColonyState {
         Self {
             resources: Resources {
                 materials: 120,
-                power: 8,
+                power: 4,
                 food: 24,
                 biomass: 12,
                 alien_components: 0,
@@ -102,16 +119,60 @@ impl ColonyState {
                 building("barracks", BuildingKind::Barracks, [2, 3]),
                 building("infirmary", BuildingKind::Infirmary, [4, 3]),
                 building("workshop", BuildingKind::Workshop, [3, 4]),
+                building("hydroponics", BuildingKind::Hydroponics, [5, 3]),
+                building("power_plant", BuildingKind::PowerPlant, [5, 4]),
             ],
             construction_queue: Vec::new(),
+            planned_construction: BuildingKind::Barricade,
             next_building_serial: 1,
         }
     }
 
     pub fn has_facility(&self, kind: BuildingKind) -> bool {
+        self.buildings.iter().any(|building| {
+            building.kind == kind && !building.damaged && self.building_is_powered(&building.id)
+        })
+    }
+
+    pub fn power_supply(&self) -> i32 {
+        self.resources.power
+            + self
+                .buildings
+                .iter()
+                .filter(|building| !building.damaged)
+                .map(|building| building.kind.power_output())
+                .sum::<i32>()
+    }
+
+    pub fn power_demand(&self) -> i32 {
         self.buildings
             .iter()
-            .any(|building| building.kind == kind && !building.damaged)
+            .filter(|building| !building.damaged)
+            .map(|building| building.kind.power_demand())
+            .sum()
+    }
+
+    pub fn building_is_powered(&self, building_id: &str) -> bool {
+        let mut remaining = self.power_supply();
+        for building in self.buildings.iter().filter(|building| !building.damaged) {
+            let demand = building.kind.power_demand();
+            let powered = demand <= remaining;
+            if powered {
+                remaining -= demand;
+            }
+            if building.id == building_id {
+                return powered;
+            }
+        }
+        false
+    }
+
+    pub fn select_construction(&mut self, kind: BuildingKind) -> Result<(), String> {
+        if !matches!(kind, BuildingKind::Barricade | BuildingKind::PowerPlant) {
+            return Err(format!("{} cannot be planned here", kind.name()));
+        }
+        self.planned_construction = kind;
+        Ok(())
     }
 
     pub fn place_construction(
@@ -165,6 +226,13 @@ impl ColonyState {
                 level: 1,
                 damaged: false,
             }));
+        self.resources.food += if self.has_facility(BuildingKind::Hydroponics) {
+            3
+        } else if self.has_facility(BuildingKind::CommandCentre) {
+            1
+        } else {
+            0
+        };
     }
 
     pub fn damage_for_failed_defense(&mut self, seed: u64) -> Option<String> {
@@ -227,6 +295,7 @@ impl ColonyState {
                 }
                 BuildingKind::CommandCentre
                 | BuildingKind::Infirmary
+                | BuildingKind::Hydroponics
                 | BuildingKind::PowerPlant => critical_objectives.push(position),
             }
         }
@@ -245,6 +314,40 @@ impl ColonyState {
                 .construction_queue
                 .iter()
                 .any(|project| project.position == position)
+    }
+
+    pub fn ensure_phase_one_infrastructure(&mut self, migrate_power: bool) {
+        if !self
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::Hydroponics)
+        {
+            let position = self.first_open_plot([5, 3]);
+            self.buildings
+                .push(building("hydroponics", BuildingKind::Hydroponics, position));
+        }
+        if !self
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::PowerPlant)
+        {
+            let position = self.first_open_plot([5, 4]);
+            self.buildings
+                .push(building("power_plant", BuildingKind::PowerPlant, position));
+            if migrate_power {
+                self.resources.power = (self.resources.power - 4).max(0);
+            }
+        }
+    }
+
+    fn first_open_plot(&self, preferred: [i32; 2]) -> [i32; 2] {
+        if !self.is_occupied(preferred) {
+            return preferred;
+        }
+        (0..COLONY_HEIGHT)
+            .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
+            .find(|position| !self.is_occupied(*position))
+            .expect("the colony has room for required Phase One infrastructure")
     }
 }
 
@@ -306,5 +409,41 @@ mod tests {
         let (_, cost) = colony.repair_building(&id).unwrap();
         assert_eq!(colony.resources.materials, materials - cost);
         assert!(colony.has_facility(kind));
+    }
+
+    #[test]
+    fn hydroponics_production_and_power_load_are_derived_from_buildings() {
+        let mut colony = ColonyState::new();
+        assert_eq!(colony.power_supply(), 8);
+        assert_eq!(colony.power_demand(), 7);
+        let food = colony.resources.food;
+        colony.advance_operation();
+        assert_eq!(colony.resources.food, food + 3);
+
+        colony
+            .buildings
+            .iter_mut()
+            .find(|building| building.kind == BuildingKind::PowerPlant)
+            .unwrap()
+            .damaged = true;
+        assert_eq!(colony.power_supply(), 4);
+        assert_eq!(colony.power_demand(), 7);
+        assert!(!colony.has_facility(BuildingKind::Workshop));
+        assert!(!colony.has_facility(BuildingKind::Hydroponics));
+        colony.advance_operation();
+        assert_eq!(colony.resources.food, food + 4);
+    }
+
+    #[test]
+    fn power_plant_construction_adds_redundant_grid_capacity() {
+        let mut colony = ColonyState::new();
+        colony
+            .place_construction(BuildingKind::PowerPlant, [1, 1])
+            .unwrap();
+        colony.advance_operation();
+        assert_eq!(colony.power_supply(), 12);
+        assert!(colony.buildings.iter().any(
+            |building| building.kind == BuildingKind::PowerPlant && building.position == [1, 1]
+        ));
     }
 }
