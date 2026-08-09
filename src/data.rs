@@ -121,5 +121,19 @@ mod tests {
         assert!(data.mission.round_limit > 0);
         assert!(data.mission.terrain_costs.iter().all(|tile| tile.cost > 0));
         assert!(data.roster.iter().all(|unit| unit.weapon_ap_cost > 0));
+        assert_eq!(
+            data.roster
+                .iter()
+                .filter(|unit| unit.team == Team::Colony)
+                .count(),
+            4
+        );
+        let hostile_roles = data
+            .roster
+            .iter()
+            .filter(|unit| unit.team == Team::Hostile)
+            .map(|unit| unit.role.as_str())
+            .collect::<std::collections::HashSet<_>>();
+        assert!(hostile_roles.len() >= 2);
     }
 }

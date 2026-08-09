@@ -1,7 +1,8 @@
 //! Application state machine, persistence, and toolkit integration.
 
 use crate::data::GameData;
-use crate::state::{migrate_save_value, GameSession, SaveData};
+use crate::persistence::migrate_save_value;
+use crate::state::{GameSession, MissionOutcome, SaveData};
 use crate::ui::{self, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -17,7 +18,9 @@ use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_fr
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AppState {
     Title,
+    MissionBriefing,
     Tactical,
+    Debrief,
 }
 
 pub struct Game {
@@ -28,6 +31,7 @@ pub struct Game {
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
+    last_outcome: Option<MissionOutcome>,
 }
 
 impl Game {
@@ -43,7 +47,7 @@ impl Game {
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
         let mut notifications = NotificationManager::new();
         notifications.info(format!(
-            "Phase 0 systems online; {} manifest textures loaded",
+            "Mission systems online; {} manifest textures loaded",
             loaded_assets
         ));
 
@@ -55,6 +59,7 @@ impl Game {
             notifications,
             events: EventBus::new(),
             save_exists,
+            last_outcome: None,
         }
     }
 
@@ -65,6 +70,14 @@ impl Game {
             AppState::Title => {
                 if input.space_pressed || is_key_pressed(KeyCode::Enter) {
                     self.events.push(UiAction::StartMission);
+                }
+            }
+            AppState::MissionBriefing => {
+                if input.escape_pressed {
+                    self.events.push(UiAction::ReturnToTitle);
+                }
+                if input.space_pressed || is_key_pressed(KeyCode::Enter) {
+                    self.events.push(UiAction::DeployMission);
                 }
             }
             AppState::Tactical => {
@@ -84,6 +97,11 @@ impl Game {
                     self.session.move_selection(dx, dy);
                 }
             }
+            AppState::Debrief => {
+                if input.space_pressed || is_key_pressed(KeyCode::Enter) {
+                    self.events.push(UiAction::ReturnToTitle);
+                }
+            }
         }
 
         let actions: Vec<_> = self.events.drain().collect();
@@ -92,11 +110,37 @@ impl Game {
         }
     }
 
+    pub fn begin_capture_scene(&mut self, scene: &str) {
+        match scene {
+            "title" => self.state = AppState::Title,
+            "briefing" => self.state = AppState::MissionBriefing,
+            "debrief" => {
+                self.session =
+                    GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
+                self.session.tactical.objective_state = crate::state::ObjectiveState::Victory;
+                for unit in &mut self.session.tactical.units {
+                    if unit.team == crate::data::Team::Hostile {
+                        unit.incapacitated = true;
+                        unit.health = 0;
+                    }
+                }
+                self.last_outcome = self.session.mission_outcome(&self.data.mission);
+                self.state = AppState::Debrief;
+            }
+            _ => {
+                self.session =
+                    GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
+                self.state = AppState::Tactical;
+            }
+        }
+    }
+
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
+            AppState::MissionBriefing => ui::draw_mission_briefing(&self.data, &virtual_ui),
             AppState::Tactical => ui::draw_tactical(UiContext {
                 data: &self.data,
                 session: &self.session,
@@ -104,6 +148,13 @@ impl Game {
                 loaded_assets: self.assets.len(),
                 ui: &virtual_ui,
             }),
+            AppState::Debrief => ui::draw_debrief(
+                &self.data,
+                self.last_outcome
+                    .as_ref()
+                    .expect("debrief requires an outcome"),
+                &virtual_ui,
+            ),
         };
         end_virtual_ui_frame();
         for action in actions {
@@ -119,6 +170,10 @@ impl Game {
     fn apply_action(&mut self, action: UiAction) {
         match action {
             UiAction::StartMission => {
+                self.state = AppState::MissionBriefing;
+                self.last_outcome = None;
+            }
+            UiAction::DeployMission => {
                 self.session =
                     GameSession::new(&self.data.config, &self.data.mission, &self.data.roster);
                 self.state = AppState::Tactical;
@@ -143,7 +198,7 @@ impl Game {
                 Err(_) => self.notifications.warning("No valid firing solution"),
             },
             UiAction::InteractObjective => match self.session.interact_selected() {
-                Ok(_) => self.notifications.success("Survey beacon secured"),
+                Ok(_) => self.notifications.success("Survey refuge stabilised"),
                 Err(_) => self
                     .notifications
                     .warning("A colonist must reach the beacon"),
@@ -158,6 +213,17 @@ impl Game {
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
             UiAction::DeleteSave => self.delete_save(),
+        }
+        self.enter_debrief_if_finished();
+    }
+
+    fn enter_debrief_if_finished(&mut self) {
+        if self.state != AppState::Tactical {
+            return;
+        }
+        if let Some(outcome) = self.session.mission_outcome(&self.data.mission) {
+            self.last_outcome = Some(outcome);
+            self.state = AppState::Debrief;
         }
     }
 
@@ -188,6 +254,7 @@ impl Game {
             Ok(save) => {
                 self.session = GameSession::from_save(save);
                 self.state = AppState::Tactical;
+                self.last_outcome = None;
                 self.notifications.success("Tactical state restored");
             }
             Err(err) => self.notifications.warning(format!("Load failed: {}", err)),

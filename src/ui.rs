@@ -1,7 +1,9 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::data::{GameData, Team};
-use crate::state::{BattleEvent, GameSession, ObjectiveState, TacticalPhase, UnitState};
+use crate::state::{
+    BattleEvent, GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState,
+};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
@@ -13,6 +15,7 @@ pub const LOGICAL_HEIGHT: f32 = 720.0;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartMission,
+    DeployMission,
     Continue,
     ReturnToTitle,
     SelectTile(TilePos),
@@ -99,6 +102,143 @@ pub fn draw_title(data: &GameData, save_exists: bool, ui: &VirtualUi) -> Vec<UiA
         626.0,
         TextStyle::new(16.0, Color::new(0.38, 0.52, 0.55, 1.0)).params(),
     );
+    actions
+}
+
+pub fn draw_mission_briefing(data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
+    let mut actions = Vec::new();
+    let mouse = ui.mouse_position();
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.025, 0.04, 0.055, 1.0),
+    );
+    let panel = Rect::new(150.0, 90.0, 980.0, 540.0);
+    draw_surface_with_title(
+        panel,
+        Some("MISSION BRIEFING // OUTER SETTLEMENT"),
+        &SurfaceStyle::new(Color::new(0.045, 0.065, 0.075, 0.98))
+            .with_border(1.0, Color::new(0.25, 0.58, 0.52, 0.9))
+            .with_header(48.0, Color::new(0.07, 0.12, 0.13, 1.0)),
+        TextStyle::new(18.0, dark::TEXT),
+    );
+    draw_ui_text_ex(
+        &data.mission.name,
+        200.0,
+        190.0,
+        TextStyle::new(34.0, dark::TEXT_BRIGHT).params(),
+    );
+    draw_text_block(
+        &data.mission.briefing,
+        200.0,
+        230.0,
+        640.0,
+        100.0,
+        21.0,
+        7.0,
+        dark::TEXT_DIM,
+    );
+    draw_ui_text_ex(
+        "DEPLOYMENT",
+        200.0,
+        370.0,
+        TextStyle::new(15.0, dark::ACCENT).params(),
+    );
+    let squad = data
+        .roster
+        .iter()
+        .filter(|unit| unit.team == Team::Colony)
+        .map(|unit| format!("{} · {} · {}", unit.name, unit.role, unit.mutation))
+        .collect::<Vec<_>>()
+        .join("\n");
+    draw_text_block(&squad, 200.0, 394.0, 650.0, 110.0, 18.0, 6.0, dark::TEXT);
+    if button(
+        Rect::new(820.0, 520.0, 250.0, 48.0),
+        "DEPLOY SQUAD",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::DeployMission);
+    }
+    if button(
+        Rect::new(200.0, 520.0, 180.0, 48.0),
+        "STAND DOWN",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ReturnToTitle);
+    }
+    actions
+}
+
+pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -> Vec<UiAction> {
+    let mut actions = Vec::new();
+    let mouse = ui.mouse_position();
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.025, 0.04, 0.055, 1.0),
+    );
+    let won = outcome.result == ObjectiveState::Victory;
+    let panel = Rect::new(220.0, 100.0, 840.0, 500.0);
+    draw_surface(
+        panel,
+        &SurfaceStyle::new(Color::new(0.045, 0.065, 0.075, 0.98))
+            .with_border(1.0, if won { dark::POSITIVE } else { dark::NEGATIVE }),
+    );
+    draw_rectangle(
+        panel.x,
+        panel.y,
+        panel.w,
+        48.0,
+        Color::new(0.07, 0.12, 0.13, 1.0),
+    );
+    draw_text("OPERATION DEBRIEF", 535.0, 132.0, 18.0, dark::TEXT);
+    draw_text(
+        if won {
+            "SURVEY TEAM RECOVERED"
+        } else {
+            "REFUGE LOST"
+        },
+        280.0,
+        220.0,
+        36.0,
+        if won { dark::POSITIVE } else { dark::NEGATIVE },
+    );
+    let injuries = if outcome.colonists_incapacitated.is_empty() {
+        "No squad incapacitations".to_owned()
+    } else {
+        format!(
+            "Incapacitated: {}",
+            outcome.colonists_incapacitated.join(", ")
+        )
+    };
+    let report = [
+        format!("Operation: {}", data.mission.name),
+        format!(
+            "Squad returned: {}/{}",
+            outcome.colonists_deployed - outcome.colonists_incapacitated.len(),
+            outcome.colonists_deployed
+        ),
+        injuries,
+        format!("Hostiles neutralised: {}", outcome.hostiles_neutralised),
+        format!("Materials recovered: {}", outcome.materials_awarded),
+    ];
+    for (index, line) in report.iter().enumerate() {
+        draw_text(line, 280.0, 305.0 + index as f32 * 30.0, 21.0, dark::TEXT);
+    }
+    if button(
+        Rect::new(780.0, 510.0, 220.0, 48.0),
+        "RETURN TO COLONY",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ReturnToTitle);
+    }
     actions
 }
 
@@ -349,7 +489,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     if button(
         Rect::new(x, panel.bottom() - 166.0, panel.w - 36.0, 38.0),
-        "SECURE BEACON",
+        "STABILISE REFUGE",
         ctx.session.can_interact_selected(),
         mouse,
     ) {
@@ -431,7 +571,7 @@ fn event_summary(event: &BattleEvent) -> String {
             format!("{} damage · {} vitality remains", amount, remaining)
         }
         BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
-        BattleEvent::ObjectiveSecured { .. } => "Survey beacon secured".to_owned(),
+        BattleEvent::ObjectiveSecured { .. } => "Survey refuge stabilised".to_owned(),
         BattleEvent::PhaseStarted { phase, round } => {
             format!("{:?} phase · round {}", phase, round)
         }

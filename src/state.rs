@@ -5,7 +5,6 @@ use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -155,6 +154,15 @@ pub struct TacticalState {
 pub struct SaveData {
     pub version: String,
     pub tactical: TacticalState,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MissionOutcome {
+    pub result: ObjectiveState,
+    pub colonists_deployed: usize,
+    pub colonists_incapacitated: Vec<String>,
+    pub hostiles_neutralised: usize,
+    pub materials_awarded: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -372,6 +380,36 @@ impl GameSession {
             self.tactical.objective_state,
             ObjectiveState::Victory | ObjectiveState::Failed
         )
+    }
+
+    pub fn mission_outcome(&self, mission: &MissionDef) -> Option<MissionOutcome> {
+        self.battle_is_over().then(|| MissionOutcome {
+            result: self.tactical.objective_state,
+            colonists_deployed: self
+                .tactical
+                .units
+                .iter()
+                .filter(|unit| unit.team == Team::Colony)
+                .count(),
+            colonists_incapacitated: self
+                .tactical
+                .units
+                .iter()
+                .filter(|unit| unit.team == Team::Colony && unit.incapacitated)
+                .map(|unit| unit.name.clone())
+                .collect(),
+            hostiles_neutralised: self
+                .tactical
+                .units
+                .iter()
+                .filter(|unit| unit.team == Team::Hostile && unit.incapacitated)
+                .count(),
+            materials_awarded: if self.tactical.objective_state == ObjectiveState::Victory {
+                mission.materials_reward
+            } else {
+                0
+            },
+        })
     }
 
     fn validate_move(&self, unit_id: &str, to: TilePos) -> Result<CommandCost, RuleError> {
@@ -732,68 +770,6 @@ fn manhattan(a: TilePos, b: TilePos) -> i32 {
     (a.x - b.x).abs() + (a.y - b.y).abs()
 }
 
-pub fn migrate_save_value(
-    detected_version: Option<String>,
-    value: Value,
-    config: &GameConfig,
-) -> Result<SaveData, String> {
-    let mut payload = value.get("data").cloned().unwrap_or(value);
-    if detected_version.as_deref() == Some("0.1.0") {
-        migrate_phase_zero_payload(&mut payload, config)?;
-    }
-    let mut save = serde_json::from_value::<SaveData>(payload)
-        .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
-    save.version = config.version.clone();
-    Ok(save)
-}
-
-fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<(), String> {
-    let tactical = value
-        .get_mut("tactical")
-        .and_then(Value::as_object_mut)
-        .ok_or_else(|| "Phase 0 save is missing tactical state".to_owned())?;
-    tactical.insert("terrain_costs".to_owned(), serde_json::json!([]));
-    tactical.insert("cover_edges".to_owned(), serde_json::json!([]));
-    tactical.insert(
-        "objective_tile".to_owned(),
-        serde_json::json!({ "x": 10, "y": 4 }),
-    );
-    tactical.insert("objective_state".to_owned(), serde_json::json!("Active"));
-    tactical.insert("round_limit".to_owned(), serde_json::json!(8));
-    tactical.insert(
-        "rng".to_owned(),
-        serde_json::to_value(SeededRng::new(config.battle_seed))
-            .map_err(|err| format!("Could not seed migrated battle: {}", err))?,
-    );
-    tactical.insert("event_log".to_owned(), serde_json::json!([]));
-    let units = tactical
-        .get_mut("units")
-        .and_then(Value::as_array_mut)
-        .ok_or_else(|| "Phase 0 save is missing tactical units".to_owned())?;
-    for unit in units {
-        let Some(unit) = unit.as_object_mut() else {
-            continue;
-        };
-        let hostile = unit.get("team").and_then(Value::as_str) == Some("hostile");
-        unit.insert(
-            "armour".to_owned(),
-            serde_json::json!(if hostile { 1 } else { 0 }),
-        );
-        unit.insert(
-            "accuracy".to_owned(),
-            serde_json::json!(if hostile { 60 } else { 68 }),
-        );
-        unit.insert(
-            "weapon_range".to_owned(),
-            serde_json::json!(if hostile { 1 } else { 5 }),
-        );
-        unit.insert("weapon_damage".to_owned(), serde_json::json!(4));
-        unit.insert("weapon_ap_cost".to_owned(), serde_json::json!(2));
-        unit.insert("incapacitated".to_owned(), serde_json::json!(false));
-    }
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -932,8 +908,28 @@ mod tests {
                 unit.remove(key);
             }
         }
-        let migrated = migrate_save_value(Some("0.1.0".to_owned()), legacy, &data.config).unwrap();
+        let migrated =
+            crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data.config)
+                .unwrap();
         assert_eq!(migrated.version, "0.2.0");
         assert!(!migrated.tactical.units.is_empty());
+    }
+
+    #[test]
+    fn victorious_mission_outcome_carries_debrief_consequences() {
+        let data = crate::data::GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        session.tactical.objective_state = ObjectiveState::Victory;
+        session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "ilya_reed")
+            .unwrap()
+            .incapacitated = true;
+        let outcome = session.mission_outcome(&data.mission).unwrap();
+        assert_eq!(outcome.colonists_deployed, 4);
+        assert_eq!(outcome.colonists_incapacitated, vec!["Ilya Reed"]);
+        assert_eq!(outcome.materials_awarded, data.mission.materials_reward);
     }
 }

@@ -1,8 +1,8 @@
 {
   "id": "operation_glassroot",
   "name": "OPERATION GLASSROOT",
-  "briefing": "A survey team vanished beyond the western floodlights. Bring the colonists home before the shapes in the mire reach the settlement.",
-  "objective": "Recover the survey beacon at the marked relay before round 8, then neutralise the remaining Brood.",
+  "briefing": "A survey team is sealed inside an emergency refuge beyond the western floodlights. Stabilise their failing shelter before the shapes in the mire overrun it.",
+  "objective": "Reach and stabilise the marked survey refuge before round 8, then neutralise the remaining Brood so the trapped team can evacuate.",
   "round_limit": 8,
   "materials_reward": 30,
   "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]],
