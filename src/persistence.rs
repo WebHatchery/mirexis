@@ -749,4 +749,33 @@ mod tests {
             2
         );
     }
+
+    #[test]
+    fn chitin_save_gains_ilyas_unevolved_paths() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.colony.ensure_gene_lab();
+        campaign.roster[1].mutation_evolution_id = "fortress_carapace".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.15.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.15.0".to_owned()), legacy, &data).unwrap();
+        let ilya = migrated
+            .campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "ilya_reed")
+            .unwrap();
+        assert!(ilya.mutation_evolution_id.is_empty());
+        assert_eq!(
+            data.mutations
+                .iter()
+                .find(|mutation| mutation.id == ilya.mutation_id)
+                .unwrap()
+                .evolutions
+                .len(),
+            2
+        );
+    }
 }

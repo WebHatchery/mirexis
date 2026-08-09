@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — multi-colonist evolution
-Save/content version: 1.15.0
+Current campaign slice: Phase Three — support mutation evolution
+Save/content version: 1.16.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -256,6 +256,12 @@ Carapace grants two more armour and removes another movement; Razor Plating gran
 weapon damage and adds one deployment-food upkeep. The same chamber, validation,
 derived-stat, autosave, and irreversible-choice paths serve both colonists.
 
+Ilya's Regenerative Tissue adds a support/recovery pair at ten biomass. Clean Marrow
+cancels the base negative medical-healing trait, returning new injuries to the normal
+two-operation recovery while removing one weapon damage. Feral Renewal adds two more
+health regeneration per round and one deployment-food upkeep. These options exercise
+both battle refresh and post-operation recovery consumers of mutation traits.
+
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
 
@@ -453,6 +459,7 @@ Migration coverage:
 | 1.12.0 | Phase-gated Adaptation operation offers for already evolved campaigns |
 | 1.13.0 | Gene Lab infrastructure for already evolved Adaptation campaigns |
 | 1.14.0 | Data-backed Chitinous Growth evolution paths for unevolved Mara saves |
+| 1.15.0 | Data-backed Regenerative Tissue evolution paths for unevolved Ilya saves |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -485,7 +492,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`,
+`mara_evolution`, `ilya_evolution`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
@@ -501,8 +508,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (79 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-two-scene capture with visual inspection
+- `cargo test` (81 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-three-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -535,7 +542,7 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
-- Evolution paths for the remaining mutations, advanced classes, relationships,
+- Evolution paths for the remaining expressed mutation, advanced classes, relationships,
   permanent death, and additional equipment families remain future content.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
@@ -547,6 +554,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a Regenerative Tissue evolution pair for Ilya,
-expanding the Gene Lab into support and recovery decisions rather than only offensive
-or defensive stat trades.
+The recommended next vertical slice is an Elastic Musculature evolution pair for Sol,
+completing researched paths for the current roster with mobility, action-economy, and
+equipment-efficiency tradeoffs.

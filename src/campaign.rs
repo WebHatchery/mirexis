@@ -1128,4 +1128,41 @@ mod tests {
         assert_eq!(after.move_range, before.move_range - 1);
         assert!(campaign.roster[0].mutation_evolution_id.is_empty());
     }
+
+    #[test]
+    fn clean_marrow_stabilizes_ilyas_injury_recovery_at_a_damage_cost() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.colony.ensure_gene_lab();
+        campaign.colony.resources.power += 2;
+        let damage_before = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "ilya_reed")
+            .unwrap()
+            .weapon_damage;
+        campaign
+            .choose_mutation_evolution("ilya_reed", "clean_marrow", &data)
+            .unwrap();
+        let damage_after = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "ilya_reed")
+            .unwrap()
+            .weapon_damage;
+        assert_eq!(damage_after, damage_before - 1);
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Failed,
+            colonists_deployed: 3,
+            colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
+            hostiles_neutralised: 0,
+            materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
+        };
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert_eq!(campaign.roster[2].injuries[0].recovery_operations, 2);
+    }
 }

@@ -20,7 +20,11 @@
   {
     "id": "regenerative_tissue", "name": "Regenerative Tissue",
     "gift": [{ "stat": "round_regeneration", "amount": 1 }],
-    "complication": [{ "stat": "medical_healing", "amount": -25 }]
+    "complication": [{ "stat": "medical_healing", "amount": -25 }],
+    "evolutions": [
+      { "id": "clean_marrow", "name": "Clean Marrow", "description": "Normal injury recovery, but -1 weapon damage.", "biomass_cost": 10, "gift": [{ "stat": "medical_healing", "amount": 25 }], "complication": [{ "stat": "weapon_damage", "amount": -1 }] },
+      { "id": "feral_renewal", "name": "Feral Renewal", "description": "+2 round regeneration, but +1 deployment food.", "biomass_cost": 10, "gift": [{ "stat": "round_regeneration", "amount": 2 }], "complication": [{ "stat": "food_upkeep", "amount": 1 }] }
+    ]
   },
   {
     "id": "elastic_musculature", "name": "Elastic Musculature",

@@ -18,6 +18,7 @@ impl Game {
             "gene_lab" => self.capture_gene_lab(),
             "evolution" => self.capture_evolution(),
             "mara_evolution" => self.capture_mara_evolution(),
+            "ilya_evolution" => self.capture_ilya_evolution(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -162,6 +163,15 @@ impl Game {
             .choose_mutation_evolution("mara_venn", "razor_plating", &self.data)
             .expect("Mara's Adaptation capture evolution is available");
         self.campaign.selected_character_id = "mara_venn".to_owned();
+        self.state = AppState::GeneLab;
+    }
+
+    fn capture_ilya_evolution(&mut self) {
+        self.capture_gene_lab();
+        self.campaign
+            .choose_mutation_evolution("ilya_reed", "clean_marrow", &self.data)
+            .expect("Ilya's Adaptation capture evolution is available");
+        self.campaign.selected_character_id = "ilya_reed".to_owned();
         self.state = AppState::GeneLab;
     }
 

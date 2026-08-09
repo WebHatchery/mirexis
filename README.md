@@ -50,6 +50,9 @@ The completed roadmap slice includes:
   and complication both affect later deployments
 - a second Gene Lab decision for Mara: Fortress Carapace trades mobility for armour,
   while Razor Plating trades deployment food for weapon damage
+- a support-focused Regenerative Tissue decision for Ilya: Clean Marrow normalizes
+  injury recovery at a damage cost, while Feral Renewal trades food for stronger
+  round-by-round regeneration
 - an Adaptation-only Glass Nerve operation generated immediately after evolution,
   with a distinct Ascendant cradle battlefield, a six-round secure-and-clear contract,
   and visible materials, biomass, and power recovery
