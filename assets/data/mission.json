@@ -1,0 +1,9 @@
+{
+  "id": "operation_glassroot",
+  "name": "OPERATION GLASSROOT",
+  "briefing": "A survey team vanished beyond the western floodlights. Bring the colonists home before the shapes in the mire reach the settlement.",
+  "objective": "Reach the far side of the mire and recover the survey beacon. Phase 0 currently exercises selection, movement, turns, and persistence.",
+  "round_limit": 8,
+  "materials_reward": 30,
+  "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]]
+}

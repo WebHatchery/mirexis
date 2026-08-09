@@ -1,0 +1,42 @@
+[
+  {
+    "id": "kira_voss",
+    "name": "Kira Voss",
+    "role": "Scout",
+    "mutation": "Neural Bloom",
+    "team": "colony",
+    "position": [1, 2],
+    "max_health": 9,
+    "move_range": 5
+  },
+  {
+    "id": "mara_venn",
+    "name": "Mara Venn",
+    "role": "Heavy",
+    "mutation": "Chitinous Growth",
+    "team": "colony",
+    "position": [1, 4],
+    "max_health": 12,
+    "move_range": 4
+  },
+  {
+    "id": "brood_stalker_a",
+    "name": "Brood Stalker",
+    "role": "Hunter",
+    "mutation": "Adaptive Talons",
+    "team": "hostile",
+    "position": [10, 2],
+    "max_health": 8,
+    "move_range": 4
+  },
+  {
+    "id": "brood_stalker_b",
+    "name": "Brood Stalker",
+    "role": "Hunter",
+    "mutation": "Spore Hide",
+    "team": "hostile",
+    "position": [9, 6],
+    "max_health": 8,
+    "move_range": 4
+  }
+]
