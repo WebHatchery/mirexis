@@ -1132,4 +1132,21 @@ mod tests {
             .iter()
             .all(|character| character.traumas.is_empty()));
     }
+
+    #[test]
+    fn trauma_save_gains_inactive_defense_asset_integrity() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.32.0", &campaign)).unwrap();
+        let tactical = legacy["tactical"].as_object_mut().unwrap();
+        tactical.remove("objective_integrity");
+        tactical.remove("objective_max_integrity");
+        let migrated = migrate_save_value(Some("1.32.0".to_owned()), legacy, &data).unwrap();
+        let tactical = migrated.tactical.unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(tactical.objective_integrity, 0);
+        assert_eq!(tactical.objective_max_integrity, 0);
+    }
 }

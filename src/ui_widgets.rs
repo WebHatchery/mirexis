@@ -18,6 +18,13 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         } => format!("{} damage · {} vitality remains", amount, remaining),
         BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
         BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
+        BattleEvent::ObjectiveDamaged { amount, remaining } => {
+            format!(
+                "Field asset took {} damage · {} integrity",
+                amount, remaining
+            )
+        }
+        BattleEvent::ObjectiveDestroyed => "Field asset destroyed".to_owned(),
         BattleEvent::ExtractionCompleted { unit_id } => format!("{} reached extraction", unit_id),
         BattleEvent::MutationActivated { gift, .. } => gift.clone(),
         BattleEvent::ClassActionActivated { action, .. } => action.clone(),

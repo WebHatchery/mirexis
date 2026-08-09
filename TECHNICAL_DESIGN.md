@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.32.0
+Save/content version: 1.33.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -72,6 +72,7 @@ Important transition payloads:
 | `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
+| `defense_objective.rs` | Vulnerable-asset attacks, integrity, deadline result, and hostile targeting helpers | Rendering or campaign rewards |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
@@ -85,6 +86,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
+| `objective_ui.rs` | Objective-specific tactical progress summaries | Objective mutation |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
@@ -566,6 +568,7 @@ Migration coverage:
 | 1.29.0 | Persistent pair bonds, shared-victory history, and derived deployment bonuses |
 | 1.30.0 | Save-stable per-unit overwatch state, defaulting older tactical saves to disarmed |
 | 1.31.0 | Persistent per-character trauma histories, defaulting older rosters to unscarred |
+| 1.32.0 | Defense-asset integrity fields, inactive by default for older tactical saves |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -601,7 +604,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `nadi_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `redoubt_end`, `commonwealth_end`, `threshold_end`,
 `finale_debrief`,
-`adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
+`adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
@@ -617,8 +620,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (116 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-eight-scene capture with visual inspection
+- `cargo test` (120 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-nine-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -643,13 +646,13 @@ project-standard publisher.
 The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
 boundaries when continuing:
 
-- Escort, defense-target integrity, and additional multi-stage contracts remain beyond
-  the five implemented objective types.
+- Escort and additional multi-stage contracts remain beyond the six implemented objective
+  types. Thin Shelter now provides a destructible defense-target contract.
 - Prepaid single-shot overwatch now reacts to hostile movement in range and line of fire.
   Incapacitation now adds one of three bounded persistent tradeoff scars after battle.
   Elevation, in-battle injury statuses, additional reaction types, permanent death, and
   animation/audio consumers are not yet implemented.
-- The seventeen current map recipes support authored and safe mirrored layouts. Additional
+- The eighteen current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
@@ -673,5 +676,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an escort or defense-target objective that makes
-the squad protect a vulnerable actor or structure instead of only controlling tiles.
+The recommended next vertical slice is faction-signature active abilities that make Brood,
+Directorate, and Ascendant squads demand different tactical counterplay.

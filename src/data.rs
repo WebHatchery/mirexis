@@ -104,6 +104,7 @@ pub enum ObjectiveKind {
     Holdout,
     Extraction,
     SignalTrace,
+    DefendAsset,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -779,6 +780,6 @@ mod tests {
             .iter()
             .map(|mission| mission.objective_kind)
             .collect::<std::collections::HashSet<_>>();
-        assert_eq!(objective_kinds.len(), 5);
+        assert_eq!(objective_kinds.len(), 6);
     }
 }

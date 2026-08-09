@@ -41,6 +41,7 @@ impl Game {
                 16,
                 OperationModifier::EscalationCrossfire,
             ),
+            "thin_shelter" => self.capture_defense_asset(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,
@@ -524,6 +525,11 @@ impl Game {
         self.session
             .interact_selected()
             .expect("capture colonist activates relay");
+    }
+
+    fn capture_defense_asset(&mut self) {
+        self.capture_template_operation("shelter_signal", 6, OperationModifier::BroodFrenzy);
+        self.session.tactical.objective_integrity = 7;
     }
 
     fn capture_colony_damage(&mut self) {

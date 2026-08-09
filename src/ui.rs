@@ -373,7 +373,10 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         }
         if matches!(
             ctx.mission.objective_kind,
-            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction | ObjectiveKind::SignalTrace
+            ObjectiveKind::SecureAndClear
+                | ObjectiveKind::Extraction
+                | ObjectiveKind::SignalTrace
+                | ObjectiveKind::DefendAsset
         ) && position == ctx.session.tactical.objective_tile
             && ctx.session.tactical.objective_state == ObjectiveState::Active
         {
@@ -384,6 +387,16 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
                 3.0,
                 Color::new(0.95, 0.74, 0.24, 1.0),
             );
+            if ctx.mission.objective_kind == ObjectiveKind::DefendAsset {
+                draw_poly(
+                    rect.x + rect.w * 0.5,
+                    rect.y + rect.h * 0.5,
+                    4,
+                    rect.w * 0.20,
+                    45.0,
+                    Color::new(0.95, 0.74, 0.24, 1.0),
+                );
+            }
         }
         if let Some(cover) = ctx
             .session
@@ -484,7 +497,10 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     );
     let x = panel.x + 18.0;
     draw_ui_text_ex(
-        &format!("OBJECTIVE // {}", objective_progress(ctx)),
+        &format!(
+            "OBJECTIVE // {}",
+            crate::objective_ui::progress(ctx.session, ctx.mission)
+        ),
         x,
         panel.y + 78.0,
         TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
@@ -578,6 +594,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             "SIGNAL RELAY ACTIVE"
         }
         ObjectiveKind::SignalTrace => "ACTIVATE SIGNAL RELAY",
+        ObjectiveKind::DefendAsset => "PROTECT FIELD ASSET",
     };
     if button(
         Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
@@ -666,57 +683,6 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             panel.bottom() - 14.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
-    }
-}
-
-fn objective_progress(ctx: &UiContext<'_>) -> String {
-    let hostiles = ctx
-        .session
-        .tactical
-        .units
-        .iter()
-        .filter(|unit| unit.team == Team::Hostile && !unit.incapacitated)
-        .count();
-    match ctx.mission.objective_kind {
-        ObjectiveKind::SecureAndClear => match ctx.session.tactical.objective_state {
-            ObjectiveState::Active => format!("UNSECURED · {} HOSTILES", hostiles),
-            ObjectiveState::Secured => format!("SECURED · {} HOSTILES", hostiles),
-            ObjectiveState::Victory => "SECURED · AREA CLEAR".to_owned(),
-            ObjectiveState::Failed => "FAILED".to_owned(),
-        },
-        ObjectiveKind::EliminateAll => format!("{} HOSTILES", hostiles),
-        ObjectiveKind::Holdout => {
-            let remaining = ctx
-                .mission
-                .round_limit
-                .saturating_sub(ctx.session.tactical.round)
-                + 1;
-            let waves = ctx.session.tactical.reinforcement_waves.len();
-            format!(
-                "{} ROUNDS · {} HOSTILES · {} WAVES",
-                remaining, hostiles, waves
-            )
-        }
-        ObjectiveKind::Extraction => match ctx.session.tactical.objective_state {
-            ObjectiveState::Active => format!("REACH EVAC · {} HOSTILES", hostiles),
-            ObjectiveState::Victory => "COLONIST EVACUATED".to_owned(),
-            ObjectiveState::Failed => "EVACUATION FAILED".to_owned(),
-            ObjectiveState::Secured => "EVACUATION CONFIRMED".to_owned(),
-        },
-        ObjectiveKind::SignalTrace => match ctx.session.tactical.objective_state {
-            ObjectiveState::Active => format!("RELAY OFFLINE · {} HOSTILES", hostiles),
-            ObjectiveState::Secured => format!(
-                "TRACE {} ROUNDS · {} HOSTILES · {} WAVES",
-                ctx.mission
-                    .round_limit
-                    .saturating_sub(ctx.session.tactical.round)
-                    + 1,
-                hostiles,
-                ctx.session.tactical.reinforcement_waves.len()
-            ),
-            ObjectiveState::Victory => "CONTACT TRACE COMPLETE".to_owned(),
-            ObjectiveState::Failed => "CONTACT TRACE LOST".to_owned(),
-        },
     }
 }
 

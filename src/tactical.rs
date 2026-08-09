@@ -205,6 +205,9 @@ pub enum Command {
         attacker_id: String,
         position: TilePos,
     },
+    AttackObjective {
+        attacker_id: String,
+    },
     SetOverwatch {
         unit_id: String,
     },
@@ -259,6 +262,11 @@ pub enum BattleEvent {
     ObjectiveSecured {
         unit_id: String,
     },
+    ObjectiveDamaged {
+        amount: i32,
+        remaining: i32,
+    },
+    ObjectiveDestroyed,
     ExtractionCompleted {
         unit_id: String,
     },
@@ -327,6 +335,10 @@ pub struct TacticalState {
     #[serde(default)]
     pub objective_kind: ObjectiveKind,
     pub objective_state: ObjectiveState,
+    #[serde(default)]
+    pub objective_integrity: i32,
+    #[serde(default)]
+    pub objective_max_integrity: i32,
     pub phase: TacticalPhase,
     pub round: u32,
     pub round_limit: u32,

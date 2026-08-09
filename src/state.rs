@@ -72,6 +72,7 @@ impl GameSession {
             .map(|unit| unit.position)
             .unwrap_or(TilePos::new(0, 0));
         let reinforcement_waves = crate::reinforcements::create_waves(config, mission, &units);
+        let defense_integrity = crate::defense_objective::initial_integrity(mission.objective_kind);
 
         Self {
             tactical: TacticalState {
@@ -102,6 +103,8 @@ impl GameSession {
                 objective_tile: tile(mission.objective_tile),
                 objective_kind: mission.objective_kind,
                 objective_state: ObjectiveState::Active,
+                objective_integrity: defense_integrity,
+                objective_max_integrity: defense_integrity,
                 phase: TacticalPhase::Player,
                 round: 1,
                 round_limit: mission.round_limit,
@@ -184,6 +187,9 @@ impl GameSession {
                 position,
             } => crate::cover_actions::validate(self, attacker_id, *position),
             Command::SetOverwatch { unit_id } => crate::overwatch::validate(self, unit_id),
+            Command::AttackObjective { attacker_id } => {
+                crate::defense_objective::validate(self, attacker_id)
+            }
         }
     }
 
@@ -214,6 +220,9 @@ impl GameSession {
                 position,
             } => crate::cover_actions::execute(self, &attacker_id, position),
             Command::SetOverwatch { unit_id } => crate::overwatch::execute(self, &unit_id),
+            Command::AttackObjective { attacker_id } => {
+                crate::defense_objective::execute(self, &attacker_id)
+            }
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -318,7 +327,8 @@ impl GameSession {
         if self.tactical.round > self.tactical.round_limit && !self.battle_is_over() {
             let timed_success = self.tactical.objective_kind == ObjectiveKind::Holdout
                 || (self.tactical.objective_kind == ObjectiveKind::SignalTrace
-                    && self.tactical.objective_state == ObjectiveState::Secured);
+                    && self.tactical.objective_state == ObjectiveState::Secured)
+                || crate::defense_objective::survives_deadline(self);
             self.finish_battle(if timed_success {
                 ObjectiveState::Victory
             } else {
@@ -689,7 +699,7 @@ impl GameSession {
             .units
             .iter()
             .any(|unit| unit.team == Team::Hostile && !unit.incapacitated);
-        let outcome = if !colonists_alive {
+        let outcome = if crate::defense_objective::is_destroyed(self) || !colonists_alive {
             Some(ObjectiveState::Failed)
         } else {
             match self.tactical.objective_kind {

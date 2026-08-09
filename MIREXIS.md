@@ -407,12 +407,14 @@ Examples include:
 - rescue civilians
 - hold a defensive position
 - destroy a biological nest
+- protect a vulnerable structure
 - steal technology
 - capture an enemy officer
 - escort researchers
 - activate machinery
 - escape before reinforcements arrive
 - survive for a fixed number of turns
+
 - defend a convoy
 - sabotage artillery
 - retrieve mutation samples
@@ -420,6 +422,13 @@ Examples include:
 - assassinate a commander
 - recover a stranded colonist
 - seal a breach
+
+The implemented **Thin Shelter** operation combines structure protection with a survival
+deadline. A refuge transmitter begins with 12 integrity and must survive five rounds.
+Hostile AI paths toward the transmitter and attacks it whenever it has range and line of
+fire; destruction fails the operation immediately. Its integrity, deadline, and map marker
+remain visible, while overwatch lets the squad turn the attackers' objective-focused
+movement against them.
 
 ---
 

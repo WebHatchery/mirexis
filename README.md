@@ -13,12 +13,12 @@ The completed roadmap slice includes:
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
 - prepaid overwatch that reacts once when hostile movement enters weapon range and line of fire
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
-- secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
-  trace objectives with live progress
+- secure-and-clear, elimination, holdout, extraction, activate-then-defend signal trace,
+  and destructible-asset defense objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- seventeen generated operation templates, including a Brood sporefield extraction, an
+- eighteen generated operation templates, including a Brood sporefield extraction, an
   Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
-  phase-gated Adaptation scavenging operation
+  phase-gated Adaptation scavenging operation, plus Thin Shelter's vulnerable transmitter
 - save-stable authored and vertically mirrored variants for every mission map family
 - eleven class actions, explicit ally/enemy targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
