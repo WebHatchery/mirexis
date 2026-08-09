@@ -166,7 +166,7 @@ impl Game {
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
-            AppState::Colony => colony_ui::draw_colony(&self.campaign, &virtual_ui),
+            AppState::Colony => colony_ui::draw_colony(&self.campaign, &self.data, &virtual_ui),
             AppState::Roster => {
                 crate::roster_ui::draw_roster(&self.campaign, &self.data, &virtual_ui)
             }
@@ -263,11 +263,7 @@ impl Game {
                 }
             }
             UiAction::ResolveCharacterEvent => {
-                match self
-                    .campaign
-                    .strategy
-                    .resolve_first_event(&mut self.campaign.colony)
-                {
+                match self.campaign.resolve_first_character_event(&self.data) {
                     Ok(title) => {
                         self.notifications
                             .success(format!("Event resolved: {}", title));

@@ -13,8 +13,8 @@
     { "id": "salvage_doctrine", "name": "Salvage Doctrine", "description": "Successful operations recover 8 additional materials.", "materials_cost": 40, "power_reward": 2 }
   ],
   "events": [
-    { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Kira finds Sol rerouting food to an isolated survey family.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2 },
-    { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Mara asks the infirmary to document her accelerating chitin growth.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1 }
+    { "id": "hydroponics_rations", "title": "The Missing Rations", "description": "Spend 2 food to protect the isolated survey family; their route knowledge gives Sol +1 movement.", "participants": ["kira_voss", "sol_cairn"], "food_cost": 2, "attention_change": -2, "legacy_name": "Survey Family Routes", "legacy_character_id": "sol_cairn", "legacy_stat": "movement", "legacy_amount": 1 },
+    { "id": "mara_carapace", "title": "Armour Under Skin", "description": "Document Mara's accelerating chitin growth; the treatment gives her +1 armour.", "participants": ["mara_venn", "ilya_reed"], "food_cost": 0, "attention_change": 1, "legacy_name": "Documented Carapace", "legacy_character_id": "mara_venn", "legacy_stat": "armour", "legacy_amount": 1 }
   ],
   "mission_templates": [
     { "id": "supply_recovery", "name": "ISOLATION: DEAD FREIGHT", "objective": "Reach the stranded supply crawler, recover its manifest, and clear the approach.", "objective_kind": "secure_and_clear", "faction": "directorate", "map_recipe": "directorate_yard", "materials_reward": 28, "round_limit": 8 },

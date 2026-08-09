@@ -23,6 +23,14 @@ pub struct InjuryRecord {
     pub recovery_operations: u8,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CharacterLegacy {
+    pub id: String,
+    pub name: String,
+    pub stat: String,
+    pub amount: i32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterRecord {
     pub id: String,
@@ -41,6 +49,8 @@ pub struct CharacterRecord {
     #[serde(default = "deployment_selected_default")]
     pub deployment_selected: bool,
     pub equipment_ids: Vec<String>,
+    #[serde(default)]
+    pub event_legacies: Vec<CharacterLegacy>,
 }
 
 impl CharacterRecord {
@@ -62,6 +72,7 @@ impl CharacterRecord {
             availability: Availability::Ready,
             deployment_selected: true,
             equipment_ids: def.equipment.clone(),
+            event_legacies: Vec::new(),
         }
     }
 }
@@ -219,6 +230,69 @@ impl CampaignState {
                 character.availability = Availability::Recovering;
             }
         }
+    }
+
+    pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
+        let event = self
+            .strategy
+            .character_events
+            .iter()
+            .find(|event| !event.resolved)
+            .cloned()
+            .ok_or_else(|| "No unresolved character events".to_owned())?;
+        let data_legacy = data
+            .campaign
+            .events
+            .iter()
+            .find(|definition| definition.id == event.id)
+            .map(|definition| {
+                (
+                    definition.legacy_name.clone(),
+                    definition.legacy_character_id.clone(),
+                    definition.legacy_stat.clone(),
+                    definition.legacy_amount,
+                )
+            });
+        let (legacy_name, legacy_character_id, legacy_stat, legacy_amount) =
+            if event.legacy_amount != 0 {
+                (
+                    event.legacy_name.clone(),
+                    event.legacy_character_id.clone(),
+                    event.legacy_stat.clone(),
+                    event.legacy_amount,
+                )
+            } else {
+                data_legacy.unwrap_or_default()
+            };
+        if legacy_amount != 0
+            && !self
+                .roster
+                .iter()
+                .any(|character| character.id == legacy_character_id)
+        {
+            return Err(format!("Unknown legacy recipient: {}", legacy_character_id));
+        }
+        let title = self.strategy.resolve_first_event(&mut self.colony)?;
+        if legacy_amount != 0 {
+            let character = self
+                .roster
+                .iter_mut()
+                .find(|character| character.id == legacy_character_id)
+                .expect("legacy recipient was validated before event mutation");
+            if !character
+                .event_legacies
+                .iter()
+                .any(|legacy| legacy.id == event.id)
+            {
+                character.event_legacies.push(CharacterLegacy {
+                    id: event.id,
+                    name: legacy_name,
+                    stat: legacy_stat,
+                    amount: legacy_amount,
+                });
+            }
+        }
+        Ok(title)
     }
 
     pub fn advance_recovery(&mut self) {
@@ -450,6 +524,16 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
             unit.weapon_damage += item.damage;
         }
     }
+    for legacy in &character.event_legacies {
+        match legacy.stat.as_str() {
+            "accuracy" => unit.accuracy += legacy.amount,
+            "armour" => unit.armour += legacy.amount,
+            "health" => unit.max_health += legacy.amount,
+            "movement" => unit.move_range = add_signed(unit.move_range, legacy.amount as i8),
+            "damage" => unit.weapon_damage += legacy.amount,
+            _ => {}
+        }
+    }
     unit
 }
 
@@ -600,6 +684,56 @@ mod tests {
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         campaign.apply_mission_outcome(&outcome, &mission, &data);
         assert_eq!(campaign.roster[2].injuries[0].recovery_operations, 2);
+    }
+
+    #[test]
+    fn character_events_leave_participant_legacies_in_later_deployments() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let sol_record = campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "sol_cairn")
+            .unwrap();
+        let sol_base = data
+            .roster
+            .iter()
+            .find(|unit| unit.id == "sol_cairn")
+            .unwrap();
+        let movement_before = derive_unit(sol_base, sol_record, &data).move_range;
+        campaign.strategy.character_events[0].legacy_name.clear();
+        campaign.strategy.character_events[0]
+            .legacy_character_id
+            .clear();
+        campaign.strategy.character_events[0].legacy_stat.clear();
+        campaign.strategy.character_events[0].legacy_amount = 0;
+        campaign.resolve_first_character_event(&data).unwrap();
+        let sol_after = campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "sol_cairn")
+            .unwrap();
+        assert_eq!(sol_after.event_legacies[0].name, "Survey Family Routes");
+        assert_eq!(
+            derive_unit(sol_base, sol_after, &data).move_range,
+            movement_before + 1
+        );
+
+        let mara_base = data
+            .roster
+            .iter()
+            .find(|unit| unit.id == "mara_venn")
+            .unwrap();
+        let mara_before = derive_unit(mara_base, &campaign.roster[1], &data).armour;
+        campaign.resolve_first_character_event(&data).unwrap();
+        assert_eq!(
+            campaign.roster[1].event_legacies[0].name,
+            "Documented Carapace"
+        );
+        assert_eq!(
+            derive_unit(mara_base, &campaign.roster[1], &data).armour,
+            mara_before + 1
+        );
     }
 
     #[test]

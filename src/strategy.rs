@@ -42,6 +42,14 @@ pub struct CharacterEventState {
     pub participants: Vec<String>,
     pub food_cost: i32,
     pub attention_change: i32,
+    #[serde(default)]
+    pub legacy_name: String,
+    #[serde(default)]
+    pub legacy_character_id: String,
+    #[serde(default)]
+    pub legacy_stat: String,
+    #[serde(default)]
+    pub legacy_amount: i32,
     pub resolved: bool,
 }
 
@@ -135,6 +143,10 @@ impl StrategyState {
                     participants: event.participants.clone(),
                     food_cost: event.food_cost,
                     attention_change: event.attention_change,
+                    legacy_name: event.legacy_name.clone(),
+                    legacy_character_id: event.legacy_character_id.clone(),
+                    legacy_stat: event.legacy_stat.clone(),
+                    legacy_amount: event.legacy_amount,
                     resolved: false,
                 })
                 .collect(),

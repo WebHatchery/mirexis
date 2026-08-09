@@ -68,14 +68,20 @@ fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<
         } else {
             "RESERVE"
         };
+        let legacy = if character.event_legacies.is_empty() {
+            ""
+        } else {
+            " · LEGACY"
+        };
         if button(
             Rect::new(36.0, 154.0 + index as f32 * 72.0, 244.0, 58.0),
             &format!(
-                "{}{} · LV{} · {}",
+                "{}{} · LV{} · {}{}",
                 if selected { "> " } else { "" },
                 character.name,
                 character.level,
-                deployment
+                deployment,
+                legacy
             ),
             true,
             mouse,
@@ -158,6 +164,20 @@ fn draw_selected_character(
         288.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+    if !character.event_legacies.is_empty() {
+        let legacies = character
+            .event_legacies
+            .iter()
+            .map(|legacy| format!("{} ({:+} {})", legacy.name, legacy.amount, legacy.stat))
+            .collect::<Vec<_>>()
+            .join(" · ");
+        draw_ui_text_ex(
+            &format!("EVENT LEGACY  {}", legacies),
+            344.0,
+            306.0,
+            TextStyle::new(11.0, dark::ACCENT).params(),
+        );
+    }
     draw_ui_text_ex(
         "BARRACKS // CLASS TRAINING",
         344.0,

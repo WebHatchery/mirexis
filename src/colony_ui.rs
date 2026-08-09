@@ -2,12 +2,13 @@
 
 use crate::campaign::{Availability, CampaignState};
 use crate::colony::{COLONY_HEIGHT, COLONY_WIDTH};
+use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
-pub fn draw_colony(campaign: &CampaignState, ui: &VirtualUi) -> Vec<UiAction> {
+pub fn draw_colony(campaign: &CampaignState, data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
     draw_rectangle(
@@ -19,7 +20,7 @@ pub fn draw_colony(campaign: &CampaignState, ui: &VirtualUi) -> Vec<UiAction> {
     );
     draw_header(campaign);
     draw_layout(campaign, mouse, &mut actions);
-    draw_operations(campaign, mouse, &mut actions);
+    draw_operations(campaign, data, mouse, &mut actions);
     actions
 }
 
@@ -115,7 +116,12 @@ fn draw_building_label(rect: Rect, label: &str) {
     }
 }
 
-fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+fn draw_operations(
+    campaign: &CampaignState,
+    data: &GameData,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     let panel = Rect::new(856.0, 96.0, 406.0, 580.0);
     draw_surface_with_title(
         panel,
@@ -252,6 +258,26 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         .iter()
         .find(|entry| !entry.resolved)
     {
+        let definition = data
+            .campaign
+            .events
+            .iter()
+            .find(|definition| definition.id == event.id);
+        let legacy_character_id = if event.legacy_character_id.is_empty() {
+            definition.map_or("", |definition| definition.legacy_character_id.as_str())
+        } else {
+            event.legacy_character_id.as_str()
+        };
+        let legacy_stat = if event.legacy_stat.is_empty() {
+            definition.map_or("", |definition| definition.legacy_stat.as_str())
+        } else {
+            event.legacy_stat.as_str()
+        };
+        let legacy_amount = if event.legacy_amount == 0 {
+            definition.map_or(0, |definition| definition.legacy_amount)
+        } else {
+            event.legacy_amount
+        };
         if colony_button(
             Rect::new(878.0, 548.0, 362.0, 32.0),
             &format!("EVENT: {}", event.title),
@@ -260,14 +286,38 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         ) {
             actions.push(UiAction::ResolveCharacterEvent);
         }
+        let recipient = campaign
+            .roster
+            .iter()
+            .find(|character| character.id == legacy_character_id)
+            .map_or("UNKNOWN", |character| {
+                character
+                    .name
+                    .split_whitespace()
+                    .next()
+                    .unwrap_or("UNKNOWN")
+            });
+        draw_ui_text_ex(
+            &format!(
+                "CHOICE EFFECT // {} {:+} {} · {} FOOD · DIRECTORATE {:+}",
+                recipient.to_uppercase(),
+                legacy_amount,
+                legacy_stat.to_uppercase(),
+                event.food_cost,
+                event.attention_change
+            ),
+            878.0,
+            588.0,
+            TextStyle::new(10.0, dark::TEXT_DIM).params(),
+        );
     }
     draw_ui_text_ex(
         "ACTIVE DOCTRINES",
         878.0,
-        592.0,
+        600.0,
         TextStyle::new(12.0, dark::ACCENT).params(),
     );
-    let mut doctrine_y = 606.0;
+    let mut doctrine_y = 614.0;
     for research in campaign
         .strategy
         .research
@@ -282,7 +332,7 @@ fn draw_operations(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         );
         doctrine_y += 11.0;
     }
-    if doctrine_y == 606.0 {
+    if doctrine_y == 614.0 {
         draw_ui_text_ex(
             "No completed field doctrine",
             878.0,

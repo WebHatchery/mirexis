@@ -12,6 +12,7 @@ impl Game {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
             "research" => self.capture_research(),
+            "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
             "extraction" => self.capture_extraction(),
@@ -40,6 +41,17 @@ impl Game {
             research.completed = true;
         }
         self.state = AppState::Colony;
+    }
+
+    fn capture_legacy(&mut self) {
+        self.campaign
+            .resolve_first_character_event(&self.data)
+            .expect("first capture event resolves");
+        self.campaign
+            .resolve_first_character_event(&self.data)
+            .expect("second capture event resolves");
+        self.campaign.selected_character_id = "mara_venn".to_owned();
+        self.state = AppState::Roster;
     }
 
     fn capture_equipment_target(&mut self) {

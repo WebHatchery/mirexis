@@ -272,7 +272,10 @@ into the tactical mission, so colony placement and defense geometry share one so
   Fortifications raises colony-defense cover integrity from 6 to 10, Xeno-Triage
   reduces new injury recovery by one operation, and Salvage Doctrine adds 8
   materials to later mission rewards.
-- Data-backed character events with participant validation and choice costs.
+- Data-backed character events with participant validation, disclosed costs, and
+  persistent character legacies. Survey Family Routes gives Sol +1 movement;
+  Documented Carapace gives Mara +1 armour. Legacy modifiers are stored on the
+  recipient's character record and folded into later deployment derivation.
 - Seeded, immutable mission offers and the selected mission ID.
 
 Mission resolution adjusts the responsible faction's attention, advances threats,
@@ -371,10 +374,10 @@ Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
 translated into `UiAction` or tactical commands before simulation mutation. Tactical
 units use labels as well as faction color, and colony buildings use text labels.
 
-`scripts/capture_ui.ps1` captures `title`, `colony`, `research`, `roster`, `briefing`,
-`gameplay`, `extraction`, `variant`, `equipment`, `class_target`, `breach`, and
-`debrief` by default. Capture setup seeds each scene deterministically, including
-objective, doctrine, and targeting states.
+`scripts/capture_ui.ps1` captures `title`, `colony`, `research`, `roster`, `legacy`,
+`briefing`, `gameplay`, `extraction`, `variant`, `equipment`, `class_target`, `breach`,
+and `debrief` by default. Capture setup seeds each scene deterministically, including
+objective, doctrine, legacy, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -383,8 +386,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (47 domain/migration tests plus the shared source-size gate)
-- deterministic twelve-scene capture with visual inspection
+- `cargo test` (48 domain/migration tests plus the shared source-size gate)
+- deterministic thirteen-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -425,5 +428,5 @@ boundaries when continuing:
   or renamed safely.
 
 The recommended next vertical slice is another layer of Isolation campaign content:
-character-event choices with persistent consequences, or additional mission templates
-that test the squad and completed doctrines in new combinations.
+additional mission templates or operation modifiers that test the squad, completed
+doctrines, and earned character legacies in new combinations.

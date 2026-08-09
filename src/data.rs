@@ -199,6 +199,10 @@ pub struct CharacterEventDef {
     pub participants: Vec<String>,
     pub food_cost: i32,
     pub attention_change: i32,
+    pub legacy_name: String,
+    pub legacy_character_id: String,
+    pub legacy_stat: String,
+    pub legacy_amount: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -436,6 +440,23 @@ impl GameData {
                         event.id, participant
                     ));
                 }
+            }
+            if !event.participants.contains(&event.legacy_character_id) {
+                return Err(format!(
+                    "Campaign event {} gives a legacy to non-participant {}",
+                    event.id, event.legacy_character_id
+                ));
+            }
+            if !matches!(
+                event.legacy_stat.as_str(),
+                "accuracy" | "armour" | "health" | "movement" | "damage"
+            ) || !(-127..=127).contains(&event.legacy_amount)
+                || event.legacy_amount == 0
+            {
+                return Err(format!(
+                    "Campaign event {} has an invalid legacy modifier",
+                    event.id
+                ));
             }
         }
         Ok(())
