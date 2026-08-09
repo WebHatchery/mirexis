@@ -222,6 +222,7 @@ fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<
         .and_then(Value::as_object_mut)
         .ok_or_else(|| "Phase 0 save is missing tactical state".to_owned())?;
     tactical.insert("terrain_costs".to_owned(), serde_json::json!([]));
+    tactical.insert("hazards".to_owned(), serde_json::json!([]));
     tactical.insert("cover_edges".to_owned(), serde_json::json!([]));
     tactical.insert(
         "objective_tile".to_owned(),
@@ -1177,5 +1178,21 @@ mod tests {
             .iter()
             .filter(|unit| unit.team == crate::data::Team::Hostile)
             .all(|unit| unit.faction.is_some() && !unit.enemy_ability_used));
+    }
+
+    #[test]
+    fn faction_ability_save_gains_empty_realized_hazard_tiles() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.34.0", &campaign)).unwrap();
+        legacy["tactical"]
+            .as_object_mut()
+            .unwrap()
+            .remove("hazards");
+        let migrated = migrate_save_value(Some("1.34.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.tactical.unwrap().hazards.is_empty());
     }
 }

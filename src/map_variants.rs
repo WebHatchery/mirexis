@@ -1,12 +1,13 @@
 //! Deterministic, safety-checked transforms for authored map families.
 
-use crate::data::{CoverEdgeDef, EdgeDirection, GameData, MapRecipeDef, TerrainCostDef};
+use crate::data::{CoverEdgeDef, EdgeDirection, GameData, HazardDef, MapRecipeDef, TerrainCostDef};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MapLayout {
     pub blocked_tiles: Vec<[i32; 2]>,
     pub objective_tile: [i32; 2],
     pub terrain_costs: Vec<TerrainCostDef>,
+    pub hazards: Vec<HazardDef>,
     pub cover_edges: Vec<CoverEdgeDef>,
 }
 
@@ -15,6 +16,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
         blocked_tiles: recipe.blocked_tiles.clone(),
         objective_tile: recipe.objective_tile,
         terrain_costs: recipe.terrain_costs.clone(),
+        hazards: recipe.hazards.clone(),
         cover_edges: recipe.cover_edges.clone(),
     };
     if seed & 1 == 0 {
@@ -34,6 +36,14 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .map(|entry| TerrainCostDef {
                 position: mirror_position(entry.position, max_y),
                 cost: entry.cost,
+            })
+            .collect(),
+        hazards: authored
+            .hazards
+            .iter()
+            .map(|hazard| HazardDef {
+                position: mirror_position(hazard.position, max_y),
+                kind: hazard.kind,
             })
             .collect(),
         cover_edges: authored
@@ -74,6 +84,9 @@ fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {
             .blocked_tiles
             .iter()
             .all(|position| in_bounds(*position))
+        && layout.hazards.iter().all(|hazard| {
+            in_bounds(hazard.position) && !layout.blocked_tiles.contains(&hazard.position)
+        })
         && data
             .roster
             .iter()

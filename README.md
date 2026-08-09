@@ -24,6 +24,8 @@ The completed roadmap slice includes:
 - role-aware hostile activations and deterministic holdout reinforcements
 - once-per-phase faction abilities: Brood Predatory Surge, Directorate Suppression Lock,
   and Ascendant Phase Ward, each surfaced through status markers and the battle log
+- visible faction terrain hazards across nine battlefields: damaging Directorate fire
+  lanes, hindering Brood spore blooms, and accuracy-disrupting Ascendant static rifts
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

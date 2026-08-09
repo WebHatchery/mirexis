@@ -4,8 +4,8 @@ use crate::campaign::CampaignState;
 use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
-    BattleEvent, Command, CommandCost, DestructibleCover, ObjectiveState, ReinforcementWave,
-    RuleError, StatusKind, TacticalPhase, TacticalState, UnitState,
+    BattleEvent, Command, CommandCost, DestructibleCover, HazardTile, ObjectiveState,
+    ReinforcementWave, RuleError, StatusKind, TacticalPhase, TacticalState, UnitState,
 };
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
@@ -86,6 +86,14 @@ impl GameSession {
                     .terrain_costs
                     .iter()
                     .map(|entry| (tile(entry.position), entry.cost))
+                    .collect(),
+                hazards: mission
+                    .hazards
+                    .iter()
+                    .map(|hazard| HazardTile {
+                        position: tile(hazard.position),
+                        kind: hazard.kind,
+                    })
                     .collect(),
                 cover_edges: mission.cover_edges.clone(),
                 destructible_cover: mission
@@ -201,6 +209,7 @@ impl GameSession {
         let events = match command {
             Command::Move { unit_id, to } => {
                 let mut events = self.execute_move(&unit_id, to);
+                events.extend(crate::hazards::resolve_after_move(self, &unit_id));
                 events.extend(crate::overwatch::resolve_after_hostile_move(self, &unit_id));
                 events
             }

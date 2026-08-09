@@ -53,6 +53,8 @@ pub struct MissionDef {
     #[serde(default)]
     pub terrain_costs: Vec<TerrainCostDef>,
     #[serde(default)]
+    pub hazards: Vec<HazardDef>,
+    #[serde(default)]
     pub cover_edges: Vec<CoverEdgeDef>,
 }
 
@@ -111,6 +113,30 @@ pub enum ObjectiveKind {
 pub struct TerrainCostDef {
     pub position: [i32; 2],
     pub cost: u8,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HazardKind {
+    FireLane,
+    SporeBloom,
+    StaticRift,
+}
+
+impl HazardKind {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::FireLane => "DIRECTORATE FIRE LANE",
+            Self::SporeBloom => "BROOD SPORE BLOOM",
+            Self::StaticRift => "ASCENDANT STATIC RIFT",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HazardDef {
+    pub position: [i32; 2],
+    pub kind: HazardKind,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -364,6 +390,8 @@ pub struct MapRecipeDef {
     pub blocked_tiles: Vec<[i32; 2]>,
     pub objective_tile: [i32; 2],
     pub terrain_costs: Vec<TerrainCostDef>,
+    #[serde(default)]
+    pub hazards: Vec<HazardDef>,
     pub cover_edges: Vec<CoverEdgeDef>,
 }
 
@@ -692,7 +720,8 @@ impl GameData {
                 .blocked_tiles
                 .iter()
                 .chain(std::iter::once(&recipe.objective_tile))
-                .chain(recipe.terrain_costs.iter().map(|entry| &entry.position));
+                .chain(recipe.terrain_costs.iter().map(|entry| &entry.position))
+                .chain(recipe.hazards.iter().map(|entry| &entry.position));
             if positions.into_iter().any(|position| {
                 position[0] < 0
                     || position[1] < 0
@@ -706,6 +735,13 @@ impl GameData {
             }
             if recipe.blocked_tiles.contains(&recipe.objective_tile) {
                 return Err(format!("Map recipe {} blocks its objective", recipe.id));
+            }
+            if recipe
+                .hazards
+                .iter()
+                .any(|hazard| recipe.blocked_tiles.contains(&hazard.position))
+            {
+                return Err(format!("Map recipe {} blocks a hazard", recipe.id));
             }
         }
         for template in &self.campaign.mission_templates {

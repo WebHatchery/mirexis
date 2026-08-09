@@ -1,6 +1,6 @@
 //! Serializable tactical types shared by simulation, presentation, and saves.
 
-use crate::data::{CoverEdgeDef, ObjectiveKind, Team, UnitDef};
+use crate::data::{CoverEdgeDef, HazardKind, ObjectiveKind, Team, UnitDef};
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
@@ -48,6 +48,12 @@ pub struct DestructibleCover {
     pub position: TilePos,
     pub health: i32,
     pub max_health: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HazardTile {
+    pub position: TilePos,
+    pub kind: HazardKind,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -309,6 +315,10 @@ pub enum BattleEvent {
         attacker_id: String,
         target_id: String,
     },
+    HazardTriggered {
+        unit_id: String,
+        kind: HazardKind,
+    },
     EnemyAbilityActivated {
         unit_id: String,
         ability: String,
@@ -340,6 +350,8 @@ pub struct TacticalState {
     pub fog: FlatGrid<FogState>,
     pub blocked: HashSet<TilePos>,
     pub terrain_costs: Vec<(TilePos, u8)>,
+    #[serde(default)]
+    pub hazards: Vec<HazardTile>,
     pub cover_edges: Vec<CoverEdgeDef>,
     #[serde(default)]
     pub destructible_cover: Vec<DestructibleCover>,

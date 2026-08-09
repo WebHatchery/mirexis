@@ -42,6 +42,9 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
             attacker_id,
             target_id,
         } => format!("{} reacted to {}", attacker_id, target_id),
+        BattleEvent::HazardTriggered { unit_id, kind } => {
+            format!("{} crossed {}", unit_id, kind.label())
+        }
         BattleEvent::EnemyAbilityActivated { unit_id, ability } => {
             format!("{} used {}", unit_id, ability)
         }

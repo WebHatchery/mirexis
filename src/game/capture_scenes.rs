@@ -47,6 +47,7 @@ impl Game {
                 self.capture_enemy_ability("supply_recovery", "directorate", 9)
             }
             "ascendant_ability" => self.capture_enemy_ability("vault_purge", "ascendants", 11),
+            "hazard" => self.capture_hazard(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",
                 18,
@@ -503,6 +504,7 @@ impl Game {
         self.active_mission.blocked_tiles = layout.blocked_tiles;
         self.active_mission.objective_tile = layout.objective_tile;
         self.active_mission.terrain_costs = layout.terrain_costs;
+        self.active_mission.hazards = layout.hazards;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
     }
@@ -566,6 +568,22 @@ impl Game {
             .expect("capture hostile can activate its faction ability");
         self.session.tactical.phase = TacticalPhase::Player;
         self.session.tactical.selected_tile = TilePos::new(5, 3);
+    }
+
+    fn capture_hazard(&mut self) {
+        self.capture_template_operation("sporefield_extraction", 4, OperationModifier::BroodFrenzy);
+        let unit_id = self.session.tactical.selected_unit.clone().unwrap();
+        self.session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == unit_id)
+            .unwrap()
+            .position = TilePos::new(4, 3);
+        let _ = self.session.execute(Command::Move {
+            unit_id,
+            to: TilePos::new(5, 3),
+        });
     }
 
     fn capture_colony_damage(&mut self) {
@@ -675,6 +693,7 @@ impl Game {
         self.active_mission.blocked_tiles = layout.blocked_tiles;
         self.active_mission.objective_tile = layout.objective_tile;
         self.active_mission.terrain_costs = layout.terrain_costs;
+        self.active_mission.hazards = layout.hazards;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
         let evac = self.session.tactical.objective_tile;

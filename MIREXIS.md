@@ -210,6 +210,10 @@ A technologically advanced human military and corporate power.
 Directorate units now open a viable activation with **Suppression Lock**, spending one
 action point to Disrupt the most vulnerable visible colonist for their next player phase.
 
+Directorate battlefields may contain marked **Fire Lanes**. A non-Directorate unit that
+ends movement in one takes two direct damage; Directorate troops know the firing schedule
+and cross safely.
+
 ### Technology
 
 - rail weapons
@@ -261,6 +265,10 @@ Brood forces may alter terrain by spreading:
 - corrosive growth
 - spawning structures
 
+Authored Brood maps now place visible **Spore Blooms**. A non-Brood unit that ends
+movement in one takes one damage and becomes Hindered through its next activation. Brood
+organisms are adapted to the bloom and ignore it.
+
 ### Relationship With The Colony
 
 The mutations appearing among colonists appear to be connected to Brood biology.
@@ -286,6 +294,10 @@ Their technology operates according to principles barely understood by human sci
 
 Ascendant units now open an activation with **Phase Ward**, spending one action point for
 Guarded armour that persists through the colony's response.
+
+Ascendant battlefields may fracture into marked **Static Rifts**. A non-Ascendant unit
+that ends movement in one becomes Disrupted through its next activation, while Ascendant
+constructs remain phase-aligned and unaffected.
 
 ### Technology
 

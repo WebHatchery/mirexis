@@ -340,6 +340,9 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         ctx.session.tactical.fog.height,
         grid_rect,
     );
+    if !ctx.session.tactical.hazards.is_empty() {
+        crate::hazard_ui::draw_legend(panel);
+    }
     for (position, _) in ctx.session.tactical.fog.iter_with_pos() {
         let rect = view.tile_rect(position);
         let mut color = if (position.x + position.y) % 2 == 0 {
@@ -361,6 +364,15 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             1.0,
             Color::new(0.16, 0.26, 0.25, 0.65),
         );
+        if let Some(hazard) = ctx
+            .session
+            .tactical
+            .hazards
+            .iter()
+            .find(|hazard| hazard.position == position)
+        {
+            crate::hazard_ui::draw_tile(rect, hazard.kind);
+        }
         if position == ctx.session.tactical.selected_tile {
             draw_rectangle_lines(
                 rect.x + 2.0,

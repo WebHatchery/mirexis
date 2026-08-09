@@ -310,6 +310,13 @@ impl StrategyState {
                 || base.terrain_costs.clone(),
                 |layout| layout.terrain_costs.clone(),
             ),
+            hazards: if colony_defense {
+                Vec::new()
+            } else {
+                layout
+                    .as_ref()
+                    .map_or_else(|| base.hazards.clone(), |layout| layout.hazards.clone())
+            },
             cover_edges: if colony_defense {
                 defense
                     .cover_tiles
