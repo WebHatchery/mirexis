@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase Two — Contact entry
-Save/content version: 1.8.0
+Save/content version: 1.9.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -197,9 +197,10 @@ autosaved, survives operations, and is applied before faction hostiles join the 
 roster, so reserve choice affects class, mutation, and equipment access in the mission.
 
 The colony roster screen persists a selected colonist and exposes every base class with
-aptitude-priced material costs. Workshop choices cover all starter equipment. Crafting
-replaces any item in the same slot while preserving other slots, so primary weapons,
-armour, tools, and modules remain mutually coherent rather than accumulating blindly.
+aptitude-priced material costs. Workshop choices cover starter equipment plus three
+Contact prototypes. Crafting replaces any item in the same slot while preserving other
+slots, so primary weapons, armour, tools, and modules remain mutually coherent rather
+than accumulating blindly.
 
 Seven initial class families are loaded from `classes.json`. Aptitude changes the
 material cost of training but never class eligibility. Switching classes retains
@@ -339,6 +340,9 @@ mission rewards are materialized so briefing and debrief values remain honest.
 Choosing a protocol regenerates the saved offer set with one guaranteed matching
 Contact operation. Black Channel, Living Chorus, and Open Circuit each use a distinct
 map family and the SignalTrace contract; non-matching Contact templates remain locked.
+A victorious matching trace persists its aftermath and unlocks exactly one workshop
+prototype: Directorate Smartlink, Brood Living Plate, or Ascendant Phase Lens. Other
+protocol prototypes remain visible but locked, making the consequence auditable.
 
 ## 9. Content Registry
 
@@ -352,7 +356,7 @@ Current embedded files under `assets/data/` are:
 | `characters.json` | Persistent recruits and aptitude/loadout references |
 | `classes.json` | Class families and deployment modifiers |
 | `mutations.json` | Gift and complication hooks |
-| `equipment.json` | Starter equipment modifiers |
+| `equipment.json` | Starter and protocol-gated Contact equipment modifiers |
 | `campaign.json` | Isolation/Contact factions, protocols, research, events, missions, and maps |
 | `texture_manifest.json` | Runtime texture declarations |
 
@@ -402,6 +406,7 @@ Migration coverage:
 | 1.5.0 | Persistent Isolation victory, doctrine, and repelled-assault phase progress |
 | 1.6.0 | Persistent mutually exclusive Contact protocol choice |
 | 1.7.0 | Protocol-gated Contact offers and the SignalTrace objective contract |
+| 1.8.0 | Persistent trace aftermath and protocol-gated workshop prototypes |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -433,7 +438,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `legacy`, `briefing`, `pressure`, `gameplay`,
+`construction`, `research`, `roster`, `contact_gear`, `legacy`, `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
@@ -447,8 +452,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (64 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-four-scene capture with visual inspection
+- `cargo test` (67 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -485,9 +490,10 @@ boundaries when continuing:
   equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
-  operation. Further Contact story, relationships, and later phases remain future content.
+  operation whose victory unlocks a matching equipment prototype. Further Contact
+  story, relationships, and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a persistent consequence for completing the
-first Contact trace, such as a faction relationship, recruit, or follow-up event.
+The recommended next vertical slice is a faction relationship and follow-up event for
+the completed trace, giving the Contact choice a narrative as well as mechanical echo.

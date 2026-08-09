@@ -198,6 +198,10 @@ pub struct EquipmentDef {
     pub armour: i32,
     pub health: i32,
     pub damage: i32,
+    #[serde(default)]
+    pub required_protocol: String,
+    #[serde(default)]
+    pub requires_contact_trace: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -327,6 +331,20 @@ impl GameData {
             "character",
             self.characters.iter().map(|entry| entry.id.as_str()),
         )?;
+        for equipment in &self.equipment {
+            if !equipment.required_protocol.is_empty()
+                && !self
+                    .campaign
+                    .contact_protocols
+                    .iter()
+                    .any(|protocol| protocol.id == equipment.required_protocol)
+            {
+                return Err(format!(
+                    "Equipment {} references missing Contact protocol {}",
+                    equipment.id, equipment.required_protocol
+                ));
+            }
+        }
         ensure_unique(
             "faction",
             self.campaign.factions.iter().map(|entry| entry.id.as_str()),

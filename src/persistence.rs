@@ -554,4 +554,29 @@ mod tests {
             "brood_contact_trace"
         );
     }
+
+    #[test]
+    fn signal_trace_save_gains_an_incomplete_aftermath() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        campaign
+            .strategy
+            .choose_contact_protocol("directorate_requisition", &mut campaign.colony, &data)
+            .unwrap();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.8.0", &campaign)).unwrap();
+        legacy["campaign"]["strategy"]
+            .as_object_mut()
+            .unwrap()
+            .remove("contact_trace_completed");
+        let migrated = migrate_save_value(Some("1.8.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(!migrated.campaign.strategy.contact_trace_completed);
+    }
 }

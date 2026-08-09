@@ -12,6 +12,7 @@ impl Game {
             "title" => self.state = AppState::Title,
             "colony" => self.state = AppState::Colony,
             "contact" => self.capture_contact(),
+            "contact_gear" => self.capture_contact_gear(),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -82,6 +83,16 @@ impl Game {
             .strategy
             .refresh_isolation_completion(&mut self.campaign.colony);
         self.state = AppState::Colony;
+    }
+
+    fn capture_contact_gear(&mut self) {
+        self.capture_contact();
+        self.campaign
+            .strategy
+            .choose_contact_protocol("ascendant_capacitor", &mut self.campaign.colony, &self.data)
+            .expect("capture Contact protocol is available");
+        self.campaign.strategy.contact_trace_completed = true;
+        self.state = AppState::Roster;
     }
 
     fn capture_legacy(&mut self) {

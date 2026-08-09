@@ -95,6 +95,8 @@ pub struct StrategyState {
     pub isolation_complete: bool,
     #[serde(default)]
     pub contact_protocol_id: String,
+    #[serde(default)]
+    pub contact_trace_completed: bool,
     rng: SeededRng,
 }
 
@@ -174,6 +176,7 @@ impl StrategyState {
             first_assault_repulsed: false,
             isolation_complete: false,
             contact_protocol_id: String::new(),
+            contact_trace_completed: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -290,6 +293,18 @@ impl StrategyState {
             self.isolation_victories = self.isolation_victories.saturating_add(1).min(3);
             if mission.map_recipe == "colony_defense" {
                 self.first_assault_repulsed = true;
+            }
+            if data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.id == mission.template_id)
+                .is_some_and(|template| {
+                    !template.required_protocol.is_empty()
+                        && template.required_protocol == self.contact_protocol_id
+                })
+            {
+                self.contact_trace_completed = true;
             }
         }
         if let Some(faction) = self
@@ -670,6 +685,33 @@ mod tests {
                 expected_bonus
             );
         }
+    }
+
+    #[test]
+    fn victorious_matching_contact_trace_unlocks_its_aftermath() {
+        let data = GameData::load().unwrap();
+        let mut strategy = StrategyState::new(&data);
+        let mut colony = ColonyState::new();
+        strategy.isolation_victories = 3;
+        strategy.first_assault_repulsed = true;
+        strategy.research[0].completed = true;
+        strategy.refresh_isolation_completion(&mut colony);
+        strategy
+            .choose_contact_protocol("ascendant_capacitor", &mut colony, &data)
+            .unwrap();
+        let mission = strategy.selected_mission().unwrap().clone();
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: 0,
+            biomass_awarded: 0,
+            power_awarded: 0,
+        };
+        assert!(!strategy.contact_trace_completed);
+        strategy.resolve_mission(&outcome, &mission, &data);
+        assert!(strategy.contact_trace_completed);
     }
 
     #[test]

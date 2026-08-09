@@ -1,7 +1,7 @@
 //! Persistent character identity, progression, and deployment derivation.
 
 use crate::colony::{BuildingKind, ColonyState};
-use crate::data::{CharacterDef, ClassDef, GameData, MutationDef, Team, UnitDef};
+use crate::data::{CharacterDef, ClassDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy::{MissionInstance, StrategyState};
 use serde::{Deserialize, Serialize};
@@ -410,6 +410,12 @@ impl CampaignState {
             .iter()
             .find(|equipment| equipment.id == equipment_id)
             .ok_or_else(|| format!("Unknown equipment: {}", equipment_id))?;
+        if !self.equipment_is_unlocked(equipment) {
+            return Err(format!(
+                "{} requires a completed Contact trace",
+                equipment.name
+            ));
+        }
         let cost = equipment_cost(&equipment.slot);
         let character = self
             .roster
@@ -434,6 +440,12 @@ impl CampaignState {
         self.colony.resources.materials -= cost as i32;
         character.equipment_ids.push(equipment.id.clone());
         Ok(cost)
+    }
+
+    pub fn equipment_is_unlocked(&self, equipment: &EquipmentDef) -> bool {
+        equipment.required_protocol.is_empty()
+            || (equipment.required_protocol == self.strategy.contact_protocol_id
+                && (!equipment.requires_contact_trace || self.strategy.contact_trace_completed))
     }
 
     pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
@@ -869,5 +881,38 @@ mod tests {
             .equipment_ids
             .iter()
             .any(|id| id == "frontier_rifle"));
+    }
+
+    #[test]
+    fn contact_prototypes_require_the_matching_completed_trace() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        assert!(campaign
+            .craft_equipment("kira_voss", "directorate_smartlink", &data)
+            .is_err());
+        campaign.strategy.isolation_victories = 3;
+        campaign.strategy.first_assault_repulsed = true;
+        campaign.strategy.research[0].completed = true;
+        campaign
+            .strategy
+            .refresh_isolation_completion(&mut campaign.colony);
+        campaign
+            .strategy
+            .choose_contact_protocol("directorate_requisition", &mut campaign.colony, &data)
+            .unwrap();
+        assert!(campaign
+            .craft_equipment("kira_voss", "directorate_smartlink", &data)
+            .is_err());
+        campaign.strategy.contact_trace_completed = true;
+        campaign
+            .craft_equipment("kira_voss", "directorate_smartlink", &data)
+            .unwrap();
+        assert!(campaign.roster[0]
+            .equipment_ids
+            .iter()
+            .any(|id| id == "directorate_smartlink"));
+        assert!(campaign
+            .craft_equipment("kira_voss", "brood_living_plate", &data)
+            .is_err());
     }
 }

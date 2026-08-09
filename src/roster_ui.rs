@@ -218,7 +218,9 @@ fn draw_selected_character(
     for (index, item) in data.equipment.iter().enumerate() {
         let cost = equipment_cost(&item.slot);
         let equipped = character.equipment_ids.contains(&item.id);
+        let unlocked = campaign.equipment_is_unlocked(item);
         let enabled = campaign.colony.has_facility(BuildingKind::Workshop)
+            && unlocked
             && !equipped
             && campaign.colony.resources.materials >= cost as i32;
         let column = index % 3;
@@ -230,7 +232,9 @@ fn draw_selected_character(
                 282.0,
                 30.0,
             ),
-            &if equipped {
+            &if !unlocked {
+                format!("LOCKED: {}", item.name)
+            } else if equipped {
                 format!("EQUIPPED: {}", item.name)
             } else {
                 format!("CRAFT: {} · {} MAT", item.name, cost)

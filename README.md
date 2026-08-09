@@ -36,6 +36,8 @@ The completed roadmap slice includes:
 - a mutually exclusive Contact protocol that spends recovered Alien Components on
   Directorate material supply, Brood biomass cultivation, or Ascendant power recovery,
   then unlocks that protocol's own Contact battlefield
+- protocol-specific Smartlink, Living Plate, or Phase Lens workshop prototypes that
+  unlock permanently after the matching signal trace is won
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

@@ -236,7 +236,17 @@ fn draw_operations(
             .find(|protocol| protocol.id == campaign.strategy.contact_protocol_id)
             .map_or_else(
                 || "CONTACT // CHOOSE A PROTOCOL // 2 COMPONENTS AVAILABLE".to_owned(),
-                |protocol| format!("CONTACT // {} ACTIVE", protocol.name.to_uppercase()),
+                |protocol| {
+                    format!(
+                        "CONTACT // {} ACTIVE{}",
+                        protocol.name.to_uppercase(),
+                        if campaign.strategy.contact_trace_completed {
+                            " // TRACE COMPLETE"
+                        } else {
+                            ""
+                        }
+                    )
+                },
             )
     } else {
         format!(
