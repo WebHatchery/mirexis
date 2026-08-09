@@ -6,7 +6,15 @@ use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
-use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
+use macroquad_toolkit::ui::VirtualUi;
+
+// Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
+// when every label shares the toolkit font. The hub's buttons and map labels
+// already use the built-in font, so keep all colony text on that stable atlas.
+fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -> TextDimensions {
+    params.font = None;
+    draw_text_ex(text, x, y, params)
+}
 
 pub fn draw_colony(campaign: &CampaignState, data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
     let mut actions = Vec::new();
@@ -376,7 +384,7 @@ fn draw_operations(
     let defense = campaign.colony.defense_map();
     draw_ui_text_ex(
         &format!(
-            "ROSTER {} READY / {} RECOVERING  //  DEFENCE {} COVER / {} CRITICAL",
+            "ROSTER READY {} / RECOVERING {}  //  DEFENCE {} COVER / {} CRITICAL",
             ready,
             recovering,
             defense.cover_tiles.len(),

@@ -112,6 +112,24 @@ impl CampaignState {
         }
     }
 
+    pub fn ensure_roster_characters(&mut self, data: &GameData) -> usize {
+        let mut added = 0;
+        for definition in &data.characters {
+            if self
+                .roster
+                .iter()
+                .any(|character| character.id == definition.id)
+            {
+                continue;
+            }
+            let mut character = CharacterRecord::from_def(definition);
+            character.deployment_selected = false;
+            self.roster.push(character);
+            added += 1;
+        }
+        added
+    }
+
     pub fn deployment_roster(
         &self,
         data: &GameData,
@@ -1271,6 +1289,58 @@ mod tests {
         let after = derive_unit(base, &campaign.roster[3], &data);
         assert_eq!(after.armour, before.armour + 1);
         assert_eq!(after.weapon_damage, before.weapon_damage - 1);
+    }
+
+    #[test]
+    fn nadis_symbiote_evolves_toward_cooperation_or_predation() {
+        let data = GameData::load().unwrap();
+        let base = data
+            .roster
+            .iter()
+            .find(|unit| unit.id == "nadi_vale")
+            .unwrap();
+
+        let mut cooperative = CampaignState::new(&data);
+        cooperative.strategy.contact_complete = true;
+        cooperative.colony.ensure_gene_lab();
+        cooperative.colony.resources.power += 2;
+        cooperative.colony.resources.biomass = 20;
+        let nadi = cooperative
+            .roster
+            .iter()
+            .find(|character| character.id == "nadi_vale")
+            .unwrap();
+        let before = derive_unit(base, nadi, &data);
+        cooperative
+            .choose_mutation_evolution("nadi_vale", "cooperative_symbiote", &data)
+            .unwrap();
+        let nadi = cooperative
+            .roster
+            .iter()
+            .find(|character| character.id == "nadi_vale")
+            .unwrap();
+        let after = derive_unit(base, nadi, &data);
+        assert_eq!(after.armour, before.armour + 2);
+        assert_eq!(after.round_regeneration, before.round_regeneration + 1);
+        assert_eq!(after.move_range, before.move_range - 1);
+
+        let mut predatory = CampaignState::new(&data);
+        predatory.strategy.contact_complete = true;
+        predatory.colony.ensure_gene_lab();
+        predatory.colony.resources.power += 2;
+        predatory.colony.resources.biomass = 20;
+        predatory
+            .choose_mutation_evolution("nadi_vale", "predatory_symbiote", &data)
+            .unwrap();
+        let nadi = predatory
+            .roster
+            .iter()
+            .find(|character| character.id == "nadi_vale")
+            .unwrap();
+        let after = derive_unit(base, nadi, &data);
+        assert_eq!(after.weapon_damage, before.weapon_damage + 3);
+        assert_eq!(after.accuracy, before.accuracy - 10);
+        assert_eq!(derived_mutation_traits(nadi, &data)["food_upkeep"], 2);
     }
 
     #[test]

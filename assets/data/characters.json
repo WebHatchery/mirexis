@@ -34,5 +34,14 @@
     "initial_class": "engineer",
     "mutation": "elastic_musculature",
     "equipment": ["service_pistol", "field_toolkit"]
+  },
+  {
+    "id": "nadi_vale",
+    "name": "Nadi Vale",
+    "biography": "A xenobiologist whose quarantine symbiote now answers threats before she sees them.",
+    "aptitudes": { "biology": 5, "medicine": 4, "psionics": 3, "leadership": 2, "ballistics": 1 },
+    "initial_class": "biotech",
+    "mutation": "symbiotic_organism",
+    "equipment": ["service_pistol", "field_medkit"]
   }
 ]

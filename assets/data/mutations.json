@@ -38,6 +38,10 @@
   {
     "id": "symbiotic_organism", "name": "Symbiotic Organism",
     "gift": [{ "stat": "biological_damage", "amount": 2 }],
-    "complication": [{ "stat": "food_upkeep", "amount": 1 }]
+    "complication": [{ "stat": "food_upkeep", "amount": 1 }],
+    "evolutions": [
+      { "id": "cooperative_symbiote", "name": "Cooperative Symbiote", "description": "+2 armour and +1 regeneration, but -1 movement.", "biomass_cost": 12, "gift": [{ "stat": "armour", "amount": 2 }, { "stat": "round_regeneration", "amount": 1 }], "complication": [{ "stat": "movement", "amount": -1 }] },
+      { "id": "predatory_symbiote", "name": "Predatory Symbiote", "description": "+3 weapon damage, but -10 accuracy and +1 deployment food.", "biomass_cost": 12, "gift": [{ "stat": "weapon_damage", "amount": 3 }], "complication": [{ "stat": "accuracy", "amount": -10 }, { "stat": "food_upkeep", "amount": 1 }] }
+    ]
   }
 ]

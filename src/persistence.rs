@@ -46,6 +46,7 @@ pub fn migrate_save_value(
     add_class_action_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
+    save.campaign.ensure_roster_characters(data);
     save.campaign.strategy.ensure_character_events(data);
     save.campaign.colony.ensure_phase_one_infrastructure(
         detected_version.as_deref() != Some(data.config.version.as_str()),
@@ -269,7 +270,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
         assert_eq!(migrated.version, data.config.version);
-        assert_eq!(migrated.campaign.roster.len(), 4);
+        assert_eq!(migrated.campaign.roster.len(), 5);
         assert!(migrated.tactical.is_some());
     }
 
@@ -994,5 +995,27 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(!migrated.campaign.strategy.mirexis_operation_completed);
         assert!(!migrated.campaign.strategy.campaign_complete);
+    }
+
+    #[test]
+    fn completed_campaign_save_gains_nadi_as_an_unevolved_reserve() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign
+            .roster
+            .retain(|character| character.id != "nadi_vale");
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.26.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.26.0".to_owned()), legacy, &data).unwrap();
+        let nadi = migrated
+            .campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "nadi_vale")
+            .expect("Nadi joins an existing campaign as a reserve");
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(!nadi.deployment_selected);
+        assert!(nadi.mutation_evolution_id.is_empty());
     }
 }

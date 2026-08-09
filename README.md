@@ -25,8 +25,10 @@ The completed roadmap slice includes:
 - roster-wide class training and slot-replacing workshop equipment
 - player-targeted medkit, toolkit, and survey-harness actions in tactical missions
 - destructible battlefield cover that opens movement routes and firing lanes
-- four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
+- five persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
+- a reserve Biotech Specialist, Nadi Vale, whose Symbiotic Organism can irreversibly
+  become a regenerative Cooperative Symbiote or a volatile Predatory Symbiote
 - colony resources, powered facilities, operation rations, Hydroponics production,
   selectable Barricade/Power Plant/Gene Lab construction, layout-derived defenses,
   and repairs

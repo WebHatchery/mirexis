@@ -795,7 +795,7 @@ mod tests {
                 .iter()
                 .filter(|unit| unit.team == Team::Colony)
                 .count(),
-            4
+            5
         );
         let hostile_roles = data
             .roster
@@ -804,7 +804,7 @@ mod tests {
             .map(|unit| unit.role.as_str())
             .collect::<std::collections::HashSet<_>>();
         assert!(hostile_roles.len() >= 2);
-        assert_eq!(data.characters.len(), 4);
+        assert_eq!(data.characters.len(), 5);
         assert!(data.classes.len() >= 7);
         assert!(data.mutations.len() >= 5);
         assert_eq!(data.campaign.phase_id, "isolation");

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.26.0
+Save/content version: 1.27.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -271,6 +271,13 @@ biomass. Lattice Tendons grants two movement and removes ten accuracy. Load-Bear
 Fascia cancels the base heavy-armour-efficiency penalty and removes one weapon damage.
 Armour equipment now consumes that efficiency trait, so the base complication and its
 stabilizing evolution both have observable deployment effects.
+
+Nadi Vale expands the persistent roster to five as an initially unselected Biotech
+Specialist reserve. Her Symbiotic Organism evolves at twelve biomass. Cooperative
+Symbiote adds two armour and one round regeneration while removing one movement;
+Predatory Symbiote adds three weapon damage while removing ten accuracy and adding a
+second deployment-food upkeep. Migration adds Nadi unevolved and unselected to existing
+saves without disturbing their three-colonist deployment choice.
 
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
@@ -548,6 +555,7 @@ Migration coverage:
 | 1.23.0 | Persistent Phase Five Mirexis identity path selection |
 | 1.24.0 | Path-locked Phase Five offers for already committed identities |
 | 1.25.0 | Persistent final-operation and campaign-completion gates |
+| 1.26.0 | Nadi Vale reserve recruitment and Symbiotic Organism evolution paths |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -580,7 +588,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `nadi_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `redoubt_end`, `commonwealth_end`, `threshold_end`,
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
@@ -599,8 +607,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (99 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-scene capture with visual inspection
+- `cargo test` (101 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-one-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -633,8 +641,8 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
-- The unassigned Symbiotic Organism still lacks evolution paths; advanced classes,
-  relationships, permanent death, and additional equipment families remain future content.
+- Advanced classes, relationships, permanent death, and additional equipment families
+  remain future content.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
@@ -651,6 +659,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is deeper replayability around the complete arc:
-additional Symbiotic Organism evolution paths, advanced classes, and equipment families
-that create materially different squads before the three final operations.
+The recommended next vertical slice is advanced class progression and equipment families
+that create materially different five-person roster builds before the three final
+operations.

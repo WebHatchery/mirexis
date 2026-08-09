@@ -20,6 +20,7 @@ impl Game {
             "mara_evolution" => self.capture_mara_evolution(),
             "ilya_evolution" => self.capture_ilya_evolution(),
             "sol_evolution" => self.capture_sol_evolution(),
+            "nadi_evolution" => self.capture_nadi_evolution(),
             "escalation" => self.capture_escalation(),
             "escalation_operation" => self.capture_escalation_operation(),
             "escalation_response" => self.capture_escalation_response(),
@@ -226,6 +227,16 @@ impl Game {
             .choose_mutation_evolution("sol_cairn", "lattice_tendons", &self.data)
             .expect("Sol's Adaptation capture evolution is available");
         self.campaign.selected_character_id = "sol_cairn".to_owned();
+        self.state = AppState::GeneLab;
+    }
+
+    fn capture_nadi_evolution(&mut self) {
+        self.capture_gene_lab();
+        self.campaign.colony.resources.biomass += 4;
+        self.campaign
+            .choose_mutation_evolution("nadi_vale", "predatory_symbiote", &self.data)
+            .expect("Nadi's Adaptation capture evolution is available");
+        self.campaign.selected_character_id = "nadi_vale".to_owned();
         self.state = AppState::GeneLab;
     }
 

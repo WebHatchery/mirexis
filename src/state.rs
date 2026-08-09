@@ -1272,7 +1272,7 @@ mod tests {
             .unwrap()
             .incapacitated = true;
         let outcome = session.mission_outcome(&data.mission).unwrap();
-        assert_eq!(outcome.colonists_deployed, 4);
+        assert_eq!(outcome.colonists_deployed, 5);
         assert_eq!(outcome.colonists_incapacitated[0].id, "ilya_reed");
         assert_eq!(outcome.materials_awarded, data.mission.materials_reward);
         assert_eq!(outcome.biomass_awarded, data.mission.biomass_reward);
