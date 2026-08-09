@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.46.0
+Save/content version: 1.47.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -72,6 +72,7 @@ Important transition payloads:
 | `combat_feedback.rs` | Bounded transient damage, healing, and status callouts | Simulation mutation or persistence |
 | `briefing_intel_ui.rs` | Materialized contract, hostile, ability, and hazard briefing summary | Mission generation |
 | `briefing_loadout_ui.rs` | Selected colonist derived combat/loadout summary in briefing | Campaign mutation |
+| `briefing_deployment_ui.rs` | Squad rows, formation selector, and deploy/stand-down controls | Session creation |
 | `danger_rating.rs` | Deterministic shared offer/briefing danger score and bands | Save state or rendering |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `game/input.rs` | State-aware keyboard translation and replay input lock | Simulation mutation |
@@ -119,6 +120,7 @@ Important transition payloads:
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
+| `formation.rs` | Safe deterministic wedge, line, and column colony entry placement | Tactical persistence |
 | `cover_ui.rs` | Cover integrity bars and attackable-tile outlines | Simulation mutation |
 | `tactical_unit_ui.rs` | Unit tokens, selection rings, and target outlines | Simulation mutation |
 
@@ -615,6 +617,7 @@ Migration coverage:
 | 1.43.0 | No new fields; entry markers read the existing queued unit positions one round early |
 | 1.44.0 | No new fields; transient combat feedback derives from newly appended battle events |
 | 1.45.0 | No new fields; hostile-phase playback is bounded presentation state only |
+| 1.46.0 | No new fields; formation choice is applied only while creating a new session |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -653,7 +656,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
 `briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`, `combat_feedback`, `phase_replay`,
-`extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `black_channel`, `living_chorus`,
+`extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
@@ -666,8 +669,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (142 domain/migration tests plus the shared source-size gate)
-- deterministic seventy-two-scene capture with visual inspection
+- `cargo test` (143 domain/migration tests plus the shared source-size gate)
+- deterministic seventy-three-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -723,5 +726,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is deployment formation selection, letting the squad
-choose among safe authored entry cells before the first tactical round begins.
+The recommended next vertical slice is an end-phase readiness guard that reports colonists
+with meaningful actions remaining and requires an explicit second confirmation to proceed.

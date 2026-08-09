@@ -143,6 +143,7 @@ pub fn draw_mission_briefing(
     data: &GameData,
     campaign: &CampaignState,
     mission: &MissionDef,
+    formation: crate::formation::FormationKind,
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
@@ -214,66 +215,7 @@ pub fn draw_mission_briefing(
     }
     crate::briefing_intel_ui::draw(data, mission, vec2(880.0, 328.0));
     crate::briefing_loadout_ui::draw(campaign, data, vec2(880.0, 454.0));
-    draw_ui_text_ex(
-        &format!(
-            "DEPLOYMENT // {}/{} SELECTED // SUPPLY {} FOOD",
-            campaign.selected_squad_count(),
-            crate::campaign::SQUAD_LIMIT,
-            campaign.deployment_food_cost(data)
-        ),
-        200.0,
-        370.0,
-        TextStyle::new(15.0, dark::ACCENT).params(),
-    );
-    for (index, character) in campaign.roster.iter().enumerate() {
-        let class_name = data
-            .classes
-            .iter()
-            .find(|class| class.id == character.active_class)
-            .map_or(character.active_class.as_str(), |class| class.name.as_str());
-        let state = if character.availability != crate::campaign::Availability::Ready {
-            "RECOVERING"
-        } else if character.deployment_selected {
-            "DEPLOY"
-        } else {
-            "RESERVE"
-        };
-        let bond = campaign
-            .deployed_bond_name(&character.id)
-            .map_or(String::new(), |name| format!(" · {}", name));
-        let label = format!(
-            "[{}] {} · {} · LV{} · {} XP{}",
-            state, character.name, class_name, character.level, character.experience, bond
-        );
-        if button(
-            Rect::new(200.0, 384.0 + index as f32 * 32.0, 650.0, 28.0),
-            &label,
-            character.availability == crate::campaign::Availability::Ready,
-            mouse,
-        ) {
-            actions.push(UiAction::ToggleDeployment(character.id.clone()));
-        }
-    }
-    if button(
-        Rect::new(820.0, 562.0, 250.0, 48.0),
-        &format!(
-            "DEPLOY SQUAD · {} FOOD",
-            campaign.deployment_food_cost(data)
-        ),
-        campaign.selected_squad_count() > 0
-            && campaign.colony.resources.food >= campaign.deployment_food_cost(data),
-        mouse,
-    ) {
-        actions.push(UiAction::DeployMission);
-    }
-    if button(
-        Rect::new(200.0, 562.0, 180.0, 48.0),
-        "STAND DOWN",
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::ReturnToColony);
-    }
+    crate::briefing_deployment_ui::draw(campaign, data, formation, mouse, &mut actions);
     actions
 }
 

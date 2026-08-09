@@ -15,6 +15,7 @@ pub enum UiAction {
     ChooseMutationEvolution(String, String),
     ResolveCharacterEvent,
     DeployMission,
+    CycleFormation,
     ToggleDeployment(String),
     Continue,
     ReturnToTitle,

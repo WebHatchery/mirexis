@@ -2,10 +2,24 @@
 
 use super::{AppState, Game};
 use crate::data::{OperationModifier, Team};
-use crate::state::{BattleEvent, Command, StatusKind, TacticalPhase};
+use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_line_formation(&mut self) {
+        let mut roster = self
+            .campaign
+            .deployment_roster(&self.data, &self.active_mission);
+        crate::formation::apply(
+            &mut roster,
+            &self.active_mission,
+            &self.data.config,
+            crate::formation::FormationKind::Line,
+        );
+        self.session = GameSession::new(&self.data.config, &self.active_mission, &roster);
+        self.state = AppState::Tactical;
+    }
+
     pub(super) fn capture_phase_replay(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.phase_replay.hold_for_capture(&[

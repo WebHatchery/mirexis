@@ -48,6 +48,8 @@ The completed roadmap slice includes:
   derived from ordered battle events without entering tactical saves
 - a bounded, skippable hostile-activity replay that pauses tactical input and presents
   important enemy movements, attacks, abilities, reinforcements, and phase handoff in beats
+- briefing-selectable wedge, line, and column deployment formations with deterministic
+  fallback around blocked, hazardous, occupied, objective, or out-of-bounds entry cells
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

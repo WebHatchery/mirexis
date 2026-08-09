@@ -8,6 +8,7 @@ use crate::campaign::CampaignState;
 use crate::colony_ui;
 use crate::combat_feedback::CombatFeedback;
 use crate::data::{GameData, MissionDef};
+use crate::formation::FormationKind;
 use crate::persistence::migrate_save_value;
 use crate::phase_replay::PhaseReplay;
 use crate::state::{GameSession, MissionOutcome, SaveData};
@@ -64,6 +65,7 @@ pub struct Game {
     combat_feedback: CombatFeedback,
     observed_event_count: usize,
     phase_replay: PhaseReplay,
+    deployment_formation: FormationKind,
 }
 
 impl Game {
@@ -109,6 +111,7 @@ impl Game {
             combat_feedback: CombatFeedback::default(),
             observed_event_count: 0,
             phase_replay: PhaseReplay::default(),
+            deployment_formation: FormationKind::default(),
         }
     }
 
@@ -146,6 +149,7 @@ impl Game {
                 &self.data,
                 &self.campaign,
                 &self.active_mission,
+                self.deployment_formation,
                 &virtual_ui,
             ),
             AppState::Tactical => ui::draw_tactical(UiContext {
@@ -310,13 +314,17 @@ impl Game {
                     self.targeting = None;
                     self.show_tactical_help = false;
                     self.show_battle_log = false;
-                    self.session = GameSession::new(
-                        &self.data.config,
+                    let mut roster = self
+                        .campaign
+                        .deployment_roster(&self.data, &self.active_mission);
+                    crate::formation::apply(
+                        &mut roster,
                         &self.active_mission,
-                        &self
-                            .campaign
-                            .deployment_roster(&self.data, &self.active_mission),
+                        &self.data.config,
+                        self.deployment_formation,
                     );
+                    self.session =
+                        GameSession::new(&self.data.config, &self.active_mission, &roster);
                     self.state = AppState::Tactical;
                     self.autosave_current("Deployment autosaved");
                     self.notifications.success(format!(
@@ -326,6 +334,13 @@ impl Game {
                 }
                 Err(err) => self.notifications.warning(err),
             },
+            UiAction::CycleFormation => {
+                self.deployment_formation = self.deployment_formation.next();
+                self.notifications.info(format!(
+                    "Deployment formation: {}",
+                    self.deployment_formation.label()
+                ));
+            }
             UiAction::ToggleDeployment(character_id) => {
                 let _ = self.campaign.select_character(&character_id);
                 match self.campaign.toggle_deployment(&character_id) {

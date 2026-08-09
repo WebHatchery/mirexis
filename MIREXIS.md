@@ -442,6 +442,11 @@ events then play through a short presentation queue. Movement, attacks, reaction
 abilities, reinforcements, incapacitations, and the phase handoff each receive a readable
 beat while commands are paused; Space or Escape skips the remaining playback immediately.
 
+Before deployment, the squad can cycle among wedge, line, and column entry formations.
+The chosen shape is applied only when a new tactical session is created. Any preferred cell
+that is blocked, hazardous, occupied, reserved for the objective, or outside the map falls
+back deterministically to a safe western entry cell; loaded battles retain realized positions.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.
