@@ -3,11 +3,12 @@
 use crate::data::Team;
 use crate::enemy_intent::{self, IntentAction};
 use crate::grid_ui::GridView;
-use crate::state::GameSession;
+use crate::state::{Command, GameSession, TacticalPhase};
 use crate::tactical::manhattan;
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, TextStyle};
+use std::collections::HashSet;
 
 pub(crate) fn inspected_hostile(session: &GameSession) -> Option<&crate::state::UnitState> {
     session.tactical.units.iter().find(|unit| {
@@ -75,6 +76,12 @@ pub(crate) fn draw_inspector(session: &GameSession, max_ap: u8, panel: Rect) -> 
         panel.y + 310.0,
         TextStyle::new(14.0, dark::TEXT_BRIGHT).params(),
     );
+    draw_text_ex(
+        "RED CELLS // FIRE NOW · CORNERS // AFTER 1 MOVE",
+        x,
+        panel.y + 334.0,
+        TextStyle::new(12.0, Color::new(0.93, 0.45, 0.48, 1.0)).params(),
+    );
     true
 }
 
@@ -82,7 +89,7 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     let Some(unit) = inspected_hostile(session) else {
         return;
     };
-    draw_weapon_range(session, &unit.id, view);
+    draw_weapon_range(session, &unit.id, max_ap, view);
     let Some(intent) = enemy_intent::preview(session, &unit.id, max_ap) else {
         return;
     };
@@ -116,8 +123,27 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     );
 }
 
-fn draw_weapon_range(session: &GameSession, hostile_id: &str, view: GridView) {
-    for tile in threatened_tiles(session, hostile_id) {
+fn draw_weapon_range(session: &GameSession, hostile_id: &str, max_ap: u8, view: GridView) {
+    let stationary = threatened_tiles(session, hostile_id)
+        .into_iter()
+        .collect::<HashSet<_>>();
+    for tile in danger_reach_tiles(session, hostile_id, max_ap)
+        .into_iter()
+        .filter(|tile| !stationary.contains(tile))
+    {
+        let rect = view.tile_rect(tile);
+        let color = Color::new(0.93, 0.31, 0.48, 0.42);
+        let corner = 8.0;
+        for (x, y, dx) in [
+            (rect.x + 6.0, rect.y + 6.0, corner),
+            (rect.right() - 6.0, rect.y + 6.0, -corner),
+            (rect.x + 6.0, rect.bottom() - 6.0, corner),
+            (rect.right() - 6.0, rect.bottom() - 6.0, -corner),
+        ] {
+            draw_line(x, y, x + dx, y, 1.5, color);
+        }
+    }
+    for tile in stationary {
         let rect = view.tile_rect(tile);
         draw_rectangle(
             rect.x + 3.0,
@@ -152,6 +178,50 @@ pub(crate) fn threatened_tiles(session: &GameSession, hostile_id: &str) -> Vec<T
                 && session.has_line_of_fire(hostile.position, *position)
         })
         .collect()
+}
+
+pub(crate) fn danger_reach_tiles(
+    session: &GameSession,
+    hostile_id: &str,
+    max_ap: u8,
+) -> Vec<TilePos> {
+    let mut forecast = session.clone();
+    forecast.tactical.phase = TacticalPhase::Enemy;
+    let Some(hostile) = forecast
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == hostile_id)
+    else {
+        return Vec::new();
+    };
+    hostile.action_points = max_ap;
+    let hostile = hostile.clone();
+    let mut origins = vec![hostile.position];
+    for destination in hostile.position.neighbors_4way() {
+        if let Ok(cost) = forecast.validate(&Command::Move {
+            unit_id: hostile_id.to_owned(),
+            to: destination,
+        }) {
+            if max_ap.saturating_sub(cost.action_points) >= hostile.weapon_ap_cost {
+                origins.push(destination);
+            }
+        }
+    }
+    let mut threatened = HashSet::new();
+    for origin in origins {
+        for (position, _) in forecast.tactical.fog.iter_with_pos() {
+            if position != hostile.position
+                && manhattan(origin, position) <= i32::from(hostile.weapon_range)
+                && forecast.has_line_of_fire(origin, position)
+            {
+                threatened.insert(position);
+            }
+        }
+    }
+    let mut threatened = threatened.into_iter().collect::<Vec<_>>();
+    threatened.sort_by_key(|tile| (tile.y, tile.x));
+    threatened
 }
 
 fn action_label(session: &GameSession, action: &IntentAction) -> String {
@@ -203,5 +273,25 @@ mod tests {
         assert!(threatened.contains(&TilePos::new(9, 3)));
         assert!(!threatened.contains(&TilePos::new(6, 1)));
         assert!(!threatened.contains(&TilePos::new(10, 3)));
+    }
+
+    #[test]
+    fn danger_reach_adds_one_legal_move_before_the_attack_envelope() {
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        session.tactical.blocked.clear();
+        let hostile = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(6, 3);
+        hostile.weapon_range = 2;
+        hostile.weapon_ap_cost = 2;
+        let hostile_id = hostile.id.clone();
+
+        assert!(!threatened_tiles(&session, &hostile_id).contains(&TilePos::new(9, 3)));
+        assert!(danger_reach_tiles(&session, &hostile_id, 5).contains(&TilePos::new(9, 3)));
     }
 }

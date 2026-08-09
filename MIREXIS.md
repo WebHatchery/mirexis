@@ -427,6 +427,11 @@ line of fire with a restrained red threat outline. Blocking terrain casts an imm
 in that envelope, letting the colony compare firing lanes and safe positions before yielding
 the phase; movement-enabled future reach remains represented by the orange intent forecast.
 
+Pink corner marks extend that inspection through one legal hostile movement while preserving
+enough action points to fire. The inspector legend distinguishes red `FIRE NOW` cells from
+`AFTER 1 MOVE` corners, and the projection respects occupancy, terrain cost, movement rules,
+weapon AP, weapon range, and line of fire without mutating the live battle.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.

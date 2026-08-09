@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.56.0
+Save/content version: 1.57.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -94,7 +94,7 @@ Important transition payloads:
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `enemy_abilities.rs` | Faction ability validation, target choice, effects, and AI activation | General hostile movement or rendering |
 | `enemy_intent.rs` | Read-only hostile first-action forecasts using live AI selectors | State mutation or drawing |
-| `enemy_intent_ui.rs` | Hostile inspector, stationary threat envelope, and first-action forecast | AI policy or state mutation |
+| `enemy_intent_ui.rs` | Hostile inspector, immediate/one-move threat envelopes, and first-action forecast | AI policy or state mutation |
 | `hazards.rs` | Landing-triggered faction hazard damage, statuses, immunity, and events | Pathfinding or drawing |
 | `hazard_ui.rs` | Grid hazard symbols and compact tactical legend | Simulation mutation |
 | `help_ui.rs` | Command-blocking tactical quick-reference overlay | Game rules or persistence |
@@ -629,6 +629,7 @@ Migration coverage:
 | 1.53.0 | No new fields; invalid previews expose existing command-validation errors |
 | 1.54.0 | No new fields; shot tracers and cover breakdown derive from validated attacks |
 | 1.55.0 | No new fields; threat envelopes derive from current hostile range and line of fire |
+| 1.56.0 | No new fields; danger reach derives from one validated move and remaining attack AP |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -666,7 +667,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`, `readiness_markers`, `vitality_markers`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -680,8 +681,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (146 domain/migration tests plus the shared source-size gate)
-- deterministic eighty-one-scene capture with visual inspection
+- `cargo test` (147 domain/migration tests plus the shared source-size gate)
+- deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -737,5 +738,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an expanded hostile danger-reach projection that
-combines one validated movement with the enemy's remaining attack envelope.
+The recommended next vertical slice is a tactical status legend on inspected units, naming
+active effects and their remaining phases instead of representing them with an amber dot alone.

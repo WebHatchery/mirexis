@@ -38,6 +38,8 @@ The completed roadmap slice includes:
   final hit chance, distinct from orange hostile-intent forecasting
 - translucent red weapon-range projection for an inspected hostile, clipped by authored
   weapon range and current line-of-fire blockers to reveal safe tiles and cover shadows
+- pink corner threat marks for tiles an inspected hostile can reach with one legal move
+  and still attack, with an in-panel legend separating immediate from next-step danger
 - a command-blocking tactical field manual available from the footer, `H`, or Escape,
   covering the turn loop, selection, previews, hostile intent, hazards, and objectives
 - an expandable recent battle-history panel available from `LOG` or `B`, preserving the
