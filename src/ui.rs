@@ -232,9 +232,12 @@ pub fn draw_mission_briefing(
         } else {
             "RESERVE"
         };
+        let bond = campaign
+            .deployed_bond_name(&character.id)
+            .map_or(String::new(), |name| format!(" · {}", name));
         let label = format!(
-            "[{}] {} · {} · LV{} · {} XP",
-            state, character.name, class_name, character.level, character.experience
+            "[{}] {} · {} · LV{} · {} XP{}",
+            state, character.name, class_name, character.level, character.experience, bond
         );
         if button(
             Rect::new(200.0, 384.0 + index as f32 * 32.0, 650.0, 28.0),

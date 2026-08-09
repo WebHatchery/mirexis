@@ -727,7 +727,7 @@ fn draw_character_event(
         });
     draw_ui_text_ex(
         &format!(
-            "CHOICE EFFECT // {} {:+} {} // {} FOOD // {} {:+}",
+            "CHOICE EFFECT // {} {:+} {} // BOND +2 // {} FOOD // {} {:+}",
             recipient.to_uppercase(),
             legacy_amount,
             legacy_stat.to_uppercase(),

@@ -1000,7 +1000,15 @@ Events may involve:
 - trauma
 - faction history
 
-Relationships can provide small gameplay effects but should primarily exist to make the roster feel alive.
+The implemented pair-bond layer grows through shared victories and character events.
+Roster inspection names each known bond, mission briefing identifies deployed trusted
+partners, and debrief reports when a victory strengthens the squad's history.
+
+At bond 3, a deployed pair becomes **Trusted** and each partner gains +2 accuracy. At
+bond 5, the pair becomes **Bonded** and each partner also gains +1 armour. Only a
+character's strongest deployed bond applies, so relationship bonuses remain small and
+cannot stack across a full squad. Future authored events can turn this foundation into
+rivalries, romances, ideological fractures, and reconciliation stories.
 
 ---
 

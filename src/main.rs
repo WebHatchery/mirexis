@@ -22,6 +22,7 @@ mod map_variants;
 mod operation_modifiers;
 mod persistence;
 mod reinforcements;
+mod relationships;
 mod roster_ui;
 mod state;
 mod strategy;

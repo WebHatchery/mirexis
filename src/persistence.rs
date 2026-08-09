@@ -1077,4 +1077,20 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(kira.equipment_ids.contains(&"needle_carbine".to_owned()));
     }
+
+    #[test]
+    fn weapon_profile_save_gains_empty_relationship_history() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.29.0", &campaign)).unwrap();
+        legacy["campaign"]
+            .as_object_mut()
+            .unwrap()
+            .remove("relationships");
+        let migrated = migrate_save_value(Some("1.29.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated.campaign.relationships.is_empty());
+    }
 }

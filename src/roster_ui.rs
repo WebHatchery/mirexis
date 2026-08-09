@@ -89,16 +89,34 @@ fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<
             actions.push(UiAction::SelectColonist(character.id.clone()));
         }
     }
-    draw_text_block(
-        "Select a colonist to inspect training, mutation, and loadout.",
+    let relationships = campaign.relationship_summaries(&campaign.selected_character_id);
+    draw_ui_text_ex(
+        "RELATIONSHIPS",
         40.0,
-        578.0,
-        230.0,
-        54.0,
-        14.0,
-        3.0,
-        dark::TEXT_DIM,
+        540.0,
+        TextStyle::new(13.0, dark::ACCENT).params(),
     );
+    if relationships.is_empty() {
+        draw_text_block(
+            "No shared victories yet. Deploy colonists together or resolve their events.",
+            40.0,
+            550.0,
+            230.0,
+            74.0,
+            12.0,
+            3.0,
+            dark::TEXT_DIM,
+        );
+    } else {
+        for (index, relationship) in relationships.iter().take(4).enumerate() {
+            draw_ui_text_ex(
+                relationship,
+                40.0,
+                562.0 + index as f32 * 22.0,
+                TextStyle::new(11.0, dark::TEXT_DIM).params(),
+            );
+        }
+    }
 }
 
 fn draw_selected_character(

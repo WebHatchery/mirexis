@@ -2,6 +2,7 @@
 
 use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
+use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy::{MissionInstance, StrategyState};
 use serde::{Deserialize, Serialize};
@@ -88,6 +89,8 @@ pub struct CampaignState {
     pub colony: ColonyState,
     pub strategy: StrategyState,
     pub operations_completed: u32,
+    #[serde(default)]
+    pub relationships: Vec<RelationshipRecord>,
 }
 
 impl CampaignState {
@@ -109,6 +112,7 @@ impl CampaignState {
             colony: ColonyState::new(),
             strategy: StrategyState::new(data),
             operations_completed: 0,
+            relationships: Vec::new(),
         }
     }
 
@@ -148,6 +152,7 @@ impl CampaignState {
             })
             .take(SQUAD_LIMIT)
             .collect::<Vec<_>>();
+        crate::relationships::apply_deployment_bonuses(&mut deployment, &self.relationships);
         deployment.extend(
             data.roster
                 .iter()
@@ -265,6 +270,15 @@ impl CampaignState {
         mission: &MissionInstance,
         data: &GameData,
     ) {
+        let deployed_ids = self
+            .roster
+            .iter()
+            .filter(|character| {
+                character.availability == Availability::Ready && character.deployment_selected
+            })
+            .take(SQUAD_LIMIT)
+            .map(|character| character.id.clone())
+            .collect::<Vec<_>>();
         self.operations_completed += 1;
         self.colony.advance_operation();
         self.colony.resources.materials += outcome.materials_awarded;
@@ -275,6 +289,9 @@ impl CampaignState {
         }
         self.strategy.resolve_mission(outcome, mission, data);
         self.strategy.refresh_isolation_completion(&mut self.colony);
+        if outcome.result == ObjectiveState::Victory {
+            self.strengthen_shared_victory(&deployed_ids);
+        }
         let xp = if outcome.result == ObjectiveState::Victory {
             20
         } else {
@@ -347,6 +364,7 @@ impl CampaignState {
             return Err(format!("Unknown legacy recipient: {}", legacy_character_id));
         }
         let title = self.strategy.resolve_first_event(&mut self.colony)?;
+        self.strengthen_event_participants(&event.participants);
         if legacy_amount != 0 {
             let character = self
                 .roster
@@ -978,6 +996,8 @@ mod tests {
             .find(|character| character.id == "sol_cairn")
             .unwrap();
         assert_eq!(sol_after.event_legacies[0].name, "Survey Family Routes");
+        assert_eq!(campaign.relationships.len(), 1);
+        assert_eq!(campaign.relationships[0].bond, 2);
         assert_eq!(
             derive_unit(sol_base, sol_after, &data).move_range,
             movement_before + 1
@@ -998,6 +1018,7 @@ mod tests {
             derive_unit(mara_base, &campaign.roster[1], &data).armour,
             mara_before + 1
         );
+        assert_eq!(campaign.relationships.len(), 2);
     }
 
     #[test]
@@ -1019,6 +1040,11 @@ mod tests {
         assert_eq!(campaign.colony.resources.materials, before.materials + 7);
         assert_eq!(campaign.colony.resources.biomass, before.biomass + 5);
         assert_eq!(campaign.colony.resources.power, before.power + 3);
+        assert_eq!(campaign.relationships.len(), 3);
+        assert!(campaign
+            .relationships
+            .iter()
+            .all(|relationship| relationship.bond == 1 && relationship.shared_victories == 1));
     }
 
     #[test]
@@ -1037,6 +1063,7 @@ mod tests {
             power_awarded: 0,
         };
         campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert!(campaign.relationships.is_empty());
         assert!(campaign
             .colony
             .buildings

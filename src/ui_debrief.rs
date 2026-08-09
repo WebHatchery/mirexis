@@ -72,7 +72,7 @@ pub fn draw_debrief(
                 .join(", ")
         )
     };
-    let report = [
+    let mut report = vec![
         format!("Operation: {}", mission.name),
         format!(
             "Squad returned: {}/{}",
@@ -86,6 +86,9 @@ pub fn draw_debrief(
             outcome.materials_awarded, outcome.biomass_awarded, outcome.power_awarded
         ),
     ];
+    if won && outcome.colonists_deployed > 1 {
+        report.push("Shared victory strengthened squad relationships".to_owned());
+    }
     for (index, line) in report.iter().enumerate() {
         draw_text(line, 280.0, 315.0 + index as f32 * 30.0, 21.0, dark::TEXT);
     }

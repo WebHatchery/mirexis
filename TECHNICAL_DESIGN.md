@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.29.0
+Save/content version: 1.30.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -83,6 +83,7 @@ Important transition payloads:
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
+| `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
 | `strategy_choices.rs` | Irreversible Contact-independent strategic choice transactions | Mission generation or rendering |
@@ -560,6 +561,7 @@ Migration coverage:
 | 1.26.0 | Nadi Vale reserve recruitment and Symbiotic Organism evolution paths |
 | 1.27.0 | Data-backed advanced classes; existing class history and level remain valid |
 | 1.28.0 | Inspectable equipment definitions and weapon-profile overrides |
+| 1.29.0 | Persistent pair bonds, shared-victory history, and derived deployment bonuses |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -591,7 +593,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
+`construction`, `research`, `roster`, `advanced_roster`, `relationships`, `bonded_briefing`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `nadi_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `redoubt_end`, `commonwealth_end`, `threshold_end`,
 `finale_debrief`,
@@ -611,8 +613,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (101 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-one-scene capture with visual inspection
+- `cargo test` (109 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -645,8 +647,10 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
-- Relationships, permanent death, and broader armour/tool equipment families remain
-  future content.
+- Pair relationships now grow from shared victories and character events, and trusted
+  deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,
+  romances, bespoke relationship scenes, permanent death, and broader armour/tool
+  equipment families remain future content.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
@@ -663,5 +667,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is persistent character relationships that make the
-five-person roster interact outside combat and influence squad composition.
+The recommended next vertical slice is a reaction-fire and overwatch system that makes
+weapon range and squad positioning matter during hostile movement.

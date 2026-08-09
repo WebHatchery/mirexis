@@ -22,6 +22,8 @@ The completed roadmap slice includes:
 - eleven class actions, explicit ally/enemy targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
 - persistent three-colonist squad selection with a visible reserve
+- persistent pair relationships that grow through shared victories and character
+  events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses
 - roster-wide class training, four level/phase/mastery-gated advanced disciplines,
   and slot-replacing workshop equipment
 - inspectable equipment effects plus Breach Scattergun and Needle Carbine profiles that

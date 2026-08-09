@@ -75,6 +75,8 @@ impl Game {
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
             "advanced_roster" => self.capture_advanced_roster(),
+            "relationships" => self.capture_relationships(AppState::Roster),
+            "bonded_briefing" => self.capture_relationships(AppState::MissionBriefing),
             "briefing" => self.state = AppState::MissionBriefing,
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
@@ -150,6 +152,17 @@ impl Game {
             mara.class_history.push("soldier".to_owned());
         }
         self.state = AppState::Roster;
+    }
+
+    fn capture_relationships(&mut self, state: AppState) {
+        let kira_mara = vec!["kira_voss".to_owned(), "mara_venn".to_owned()];
+        for _ in 0..3 {
+            self.campaign.strengthen_shared_victory(&kira_mara);
+        }
+        self.campaign
+            .strengthen_event_participants(&["kira_voss".to_owned(), "sol_cairn".to_owned()]);
+        self.campaign.selected_character_id = "kira_voss".to_owned();
+        self.state = state;
     }
 
     fn capture_contact(&mut self) {

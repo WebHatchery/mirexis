@@ -725,61 +725,7 @@ impl GameData {
                 ));
             }
         }
-        for event in &self.campaign.events {
-            if !event.attention_faction.is_empty()
-                && !self
-                    .campaign
-                    .factions
-                    .iter()
-                    .any(|faction| faction.id == event.attention_faction)
-            {
-                return Err(format!(
-                    "Campaign event {} references missing attention faction {}",
-                    event.id, event.attention_faction
-                ));
-            }
-            if !event.required_protocol.is_empty()
-                && !self
-                    .campaign
-                    .contact_protocols
-                    .iter()
-                    .any(|protocol| protocol.id == event.required_protocol)
-            {
-                return Err(format!(
-                    "Campaign event {} references missing Contact protocol {}",
-                    event.id, event.required_protocol
-                ));
-            }
-            for participant in &event.participants {
-                if !self
-                    .characters
-                    .iter()
-                    .any(|character| &character.id == participant)
-                {
-                    return Err(format!(
-                        "Campaign event {} references missing character {}",
-                        event.id, participant
-                    ));
-                }
-            }
-            if !event.participants.contains(&event.legacy_character_id) {
-                return Err(format!(
-                    "Campaign event {} gives a legacy to non-participant {}",
-                    event.id, event.legacy_character_id
-                ));
-            }
-            if !matches!(
-                event.legacy_stat.as_str(),
-                "accuracy" | "armour" | "health" | "movement" | "damage"
-            ) || !(-127..=127).contains(&event.legacy_amount)
-                || event.legacy_amount == 0
-            {
-                return Err(format!(
-                    "Campaign event {} has an invalid legacy modifier",
-                    event.id
-                ));
-            }
-        }
+        crate::relationships::validate_event_definitions(self)?;
         Ok(())
     }
 }
