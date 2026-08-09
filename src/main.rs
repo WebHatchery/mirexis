@@ -6,6 +6,7 @@ use macroquad_toolkit::capture;
 mod campaign;
 mod class_action_ui;
 mod class_actions;
+mod class_training;
 mod colony;
 mod colony_ui;
 mod cover_actions;

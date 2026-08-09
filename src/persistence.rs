@@ -178,6 +178,10 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             "Engineer" => "engineer",
             "Psionic" => "psionic",
             "Biotech Specialist" => "biotech",
+            "Vanguard" => "vanguard",
+            "Pathfinder" => "pathfinder",
+            "Lifewright" => "lifewright",
+            "Null Adept" => "null_adept",
             _ => "",
         };
         unit.entry("class_id".to_owned())
@@ -1017,5 +1021,35 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(!nadi.deployment_selected);
         assert!(nadi.mutation_evolution_id.is_empty());
+    }
+
+    #[test]
+    fn nadi_roster_save_preserves_class_mastery_for_advanced_training() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let mara = campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "mara_venn")
+            .unwrap();
+        mara.level = 3;
+        mara.class_history.push("soldier".to_owned());
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.27.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.27.0".to_owned()), legacy, &data).unwrap();
+        let vanguard = data
+            .classes
+            .iter()
+            .find(|class| class.id == "vanguard")
+            .unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert_eq!(
+            migrated
+                .campaign
+                .class_training_lock_reason("mara_venn", vanguard),
+            None
+        );
     }
 }

@@ -19,10 +19,11 @@ The completed roadmap slice includes:
   Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
   phase-gated Adaptation scavenging operation
 - save-stable authored and vertically mirrored variants for every mission map family
-- seven class actions, explicit Medic/Engineer/Psionic targeting, and combat statuses
+- eleven class actions, explicit ally/enemy targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
 - persistent three-colonist squad selection with a visible reserve
-- roster-wide class training and slot-replacing workshop equipment
+- roster-wide class training, four level/phase/mastery-gated advanced disciplines,
+  and slot-replacing workshop equipment
 - player-targeted medkit, toolkit, and survey-harness actions in tactical missions
 - destructible battlefield cover that opens movement routes and firing lanes
 - five persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,

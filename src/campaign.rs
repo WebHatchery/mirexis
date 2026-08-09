@@ -1,7 +1,7 @@
 //! Persistent character identity, progression, and deployment derivation.
 
 use crate::colony::{BuildingKind, ColonyState};
-use crate::data::{CharacterDef, ClassDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
+use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy::{MissionInstance, StrategyState};
 use serde::{Deserialize, Serialize};
@@ -386,31 +386,6 @@ impl CampaignState {
         }
     }
 
-    pub fn train_character(
-        &mut self,
-        character_id: &str,
-        class_id: &str,
-        data: &GameData,
-    ) -> Result<u32, String> {
-        if !self.colony.has_facility(BuildingKind::Barracks) {
-            return Err("An operational barracks is required".to_owned());
-        }
-        let class = data
-            .classes
-            .iter()
-            .find(|class| class.id == class_id)
-            .ok_or_else(|| format!("Unknown class: {}", class_id))?;
-        let cost = self
-            .training_cost(character_id, class)
-            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
-        if self.colony.resources.materials < cost as i32 {
-            return Err(format!("Training requires {} materials", cost));
-        }
-        self.colony.resources.materials -= cost as i32;
-        self.switch_class(character_id, class_id, data)?;
-        Ok(cost)
-    }
-
     pub fn treat_first_injury(&mut self) -> Result<String, String> {
         if !self.colony.has_facility(BuildingKind::Infirmary) {
             return Err("An operational infirmary is required".to_owned());
@@ -601,54 +576,6 @@ impl CampaignState {
         }
         changed
     }
-
-    pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
-        let character = self
-            .roster
-            .iter()
-            .find(|record| record.id == character_id)?;
-        let aptitude = character
-            .aptitudes
-            .get(&class.primary_aptitude)
-            .copied()
-            .unwrap_or(1);
-        Some(
-            100u32
-                .saturating_sub(u32::from(aptitude.saturating_sub(1)) * 10)
-                .max(60),
-        )
-    }
-
-    pub fn switch_class(
-        &mut self,
-        character_id: &str,
-        class_id: &str,
-        data: &GameData,
-    ) -> Result<(), String> {
-        let class = data
-            .classes
-            .iter()
-            .find(|class| class.id == class_id)
-            .ok_or_else(|| format!("Unknown class: {}", class_id))?;
-        let character = self
-            .roster
-            .iter_mut()
-            .find(|record| record.id == character_id)
-            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
-        character.active_class = class.id.clone();
-        if !character.class_history.contains(&class.id) {
-            character.class_history.push(class.id.clone());
-        }
-        let skill = format!("{}_fundamentals", class.id);
-        if !character.learned_skills.contains(&skill) {
-            character.learned_skills.push(skill.clone());
-        }
-        if !character.active_skills.contains(&skill) {
-            character.active_skills.push(skill);
-        }
-        character.active_skills.truncate(class.skill_slots as usize);
-        Ok(())
-    }
 }
 
 fn deployment_selected_default() -> bool {
@@ -773,7 +700,7 @@ mod tests {
     }
 
     #[test]
-    fn aptitude_changes_training_cost_but_not_class_eligibility() {
+    fn aptitude_changes_base_class_training_cost() {
         let data = GameData::load().unwrap();
         let mut campaign = CampaignState::new(&data);
         let psionic = data
@@ -787,6 +714,52 @@ mod tests {
             .switch_class("mara_venn", "psionic", &data)
             .unwrap();
         assert_eq!(campaign.roster[1].active_class, "psionic");
+    }
+
+    #[test]
+    fn advanced_training_requires_phase_level_and_both_disciplines() {
+        let data = GameData::load().unwrap();
+        let vanguard = data
+            .classes
+            .iter()
+            .find(|class| class.id == "vanguard")
+            .unwrap();
+        let mut campaign = CampaignState::new(&data);
+        assert_eq!(
+            campaign.class_training_lock_reason("mara_venn", vanguard),
+            Some("REQUIRES LEVEL 3".to_owned())
+        );
+        let mara = campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "mara_venn")
+            .unwrap();
+        mara.level = 3;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        assert_eq!(
+            campaign.class_training_lock_reason("mara_venn", vanguard),
+            Some("MASTER SOLDIER".to_owned())
+        );
+        campaign
+            .switch_class("mara_venn", "soldier", &data)
+            .unwrap();
+        assert_eq!(
+            campaign.class_training_lock_reason("mara_venn", vanguard),
+            None
+        );
+        campaign.colony.resources.materials = 999;
+        campaign
+            .train_character("mara_venn", "vanguard", &data)
+            .unwrap();
+        assert_eq!(
+            campaign
+                .roster
+                .iter()
+                .find(|character| character.id == "mara_venn")
+                .unwrap()
+                .active_class,
+            "vanguard"
+        );
     }
 
     #[test]

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.27.0
+Save/content version: 1.28.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -77,6 +77,7 @@ Important transition payloads:
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
 | `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
+| `class_training.rs` | Training costs, advanced-class gates, switching, and class-definition validation | UI state |
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
@@ -556,6 +557,7 @@ Migration coverage:
 | 1.24.0 | Path-locked Phase Five offers for already committed identities |
 | 1.25.0 | Persistent final-operation and campaign-completion gates |
 | 1.26.0 | Nadi Vale reserve recruitment and Symbiotic Organism evolution paths |
+| 1.27.0 | Data-backed advanced classes; existing class history and level remain valid |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

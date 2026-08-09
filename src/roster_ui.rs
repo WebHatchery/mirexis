@@ -193,27 +193,31 @@ fn draw_selected_character(
         );
     }
     draw_ui_text_ex(
-        "BARRACKS // CLASS TRAINING",
+        "BARRACKS // CLASS TRAINING · ADVANCED DISCIPLINES REQUIRE LV3 + ADAPTATION",
         344.0,
         322.0,
-        TextStyle::new(15.0, dark::ACCENT).params(),
+        TextStyle::new(13.0, dark::ACCENT).params(),
     );
     for (index, class) in data.classes.iter().enumerate() {
         let cost = campaign.training_cost(&character.id, class).unwrap_or(100);
+        let lock = campaign.class_training_lock_reason(&character.id, class);
         let enabled = campaign.colony.has_facility(BuildingKind::Barracks)
             && character.active_class != class.id
+            && lock.is_none()
             && campaign.colony.resources.materials >= cost as i32;
-        let column = index % 2;
-        let row = index / 2;
+        let column = index % 3;
+        let row = index / 3;
         if button(
             Rect::new(
-                344.0 + column as f32 * 444.0,
+                344.0 + column as f32 * 296.0,
                 334.0 + row as f32 * 36.0,
-                430.0,
+                282.0,
                 30.0,
             ),
             &if character.active_class == class.id {
                 format!("ACTIVE: {}", class.name)
+            } else if let Some(reason) = lock {
+                format!("{} · {}", class.name.to_uppercase(), reason)
             } else {
                 format!("TRAIN: {} · {} MAT", class.name, cost)
             },

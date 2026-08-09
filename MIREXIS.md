@@ -481,7 +481,17 @@ She will require more investment and may develop weaker core statistics, but the
 
 Classes represent training rather than biology.
 
-The exact class tree remains to be designed.
+The playable class tree begins with seven broad disciplines. After reaching level 3,
+entering Adaptation, and mastering both prerequisite disciplines, a colonist can train
+one of four hybrid advanced classes:
+
+- Soldier + Defender → Vanguard: projects Guarded status across a nearby formation.
+- Scout + Engineer → Pathfinder: combines action economy, mobility, and focused fire.
+- Medic + Biotech Specialist → Lifewright: heals an ally and seeds regeneration.
+- Psionic + Engineer → Null Adept: damages and disrupts a hostile at extended range.
+
+Advanced training costs more materials than base retraining. Class history persists,
+so experimentation builds toward promotion instead of being discarded.
 
 Initial broad families could include:
 

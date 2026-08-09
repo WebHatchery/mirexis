@@ -74,6 +74,7 @@ impl Game {
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
+            "advanced_roster" => self.capture_advanced_roster(),
             "briefing" => self.state = AppState::MissionBriefing,
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
@@ -131,6 +132,23 @@ impl Game {
             research.completed = true;
         }
         self.state = AppState::Colony;
+    }
+
+    fn capture_advanced_roster(&mut self) {
+        self.campaign.strategy.phase_id = "adaptation".to_owned();
+        self.campaign.colony.resources.materials = 480;
+        self.campaign.selected_character_id = "mara_venn".to_owned();
+        let mara = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "mara_venn")
+            .expect("advanced roster capture includes Mara");
+        mara.level = 3;
+        if !mara.class_history.contains(&"soldier".to_owned()) {
+            mara.class_history.push("soldier".to_owned());
+        }
+        self.state = AppState::Roster;
     }
 
     fn capture_contact(&mut self) {

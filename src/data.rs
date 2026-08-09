@@ -180,6 +180,14 @@ pub struct ClassDef {
     pub accuracy_bonus: i32,
     pub move_bonus: i8,
     pub skill_slots: u8,
+    #[serde(default)]
+    pub advanced: bool,
+    #[serde(default)]
+    pub required_level: u8,
+    #[serde(default)]
+    pub required_phase: String,
+    #[serde(default)]
+    pub prerequisite_classes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -508,6 +516,7 @@ impl GameData {
                 .map(|entry| entry.id.as_str()),
         )?;
         ensure_unique("class", self.classes.iter().map(|entry| entry.id.as_str()))?;
+        crate::class_training::validate_definitions(&self.classes)?;
         ensure_unique(
             "mutation",
             self.mutations.iter().map(|entry| entry.id.as_str()),

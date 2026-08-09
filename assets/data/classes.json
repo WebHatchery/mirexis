@@ -5,5 +5,9 @@
   { "id": "medic", "name": "Medic", "primary_aptitude": "medicine", "health_bonus": 1, "accuracy_bonus": 0, "move_bonus": 0, "skill_slots": 4 },
   { "id": "engineer", "name": "Engineer", "primary_aptitude": "engineering", "health_bonus": 1, "accuracy_bonus": 1, "move_bonus": 0, "skill_slots": 4 },
   { "id": "psionic", "name": "Psionic", "primary_aptitude": "psionics", "health_bonus": 0, "accuracy_bonus": 3, "move_bonus": 0, "skill_slots": 3 },
-  { "id": "biotech", "name": "Biotech Specialist", "primary_aptitude": "biology", "health_bonus": 1, "accuracy_bonus": 0, "move_bonus": 0, "skill_slots": 4 }
+  { "id": "biotech", "name": "Biotech Specialist", "primary_aptitude": "biology", "health_bonus": 1, "accuracy_bonus": 0, "move_bonus": 0, "skill_slots": 4 },
+  { "id": "vanguard", "name": "Vanguard", "primary_aptitude": "defence", "health_bonus": 4, "accuracy_bonus": 3, "move_bonus": -1, "skill_slots": 5, "advanced": true, "required_level": 3, "required_phase": "adaptation", "prerequisite_classes": ["soldier", "defender"] },
+  { "id": "pathfinder", "name": "Pathfinder", "primary_aptitude": "mobility", "health_bonus": 1, "accuracy_bonus": 5, "move_bonus": 2, "skill_slots": 5, "advanced": true, "required_level": 3, "required_phase": "adaptation", "prerequisite_classes": ["scout", "engineer"] },
+  { "id": "lifewright", "name": "Lifewright", "primary_aptitude": "medicine", "health_bonus": 3, "accuracy_bonus": 1, "move_bonus": 0, "skill_slots": 5, "advanced": true, "required_level": 3, "required_phase": "adaptation", "prerequisite_classes": ["medic", "biotech"] },
+  { "id": "null_adept", "name": "Null Adept", "primary_aptitude": "psionics", "health_bonus": 1, "accuracy_bonus": 6, "move_bonus": 0, "skill_slots": 5, "advanced": true, "required_level": 3, "required_phase": "adaptation", "prerequisite_classes": ["psionic", "engineer"] }
 ]
