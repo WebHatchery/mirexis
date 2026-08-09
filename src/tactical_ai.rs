@@ -15,27 +15,25 @@ pub(crate) fn resolve_enemy_phase(session: &mut GameSession) {
         .collect::<Vec<_>>();
     enemies.sort();
     for enemy_id in enemies {
-        if session.battle_is_over() {
+        for _ in 0..4 {
+            if session.battle_is_over() {
+                return;
+            }
+            if let Some(target_id) = best_attack_target(session, &enemy_id) {
+                let _ = session.execute(Command::Attack {
+                    attacker_id: enemy_id.clone(),
+                    target_id,
+                });
+                continue;
+            }
+            if let Some(destination) = best_enemy_move(session, &enemy_id) {
+                let _ = session.execute(Command::Move {
+                    unit_id: enemy_id.clone(),
+                    to: destination,
+                });
+                continue;
+            }
             break;
-        }
-        if let Some(target_id) = best_attack_target(session, &enemy_id) {
-            let _ = session.execute(Command::Attack {
-                attacker_id: enemy_id.clone(),
-                target_id,
-            });
-            continue;
-        }
-        if let Some(destination) = best_enemy_move(session, &enemy_id) {
-            let _ = session.execute(Command::Move {
-                unit_id: enemy_id.clone(),
-                to: destination,
-            });
-        }
-        if let Some(target_id) = best_attack_target(session, &enemy_id) {
-            let _ = session.execute(Command::Attack {
-                attacker_id: enemy_id.clone(),
-                target_id,
-            });
         }
     }
 }
@@ -68,6 +66,12 @@ fn best_enemy_move(session: &GameSession, enemy_id: &str) -> Option<TilePos> {
         .iter()
         .filter(|unit| unit.team == Team::Colony && !unit.incapacitated)
         .min_by_key(|unit| (manhattan(enemy.position, unit.position), unit.id.clone()))?;
+    let desired_distance = match enemy.role.as_str() {
+        "Hunter" => 1,
+        "Artillery" | "Line Infantry" | "Combat Drone" => 3,
+        "Energy Construct" | "Battlefield Controller" => 2,
+        _ => 1,
+    };
     let mut candidates = enemy
         .position
         .neighbors_4way()
@@ -81,6 +85,13 @@ fn best_enemy_move(session: &GameSession, enemy_id: &str) -> Option<TilePos> {
                 .is_ok()
         })
         .collect::<Vec<_>>();
-    candidates.sort_by_key(|to| (manhattan(*to, target.position), to.y, to.x));
+    candidates.sort_by_key(|to| {
+        (
+            (manhattan(*to, target.position) - desired_distance).abs(),
+            manhattan(*to, target.position),
+            to.y,
+            to.x,
+        )
+    });
     candidates.first().copied()
 }

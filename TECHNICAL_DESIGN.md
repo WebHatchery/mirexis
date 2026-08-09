@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 0.9.0
+Save/content version: 1.0.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -70,6 +70,7 @@ Important transition payloads:
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
+| `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
@@ -131,12 +132,18 @@ all colonists are incapacitated; non-holdout missions also fail at their deadlin
 ### 5.4 Enemy AI
 
 Hostiles are ordered by stable ID. They attack the lowest-health valid colonist,
-otherwise move toward the nearest colonist using validated commands, then try to
-attack again. Ties use stable health/ID or distance/coordinate ordering. Brood hunters
-and Sporecasters differ through data-backed range, movement, armour, accuracy, and
-damage profiles. Mission faction now filters deployment to Brood organisms,
+otherwise move toward a role-specific engagement distance using validated commands,
+then continue spending their action economy. Hunters close to melee while artillery,
+line infantry, and drones seek ranged spacing. Ties use stable health/ID or
+distance/coordinate ordering. Sporecasters and rift wardens hinder movement on a hit;
+suppression drones disrupt accuracy. Mission faction filters deployment to Brood organisms,
 Directorate riflemen and a suppression drone, or Ascendant sentinels and a rift
 warden; factions no longer borrow the authored Glassroot enemy squad.
+
+Holdout missions prebuild deterministic reinforcement waves for rounds three and five.
+Queued units are part of `TacticalState`, so saves preserve future pressure exactly.
+Arrival chooses the nearest valid edge tile, emits a battle event, and prevents an early
+elimination victory while waves remain. The sidebar reports pending waves.
 
 ## 6. Character and Progression Contract
 
@@ -155,7 +162,7 @@ movement; Medic dresses the squad's worst wound; Engineer launches an armour-ign
 shock drone; Psionic disrupts the nearest hostile; and Biotech grants short-lived squad
 regeneration. Class identity is carried into `UnitState` rather than inferred from text.
 
-Focused, Guarded, Quickened, Disrupted, and Regenerating are serialized timed statuses.
+Focused, Guarded, Quickened, Disrupted, Hindered, and Regenerating are serialized timed statuses.
 Their modifiers feed the same effective-stat methods used by command validation,
 attacks, and hostile AI. Phase ownership controls expiry so defensive and hostile
 debuffs survive long enough to affect the opposing phase.
@@ -275,6 +282,7 @@ Migration coverage:
 | 0.5.0 | Tactical mutation-use and temporary combat fields |
 | 0.6.0 | Typed objective fields for tactical state and mission offers |
 | 0.8.0 | Class identity, action-use flag, and timed tactical statuses |
+| 0.9.0 | Serialized holdout reinforcement queue |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -315,7 +323,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (31 domain/migration tests plus the shared source-size gate)
+- `cargo test` (35 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -356,6 +364,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is richer enemy behavior and reinforcement rules,
-followed by player-targeted abilities. Those additions should deepen squad and faction
-identity without requiring a strategic rewrite.
+The recommended next vertical slice is player-targeted abilities and equipment actions,
+followed by destructible cover. Those additions should deepen squad identity and map
+interaction without requiring a strategic rewrite.

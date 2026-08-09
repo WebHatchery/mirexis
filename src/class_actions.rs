@@ -120,7 +120,7 @@ fn nearest_hostile(session: &GameSession, unit_id: &str, range: i32) -> Option<S
         .map(|unit| unit.id.clone())
 }
 
-fn apply_status(
+pub(crate) fn apply_status(
     session: &mut GameSession,
     unit_id: &str,
     kind: StatusKind,

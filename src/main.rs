@@ -11,6 +11,7 @@ mod data;
 mod game;
 mod grid_ui;
 mod persistence;
+mod reinforcements;
 mod state;
 mod strategy;
 mod tactical;

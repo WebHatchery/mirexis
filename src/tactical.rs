@@ -27,6 +27,7 @@ pub enum StatusKind {
     Guarded,
     Quickened,
     Disrupted,
+    Hindered,
     Regenerating,
 }
 
@@ -34,6 +35,12 @@ pub enum StatusKind {
 pub struct StatusEffect {
     pub kind: StatusKind,
     pub remaining_phases: u8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReinforcementWave {
+    pub round: u32,
+    pub units: Vec<UnitState>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -137,6 +144,11 @@ impl UnitState {
             } else {
                 0
             })
+            .saturating_sub(if self.has_status(StatusKind::Hindered) {
+                2
+            } else {
+                0
+            })
     }
 
     pub fn effective_weapon_damage(&self) -> i32 {
@@ -227,6 +239,10 @@ pub enum BattleEvent {
         unit_id: String,
         status: StatusKind,
     },
+    ReinforcementsArrived {
+        round: u32,
+        count: usize,
+    },
     UnitHealed {
         unit_id: String,
         amount: i32,
@@ -260,6 +276,8 @@ pub struct TacticalState {
     pub materials: i32,
     pub rng: SeededRng,
     pub event_log: Vec<BattleEvent>,
+    #[serde(default)]
+    pub reinforcement_waves: Vec<ReinforcementWave>,
 }
 
 pub(crate) fn terrain_cost(position: TilePos, costs: &[(TilePos, u8)]) -> u8 {

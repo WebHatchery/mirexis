@@ -4,8 +4,8 @@ use crate::campaign::CampaignState;
 use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
-    BattleEvent, Command, CommandCost, ObjectiveState, RuleError, StatusKind, TacticalPhase,
-    TacticalState, UnitState,
+    BattleEvent, Command, CommandCost, ObjectiveState, ReinforcementWave, RuleError, StatusKind,
+    TacticalPhase, TacticalState, UnitState,
 };
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
@@ -66,6 +66,7 @@ impl GameSession {
             .find(|unit| Some(&unit.id) == selected_unit.as_ref())
             .map(|unit| unit.position)
             .unwrap_or(TilePos::new(0, 0));
+        let reinforcement_waves = crate::reinforcements::create_waves(config, mission, &units);
 
         Self {
             tactical: TacticalState {
@@ -96,6 +97,7 @@ impl GameSession {
                     phase: TacticalPhase::Player,
                     round: 1,
                 }],
+                reinforcement_waves,
             },
         }
     }
@@ -286,6 +288,7 @@ impl GameSession {
             round: self.tactical.round,
         });
         self.refresh_team(Team::Hostile, config.max_action_points);
+        crate::reinforcements::deploy(self, config.max_action_points);
         crate::tactical_ai::resolve_enemy_phase(self);
         self.advance_statuses(Team::Hostile);
         if self.battle_is_over() {
@@ -503,6 +506,16 @@ impl GameSession {
                     unit_id: target_id.to_owned(),
                 });
             }
+            if !target.incapacitated {
+                let status = match attacker.role.as_str() {
+                    "Artillery" | "Battlefield Controller" => Some(StatusKind::Hindered),
+                    "Combat Drone" => Some(StatusKind::Disrupted),
+                    _ => None,
+                };
+                if let Some(status) = status {
+                    crate::class_actions::apply_status(self, target_id, status, 1, &mut events);
+                }
+            }
         }
         self.check_outcome(&mut events);
         events
@@ -646,7 +659,10 @@ impl GameSession {
                 {
                     Some(ObjectiveState::Victory)
                 }
-                ObjectiveKind::EliminateAll | ObjectiveKind::Holdout if !hostiles_alive => {
+                ObjectiveKind::EliminateAll if !hostiles_alive => Some(ObjectiveState::Victory),
+                ObjectiveKind::Holdout
+                    if !hostiles_alive && self.tactical.reinforcement_waves.is_empty() =>
+                {
                     Some(ObjectiveState::Victory)
                 }
                 _ => None,
@@ -929,6 +945,106 @@ mod tests {
     }
 
     #[test]
+    fn hostile_activations_spend_their_available_attack_economy() {
+        let (config, mut session) = session();
+        let kira_position = session.unit("kira_voss").unwrap().position;
+        let stalker = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "brood_stalker_a")
+            .unwrap();
+        stalker.position = TilePos::new(kira_position.x + 1, kira_position.y);
+        session.end_player_phase(&config);
+        let attacks = session
+            .tactical
+            .event_log
+            .iter()
+            .filter(|event| {
+                matches!(
+                    event,
+                    BattleEvent::AttackRolled { attacker_id, .. }
+                        if attacker_id == "brood_stalker_a"
+                )
+            })
+            .count();
+        assert_eq!(attacks, 2);
+    }
+
+    #[test]
+    fn specialist_enemy_hits_apply_role_statuses() {
+        let (_, mut session) = session();
+        let kira_position = session.unit("kira_voss").unwrap().position;
+        let sporecaster = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "brood_stalker_b")
+            .unwrap();
+        sporecaster.position = TilePos::new(kira_position.x + 1, kira_position.y);
+        sporecaster.accuracy = 100;
+        session.tactical.phase = TacticalPhase::Enemy;
+        let seed = (0..1000)
+            .find(|seed| {
+                let mut rng = SeededRng::new(*seed);
+                rng.range_i32(1, 101) <= 95
+            })
+            .unwrap();
+        session.tactical.rng = SeededRng::new(seed);
+        session
+            .execute(Command::Attack {
+                attacker_id: "brood_stalker_b".into(),
+                target_id: "kira_voss".into(),
+            })
+            .unwrap();
+        assert!(session
+            .unit("kira_voss")
+            .unwrap()
+            .has_status(StatusKind::Hindered));
+    }
+
+    #[test]
+    fn holdouts_wait_for_serialized_reinforcement_waves() {
+        let data = crate::data::GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let mut mission = data.mission.clone();
+        mission.objective_kind = ObjectiveKind::Holdout;
+        mission.hostile_faction = "ascendants".to_owned();
+        mission.round_limit = 6;
+        let roster = campaign.deployment_roster(&data, &mission);
+        let mut session = GameSession::new(&data.config, &mission, &roster);
+        assert_eq!(session.tactical.reinforcement_waves.len(), 2);
+        for unit in &mut session.tactical.units {
+            if unit.team == Team::Hostile {
+                unit.incapacitated = true;
+                unit.health = 0;
+            } else {
+                unit.health = 100;
+                unit.max_health = 100;
+            }
+        }
+        session.check_outcome(&mut Vec::new());
+        assert_eq!(session.tactical.objective_state, ObjectiveState::Active);
+        for _ in 0..3 {
+            session.end_player_phase(&data.config);
+        }
+        assert_eq!(session.tactical.reinforcement_waves.len(), 1);
+        assert_eq!(
+            session
+                .tactical
+                .units
+                .iter()
+                .filter(|unit| unit.team == Team::Hostile && !unit.incapacitated)
+                .count(),
+            2
+        );
+        assert!(session.tactical.event_log.iter().any(|event| matches!(
+            event,
+            BattleEvent::ReinforcementsArrived { round: 3, count: 2 }
+        )));
+    }
+
+    #[test]
     fn phase_zero_save_payload_migrates_to_battle_schema() {
         let data = crate::data::GameData::load().unwrap();
         let campaign = CampaignState::new(&data);
@@ -965,7 +1081,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

@@ -161,7 +161,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -198,7 +198,7 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 
@@ -222,7 +222,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
         let tactical = migrated.tactical.as_ref().unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         assert!(!tactical.units[0].mutation_gift_used);
         assert_eq!(tactical.units[0].temporary_armour, 0);
     }
@@ -244,7 +244,7 @@ mod tests {
             mission.as_object_mut().unwrap().remove("objective_kind");
         }
         let migrated = migrate_save_value(Some("0.6.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         assert_eq!(
             migrated.tactical.unwrap().objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
@@ -268,7 +268,7 @@ mod tests {
             unit.remove("statuses");
         }
         let migrated = migrate_save_value(Some("0.8.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.9.0");
+        assert_eq!(migrated.version, "1.0.0");
         let kira = migrated
             .tactical
             .unwrap()
@@ -279,5 +279,20 @@ mod tests {
         assert_eq!(kira.class_id, "scout");
         assert!(!kira.class_action_used);
         assert!(kira.statuses.is_empty());
+    }
+
+    #[test]
+    fn class_action_save_gains_reinforcement_queue() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.9.0", &campaign)).unwrap();
+        legacy["tactical"]
+            .as_object_mut()
+            .unwrap()
+            .remove("reinforcement_waves");
+        let migrated = migrate_save_value(Some("0.9.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "1.0.0");
+        assert!(migrated.tactical.unwrap().reinforcement_waves.is_empty());
     }
 }

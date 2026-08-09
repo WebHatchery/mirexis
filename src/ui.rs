@@ -637,7 +637,11 @@ fn objective_progress(ctx: &UiContext<'_>) -> String {
                 .round_limit
                 .saturating_sub(ctx.session.tactical.round)
                 + 1;
-            format!("{} ROUNDS · {} HOSTILES", remaining, hostiles)
+            let waves = ctx.session.tactical.reinforcement_waves.len();
+            format!(
+                "{} ROUNDS · {} HOSTILES · {} WAVES",
+                remaining, hostiles, waves
+            )
         }
     }
 }

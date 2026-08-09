@@ -19,6 +19,9 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::MutationActivated { gift, .. } => gift.clone(),
         BattleEvent::ClassActionActivated { action, .. } => action.clone(),
         BattleEvent::StatusApplied { status, .. } => format!("{:?} status applied", status),
+        BattleEvent::ReinforcementsArrived { count, .. } => {
+            format!("{} hostile reinforcements arrived", count)
+        }
         BattleEvent::UnitHealed {
             amount, remaining, ..
         } => format!("{} vitality restored · {} remains", amount, remaining),
