@@ -1,6 +1,7 @@
 //! Campaign save migration at schema boundaries.
 
 use crate::campaign::CampaignState;
+use crate::colony::ColonyState;
 use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
 use macroquad_toolkit::rng::SeededRng;
@@ -25,6 +26,17 @@ pub fn migrate_save_value(
                 .map_err(|err| format!("Could not create migrated campaign: {}", err))?,
         );
         add_character_runtime_defaults(&mut payload)?;
+    }
+    if detected_version.as_deref() == Some("0.3.0") {
+        let campaign = payload
+            .get_mut("campaign")
+            .and_then(Value::as_object_mut)
+            .ok_or_else(|| "Character save is missing campaign state".to_owned())?;
+        campaign.insert(
+            "colony".to_owned(),
+            serde_json::to_value(ColonyState::new())
+                .map_err(|err| format!("Could not create migrated colony: {}", err))?,
+        );
     }
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
@@ -111,8 +123,24 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.3.0");
+        assert_eq!(migrated.version, "0.4.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
+    }
+
+    #[test]
+    fn character_save_gains_colony_without_losing_progress() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.roster[0].experience = 44;
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.3.0", &campaign)).unwrap();
+        legacy["campaign"].as_object_mut().unwrap().remove("colony");
+        let migrated = migrate_save_value(Some("0.3.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.campaign.roster[0].experience, 44);
+        assert!(migrated
+            .campaign
+            .colony
+            .has_facility(crate::colony::BuildingKind::Workshop));
     }
 }

@@ -1,6 +1,8 @@
 //! Application state machine, persistence, and toolkit integration.
 
 use crate::campaign::CampaignState;
+use crate::colony::BuildingKind;
+use crate::colony_ui;
 use crate::data::GameData;
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, MissionOutcome, SaveData};
@@ -20,6 +22,7 @@ use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_fr
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AppState {
     Title,
+    Colony,
     MissionBriefing,
     Tactical,
     Debrief,
@@ -83,9 +86,14 @@ impl Game {
                     self.events.push(UiAction::StartMission);
                 }
             }
-            AppState::MissionBriefing => {
+            AppState::Colony => {
                 if input.escape_pressed {
                     self.events.push(UiAction::ReturnToTitle);
+                }
+            }
+            AppState::MissionBriefing => {
+                if input.escape_pressed {
+                    self.events.push(UiAction::ReturnToColony);
                 }
                 if input.space_pressed || is_key_pressed(KeyCode::Enter) {
                     self.events.push(UiAction::DeployMission);
@@ -110,7 +118,7 @@ impl Game {
             }
             AppState::Debrief => {
                 if input.space_pressed || is_key_pressed(KeyCode::Enter) {
-                    self.events.push(UiAction::ReturnToTitle);
+                    self.events.push(UiAction::ReturnToColony);
                 }
             }
         }
@@ -124,6 +132,7 @@ impl Game {
     pub fn begin_capture_scene(&mut self, scene: &str) {
         match scene {
             "title" => self.state = AppState::Title,
+            "colony" => self.state = AppState::Colony,
             "briefing" => self.state = AppState::MissionBriefing,
             "debrief" => {
                 self.session = GameSession::new(
@@ -157,6 +166,7 @@ impl Game {
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
             AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
+            AppState::Colony => colony_ui::draw_colony(&self.data, &self.campaign, &virtual_ui),
             AppState::MissionBriefing => {
                 ui::draw_mission_briefing(&self.data, &self.campaign, &virtual_ui)
             }
@@ -189,9 +199,12 @@ impl Game {
     fn apply_action(&mut self, action: UiAction) {
         match action {
             UiAction::StartMission => {
-                self.state = AppState::MissionBriefing;
+                self.campaign = CampaignState::new(&self.data);
+                self.state = AppState::Colony;
                 self.last_outcome = None;
+                self.autosave_campaign_only("New colony autosaved");
             }
+            UiAction::OpenMissionBriefing => self.state = AppState::MissionBriefing,
             UiAction::DeployMission => {
                 self.session = GameSession::new(
                     &self.data.config,
@@ -204,6 +217,53 @@ impl Game {
             }
             UiAction::Continue => self.load_game(),
             UiAction::ReturnToTitle => self.state = AppState::Title,
+            UiAction::ReturnToColony => {
+                self.state = AppState::Colony;
+                self.autosave_campaign_only("Colony entry autosaved");
+            }
+            UiAction::ConstructBarricade(position) => {
+                match self
+                    .campaign
+                    .colony
+                    .place_construction(BuildingKind::Barricade, position)
+                {
+                    Ok(_) => {
+                        self.notifications.success("Barricade construction planned");
+                        self.autosave_campaign_only("Construction plan autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
+            UiAction::TrainKira => {
+                match self
+                    .campaign
+                    .train_character("kira_voss", "soldier", &self.data)
+                {
+                    Ok(cost) => {
+                        self.notifications.success(format!(
+                            "Kira completed Soldier training · {} materials",
+                            cost
+                        ));
+                        self.autosave_campaign_only("Training autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
+            UiAction::TreatInjury => match self.campaign.treat_first_injury() {
+                Ok(name) => {
+                    self.notifications
+                        .success(format!("{} received priority treatment", name));
+                    self.autosave_campaign_only("Treatment autosaved");
+                }
+                Err(err) => self.notifications.warning(err),
+            },
+            UiAction::CraftKiraArmour => match self.campaign.craft_armour("kira_voss") {
+                Ok(()) => {
+                    self.notifications.success("Chitin Plate issued to Kira");
+                    self.autosave_campaign_only("Workshop change autosaved");
+                }
+                Err(err) => self.notifications.warning(err),
+            },
             UiAction::SelectTile(tile) => self.session.select_tile(tile),
             UiAction::MoveSelected(tile) => {
                 if self.session.move_selected_to(tile) {
@@ -277,6 +337,25 @@ impl Game {
         }
     }
 
+    fn autosave_campaign_only(&mut self, success_message: &str) {
+        let save = SaveData::campaign_only(&self.data.config.version, &self.campaign);
+        let game_name = self.data.config.game_name.clone();
+        let slot = self.data.config.save_slot.clone();
+        let version = self.data.config.version.clone();
+        match self
+            .autosave
+            .force(move || save_to_slot_with_version(&game_name, &slot, &save, &version))
+        {
+            Ok(()) => {
+                self.save_exists = true;
+                self.notifications.info(success_message);
+            }
+            Err(err) => self
+                .notifications
+                .danger(format!("Autosave failed: {}", err)),
+        }
+    }
+
     fn save_game(&mut self) {
         let save = self
             .session
@@ -305,16 +384,21 @@ impl Game {
         match loaded {
             Ok(save) => {
                 self.campaign = save.campaign;
-                let tactical = save.tactical.unwrap_or_else(|| {
-                    GameSession::new(
+                if let Some(tactical) = save.tactical {
+                    self.session = GameSession::from_tactical(tactical);
+                    self.state = if self.session.battle_is_over() {
+                        AppState::Colony
+                    } else {
+                        AppState::Tactical
+                    };
+                } else {
+                    self.session = GameSession::new(
                         &self.data.config,
                         &self.data.mission,
                         &self.campaign.deployment_roster(&self.data),
-                    )
-                    .tactical
-                });
-                self.session = GameSession::from_tactical(tactical);
-                self.state = AppState::Tactical;
+                    );
+                    self.state = AppState::Colony;
+                }
                 self.last_outcome = None;
                 self.notifications.success("Tactical state restored");
             }

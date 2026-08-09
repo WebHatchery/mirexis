@@ -16,9 +16,15 @@ pub const LOGICAL_HEIGHT: f32 = 720.0;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartMission,
+    OpenMissionBriefing,
     DeployMission,
     Continue,
     ReturnToTitle,
+    ReturnToColony,
+    ConstructBarricade([i32; 2]),
+    TrainKira,
+    TreatInjury,
+    CraftKiraArmour,
     SelectTile(TilePos),
     MoveSelected(TilePos),
     AttackSelected(String),
@@ -190,7 +196,7 @@ pub fn draw_mission_briefing(
         true,
         mouse,
     ) {
-        actions.push(UiAction::ReturnToTitle);
+        actions.push(UiAction::ReturnToColony);
     }
     actions
 }
@@ -264,7 +270,7 @@ pub fn draw_debrief(data: &GameData, outcome: &MissionOutcome, ui: &VirtualUi) -
         true,
         mouse,
     ) {
-        actions.push(UiAction::ReturnToTitle);
+        actions.push(UiAction::ReturnToColony);
     }
     actions
 }

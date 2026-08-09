@@ -12,7 +12,7 @@
     ./scripts/capture_ui.ps1 -Frames 60 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("gameplay"),
+    [string[]]$Scenes = @("title", "colony", "briefing", "gameplay", "debrief"),
     [int]$Frames = 150,
     [string]$OutputDir = "docs\verification",
     [switch]$SkipBuild

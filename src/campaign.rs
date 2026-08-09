@@ -1,5 +1,6 @@
 //! Persistent character identity, progression, and deployment derivation.
 
+use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, ClassDef, GameData, MutationDef, Team, UnitDef};
 use crate::state::{MissionOutcome, ObjectiveState};
 use serde::{Deserialize, Serialize};
@@ -62,6 +63,7 @@ impl CharacterRecord {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CampaignState {
     pub roster: Vec<CharacterRecord>,
+    pub colony: ColonyState,
     pub operations_completed: u32,
 }
 
@@ -73,6 +75,7 @@ impl CampaignState {
                 .iter()
                 .map(CharacterRecord::from_def)
                 .collect(),
+            colony: ColonyState::new(),
             operations_completed: 0,
         }
     }
@@ -93,6 +96,8 @@ impl CampaignState {
 
     pub fn apply_mission_outcome(&mut self, outcome: &MissionOutcome, data: &GameData) {
         self.operations_completed += 1;
+        self.colony.advance_operation();
+        self.colony.resources.materials += outcome.materials_awarded;
         let xp = if outcome.result == ObjectiveState::Victory {
             20
         } else {
@@ -136,7 +141,80 @@ impl CampaignState {
         }
     }
 
-    #[allow(dead_code)]
+    pub fn train_character(
+        &mut self,
+        character_id: &str,
+        class_id: &str,
+        data: &GameData,
+    ) -> Result<u32, String> {
+        if !self.colony.has_facility(BuildingKind::Barracks) {
+            return Err("An operational barracks is required".to_owned());
+        }
+        let class = data
+            .classes
+            .iter()
+            .find(|class| class.id == class_id)
+            .ok_or_else(|| format!("Unknown class: {}", class_id))?;
+        let cost = self
+            .training_cost(character_id, class)
+            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
+        if self.colony.resources.materials < cost as i32 {
+            return Err(format!("Training requires {} materials", cost));
+        }
+        self.colony.resources.materials -= cost as i32;
+        self.switch_class(character_id, class_id, data)?;
+        Ok(cost)
+    }
+
+    pub fn treat_first_injury(&mut self) -> Result<String, String> {
+        if !self.colony.has_facility(BuildingKind::Infirmary) {
+            return Err("An operational infirmary is required".to_owned());
+        }
+        if self.colony.resources.biomass < 5 {
+            return Err("Treatment requires 5 biomass".to_owned());
+        }
+        let character = self
+            .roster
+            .iter_mut()
+            .find(|character| !character.injuries.is_empty())
+            .ok_or_else(|| "No colonist currently needs treatment".to_owned())?;
+        self.colony.resources.biomass -= 5;
+        for injury in &mut character.injuries {
+            injury.recovery_operations = injury.recovery_operations.saturating_sub(1);
+        }
+        character
+            .injuries
+            .retain(|injury| injury.recovery_operations > 0);
+        if character.injuries.is_empty() {
+            character.availability = Availability::Ready;
+        }
+        Ok(character.name.clone())
+    }
+
+    pub fn craft_armour(&mut self, character_id: &str) -> Result<(), String> {
+        if !self.colony.has_facility(BuildingKind::Workshop) {
+            return Err("An operational workshop is required".to_owned());
+        }
+        if self.colony.resources.materials < 25 {
+            return Err("Crafting requires 25 materials".to_owned());
+        }
+        let character = self
+            .roster
+            .iter_mut()
+            .find(|character| character.id == character_id)
+            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
+        if character
+            .equipment_ids
+            .iter()
+            .any(|id| id == "chitin_plate")
+        {
+            return Err("Character already carries Chitin Plate".to_owned());
+        }
+        self.colony.resources.materials -= 25;
+        character.equipment_ids.push("chitin_plate".to_owned());
+        Ok(())
+    }
+
     pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
         let character = self
             .roster
@@ -154,7 +232,6 @@ impl CampaignState {
         )
     }
 
-    #[allow(dead_code)]
     pub fn switch_class(
         &mut self,
         character_id: &str,
@@ -326,5 +403,21 @@ mod tests {
             campaign.advance_recovery();
         }
         assert_eq!(campaign.roster[2].availability, Availability::Ready);
+    }
+
+    #[test]
+    fn facilities_gate_training_treatment_and_crafting() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        let cost = campaign
+            .train_character("kira_voss", "soldier", &data)
+            .unwrap();
+        assert!(cost >= 60);
+        assert_eq!(campaign.roster[0].active_class, "soldier");
+        campaign.craft_armour("kira_voss").unwrap();
+        assert!(campaign.roster[0]
+            .equipment_ids
+            .iter()
+            .any(|id| id == "chitin_plate"));
     }
 }

@@ -4,6 +4,8 @@ use macroquad::prelude::*;
 use macroquad_toolkit::capture;
 
 mod campaign;
+mod colony;
+mod colony_ui;
 mod data;
 mod game;
 mod persistence;
