@@ -23,6 +23,10 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
             target_id,
             ..
         } => format!("{} used on {}", equipment_id, target_id),
+        BattleEvent::CoverDamaged {
+            amount, remaining, ..
+        } => format!("Cover took {} damage · {} integrity", amount, remaining),
+        BattleEvent::CoverDestroyed { .. } => "Cover destroyed · route opened".to_owned(),
         BattleEvent::StatusApplied { status, .. } => format!("{:?} status applied", status),
         BattleEvent::ReinforcementsArrived { count, .. } => {
             format!("{} hostile reinforcements arrived", count)

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 1.3.0
+Save/content version: 1.4.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -74,6 +74,7 @@ Important transition payloads:
 | `reinforcements.rs` | Holdout wave construction, placement, and deployment | Rendering |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
+| `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
@@ -84,6 +85,7 @@ Important transition payloads:
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
+| `cover_ui.rs` | Cover integrity bars and attackable-tile outlines | Simulation mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
 multi-objective logic that would push it toward the source limit.
@@ -97,6 +99,7 @@ round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
 commands are move, attack, interact, activate mutation, and activate class action.
 Carried field equipment also grants validated target commands whose per-mission use is
 serialized with the unit.
+Blocked cover may be attacked with the active weapon through the same command boundary.
 Ending a phase is a session operation that resolves timed statuses, runs hostile
 commands, and advances the round.
 
@@ -117,6 +120,8 @@ Only `execute` mutates tactical state or consumes RNG.
   cost, action points, and each unit's derived move range.
 - Paths and their total cost are emitted in `BattleEvent::UnitMoved`.
 - Colony-defense blocked tiles are derived from saved building coordinates.
+- Destroyed cover is removed from the authoritative blocked set, immediately opening
+  that tile to pathfinding and any firing line that crosses it.
 
 ### 5.3 Attacks and outcomes
 
@@ -128,6 +133,13 @@ Resolution order is fixed:
 4. Draw 1–100 from the battle-owned toolkit `SeededRng`.
 5. Apply critical bonus, armour mitigation, damage, and incapacitation.
 6. Emit roll, damage, incapacitation, objective, and battle-end events in order.
+
+Every initially blocked battlefield tile also owns six battle-local cover integrity.
+A cover attack costs the weapon's normal action points, obeys range and line of fire,
+and deals the weapon's effective damage without a separate evasion roll. At zero
+integrity the cover and any attached directional edge are removed, emitting an ordered
+destruction event. Strategic colony structures are unchanged after the operation;
+persistent building damage remains a separate campaign concern.
 
 `ObjectiveKind` selects one of three victory contracts. `SecureAndClear` requires an
 adjacent interaction followed by neutralizing all hostiles. `EliminateAll` resolves as
@@ -308,6 +320,7 @@ Migration coverage:
 | 1.0.0 | Persistent deployment selection, normalized to the three-colonist limit |
 | 1.1.0 | Persistent roster-screen character selection |
 | 1.2.0 | Tactical equipment identity and once-per-mission item usage |
+| 1.3.0 | Battle-local destructible-cover integrity |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -339,8 +352,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
-`equipment`, and `debrief` by default. `Game::begin_capture_scene()` seeds each scene
-deterministically, including a valid equipment target for the targeting-mode reference.
+`equipment`, `breach`, and `debrief` by default. `Game::begin_capture_scene()` seeds each
+scene deterministically, including valid equipment targeting and breached-cover states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -349,8 +362,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (40 domain/migration tests plus the shared source-size gate)
-- deterministic seven-scene capture with visual inspection
+- `cargo test` (42 domain/migration tests plus the shared source-size gate)
+- deterministic eight-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -377,9 +390,8 @@ boundaries when continuing:
 
 - Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
   beyond the three implemented objective types.
-- Elevation, destructible cover, additional player-targeted class abilities, long-lived
-  injuries as tactical statuses, reactions, and animation/audio consumers are not yet
-  implemented.
+- Elevation, additional player-targeted class abilities, long-lived injuries as tactical
+  statuses, reactions, and animation/audio consumers are not yet implemented.
 - The three current map recipes are fixed authored layouts. Procedural variation,
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
@@ -391,6 +403,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is destructible cover, followed by explicitly
-targeted class abilities. Those additions should deepen map interaction and squad
-identity without requiring a strategic rewrite.
+The recommended next vertical slice is explicitly targeted class abilities, followed by
+an additional objective contract. Those additions should deepen squad identity and
+mission variety without requiring a strategic rewrite.

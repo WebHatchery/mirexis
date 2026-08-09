@@ -1,7 +1,9 @@
 //! Targeted tactical actions granted by carried field equipment.
 
 use crate::data::Team;
-use crate::state::{BattleEvent, CommandCost, GameSession, RuleError, StatusKind, TacticalPhase};
+use crate::state::{
+    BattleEvent, Command, CommandCost, GameSession, RuleError, StatusKind, TacticalPhase,
+};
 use crate::tactical::manhattan;
 
 pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
@@ -10,6 +12,30 @@ pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
         "field_toolkit" => Some("FIELD FORTIFY"),
         "survey_harness" => Some("MARK HOSTILE"),
         _ => None,
+    }
+}
+
+impl GameSession {
+    pub fn can_use_equipment(&self, unit_id: &str, equipment_id: &str, target_id: &str) -> bool {
+        self.validate(&Command::UseEquipment {
+            unit_id: unit_id.to_owned(),
+            equipment_id: equipment_id.to_owned(),
+            target_id: target_id.to_owned(),
+        })
+        .is_ok()
+    }
+
+    pub fn use_equipment(
+        &mut self,
+        unit_id: &str,
+        equipment_id: &str,
+        target_id: &str,
+    ) -> Result<Vec<BattleEvent>, RuleError> {
+        self.execute(Command::UseEquipment {
+            unit_id: unit_id.to_owned(),
+            equipment_id: equipment_id.to_owned(),
+            target_id: target_id.to_owned(),
+        })
     }
 }
 

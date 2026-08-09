@@ -190,6 +190,45 @@ impl Game {
                 });
                 self.state = AppState::Tactical;
             }
+            "breach" => {
+                self.session = GameSession::new(
+                    &self.data.config,
+                    &self.active_mission,
+                    &self
+                        .campaign
+                        .deployment_roster(&self.data, &self.active_mission),
+                );
+                let position = self
+                    .session
+                    .tactical
+                    .destructible_cover
+                    .iter()
+                    .find(|cover| self.session.can_attack_selected_cover(cover.position))
+                    .expect("capture map includes attackable cover")
+                    .position;
+                while self.session.tactical.blocked.contains(&position) {
+                    if let Some(unit) =
+                        self.session.tactical.units.iter_mut().find(|unit| {
+                            Some(&unit.id) == self.session.tactical.selected_unit.as_ref()
+                        })
+                    {
+                        unit.action_points = self.data.config.max_action_points;
+                    }
+                    self.session
+                        .attack_selected_cover(position)
+                        .expect("capture cover remains attackable");
+                }
+                if let Some(unit) = self
+                    .session
+                    .tactical
+                    .units
+                    .iter_mut()
+                    .find(|unit| Some(&unit.id) == self.session.tactical.selected_unit.as_ref())
+                {
+                    unit.action_points = self.data.config.max_action_points;
+                }
+                self.state = AppState::Tactical;
+            }
             "debrief" => {
                 self.session = GameSession::new(
                     &self.data.config,
@@ -439,6 +478,17 @@ impl Game {
                     events.len()
                 )),
                 Err(_) => self.notifications.warning("No valid firing solution"),
+            },
+            UiAction::AttackCover(position) => match self.session.attack_selected_cover(position) {
+                Ok(events) => self.notifications.info(
+                    events
+                        .last()
+                        .map(crate::ui_widgets::event_summary)
+                        .unwrap_or_else(|| "Cover struck".to_owned()),
+                ),
+                Err(_) => self
+                    .notifications
+                    .warning("Cover is outside the firing solution"),
             },
             UiAction::InteractObjective => match self.session.interact_selected() {
                 Ok(_) => self.notifications.success("Mission objective secured"),

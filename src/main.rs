@@ -7,6 +7,8 @@ mod campaign;
 mod class_actions;
 mod colony;
 mod colony_ui;
+mod cover_actions;
+mod cover_ui;
 mod data;
 mod equipment_actions;
 mod equipment_ui;

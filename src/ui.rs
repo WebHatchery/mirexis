@@ -34,6 +34,7 @@ pub enum UiAction {
     SelectTile(TilePos),
     MoveSelected(TilePos),
     AttackSelected(String),
+    AttackCover(TilePos),
     InteractObjective,
     ActivateMutation,
     ActivateClassAction,
@@ -411,6 +412,19 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
                 Color::new(0.95, 0.74, 0.24, 1.0),
             );
         }
+        if let Some(cover) = ctx
+            .session
+            .tactical
+            .destructible_cover
+            .iter()
+            .find(|cover| cover.position == position)
+        {
+            crate::cover_ui::draw_cover(
+                view,
+                cover,
+                ctx.session.can_attack_selected_cover(position),
+            );
+        }
     }
     for unit in &ctx.session.tactical.units {
         let targetable =
@@ -453,6 +467,8 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             if let Some(hostile) = hostile.filter(|unit| ctx.session.can_attack_selected(&unit.id))
             {
                 actions.push(UiAction::AttackSelected(hostile.id.clone()));
+            } else if ctx.session.can_attack_selected_cover(tile) {
+                actions.push(UiAction::AttackCover(tile));
             } else if ctx.session.can_move_selected_to(tile) {
                 actions.push(UiAction::MoveSelected(tile));
             } else {

@@ -43,6 +43,13 @@ pub struct ReinforcementWave {
     pub units: Vec<UnitState>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DestructibleCover {
+    pub position: TilePos,
+    pub health: i32,
+    pub max_health: i32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnitState {
     pub id: String,
@@ -190,6 +197,10 @@ pub enum Command {
         equipment_id: String,
         target_id: String,
     },
+    AttackCover {
+        attacker_id: String,
+        position: TilePos,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -213,6 +224,7 @@ pub enum RuleError {
     MutationUnavailable,
     ClassActionUnavailable,
     EquipmentUnavailable,
+    CoverUnavailable,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -252,6 +264,14 @@ pub enum BattleEvent {
         equipment_id: String,
         target_id: String,
     },
+    CoverDamaged {
+        position: TilePos,
+        amount: i32,
+        remaining: i32,
+    },
+    CoverDestroyed {
+        position: TilePos,
+    },
     StatusApplied {
         unit_id: String,
         status: StatusKind,
@@ -280,6 +300,8 @@ pub struct TacticalState {
     pub blocked: HashSet<TilePos>,
     pub terrain_costs: Vec<(TilePos, u8)>,
     pub cover_edges: Vec<CoverEdgeDef>,
+    #[serde(default)]
+    pub destructible_cover: Vec<DestructibleCover>,
     pub units: Vec<UnitState>,
     pub selected_unit: Option<String>,
     pub selected_tile: TilePos,

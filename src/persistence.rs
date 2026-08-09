@@ -5,6 +5,7 @@ use crate::colony::ColonyState;
 use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
 use crate::strategy::StrategyState;
+use crate::tactical::DestructibleCover;
 use macroquad_toolkit::rng::SeededRng;
 use serde_json::Value;
 
@@ -81,6 +82,21 @@ pub fn migrate_save_value(
                         unit.equipment_ids = character.equipment_ids.clone();
                     }
                 }
+            }
+            if tactical.destructible_cover.is_empty() {
+                tactical.destructible_cover = tactical
+                    .blocked
+                    .iter()
+                    .copied()
+                    .map(|position| DestructibleCover {
+                        position,
+                        health: 6,
+                        max_health: 6,
+                    })
+                    .collect();
+                tactical
+                    .destructible_cover
+                    .sort_by_key(|cover| (cover.position.y, cover.position.x));
             }
         }
     }
@@ -200,7 +216,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -237,7 +253,7 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 
@@ -261,7 +277,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
         let tactical = migrated.tactical.as_ref().unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert!(!tactical.units[0].mutation_gift_used);
         assert_eq!(tactical.units[0].temporary_armour, 0);
     }
@@ -283,7 +299,7 @@ mod tests {
             mission.as_object_mut().unwrap().remove("objective_kind");
         }
         let migrated = migrate_save_value(Some("0.6.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert_eq!(
             migrated.tactical.unwrap().objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
@@ -307,7 +323,7 @@ mod tests {
             unit.remove("statuses");
         }
         let migrated = migrate_save_value(Some("0.8.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         let kira = migrated
             .tactical
             .unwrap()
@@ -331,7 +347,7 @@ mod tests {
             .unwrap()
             .remove("reinforcement_waves");
         let migrated = migrate_save_value(Some("0.9.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert!(migrated.tactical.unwrap().reinforcement_waves.is_empty());
     }
 
@@ -348,7 +364,7 @@ mod tests {
                 .remove("deployment_selected");
         }
         let migrated = migrate_save_value(Some("1.0.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert_eq!(
             migrated
                 .campaign
@@ -371,7 +387,7 @@ mod tests {
             .unwrap()
             .remove("selected_character_id");
         let migrated = migrate_save_value(Some("1.1.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert_eq!(migrated.campaign.selected_character_id, "kira_voss");
     }
 
@@ -388,7 +404,7 @@ mod tests {
             unit.remove("used_equipment_ids");
         }
         let migrated = migrate_save_value(Some("1.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         let kira = migrated
             .tactical
             .unwrap()
@@ -398,5 +414,26 @@ mod tests {
             .unwrap();
         assert!(kira.equipment_ids.contains(&"survey_harness".to_owned()));
         assert!(kira.used_equipment_ids.is_empty());
+    }
+
+    #[test]
+    fn equipment_save_gains_destructible_cover_integrity() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let roster = campaign.deployment_roster(&data, &data.mission);
+        let session = GameSession::new(&data.config, &data.mission, &roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.3.0", &campaign)).unwrap();
+        legacy["tactical"]
+            .as_object_mut()
+            .unwrap()
+            .remove("destructible_cover");
+        let migrated = migrate_save_value(Some("1.3.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "1.4.0");
+        let tactical = migrated.tactical.unwrap();
+        assert_eq!(tactical.destructible_cover.len(), tactical.blocked.len());
+        assert!(tactical
+            .destructible_cover
+            .iter()
+            .all(|cover| cover.health == 6 && cover.max_health == 6));
     }
 }

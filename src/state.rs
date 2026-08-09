@@ -4,8 +4,8 @@ use crate::campaign::CampaignState;
 use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
-    BattleEvent, Command, CommandCost, ObjectiveState, ReinforcementWave, RuleError, StatusKind,
-    TacticalPhase, TacticalState, UnitState,
+    BattleEvent, Command, CommandCost, DestructibleCover, ObjectiveState, ReinforcementWave,
+    RuleError, StatusKind, TacticalPhase, TacticalState, UnitState,
 };
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
@@ -82,6 +82,15 @@ impl GameSession {
                     .map(|entry| (tile(entry.position), entry.cost))
                     .collect(),
                 cover_edges: mission.cover_edges.clone(),
+                destructible_cover: mission
+                    .blocked_tiles
+                    .iter()
+                    .map(|position| DestructibleCover {
+                        position: tile(*position),
+                        health: 6,
+                        max_health: 6,
+                    })
+                    .collect(),
                 units,
                 selected_unit,
                 selected_tile,
@@ -165,6 +174,10 @@ impl GameSession {
                 equipment_id,
                 target_id,
             } => crate::equipment_actions::validate(self, unit_id, equipment_id, target_id),
+            Command::AttackCover {
+                attacker_id,
+                position,
+            } => crate::cover_actions::validate(self, attacker_id, *position),
         }
     }
 
@@ -186,6 +199,10 @@ impl GameSession {
                 equipment_id,
                 target_id,
             } => crate::equipment_actions::execute(self, &unit_id, &equipment_id, &target_id),
+            Command::AttackCover {
+                attacker_id,
+                position,
+            } => crate::cover_actions::execute(self, &attacker_id, position),
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -284,28 +301,6 @@ impl GameSession {
                 unit_id: unit_id.clone(),
             })
             .is_ok()
-        })
-    }
-
-    pub fn can_use_equipment(&self, unit_id: &str, equipment_id: &str, target_id: &str) -> bool {
-        self.validate(&Command::UseEquipment {
-            unit_id: unit_id.to_owned(),
-            equipment_id: equipment_id.to_owned(),
-            target_id: target_id.to_owned(),
-        })
-        .is_ok()
-    }
-
-    pub fn use_equipment(
-        &mut self,
-        unit_id: &str,
-        equipment_id: &str,
-        target_id: &str,
-    ) -> Result<Vec<BattleEvent>, RuleError> {
-        self.execute(Command::UseEquipment {
-            unit_id: unit_id.to_owned(),
-            equipment_id: equipment_id.to_owned(),
-            target_id: target_id.to_owned(),
         })
     }
 
@@ -461,7 +456,7 @@ impl GameSession {
         Ok(CommandCost { action_points: 1 })
     }
 
-    fn active_unit_for_phase(&self, id: &str) -> Result<&UnitState, RuleError> {
+    pub(crate) fn active_unit_for_phase(&self, id: &str) -> Result<&UnitState, RuleError> {
         let unit = self.unit(id).ok_or(RuleError::UnknownUnit)?;
         let active_team = match self.tactical.phase {
             TacticalPhase::Player => Team::Colony,
@@ -611,7 +606,7 @@ impl GameSession {
         (attacker.effective_accuracy() - range_penalty - cover).clamp(5, 95) as u8
     }
 
-    fn has_line_of_fire(&self, from: TilePos, to: TilePos) -> bool {
+    pub(crate) fn has_line_of_fire(&self, from: TilePos, to: TilePos) -> bool {
         line_between(from, to)
             .into_iter()
             .all(|position| !self.tactical.blocked.contains(&position))
@@ -1113,7 +1108,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "1.3.0");
+        assert_eq!(migrated.version, "1.4.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

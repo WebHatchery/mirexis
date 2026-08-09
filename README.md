@@ -19,6 +19,7 @@ The completed roadmap slice includes:
 - persistent three-colonist squad selection with a visible reserve
 - roster-wide class training and slot-replacing workshop equipment
 - player-targeted medkit, toolkit, and survey-harness actions in tactical missions
+- destructible battlefield cover that opens movement routes and firing lanes
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,
