@@ -36,6 +36,8 @@ The completed roadmap slice includes:
   destinations, range failures, wrong phases, and insufficient AP on the focused tile
 - colony-green valid-shot tracers plus an explicit directional-cover penalty beside the
   final hit chance, distinct from orange hostile-intent forecasting
+- translucent red weapon-range projection for an inspected hostile, clipped by authored
+  weapon range and current line-of-fire blockers to reveal safe tiles and cover shadows
 - a command-blocking tactical field manual available from the footer, `H`, or Escape,
   covering the turn loop, selection, previews, hostile intent, hazards, and objectives
 - an expandable recent battle-history panel available from `LOG` or `B`, preserving the

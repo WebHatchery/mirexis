@@ -422,6 +422,11 @@ hostile. The command banner separates any directional cover penalty from the fin
 chance, while hostile-intent forecasts remain orange, so both plans can coexist without
 sharing an ambiguous colour.
 
+Inspecting a hostile also washes every tile inside its current stationary weapon range and
+line of fire with a restrained red threat outline. Blocking terrain casts an immediate gap
+in that envelope, letting the colony compare firing lanes and safe positions before yielding
+the phase; movement-enabled future reach remains represented by the orange intent forecast.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.

@@ -4,7 +4,9 @@ use crate::data::Team;
 use crate::enemy_intent::{self, IntentAction};
 use crate::grid_ui::GridView;
 use crate::state::GameSession;
+use crate::tactical::manhattan;
 use macroquad::prelude::*;
+use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
 pub(crate) fn inspected_hostile(session: &GameSession) -> Option<&crate::state::UnitState> {
@@ -80,6 +82,7 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     let Some(unit) = inspected_hostile(session) else {
         return;
     };
+    draw_weapon_range(session, &unit.id, view);
     let Some(intent) = enemy_intent::preview(session, &unit.id, max_ap) else {
         return;
     };
@@ -113,6 +116,44 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     );
 }
 
+fn draw_weapon_range(session: &GameSession, hostile_id: &str, view: GridView) {
+    for tile in threatened_tiles(session, hostile_id) {
+        let rect = view.tile_rect(tile);
+        draw_rectangle(
+            rect.x + 3.0,
+            rect.y + 3.0,
+            rect.w - 6.0,
+            rect.h - 6.0,
+            Color::new(0.82, 0.20, 0.16, 0.10),
+        );
+        draw_rectangle_lines(
+            rect.x + 4.0,
+            rect.y + 4.0,
+            rect.w - 8.0,
+            rect.h - 8.0,
+            1.0,
+            Color::new(0.96, 0.40, 0.28, 0.34),
+        );
+    }
+}
+
+pub(crate) fn threatened_tiles(session: &GameSession, hostile_id: &str) -> Vec<TilePos> {
+    let Some(hostile) = session.unit(hostile_id) else {
+        return Vec::new();
+    };
+    session
+        .tactical
+        .fog
+        .iter_with_pos()
+        .map(|(position, _)| position)
+        .filter(|position| {
+            *position != hostile.position
+                && manhattan(hostile.position, *position) <= i32::from(hostile.weapon_range)
+                && session.has_line_of_fire(hostile.position, *position)
+        })
+        .collect()
+}
+
 fn action_label(session: &GameSession, action: &IntentAction) -> String {
     match action {
         IntentAction::AttackUnit(target_id) => {
@@ -133,5 +174,34 @@ fn faction_label(faction: Option<&str>) -> &'static str {
         Some("brood") => "BROOD",
         Some("ascendants") => "ASCENDANT",
         _ => "UNKNOWN POWER",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::data::{GameData, Team};
+
+    #[test]
+    fn weapon_range_respects_distance_and_blocked_line_of_fire() {
+        let data = GameData::load().unwrap();
+        let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let hostile = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(6, 3);
+        hostile.weapon_range = 3;
+        let hostile_id = hostile.id.clone();
+        session.tactical.blocked.clear();
+        session.tactical.blocked.insert(TilePos::new(6, 2));
+
+        let threatened = threatened_tiles(&session, &hostile_id);
+
+        assert!(threatened.contains(&TilePos::new(9, 3)));
+        assert!(!threatened.contains(&TilePos::new(6, 1)));
+        assert!(!threatened.contains(&TilePos::new(10, 3)));
     }
 }

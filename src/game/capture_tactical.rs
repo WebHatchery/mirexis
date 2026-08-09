@@ -6,6 +6,24 @@ use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase}
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_threat_range(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session.tactical.blocked.clear();
+        self.session.tactical.destructible_cover.clear();
+        self.session.tactical.blocked.insert(TilePos::new(6, 2));
+        let hostile = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(6, 3);
+        hostile.weapon_range = 3;
+        let hostile_tile = hostile.position;
+        self.session.tactical.selected_tile = hostile_tile;
+    }
+
     pub(super) fn capture_valid_shot(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session
