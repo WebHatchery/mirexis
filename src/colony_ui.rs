@@ -379,18 +379,15 @@ fn draw_operations(
     }
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
-    let evolution_character = campaign
-        .roster
-        .iter()
-        .find(|character| character.id == "kira_voss");
-    let evolution_mutation = evolution_character.and_then(|character| {
-        data.mutations
-            .iter()
-            .find(|mutation| mutation.id == character.mutation_id)
-    });
     let evolution_pending = campaign.strategy.contact_complete
-        && evolution_character.is_some_and(|character| character.mutation_evolution_id.is_empty())
-        && evolution_mutation.is_some_and(|mutation| !mutation.evolutions.is_empty());
+        && campaign.roster.iter().any(|character| {
+            character.mutation_evolution_id.is_empty()
+                && data
+                    .mutations
+                    .iter()
+                    .find(|mutation| mutation.id == character.mutation_id)
+                    .is_some_and(|mutation| !mutation.evolutions.is_empty())
+        });
     if choosing_contact {
         draw_ui_text_ex(
             "FIRST CONTACT // SPEND 2 COMPONENTS // CHOOSE ONE",
@@ -424,7 +421,7 @@ fn draw_operations(
         let lab_ready = campaign.colony.has_facility(BuildingKind::GeneLab);
         draw_ui_text_ex(
             if lab_ready {
-                "GENE LAB READY // CLICK THE FACILITY TO EVOLVE KIRA"
+                "GENE LAB READY // CLICK THE FACILITY TO EVOLVE A COLONIST"
             } else if lab_exists {
                 "GENE LAB OFFLINE // RESTORE POWER OR REPAIR THE FACILITY"
             } else {

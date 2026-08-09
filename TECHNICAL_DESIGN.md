@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — Gene Lab
-Save/content version: 1.14.0
+Current campaign slice: Phase Three — multi-colonist evolution
+Save/content version: 1.15.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -251,6 +251,11 @@ are data-backed gift/complication pairs, the chosen evolution ID persists on the
 character, and the ordinary derived-stat path applies both halves. Further mutations
 can gain evolution options without character-specific simulation branches.
 
+Mara's Chitinous Growth has the second researched pair at ten biomass. Fortress
+Carapace grants two more armour and removes another movement; Razor Plating grants two
+weapon damage and adds one deployment-food upkeep. The same chamber, validation,
+derived-stat, autosave, and irreversible-choice paths serve both colonists.
+
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
 
@@ -447,6 +452,7 @@ Migration coverage:
 | 1.11.0 | Persistent mutation evolution choice and derived gift/complication fields |
 | 1.12.0 | Phase-gated Adaptation operation offers for already evolved campaigns |
 | 1.13.0 | Gene Lab infrastructure for already evolved Adaptation campaigns |
+| 1.14.0 | Data-backed Chitinous Growth evolution paths for unevolved Mara saves |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -479,6 +485,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
+`mara_evolution`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
@@ -494,8 +501,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (77 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-one-scene capture with visual inspection
+- `cargo test` (79 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -528,8 +535,8 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
-- Additional mutation evolutions, advanced classes, relationships, permanent death,
-  and additional equipment families need content beyond the starter roster screen.
+- Evolution paths for the remaining mutations, advanced classes, relationships,
+  permanent death, and additional equipment families remain future content.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
@@ -540,6 +547,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a second researched evolution pair for Mara's
-Chitinous Growth, using the Gene Lab's existing multi-colonist interface and attaching
-new tactical and strategic consequences to a different squad role.
+The recommended next vertical slice is a Regenerative Tissue evolution pair for Ilya,
+expanding the Gene Lab into support and recovery decisions rather than only offensive
+or defensive stat trades.

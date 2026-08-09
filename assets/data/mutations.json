@@ -2,7 +2,11 @@
   {
     "id": "chitinous_growth", "name": "Chitinous Growth",
     "gift": [{ "stat": "armour", "amount": 2 }],
-    "complication": [{ "stat": "movement", "amount": -1 }]
+    "complication": [{ "stat": "movement", "amount": -1 }],
+    "evolutions": [
+      { "id": "fortress_carapace", "name": "Fortress Carapace", "description": "+2 armour, but -1 movement.", "biomass_cost": 10, "gift": [{ "stat": "armour", "amount": 2 }], "complication": [{ "stat": "movement", "amount": -1 }] },
+      { "id": "razor_plating", "name": "Razor Plating", "description": "+2 weapon damage, but +1 deployment food.", "biomass_cost": 10, "gift": [{ "stat": "weapon_damage", "amount": 2 }], "complication": [{ "stat": "food_upkeep", "amount": 1 }] }
+    ]
   },
   {
     "id": "neural_bloom", "name": "Neural Bloom",

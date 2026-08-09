@@ -1100,4 +1100,32 @@ mod tests {
             .choose_mutation_evolution("kira_voss", "echo_mind", &data)
             .is_err());
     }
+
+    #[test]
+    fn mara_can_trade_mobility_for_a_fortress_carapace() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.colony.ensure_gene_lab();
+        campaign.colony.resources.power += 2;
+        let before = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "mara_venn")
+            .unwrap();
+        assert_eq!(
+            campaign
+                .choose_mutation_evolution("mara_venn", "fortress_carapace", &data)
+                .unwrap(),
+            "Fortress Carapace"
+        );
+        let after = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "mara_venn")
+            .unwrap();
+        assert_eq!(after.armour, before.armour + 2);
+        assert_eq!(after.move_range, before.move_range - 1);
+        assert!(campaign.roster[0].mutation_evolution_id.is_empty());
+    }
 }

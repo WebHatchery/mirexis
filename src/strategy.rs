@@ -607,7 +607,7 @@ impl StrategyState {
             name: template.name.clone(),
             briefing: if !template.required_phase.is_empty() {
                 format!(
-                    "Kira's evolved Neural Bloom has located a scavenging route through this {} site.",
+                    "Gene Lab telemetry has located a scavenging route through this {} site.",
                     template.faction
                 )
             } else if template.required_protocol.is_empty() {

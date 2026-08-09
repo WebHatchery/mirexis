@@ -48,6 +48,8 @@ The completed roadmap slice includes:
   trades higher accuracy for food upkeep, while Echo Mind trades weapon damage for
   movement; the powered, damageable Gene Lab owns the choice and the resulting gift
   and complication both affect later deployments
+- a second Gene Lab decision for Mara: Fortress Carapace trades mobility for armour,
+  while Razor Plating trades deployment food for weapon damage
 - an Adaptation-only Glass Nerve operation generated immediately after evolution,
   with a distinct Ascendant cradle battlefield, a six-round secure-and-clear contract,
   and visible materials, biomass, and power recovery

@@ -720,4 +720,33 @@ mod tests {
             .iter()
             .any(|building| building.kind == crate::colony::BuildingKind::GeneLab));
     }
+
+    #[test]
+    fn gene_lab_save_gains_maras_unevolved_paths() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.colony.ensure_gene_lab();
+        campaign.roster[0].mutation_evolution_id = "expanded_cortex".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.14.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.14.0".to_owned()), legacy, &data).unwrap();
+        let mara = migrated
+            .campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "mara_venn")
+            .unwrap();
+        assert!(mara.mutation_evolution_id.is_empty());
+        assert_eq!(
+            data.mutations
+                .iter()
+                .find(|mutation| mutation.id == mara.mutation_id)
+                .unwrap()
+                .evolutions
+                .len(),
+            2
+        );
+    }
 }
