@@ -2,8 +2,9 @@
   "game_name": "mirexis",
   "display_name": "Mirexis",
   "save_slot": "campaign_autosave",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "world_width": 12,
   "world_height": 8,
-  "max_action_points": 5
+  "max_action_points": 5,
+  "battle_seed": 1296651091
 }

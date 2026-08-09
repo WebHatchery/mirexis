@@ -135,6 +135,19 @@ impl Game {
                         .warning("Tile is outside the valid movement envelope");
                 }
             }
+            UiAction::AttackSelected(target_id) => match self.session.attack_selected(&target_id) {
+                Ok(events) => self.notifications.info(format!(
+                    "Attack resolved — {} tactical events",
+                    events.len()
+                )),
+                Err(_) => self.notifications.warning("No valid firing solution"),
+            },
+            UiAction::InteractObjective => match self.session.interact_selected() {
+                Ok(_) => self.notifications.success("Survey beacon secured"),
+                Err(_) => self
+                    .notifications
+                    .warning("A colonist must reach the beacon"),
+            },
             UiAction::EndPhase => {
                 self.session.end_player_phase(&self.data.config);
                 self.notifications.info(format!(

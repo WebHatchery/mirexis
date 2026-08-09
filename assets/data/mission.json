@@ -2,8 +2,20 @@
   "id": "operation_glassroot",
   "name": "OPERATION GLASSROOT",
   "briefing": "A survey team vanished beyond the western floodlights. Bring the colonists home before the shapes in the mire reach the settlement.",
-  "objective": "Reach the far side of the mire and recover the survey beacon. Phase 0 currently exercises selection, movement, turns, and persistence.",
+  "objective": "Recover the survey beacon at the marked relay before round 8, then neutralise the remaining Brood.",
   "round_limit": 8,
   "materials_reward": 30,
-  "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]]
+  "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]],
+  "objective_tile": [10, 4],
+  "terrain_costs": [
+    { "position": [3, 2], "cost": 2 },
+    { "position": [4, 2], "cost": 2 },
+    { "position": [6, 5], "cost": 2 },
+    { "position": [8, 5], "cost": 2 }
+  ],
+  "cover_edges": [
+    { "position": [4, 4], "direction": "west", "strength": 25 },
+    { "position": [8, 2], "direction": "east", "strength": 25 },
+    { "position": [9, 6], "direction": "south", "strength": 25 }
+  ]
 }

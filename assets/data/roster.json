@@ -7,7 +7,12 @@
     "team": "colony",
     "position": [1, 2],
     "max_health": 9,
-    "move_range": 5
+    "move_range": 5,
+    "armour": 0,
+    "accuracy": 72,
+    "weapon_range": 6,
+    "weapon_damage": 4,
+    "weapon_ap_cost": 2
   },
   {
     "id": "mara_venn",
@@ -17,7 +22,12 @@
     "team": "colony",
     "position": [1, 4],
     "max_health": 12,
-    "move_range": 4
+    "move_range": 4,
+    "armour": 2,
+    "accuracy": 65,
+    "weapon_range": 5,
+    "weapon_damage": 5,
+    "weapon_ap_cost": 2
   },
   {
     "id": "brood_stalker_a",
@@ -27,7 +37,12 @@
     "team": "hostile",
     "position": [10, 2],
     "max_health": 8,
-    "move_range": 4
+    "move_range": 4,
+    "armour": 1,
+    "accuracy": 64,
+    "weapon_range": 1,
+    "weapon_damage": 4,
+    "weapon_ap_cost": 2
   },
   {
     "id": "brood_stalker_b",
@@ -37,6 +52,11 @@
     "team": "hostile",
     "position": [9, 6],
     "max_health": 8,
-    "move_range": 4
+    "move_range": 4,
+    "armour": 1,
+    "accuracy": 60,
+    "weapon_range": 4,
+    "weapon_damage": 3,
+    "weapon_ap_cost": 2
   }
 ]

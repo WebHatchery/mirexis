@@ -18,6 +18,7 @@ pub struct GameConfig {
     pub world_width: usize,
     pub world_height: usize,
     pub max_action_points: u8,
+    pub battle_seed: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +30,33 @@ pub struct MissionDef {
     pub round_limit: u32,
     pub materials_reward: i32,
     pub blocked_tiles: Vec<[i32; 2]>,
+    pub objective_tile: [i32; 2],
+    #[serde(default)]
+    pub terrain_costs: Vec<TerrainCostDef>,
+    #[serde(default)]
+    pub cover_edges: Vec<CoverEdgeDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TerrainCostDef {
+    pub position: [i32; 2],
+    pub cost: u8,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EdgeDirection {
+    North,
+    East,
+    South,
+    West,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CoverEdgeDef {
+    pub position: [i32; 2],
+    pub direction: EdgeDirection,
+    pub strength: u8,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -48,6 +76,11 @@ pub struct UnitDef {
     pub position: [i32; 2],
     pub max_health: i32,
     pub move_range: u8,
+    pub armour: i32,
+    pub accuracy: i32,
+    pub weapon_range: u8,
+    pub weapon_damage: i32,
+    pub weapon_ap_cost: u8,
 }
 
 #[derive(Debug, Clone)]
@@ -86,5 +119,7 @@ mod tests {
         assert!(data.roster.iter().any(|unit| unit.team == Team::Colony));
         assert!(data.roster.iter().any(|unit| unit.team == Team::Hostile));
         assert!(data.mission.round_limit > 0);
+        assert!(data.mission.terrain_costs.iter().all(|tile| tile.cost > 0));
+        assert!(data.roster.iter().all(|unit| unit.weapon_ap_cost > 0));
     }
 }

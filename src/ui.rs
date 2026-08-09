@@ -1,7 +1,7 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::data::{GameData, Team};
-use crate::state::{GameSession, TacticalPhase, UnitState};
+use crate::state::{BattleEvent, GameSession, ObjectiveState, TacticalPhase, UnitState};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
@@ -17,6 +17,8 @@ pub enum UiAction {
     ReturnToTitle,
     SelectTile(TilePos),
     MoveSelected(TilePos),
+    AttackSelected(String),
+    InteractObjective,
     EndPhase,
     Save,
     Load,
@@ -196,6 +198,17 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
                 Color::new(0.78, 0.94, 0.63, 1.0),
             );
         }
+        if position == ctx.session.tactical.objective_tile
+            && ctx.session.tactical.objective_state == ObjectiveState::Active
+        {
+            draw_circle_lines(
+                rect.x + rect.w * 0.5,
+                rect.y + rect.h * 0.5,
+                rect.w * 0.30,
+                3.0,
+                Color::new(0.95, 0.74, 0.24, 1.0),
+            );
+        }
     }
     for unit in &ctx.session.tactical.units {
         draw_unit(
@@ -206,7 +219,16 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     if is_mouse_button_released(MouseButton::Left) {
         if let Some(tile) = view.tile_at(mouse) {
-            if ctx.session.can_move_selected_to(tile) {
+            let hostile = ctx
+                .session
+                .tactical
+                .units
+                .iter()
+                .find(|unit| unit.position == tile && unit.team == Team::Hostile);
+            if let Some(hostile) = hostile.filter(|unit| ctx.session.can_attack_selected(&unit.id))
+            {
+                actions.push(UiAction::AttackSelected(hostile.id.clone()));
+            } else if ctx.session.can_move_selected_to(tile) {
                 actions.push(UiAction::MoveSelected(tile));
             } else {
                 actions.push(UiAction::SelectTile(tile));
@@ -222,6 +244,11 @@ fn draw_unit(view: GridView, unit: &UnitState, selected: bool) {
         Team::Hostile => Color::new(0.86, 0.27, 0.25, 1.0),
     };
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.48);
+    let color = if unit.incapacitated {
+        Color::new(color.r * 0.35, color.g * 0.35, color.b * 0.35, 1.0)
+    } else {
+        color
+    };
     draw_circle(center.x, center.y, rect.w * 0.28, color);
     draw_circle_lines(
         center.x,
@@ -321,6 +348,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         );
     }
     if button(
+        Rect::new(x, panel.bottom() - 166.0, panel.w - 36.0, 38.0),
+        "SECURE BEACON",
+        ctx.session.can_interact_selected(),
+        mouse,
+    ) {
+        actions.push(UiAction::InteractObjective);
+    }
+    if button(
         Rect::new(x, panel.bottom() - 120.0, panel.w - 36.0, 44.0),
         "END COLONY PHASE",
         true,
@@ -337,6 +372,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         panel.bottom() - 48.0,
         TextStyle::new(15.0, dark::TEXT_DIM).params(),
     );
+    if let Some(event) = ctx.session.tactical.event_log.last() {
+        draw_ui_text_ex(
+            &event_summary(event),
+            x,
+            panel.bottom() - 22.0,
+            TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        );
+    }
 }
 
 fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
@@ -365,13 +408,35 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     draw_ui_text_ex(
         &format!(
-            "Phase 0 foundation  //  {} assets  //  S save · L load · Enter end phase",
+            "Phase 1A tactical rules  //  {} assets  //  click a hostile to attack",
             ctx.loaded_assets
         ),
         620.0,
         y + 28.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+}
+
+fn event_summary(event: &BattleEvent) -> String {
+    match event {
+        BattleEvent::UnitMoved { unit_id, cost, .. } => format!("{} moved · {} AP", unit_id, cost),
+        BattleEvent::AttackRolled {
+            roll, hit_chance, ..
+        } => {
+            format!("Attack roll {} · {}% target", roll, hit_chance)
+        }
+        BattleEvent::DamageApplied {
+            amount, remaining, ..
+        } => {
+            format!("{} damage · {} vitality remains", amount, remaining)
+        }
+        BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
+        BattleEvent::ObjectiveSecured { .. } => "Survey beacon secured".to_owned(),
+        BattleEvent::PhaseStarted { phase, round } => {
+            format!("{:?} phase · round {}", phase, round)
+        }
+        BattleEvent::BattleEnded { outcome } => format!("Operation {:?}", outcome),
+    }
 }
 
 fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
