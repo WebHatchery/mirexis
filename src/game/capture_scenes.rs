@@ -34,6 +34,21 @@ impl Game {
                 16,
                 OperationModifier::EscalationCrossfire,
             ),
+            "breakwater" => self.capture_template_operation(
+                "escalation_bastion_breakwater",
+                18,
+                OperationModifier::EscalationCrossfire,
+            ),
+            "false_heart" => self.capture_template_operation(
+                "escalation_living_false_heart",
+                19,
+                OperationModifier::EscalationCrossfire,
+            ),
+            "live_wire" => self.capture_template_operation(
+                "escalation_lattice_live_wire",
+                20,
+                OperationModifier::EscalationCrossfire,
+            ),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -299,7 +314,12 @@ impl Game {
         let layout = crate::map_variants::materialize(recipe, &self.data, seed);
         self.active_mission.id = format!("capture_{}", template.id);
         self.active_mission.name = template.name.clone();
-        self.active_mission.briefing = if template.required_phase == "escalation" {
+        self.active_mission.briefing = if !template.required_response.is_empty() {
+            format!(
+                "The committed {} response opens this battlefield.",
+                template.required_response.replace('_', " ")
+            )
+        } else if template.required_phase == "escalation" {
             "Escalation intelligence confirms three-power crossfire.".to_owned()
         } else if !template.required_phase.is_empty() {
             format!(

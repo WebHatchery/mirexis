@@ -73,6 +73,11 @@ pub fn migrate_save_value(
     if detected_version.as_deref() == Some("1.18.0") && save.campaign.strategy.adaptation_complete {
         save.campaign.strategy.regenerate_missions(data);
     }
+    if detected_version.as_deref() == Some("1.20.0")
+        && !save.campaign.strategy.escalation_response_id.is_empty()
+    {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
@@ -862,5 +867,26 @@ mod tests {
         assert_eq!(migrated.version, data.config.version);
         assert!(!migrated.campaign.strategy.escalation_operation_completed);
         assert!(migrated.campaign.strategy.escalation_response_id.is_empty());
+    }
+
+    #[test]
+    fn convergence_response_save_gains_its_branch_operation() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.phase_id = "escalation".to_owned();
+        campaign.strategy.adaptation_complete = true;
+        campaign.strategy.escalation_operation_completed = true;
+        campaign.strategy.escalation_response_id = "bastion_beacon".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.20.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.20.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .strategy
+            .mission_offers
+            .iter()
+            .any(|mission| mission.template_id == "escalation_bastion_breakwater"));
     }
 }

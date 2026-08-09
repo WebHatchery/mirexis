@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Four — Escalation convergence response
-Save/content version: 1.20.0
+Current campaign slice: Phase Four — response-branched Escalation operations
+Save/content version: 1.21.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -420,6 +420,14 @@ adds 5 attention to every faction, and adds 8 materials to all later victorious 
 recovery. The selected response ID is saved, the resource and pressure effects apply
 once, and the hub keeps the committed response visible afterward.
 
+Committing a response regenerates the serialized offer set with one matching follow-up
+operation prioritized. Bastion Beacon opens `BREAKWATER`, a Directorate elimination
+siege on the beacon-bastion map. Living Decoy opens `FALSE HEART`, a Brood extraction
+through the decoy warrens. Weaponized Lattice opens `LIVE WIRE`, an Ascendant signal
+trace inside a lattice storm. All three retain the Phase Four crossfire modifier while
+changing faction, objective, recovery, and map family. Response-locked templates remain
+unavailable before the choice and mutually exclusive afterward.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -494,6 +502,7 @@ Migration coverage:
 | 1.17.0 | Persistent Glass Nerve and Adaptation completion gates |
 | 1.18.0 | Phase-gated Escalation operation offers for transitioned campaigns |
 | 1.19.0 | Persistent Three Knives victory and convergence-response choice state |
+| 1.20.0 | Response-locked Escalation offers for already committed campaigns |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -527,7 +536,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`, `escalation_operation`, `escalation_response`,
-`adaptation_operation`, `glass_nerve`, `legacy`,
+`adaptation_operation`, `glass_nerve`, `breakwater`, `false_heart`, `live_wire`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
@@ -542,8 +551,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (89 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-eight-scene capture with visual inspection
+- `cargo test` (90 domain/migration tests plus the shared source-size gate)
+- deterministic forty-one-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -572,7 +581,7 @@ boundaries when continuing:
   the five implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The eleven current map recipes support authored and safe mirrored layouts. Additional
+- The fourteen current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, and one
   Adaptation-gated Gene Lab; population and free placement for every building remain.
@@ -586,10 +595,11 @@ boundaries when continuing:
   two evolved colonists and an operational Gene Lab complete Adaptation and enter
   Escalation. Three Knives makes that phase immediately playable with a compound
   three-power pressure modifier, and its convergence response creates the first
-  persistent Phase Four strategic tradeoff; additional Escalation operations and later
-  phases remain future content.
+  persistent Phase Four strategic tradeoff with a matching follow-up operation;
+  Escalation completion and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a second Escalation operation whose faction,
-recovery, or assault pressure changes according to the committed convergence response.
+The recommended next vertical slice is a true mixed-faction hostile deployment for
+Three Knives, so the convergence battle visibly fields Directorate, Brood, and
+Ascendant units instead of representing the contest only through its compound modifier.

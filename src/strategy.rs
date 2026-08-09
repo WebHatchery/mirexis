@@ -521,6 +521,7 @@ impl StrategyState {
                 .saturating_add(response.threat_delay);
         }
         self.escalation_response_id = response.id.clone();
+        self.generate_missions(data);
         Ok(response.name.clone())
     }
 
@@ -655,11 +656,14 @@ impl StrategyState {
                     || template.required_protocol == self.contact_protocol_id)
                     && (template.required_phase.is_empty()
                         || template.required_phase == self.phase_id)
+                    && (template.required_response.is_empty()
+                        || template.required_response == self.escalation_response_id)
             })
             .collect::<Vec<_>>();
         templates.sort_by_key(|template| {
             (
                 template.required_phase != self.phase_id,
+                template.required_response != self.escalation_response_id,
                 template.required_protocol != self.contact_protocol_id,
                 template.faction.as_str() != highest_faction.unwrap_or(""),
                 template.id.clone(),
@@ -671,6 +675,7 @@ impl StrategyState {
             templates.sort_by_key(|template| {
                 (
                     template.required_phase != self.phase_id,
+                    template.required_response != self.escalation_response_id,
                     template.required_protocol != self.contact_protocol_id,
                     template.faction.as_str() != highest_faction.unwrap_or(""),
                 )
@@ -709,7 +714,13 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: if template.required_phase == "escalation" {
+            briefing: if !template.required_response.is_empty() {
+                format!(
+                    "The {} response has opened a new {} route through the convergence war.",
+                    template.required_response.replace('_', " "),
+                    template.faction
+                )
+            } else if template.required_phase == "escalation" {
                 "All three powers have converged on the same targeting beacon; holding it means fighting inside their crossfire."
                     .to_owned()
             } else if !template.required_phase.is_empty() {
@@ -1120,6 +1131,7 @@ mod tests {
             .choose_escalation_response("bastion_beacon", &mut colony, &data)
             .is_err());
         bastion.escalation_operation_completed = true;
+        bastion.phase_id = "escalation".to_owned();
         let materials_before = colony.resources.materials;
         let threat_before = bastion.threats[0].operations_until;
         bastion
@@ -1127,10 +1139,15 @@ mod tests {
             .unwrap();
         assert_eq!(colony.resources.materials, materials_before - 30);
         assert_eq!(bastion.threats[0].operations_until, threat_before + 2);
+        assert_eq!(
+            bastion.mission_offers[0].template_id,
+            "escalation_bastion_breakwater"
+        );
 
         let mut decoy = StrategyState::new(&data);
         let mut colony = ColonyState::new();
         decoy.escalation_operation_completed = true;
+        decoy.phase_id = "escalation".to_owned();
         colony.resources.biomass = 20;
         let attention_before = decoy.factions[0].attention;
         decoy
@@ -1138,18 +1155,26 @@ mod tests {
             .unwrap();
         assert_eq!(colony.resources.biomass, 12);
         assert_eq!(decoy.factions[0].attention, attention_before - 8);
+        assert_eq!(
+            decoy.mission_offers[0].template_id,
+            "escalation_living_false_heart"
+        );
 
         let mut lattice = StrategyState::new(&data);
         let mut colony = ColonyState::new();
         lattice.escalation_operation_completed = true;
         lattice.phase_id = "escalation".to_owned();
         lattice.regenerate_missions(&data);
-        let base_reward = lattice.selected_mission().unwrap().materials_reward;
         let power_before = colony.resources.power;
         lattice
             .choose_escalation_response("weaponized_lattice", &mut colony, &data)
             .unwrap();
         assert_eq!(colony.resources.power, power_before - 4);
+        assert_eq!(
+            lattice.mission_offers[0].template_id,
+            "escalation_lattice_live_wire"
+        );
+        let base_reward = lattice.selected_mission().unwrap().materials_reward;
         assert_eq!(
             lattice
                 .materialize_selected(&data, &colony)

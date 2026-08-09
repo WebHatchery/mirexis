@@ -15,7 +15,7 @@ The completed roadmap slice includes:
 - secure-and-clear, elimination, holdout, extraction, and activate-then-defend signal
   trace objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
-- eleven generated operation templates, including a Brood sporefield extraction, an
+- fourteen generated operation templates, including a Brood sporefield extraction, an
   Ascendant fractured-vault purge, three protocol-gated Contact signal traces, and a
   phase-gated Adaptation scavenging operation
 - save-stable authored and vertically mirrored variants for every mission map family
@@ -67,6 +67,9 @@ The completed roadmap slice includes:
 - a post-victory Escalation response: spend materials to delay the next assault, spend
   biomass to misdirect every faction, or spend power to trade higher attention for
   recurring material recovery
+- three response-locked follow-up operations: a Directorate elimination siege for
+  Bastion Beacon, a Brood extraction corridor for Living Decoy, or an Ascendant signal
+  trace for Weaponized Lattice, each on its own battlefield family
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -105,5 +108,5 @@ Capture all application scenes with:
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
 tactical baselines, persistent characters, classes, mutations, equipment, campaign
-content through the first Escalation strategy decision, and the texture manifest. `GameData::load()`
+content through the response-branched Escalation operations, and the texture manifest. `GameData::load()`
 validates IDs and cross-references before the game starts.

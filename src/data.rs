@@ -308,6 +308,8 @@ pub struct MissionTemplateDef {
     pub required_protocol: String,
     #[serde(default)]
     pub required_phase: String,
+    #[serde(default)]
+    pub required_response: String,
     pub materials_reward: i32,
     #[serde(default)]
     pub biomass_reward: i32,
@@ -370,6 +372,20 @@ impl GameData {
             "character",
             self.characters.iter().map(|entry| entry.id.as_str()),
         )?;
+        for template in &self.campaign.mission_templates {
+            if !template.required_response.is_empty()
+                && !self
+                    .campaign
+                    .escalation_responses
+                    .iter()
+                    .any(|response| response.id == template.required_response)
+            {
+                return Err(format!(
+                    "Mission template {} references missing Escalation response {}",
+                    template.id, template.required_response
+                ));
+            }
+        }
         for equipment in &self.equipment {
             if !equipment.required_protocol.is_empty()
                 && !self
