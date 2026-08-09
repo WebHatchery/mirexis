@@ -32,6 +32,7 @@ pub enum UiAction {
     MoveSelected(TilePos),
     AttackSelected(String),
     InteractObjective,
+    ActivateMutation,
     EndPhase,
     Save,
     Load,
@@ -514,6 +515,12 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             dark::POSITIVE,
             Some(&format!("VITALS {}/{}", unit.health, unit.max_health)),
         );
+        draw_ui_text_ex(
+            mutation_status(unit),
+            x,
+            panel.y + 332.0,
+            TextStyle::new(14.0, dark::TEXT_DIM).params(),
+        );
         meter(
             Rect::new(x, panel.y + 292.0, panel.w - 36.0, 22.0),
             unit.action_points as f32,
@@ -530,15 +537,31 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         );
     }
     if button(
-        Rect::new(x, panel.bottom() - 166.0, panel.w - 36.0, 38.0),
+        Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
         "COMPLETE OBJECTIVE",
         ctx.session.can_interact_selected(),
         mouse,
     ) {
         actions.push(UiAction::InteractObjective);
     }
+    let mutation_label = selected.map_or("MUTATION GIFT", |unit| match unit.mutation.as_str() {
+        "Neural Bloom" => "NEURAL FOCUS",
+        "Chitinous Growth" => "HARDEN CARAPACE",
+        "Regenerative Tissue" => "ACCELERATE TISSUE",
+        "Elastic Musculature" => "COIL MUSCLE",
+        "Symbiotic Organism" => "FEEDING FRENZY",
+        _ => "MUTATION GIFT",
+    });
     if button(
-        Rect::new(x, panel.bottom() - 120.0, panel.w - 36.0, 44.0),
+        Rect::new(x, panel.bottom() - 144.0, panel.w - 36.0, 38.0),
+        mutation_label,
+        ctx.session.can_activate_selected_mutation(),
+        mouse,
+    ) {
+        actions.push(UiAction::ActivateMutation);
+    }
+    if button(
+        Rect::new(x, panel.bottom() - 100.0, panel.w - 36.0, 44.0),
         "END COLONY PHASE",
         true,
         mouse,
@@ -551,14 +574,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             ctx.session.tactical.materials, ctx.mission.round_limit
         ),
         x,
-        panel.bottom() - 48.0,
+        panel.bottom() - 36.0,
         TextStyle::new(15.0, dark::TEXT_DIM).params(),
     );
     if let Some(event) = ctx.session.tactical.event_log.last() {
         draw_ui_text_ex(
             &event_summary(event),
             x,
-            panel.bottom() - 22.0,
+            panel.bottom() - 14.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
     }
@@ -599,7 +622,7 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     );
 }
 
-fn event_summary(event: &BattleEvent) -> String {
+pub(crate) fn event_summary(event: &BattleEvent) -> String {
     match event {
         BattleEvent::UnitMoved { unit_id, cost, .. } => format!("{} moved · {} AP", unit_id, cost),
         BattleEvent::AttackRolled {
@@ -614,10 +637,28 @@ fn event_summary(event: &BattleEvent) -> String {
         }
         BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
         BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
+        BattleEvent::MutationActivated { gift, .. } => gift.clone(),
+        BattleEvent::UnitHealed {
+            amount, remaining, ..
+        } => format!("{} vitality restored · {} remains", amount, remaining),
         BattleEvent::PhaseStarted { phase, round } => {
             format!("{:?} phase · round {}", phase, round)
         }
         BattleEvent::BattleEnded { outcome } => format!("Operation {:?}", outcome),
+    }
+}
+
+fn mutation_status(unit: &UnitState) -> &'static str {
+    if !unit.mutation_gift_used {
+        return "Mutation gift ready · costs 1 AP";
+    }
+    match unit.mutation.as_str() {
+        "Neural Bloom" => "Neural focus active · +20 accuracy",
+        "Chitinous Growth" => "Carapace hardened · +3 armour",
+        "Regenerative Tissue" => "Regeneration spent until next round",
+        "Elastic Musculature" => "Muscles coiled · movement range extended",
+        "Symbiotic Organism" => "Symbiote feeding · +2 weapon damage",
+        _ => "Mutation gift spent until next round",
     }
 }
 

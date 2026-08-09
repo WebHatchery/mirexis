@@ -11,6 +11,7 @@ The completed roadmap slice includes:
 
 - a title → colony → briefing → tactical → debrief campaign loop
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
+- obstacle-blocked firing lanes and once-per-round tactical mutation gifts
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,
@@ -43,8 +44,8 @@ Capture all application scenes with:
 
 ## Controls
 
-- Mouse: use colony actions, select missions, select colonists, move, attack, and
-  complete tactical objectives
+- Mouse: use colony actions, select missions, select colonists, move, attack,
+  complete tactical objectives, or activate the selected colonist's mutation gift
 - Arrow keys: move the tactical cursor
 - Enter: confirm title/briefing/debrief or end the colony tactical phase
 - S / L: save / load an in-progress battle

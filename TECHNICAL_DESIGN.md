@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 0.5.0
+Save/content version: 0.6.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -68,6 +68,7 @@ Important transition payloads:
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
 | `state.rs` | Tactical commands, validation, execution, AI, events, outcomes | Drawing, colony mutation |
+| `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
@@ -84,8 +85,8 @@ multi-objective logic that would push it toward the source limit.
 
 `TacticalState` owns the grid, occupancy, terrain costs, edge cover, units, phase,
 round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
-commands are move, attack, and interact. Ending a phase is a session operation that
-runs hostile commands and advances the round.
+commands are move, attack, interact, and activate mutation. Ending a phase is a
+session operation that runs hostile commands and advances the round.
 
 The authority boundary is:
 
@@ -110,10 +111,11 @@ Only `execute` mutates tactical state or consumes RNG.
 Resolution order is fixed:
 
 1. Validate phase, teams, incapacitation, range, and action points.
-2. Calculate accuracy from the attacker, range falloff, and the target-facing cover edge.
-3. Draw 1–100 from the battle-owned toolkit `SeededRng`.
-4. Apply critical bonus, armour mitigation, damage, and incapacitation.
-5. Emit roll, damage, incapacitation, objective, and battle-end events in order.
+2. Reject shots whose firing line crosses a solid blocked tile.
+3. Calculate accuracy from the attacker, range falloff, and the target-facing cover edge.
+4. Draw 1–100 from the battle-owned toolkit `SeededRng`.
+5. Apply critical bonus, armour mitigation, damage, and incapacitation.
+6. Emit roll, damage, incapacitation, objective, and battle-end events in order.
 
 Victory currently requires completing the interactive objective and neutralizing all
 hostiles. Failure occurs when every colonist is incapacitated or the round limit is
@@ -148,6 +150,12 @@ five implemented mutations exercise these hooks:
 | Regenerative Tissue | Health at phase refresh | Longer injury recovery |
 | Elastic Musculature | Increased movement | Heavy-armour-efficiency trait |
 | Symbiotic Organism | Biological-damage trait | Food-upkeep trait |
+
+Each mutation also exposes a one-action-point, once-per-round tactical gift. Neural
+Bloom focuses accuracy, Chitinous Growth hardens armour, Regenerative Tissue restores
+vitality, Elastic Musculature adds immediate action economy and movement range, and
+Symbiotic Organism temporarily increases weapon damage. Round refresh clears temporary
+bonuses and makes the gift available again.
 
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
@@ -244,6 +252,7 @@ Migration coverage:
 | 0.2.0 | Persistent character campaign and mutation runtime defaults |
 | 0.3.0 | Colony state while preserving character XP |
 | 0.4.0 | Isolation strategy, pressure, and seeded offers |
+| 0.5.0 | Tactical mutation-use and temporary combat fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -284,7 +293,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (21 domain/migration tests plus the shared source-size gate)
+- `cargo test` (24 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -312,7 +321,7 @@ boundaries when continuing:
 
 - Tactical combat currently has one shared interactive-objective contract. Add typed
   objective variants before authoring escort, holdout, or multi-stage missions.
-- True line of sight, elevation, destructible cover, abilities, items, statuses,
+- Elevation, destructible cover, targeted class abilities, items, persistent statuses,
   reactions, and animation/audio consumers are not yet implemented.
 - Generated outer-mire missions reuse Glassroot geometry with different seeds,
   objectives, rewards, and limits. Add data-backed map recipes before adding volume.
@@ -325,6 +334,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is typed tactical objectives plus line of sight
-and status resolution, followed by data-backed map recipes. Those additions exercise
-the existing command/event boundary without requiring a strategic rewrite.
+The recommended next vertical slice is typed tactical objectives and status resolution,
+followed by data-backed map recipes. Those additions exercise the existing command/event
+boundary without requiring a strategic rewrite.

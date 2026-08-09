@@ -127,7 +127,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.5.0");
+        assert_eq!(migrated.version, "0.6.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -164,7 +164,32 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.5.0");
+        assert_eq!(migrated.version, "0.6.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
+    }
+
+    #[test]
+    fn isolation_save_gains_tactical_mutation_runtime_fields() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.5.0", &campaign)).unwrap();
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            let unit = unit.as_object_mut().unwrap();
+            for key in [
+                "mutation_gift_used",
+                "temporary_armour",
+                "temporary_accuracy",
+                "temporary_move_range",
+                "temporary_weapon_damage",
+            ] {
+                unit.remove(key);
+            }
+        }
+        let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
+        let tactical = migrated.tactical.as_ref().unwrap();
+        assert_eq!(migrated.version, "0.6.0");
+        assert!(!tactical.units[0].mutation_gift_used);
+        assert_eq!(tactical.units[0].temporary_armour, 0);
     }
 }

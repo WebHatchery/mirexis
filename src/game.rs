@@ -346,6 +346,15 @@ impl Game {
                     .notifications
                     .warning("A colonist must reach the objective"),
             },
+            UiAction::ActivateMutation => match self.session.activate_selected_mutation() {
+                Ok(events) => self.notifications.success(
+                    events
+                        .first()
+                        .map(ui::event_summary)
+                        .unwrap_or_else(|| "Mutation gift activated".to_owned()),
+                ),
+                Err(_) => self.notifications.warning("Mutation gift is unavailable"),
+            },
             UiAction::EndPhase => {
                 self.session.end_player_phase(&self.data.config);
                 self.notifications.info(format!(

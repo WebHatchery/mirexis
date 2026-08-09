@@ -1,157 +1,17 @@
 //! Deterministic tactical command simulation and persistence model.
 
 use crate::campaign::CampaignState;
-use crate::data::{CoverEdgeDef, EdgeDirection, GameConfig, MissionDef, Team, UnitDef};
+use crate::data::{EdgeDirection, GameConfig, MissionDef, Team, UnitDef};
+use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
+pub use crate::tactical::{
+    BattleEvent, Command, CommandCost, ObjectiveState, RuleError, TacticalPhase, TacticalState,
+    UnitState,
+};
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TacticalPhase {
-    Player,
-    Enemy,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ObjectiveState {
-    Active,
-    Secured,
-    Victory,
-    Failed,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UnitState {
-    pub id: String,
-    pub name: String,
-    pub role: String,
-    pub mutation: String,
-    pub team: Team,
-    pub position: TilePos,
-    pub health: i32,
-    pub max_health: i32,
-    pub move_range: u8,
-    pub action_points: u8,
-    pub armour: i32,
-    pub accuracy: i32,
-    pub weapon_range: u8,
-    pub weapon_damage: i32,
-    pub weapon_ap_cost: u8,
-    pub round_regeneration: i32,
-    pub incapacitated: bool,
-}
-
-impl UnitState {
-    fn from_def(def: &UnitDef, action_points: u8) -> Self {
-        Self {
-            id: def.id.clone(),
-            name: def.name.clone(),
-            role: def.role.clone(),
-            mutation: def.mutation.clone(),
-            team: def.team,
-            position: TilePos::new(def.position[0], def.position[1]),
-            health: def.max_health,
-            max_health: def.max_health,
-            move_range: def.move_range,
-            action_points,
-            armour: def.armour,
-            accuracy: def.accuracy,
-            weapon_range: def.weapon_range,
-            weapon_damage: def.weapon_damage,
-            weapon_ap_cost: def.weapon_ap_cost,
-            round_regeneration: def.round_regeneration,
-            incapacitated: false,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Command {
-    Move {
-        unit_id: String,
-        to: TilePos,
-    },
-    Attack {
-        attacker_id: String,
-        target_id: String,
-    },
-    Interact {
-        unit_id: String,
-    },
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CommandCost {
-    pub action_points: u8,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RuleError {
-    WrongPhase,
-    UnknownUnit,
-    WrongTeam,
-    Incapacitated,
-    Occupied,
-    NoPath,
-    OutOfRange,
-    InsufficientActionPoints,
-    InvalidTarget,
-    ObjectiveUnavailable,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum BattleEvent {
-    UnitMoved {
-        unit_id: String,
-        path: Vec<TilePos>,
-        cost: u8,
-    },
-    AttackRolled {
-        attacker_id: String,
-        target_id: String,
-        roll: u8,
-        hit_chance: u8,
-    },
-    DamageApplied {
-        target_id: String,
-        amount: i32,
-        remaining: i32,
-    },
-    UnitIncapacitated {
-        unit_id: String,
-    },
-    ObjectiveSecured {
-        unit_id: String,
-    },
-    PhaseStarted {
-        phase: TacticalPhase,
-        round: u32,
-    },
-    BattleEnded {
-        outcome: ObjectiveState,
-    },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TacticalState {
-    pub fog: FlatGrid<FogState>,
-    pub blocked: HashSet<TilePos>,
-    pub terrain_costs: Vec<(TilePos, u8)>,
-    pub cover_edges: Vec<CoverEdgeDef>,
-    pub units: Vec<UnitState>,
-    pub selected_unit: Option<String>,
-    pub selected_tile: TilePos,
-    pub objective_tile: TilePos,
-    pub objective_state: ObjectiveState,
-    pub phase: TacticalPhase,
-    pub round: u32,
-    pub round_limit: u32,
-    pub materials: i32,
-    pub rng: SeededRng,
-    pub event_log: Vec<BattleEvent>,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SaveData {
@@ -293,6 +153,7 @@ impl GameSession {
                 target_id,
             } => self.validate_attack(attacker_id, target_id),
             Command::Interact { unit_id } => self.validate_interact(unit_id),
+            Command::ActivateMutation { unit_id } => self.validate_mutation(unit_id),
         }
     }
 
@@ -305,6 +166,7 @@ impl GameSession {
                 target_id,
             } => self.execute_attack(&attacker_id, &target_id),
             Command::Interact { unit_id } => self.execute_interact(&unit_id),
+            Command::ActivateMutation { unit_id } => self.execute_mutation(&unit_id),
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -364,6 +226,24 @@ impl GameSession {
     pub fn can_interact_selected(&self) -> bool {
         self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
             self.validate(&Command::Interact {
+                unit_id: unit_id.clone(),
+            })
+            .is_ok()
+        })
+    }
+
+    pub fn activate_selected_mutation(&mut self) -> Result<Vec<BattleEvent>, RuleError> {
+        let unit_id = self
+            .tactical
+            .selected_unit
+            .clone()
+            .ok_or(RuleError::UnknownUnit)?;
+        self.execute(Command::ActivateMutation { unit_id })
+    }
+
+    pub fn can_activate_selected_mutation(&self) -> bool {
+        self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
+            self.validate(&Command::ActivateMutation {
                 unit_id: unit_id.clone(),
             })
             .is_ok()
@@ -448,7 +328,7 @@ impl GameSession {
             .path_for(unit.position, to, Some(unit_id))
             .ok_or(RuleError::NoPath)?;
         let cost = path_cost(&path, &self.tactical.terrain_costs);
-        if cost == 0 || cost > unit.move_range || cost > unit.action_points {
+        if cost == 0 || cost > unit.effective_move_range() || cost > unit.action_points {
             return Err(if cost > unit.action_points {
                 RuleError::InsufficientActionPoints
             } else {
@@ -473,6 +353,9 @@ impl GameSession {
         if manhattan(attacker.position, target.position) > attacker.weapon_range as i32 {
             return Err(RuleError::OutOfRange);
         }
+        if !self.has_line_of_fire(attacker.position, target.position) {
+            return Err(RuleError::NoLineOfFire);
+        }
         if attacker.action_points < attacker.weapon_ap_cost {
             return Err(RuleError::InsufficientActionPoints);
         }
@@ -487,6 +370,20 @@ impl GameSession {
             || manhattan(unit.position, self.tactical.objective_tile) > 1
         {
             return Err(RuleError::ObjectiveUnavailable);
+        }
+        if unit.action_points < 1 {
+            return Err(RuleError::InsufficientActionPoints);
+        }
+        Ok(CommandCost { action_points: 1 })
+    }
+
+    fn validate_mutation(&self, unit_id: &str) -> Result<CommandCost, RuleError> {
+        let unit = self.active_unit_for_phase(unit_id)?;
+        if unit.mutation_gift_used
+            || mutation_gift_name(&unit.mutation).is_none()
+            || (unit.mutation == "Regenerative Tissue" && unit.health == unit.max_health)
+        {
+            return Err(RuleError::MutationUnavailable);
         }
         if unit.action_points < 1 {
             return Err(RuleError::InsufficientActionPoints);
@@ -550,7 +447,9 @@ impl GameSession {
         }];
         if roll <= hit_chance {
             let critical = roll <= 10;
-            let damage = (attacker.weapon_damage + i32::from(critical) * 2 - target.armour).max(1);
+            let damage = (attacker.effective_weapon_damage() + i32::from(critical) * 2
+                - target.effective_armour())
+            .max(1);
             let target = self
                 .tactical
                 .units
@@ -589,11 +488,53 @@ impl GameSession {
         events
     }
 
+    fn execute_mutation(&mut self, unit_id: &str) -> Vec<BattleEvent> {
+        let unit = self
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == unit_id)
+            .unwrap();
+        unit.action_points -= 1;
+        unit.mutation_gift_used = true;
+        let gift = mutation_gift_name(&unit.mutation).unwrap().to_owned();
+        let mut events = vec![BattleEvent::MutationActivated {
+            unit_id: unit_id.to_owned(),
+            gift,
+        }];
+        match unit.mutation.as_str() {
+            "Neural Bloom" => unit.temporary_accuracy = 20,
+            "Chitinous Growth" => unit.temporary_armour = 3,
+            "Regenerative Tissue" => {
+                let before = unit.health;
+                unit.health = (unit.health + 3).min(unit.max_health);
+                events.push(BattleEvent::UnitHealed {
+                    unit_id: unit_id.to_owned(),
+                    amount: unit.health - before,
+                    remaining: unit.health,
+                });
+            }
+            "Elastic Musculature" => {
+                unit.temporary_move_range = 3;
+                unit.action_points = unit.action_points.saturating_add(3);
+            }
+            "Symbiotic Organism" => unit.temporary_weapon_damage = 2,
+            _ => unreachable!("validated mutation has a tactical gift"),
+        }
+        events
+    }
+
     fn hit_chance(&self, attacker: &UnitState, target: &UnitState) -> u8 {
         let distance = manhattan(attacker.position, target.position);
         let range_penalty = (distance - i32::from(attacker.weapon_range) / 2).max(0) * 5;
         let cover = self.cover_against(target.position, attacker.position);
-        (attacker.accuracy - range_penalty - cover).clamp(5, 95) as u8
+        (attacker.effective_accuracy() - range_penalty - cover).clamp(5, 95) as u8
+    }
+
+    fn has_line_of_fire(&self, from: TilePos, to: TilePos) -> bool {
+        line_between(from, to)
+            .into_iter()
+            .all(|position| !self.tactical.blocked.contains(&position))
     }
 
     fn cover_against(&self, target: TilePos, attacker: TilePos) -> i32 {
@@ -761,6 +702,11 @@ impl GameSession {
         for unit in &mut self.tactical.units {
             if unit.team == team && !unit.incapacitated {
                 unit.action_points = action_points;
+                unit.mutation_gift_used = false;
+                unit.temporary_armour = 0;
+                unit.temporary_accuracy = 0;
+                unit.temporary_move_range = 0;
+                unit.temporary_weapon_damage = 0;
                 if unit.round_regeneration > 0 {
                     unit.health = (unit.health + unit.round_regeneration).min(unit.max_health);
                 }
@@ -777,22 +723,15 @@ fn tile(position: [i32; 2]) -> TilePos {
     TilePos::new(position[0], position[1])
 }
 
-fn terrain_cost(position: TilePos, costs: &[(TilePos, u8)]) -> u8 {
-    costs
-        .iter()
-        .find(|(tile, _)| *tile == position)
-        .map_or(1, |(_, cost)| *cost)
-}
-
-fn path_cost(path: &[TilePos], costs: &[(TilePos, u8)]) -> u8 {
-    path.iter()
-        .skip(1)
-        .map(|tile| terrain_cost(*tile, costs))
-        .sum()
-}
-
-fn manhattan(a: TilePos, b: TilePos) -> i32 {
-    (a.x - b.x).abs() + (a.y - b.y).abs()
+fn mutation_gift_name(mutation: &str) -> Option<&'static str> {
+    match mutation {
+        "Neural Bloom" => Some("NEURAL FOCUS · +20 accuracy this round"),
+        "Chitinous Growth" => Some("HARDEN CARAPACE · +3 armour this round"),
+        "Regenerative Tissue" => Some("ACCELERATE TISSUE · restore 3 vitality"),
+        "Elastic Musculature" => Some("COIL MUSCLE · +2 AP and +3 movement this round"),
+        "Symbiotic Organism" => Some("FEEDING FRENZY · +2 weapon damage this round"),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -803,6 +742,15 @@ mod tests {
         let data = crate::data::GameData::load().unwrap();
         let session = GameSession::new(&data.config, &data.mission, &data.roster);
         (data.config, session)
+    }
+
+    fn unit_mut<'a>(session: &'a mut GameSession, id: &str) -> &'a mut UnitState {
+        session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == id)
+            .unwrap()
     }
 
     #[test]
@@ -865,6 +813,54 @@ mod tests {
             25
         );
         assert!(session.hit_chance(&attacker, &target) < attacker.accuracy as u8);
+    }
+
+    #[test]
+    fn solid_obstacles_block_line_of_fire() {
+        let (_, mut session) = session();
+        unit_mut(&mut session, "kira_voss").position = TilePos::new(8, 2);
+        session.tactical.blocked.insert(TilePos::new(9, 2));
+        assert_eq!(
+            session.validate(&Command::Attack {
+                attacker_id: "kira_voss".into(),
+                target_id: "brood_stalker_a".into(),
+            }),
+            Err(RuleError::NoLineOfFire)
+        );
+    }
+
+    #[test]
+    fn each_colonist_mutation_gift_changes_its_tactical_options() {
+        let (_, base) = session();
+
+        let mut neural = base.clone();
+        neural.tactical.selected_unit = Some("kira_voss".into());
+        neural.activate_selected_mutation().unwrap();
+        assert_eq!(neural.unit("kira_voss").unwrap().temporary_accuracy, 20);
+
+        let mut chitin = base.clone();
+        chitin.tactical.selected_unit = Some("mara_venn".into());
+        chitin.activate_selected_mutation().unwrap();
+        assert_eq!(chitin.unit("mara_venn").unwrap().temporary_armour, 3);
+
+        let mut regen = base.clone();
+        regen.tactical.selected_unit = Some("ilya_reed".into());
+        unit_mut(&mut regen, "ilya_reed").health = 4;
+        regen.activate_selected_mutation().unwrap();
+        assert_eq!(regen.unit("ilya_reed").unwrap().health, 7);
+
+        let mut healthy_regen = base.clone();
+        healthy_regen.tactical.selected_unit = Some("ilya_reed".into());
+        assert!(!healthy_regen.can_activate_selected_mutation());
+
+        let mut elastic = base;
+        elastic.tactical.selected_unit = Some("sol_cairn".into());
+        let before = elastic.unit("sol_cairn").unwrap().action_points;
+        elastic.activate_selected_mutation().unwrap();
+        let sol = elastic.unit("sol_cairn").unwrap();
+        assert_eq!(sol.action_points, before + 2);
+        assert_eq!(sol.temporary_move_range, 3);
+        assert!(!elastic.can_activate_selected_mutation());
     }
 
     #[test]
@@ -940,7 +936,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.5.0");
+        assert_eq!(migrated.version, "0.6.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

@@ -11,6 +11,7 @@ mod game;
 mod persistence;
 mod state;
 mod strategy;
+mod tactical;
 mod ui;
 
 use game::Game;
