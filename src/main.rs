@@ -37,6 +37,7 @@ mod operation_modifiers;
 mod overwatch;
 mod persistence;
 mod phase_refresh;
+mod reinforcement_ui;
 mod reinforcements;
 mod relationships;
 mod roster_ui;

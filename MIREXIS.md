@@ -428,6 +428,10 @@ east-edge approach. Once deployed, the objective panel reads the serialized wave
 keeps the next arrival visible until it enters, so surviving a timed contract involves
 planning for the second line rather than discovering it after ending a phase.
 
+During the round immediately before arrival, each queued unit's preferred insertion tile
+is outlined in orange and names the arrival round. These markers sit beneath battlefield
+units, remain read-only, and disappear when the wave deploys or its warning window passes.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.

@@ -42,6 +42,8 @@ The completed roadmap slice includes:
   from hostiles, mixed powers, reinforcement contracts, deadlines, hazards, and modifiers
 - reinforcement forecasts that disclose arrival rounds, likely roles, and east-edge entry
   pressure in both deployment intelligence and the live tactical objective panel
+- orange on-grid insertion markers during the round before a queued hostile wave arrives,
+  pairing exact preferred tiles with the live round warning
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

@@ -114,6 +114,15 @@ pub(crate) fn next_wave_forecast(session: &GameSession) -> Option<String> {
     ))
 }
 
+pub(crate) fn telegraphed_wave(session: &GameSession) -> Option<&ReinforcementWave> {
+    session
+        .tactical
+        .reinforcement_waves
+        .iter()
+        .filter(|wave| wave.round == session.tactical.round.saturating_add(1))
+        .min_by_key(|wave| wave.round)
+}
+
 fn wave_rounds(mission: &MissionDef) -> impl Iterator<Item = u32> + '_ {
     [3, 5].into_iter().filter(|round| {
         matches!(
@@ -179,5 +188,25 @@ mod tests {
         assert!(forecast.contains("R3/R5"));
         assert!(forecast.contains("HUNTER+ARTILLERY"));
         assert!(forecast.contains("EAST"));
+    }
+
+    #[test]
+    fn entry_tiles_telegraph_only_during_the_round_before_arrival() {
+        let data = GameData::load().unwrap();
+        let mut mission = data.mission.clone();
+        mission.objective_kind = ObjectiveKind::Holdout;
+        mission.round_limit = 5;
+        let mut session = GameSession::new(&data.config, &mission, &data.roster);
+
+        assert!(telegraphed_wave(&session).is_none());
+        session.tactical.round = 2;
+        let warning = telegraphed_wave(&session).unwrap();
+        assert_eq!(warning.round, 3);
+        assert!(warning
+            .units
+            .iter()
+            .all(|unit| unit.position.x == data.config.world_width as i32 - 1));
+        session.tactical.round = 3;
+        assert!(telegraphed_wave(&session).is_none());
     }
 }

@@ -2,7 +2,7 @@
 
 use super::{AppState, Game, TacticalTargeting};
 use crate::data::{ObjectiveKind, OperationModifier, Team};
-use crate::state::{GameSession, ObjectiveState};
+use crate::state::{BattleEvent, GameSession, ObjectiveState, TacticalPhase};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
@@ -43,6 +43,18 @@ impl Game {
                 16,
                 OperationModifier::EscalationCrossfire,
             ),
+            "reinforcement_warning" => {
+                self.capture_template_operation(
+                    "escalation_three_knives",
+                    16,
+                    OperationModifier::EscalationCrossfire,
+                );
+                self.session.tactical.round = 2;
+                self.session.tactical.event_log = vec![BattleEvent::PhaseStarted {
+                    phase: TacticalPhase::Player,
+                    round: 2,
+                }];
+            }
             "thin_shelter" => self.capture_defense_asset(),
             "brood_ability" => self.capture_enemy_ability("nest_suppression", "brood", 7),
             "directorate_ability" => {

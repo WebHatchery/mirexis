@@ -435,6 +435,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             );
         }
     }
+    crate::reinforcement_ui::draw(ctx.session, view);
     crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
     for unit in &ctx.session.tactical.units {
         let targetable = match ctx.targeting {
