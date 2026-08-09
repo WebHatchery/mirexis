@@ -778,4 +778,33 @@ mod tests {
             2
         );
     }
+
+    #[test]
+    fn regeneration_save_gains_sols_unevolved_paths() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.colony.ensure_gene_lab();
+        campaign.roster[2].mutation_evolution_id = "clean_marrow".to_owned();
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let legacy = serde_json::to_value(session.to_save("1.16.0", &campaign)).unwrap();
+        let migrated = migrate_save_value(Some("1.16.0".to_owned()), legacy, &data).unwrap();
+        let sol = migrated
+            .campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "sol_cairn")
+            .unwrap();
+        assert!(sol.mutation_evolution_id.is_empty());
+        assert_eq!(
+            data.mutations
+                .iter()
+                .find(|mutation| mutation.id == sol.mutation_id)
+                .unwrap()
+                .evolutions
+                .len(),
+            2
+        );
+    }
 }

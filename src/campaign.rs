@@ -662,7 +662,8 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
             .find(|entry| &entry.id == equipment_id)
         {
             unit.accuracy += item.accuracy;
-            unit.armour += item.armour;
+            unit.armour +=
+                (item.armour + traits.get("heavy_armour_efficiency").copied().unwrap_or(0)).max(0);
             unit.max_health += item.health;
             unit.weapon_damage += item.damage;
         }
@@ -1164,5 +1165,29 @@ mod tests {
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         campaign.apply_mission_outcome(&outcome, &mission, &data);
         assert_eq!(campaign.roster[2].injuries[0].recovery_operations, 2);
+    }
+
+    #[test]
+    fn load_bearing_fascia_restores_sols_armour_efficiency() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.colony.ensure_gene_lab();
+        campaign.colony.resources.power += 2;
+        campaign.roster[3]
+            .equipment_ids
+            .push("chitin_plate".to_owned());
+        let base = data
+            .roster
+            .iter()
+            .find(|unit| unit.id == "sol_cairn")
+            .unwrap();
+        let before = derive_unit(base, &campaign.roster[3], &data);
+        campaign
+            .choose_mutation_evolution("sol_cairn", "load_bearing_fascia", &data)
+            .unwrap();
+        let after = derive_unit(base, &campaign.roster[3], &data);
+        assert_eq!(after.armour, before.armour + 1);
+        assert_eq!(after.weapon_damage, before.weapon_damage - 1);
     }
 }

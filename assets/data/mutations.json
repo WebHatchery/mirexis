@@ -29,7 +29,11 @@
   {
     "id": "elastic_musculature", "name": "Elastic Musculature",
     "gift": [{ "stat": "movement", "amount": 1 }],
-    "complication": [{ "stat": "heavy_armour_efficiency", "amount": -1 }]
+    "complication": [{ "stat": "heavy_armour_efficiency", "amount": -1 }],
+    "evolutions": [
+      { "id": "lattice_tendons", "name": "Lattice Tendons", "description": "+2 movement, but -10 accuracy.", "biomass_cost": 10, "gift": [{ "stat": "movement", "amount": 2 }], "complication": [{ "stat": "accuracy", "amount": -10 }] },
+      { "id": "load_bearing_fascia", "name": "Load-Bearing Fascia", "description": "Normal armour efficiency, but -1 weapon damage.", "biomass_cost": 10, "gift": [{ "stat": "heavy_armour_efficiency", "amount": 1 }], "complication": [{ "stat": "weapon_damage", "amount": -1 }] }
+    ]
   },
   {
     "id": "symbiotic_organism", "name": "Symbiotic Organism",
