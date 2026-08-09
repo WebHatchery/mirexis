@@ -196,15 +196,30 @@ fn draw_selected_character(
         288.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+    let mut history = Vec::new();
     if !character.event_legacies.is_empty() {
-        let legacies = character
-            .event_legacies
-            .iter()
-            .map(|legacy| format!("{} ({:+} {})", legacy.name, legacy.amount, legacy.stat))
-            .collect::<Vec<_>>()
-            .join(" · ");
+        history.push(
+            character
+                .event_legacies
+                .iter()
+                .map(|legacy| format!("{} ({:+} {})", legacy.name, legacy.amount, legacy.stat))
+                .collect::<Vec<_>>()
+                .join(" · "),
+        );
+    }
+    if !character.traumas.is_empty() {
+        history.push(
+            character
+                .traumas
+                .iter()
+                .map(|trauma| format!("{} ({})", trauma.name, trauma.effect))
+                .collect::<Vec<_>>()
+                .join(" · "),
+        );
+    }
+    if !history.is_empty() {
         draw_ui_text_ex(
-            &format!("EVENT LEGACY  {}", legacies),
+            &format!("HISTORY  {}", history.join("  //  ")),
             344.0,
             306.0,
             TextStyle::new(11.0, dark::ACCENT).params(),

@@ -5,6 +5,7 @@ use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitD
 use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy::{MissionInstance, StrategyState};
+use crate::trauma::TraumaRecord;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -54,6 +55,8 @@ pub struct CharacterRecord {
     pub equipment_ids: Vec<String>,
     #[serde(default)]
     pub event_legacies: Vec<CharacterLegacy>,
+    #[serde(default)]
+    pub traumas: Vec<TraumaRecord>,
 }
 
 impl CharacterRecord {
@@ -77,6 +80,7 @@ impl CharacterRecord {
             deployment_selected: true,
             equipment_ids: def.equipment.clone(),
             event_legacies: Vec::new(),
+            traumas: Vec::new(),
         }
     }
 }
@@ -317,6 +321,7 @@ impl CampaignState {
                     name: "Mire exposure trauma".to_owned(),
                     recovery_operations,
                 });
+                crate::trauma::record_incapacitation(character, self.operations_completed);
                 character.availability = Availability::Recovering;
             }
         }
@@ -699,6 +704,7 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
             _ => {}
         }
     }
+    crate::trauma::apply_deployment_traits(&mut unit, &character.traumas);
     unit
 }
 
@@ -933,6 +939,7 @@ mod tests {
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         campaign.apply_mission_outcome(&outcome, &mission, &data);
         assert_eq!(campaign.roster[2].availability, Availability::Recovering);
+        assert_eq!(campaign.roster[2].traumas.len(), 1);
         assert!(!campaign
             .deployment_roster(&data, &data.mission)
             .iter()
@@ -941,6 +948,7 @@ mod tests {
             campaign.advance_recovery();
         }
         assert_eq!(campaign.roster[2].availability, Availability::Ready);
+        assert_eq!(campaign.roster[2].traumas.len(), 1);
     }
 
     #[test]

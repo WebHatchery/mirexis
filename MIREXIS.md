@@ -1029,7 +1029,12 @@ Characters reduced to zero health become incapacitated rather than immediately d
 
 Further damage, failed evacuation, certain enemies, or mission failure can cause permanent death.
 
-Characters may instead receive permanent injuries.
+Characters now receive a temporary recovery injury and, for their first two
+incapacitations, a permanent tradeoff scar. Clouded Eye exchanges accuracy for damage,
+Reinforced Ribs exchanges movement for armour, and Mire Reflex exchanges vitality for
+movement. These scars remain after infirmary recovery, alter later deployments, and are
+listed in roster history. The two-scar cap keeps a favourite colonist playable while still
+letting battlefield failure rewrite that character.
 
 Examples:
 
@@ -1039,7 +1044,8 @@ Examples:
 - mutation instability
 - permanent scarring
 
-Some injuries may eventually unlock unusual opportunities rather than simply being penalties.
+The implemented scars deliberately include an unusual opportunity rather than acting as
+pure penalties. Further authored injuries can build on this foundation.
 
 ---
 

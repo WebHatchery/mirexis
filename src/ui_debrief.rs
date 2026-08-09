@@ -89,6 +89,9 @@ pub fn draw_debrief(
     if won && outcome.colonists_deployed > 1 {
         report.push("Shared victory strengthened squad relationships".to_owned());
     }
+    if !outcome.colonists_incapacitated.is_empty() {
+        report.push("Incapacitation left a lasting tradeoff scar".to_owned());
+    }
     for (index, line) in report.iter().enumerate() {
         draw_text(line, 280.0, 315.0 + index as f32 * 30.0, 21.0, dark::TEXT);
     }

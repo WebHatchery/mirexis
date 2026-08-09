@@ -76,6 +76,7 @@ impl Game {
             "roster" => self.state = AppState::Roster,
             "advanced_roster" => self.capture_advanced_roster(),
             "relationships" => self.capture_relationships(AppState::Roster),
+            "trauma" => self.capture_trauma(),
             "bonded_briefing" => self.capture_relationships(AppState::MissionBriefing),
             "briefing" => self.state = AppState::MissionBriefing,
             "pressure" => self.capture_pressure(),
@@ -116,6 +117,7 @@ impl Game {
             "class_target" => self.capture_class_target(),
             "breach" => self.capture_breach(),
             "debrief" => self.capture_debrief(),
+            "trauma_debrief" => self.capture_trauma_debrief(),
             _ => self.reset_capture_session(AppState::Tactical),
         }
     }
@@ -164,6 +166,18 @@ impl Game {
             .strengthen_event_participants(&["kira_voss".to_owned(), "sol_cairn".to_owned()]);
         self.campaign.selected_character_id = "kira_voss".to_owned();
         self.state = state;
+    }
+
+    fn capture_trauma(&mut self) {
+        let kira = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .expect("capture roster includes Kira");
+        crate::trauma::record_incapacitation(kira, 1);
+        self.campaign.selected_character_id = "kira_voss".to_owned();
+        self.state = AppState::Roster;
     }
 
     fn capture_contact(&mut self) {
@@ -693,6 +707,19 @@ impl Game {
         self.session.tactical.objective_state = ObjectiveState::Victory;
         for unit in &mut self.session.tactical.units {
             if unit.team == Team::Hostile {
+                unit.incapacitated = true;
+                unit.health = 0;
+            }
+        }
+        self.last_outcome = self.session.mission_outcome(&self.active_mission);
+        self.state = AppState::Debrief;
+    }
+
+    fn capture_trauma_debrief(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session.tactical.objective_state = ObjectiveState::Victory;
+        for unit in &mut self.session.tactical.units {
+            if unit.team == Team::Hostile || unit.id == "kira_voss" {
                 unit.incapacitated = true;
                 unit.health = 0;
             }

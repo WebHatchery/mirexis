@@ -33,6 +33,8 @@ The completed roadmap slice includes:
 - destructible battlefield cover that opens movement routes and firing lanes
 - five persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
+- up to two lasting incapacitation scars per colonist, each pairing a permanent benefit
+  with a permanent cost and remaining visible in roster history
 - a reserve Biotech Specialist, Nadi Vale, whose Symbiotic Organism can irreversibly
   become a regenerative Cooperative Symbiote or a volatile Predatory Symbiote
 - colony resources, powered facilities, operation rations, Hydroponics production,

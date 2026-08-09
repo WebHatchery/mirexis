@@ -1113,4 +1113,23 @@ mod tests {
             .iter()
             .all(|unit| !unit.overwatching));
     }
+
+    #[test]
+    fn overwatch_save_gains_empty_character_trauma_histories() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.31.0", &campaign)).unwrap();
+        for character in legacy["campaign"]["roster"].as_array_mut().unwrap() {
+            character.as_object_mut().unwrap().remove("traumas");
+        }
+        let migrated = migrate_save_value(Some("1.31.0".to_owned()), legacy, &data).unwrap();
+
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .roster
+            .iter()
+            .all(|character| character.traumas.is_empty()));
+    }
 }

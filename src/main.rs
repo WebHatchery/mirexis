@@ -33,6 +33,7 @@ mod strategy_rewards;
 mod tactical;
 mod tactical_ai;
 mod tactical_unit_ui;
+mod trauma;
 mod ui;
 mod ui_action;
 mod ui_debrief;

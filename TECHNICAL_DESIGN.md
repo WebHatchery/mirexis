@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.31.0
+Save/content version: 1.32.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -85,6 +85,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
+| `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
 | `strategy_choices.rs` | Irreversible Contact-independent strategic choice transactions | Mission generation or rendering |
@@ -564,6 +565,7 @@ Migration coverage:
 | 1.28.0 | Inspectable equipment definitions and weapon-profile overrides |
 | 1.29.0 | Persistent pair bonds, shared-victory history, and derived deployment bonuses |
 | 1.30.0 | Save-stable per-unit overwatch state, defaulting older tactical saves to disarmed |
+| 1.31.0 | Persistent per-character trauma histories, defaulting older rosters to unscarred |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -595,7 +597,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `advanced_roster`, `relationships`, `bonded_briefing`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
+`construction`, `research`, `roster`, `advanced_roster`, `relationships`, `trauma`, `bonded_briefing`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `nadi_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `redoubt_end`, `commonwealth_end`, `threshold_end`,
 `finale_debrief`,
@@ -604,7 +606,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
-`equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds
+`equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
@@ -615,8 +617,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (113 domain/migration tests plus the shared source-size gate)
-- deterministic fifty-six-scene capture with visual inspection
+- `cargo test` (116 domain/migration tests plus the shared source-size gate)
+- deterministic fifty-eight-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -644,7 +646,8 @@ boundaries when continuing:
 - Escort, defense-target integrity, and additional multi-stage contracts remain beyond
   the five implemented objective types.
 - Prepaid single-shot overwatch now reacts to hostile movement in range and line of fire.
-  Elevation, long-lived injuries as tactical statuses, additional reaction types, and
+  Incapacitation now adds one of three bounded persistent tradeoff scars after battle.
+  Elevation, in-battle injury statuses, additional reaction types, permanent death, and
   animation/audio consumers are not yet implemented.
 - The seventeen current map recipes support authored and safe mirrored layouts. Additional
   transforms, elevation, spawn recipes, and battlefield families remain future work.
@@ -670,5 +673,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is persistent trauma and permanent-injury traits that
-make incapacitation change later missions without immediately deleting a named colonist.
+The recommended next vertical slice is an escort or defense-target objective that makes
+the squad protect a vulnerable actor or structure instead of only controlling tiles.
