@@ -89,6 +89,8 @@ pub struct UnitDef {
     pub id: String,
     pub name: String,
     pub role: String,
+    #[serde(default)]
+    pub class_id: String,
     pub mutation: String,
     pub team: Team,
     #[serde(default)]

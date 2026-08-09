@@ -14,6 +14,7 @@ The completed roadmap slice includes:
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
 - secure-and-clear, elimination, and holdout mission objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
+- seven class actions and round-resolved combat statuses
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,
@@ -47,7 +48,7 @@ Capture all application scenes with:
 ## Controls
 
 - Mouse: use colony actions, select missions, select colonists, move, attack,
-  complete tactical objectives, or activate the selected colonist's mutation gift
+  complete tactical objectives, or activate mutation and class actions
 - Arrow keys: move the tactical cursor
 - Enter: confirm title/briefing/debrief or end the colony tactical phase
 - S / L: save / load an in-progress battle

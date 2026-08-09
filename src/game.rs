@@ -356,10 +356,19 @@ impl Game {
                 Ok(events) => self.notifications.success(
                     events
                         .first()
-                        .map(ui::event_summary)
+                        .map(crate::ui_widgets::event_summary)
                         .unwrap_or_else(|| "Mutation gift activated".to_owned()),
                 ),
                 Err(_) => self.notifications.warning("Mutation gift is unavailable"),
+            },
+            UiAction::ActivateClassAction => match self.session.activate_selected_class_action() {
+                Ok(events) => self.notifications.success(
+                    events
+                        .first()
+                        .map(crate::ui_widgets::event_summary)
+                        .unwrap_or_else(|| "Class action activated".to_owned()),
+                ),
+                Err(_) => self.notifications.warning("Class action is unavailable"),
             },
             UiAction::EndPhase => {
                 self.session.end_player_phase(&self.data.config);

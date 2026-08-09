@@ -4,8 +4,8 @@ use crate::campaign::CampaignState;
 use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
-    BattleEvent, Command, CommandCost, ObjectiveState, RuleError, TacticalPhase, TacticalState,
-    UnitState,
+    BattleEvent, Command, CommandCost, ObjectiveState, RuleError, StatusKind, TacticalPhase,
+    TacticalState, UnitState,
 };
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
@@ -155,6 +155,9 @@ impl GameSession {
             } => self.validate_attack(attacker_id, target_id),
             Command::Interact { unit_id } => self.validate_interact(unit_id),
             Command::ActivateMutation { unit_id } => self.validate_mutation(unit_id),
+            Command::ActivateClassAction { unit_id } => {
+                crate::class_actions::validate(self, unit_id)
+            }
         }
     }
 
@@ -168,6 +171,9 @@ impl GameSession {
             } => self.execute_attack(&attacker_id, &target_id),
             Command::Interact { unit_id } => self.execute_interact(&unit_id),
             Command::ActivateMutation { unit_id } => self.execute_mutation(&unit_id),
+            Command::ActivateClassAction { unit_id } => {
+                crate::class_actions::execute(self, &unit_id)
+            }
         };
         self.tactical.event_log.extend(events.iter().cloned());
         Ok(events)
@@ -251,17 +257,37 @@ impl GameSession {
         })
     }
 
+    pub fn activate_selected_class_action(&mut self) -> Result<Vec<BattleEvent>, RuleError> {
+        let unit_id = self
+            .tactical
+            .selected_unit
+            .clone()
+            .ok_or(RuleError::UnknownUnit)?;
+        self.execute(Command::ActivateClassAction { unit_id })
+    }
+
+    pub fn can_activate_selected_class_action(&self) -> bool {
+        self.tactical.selected_unit.as_ref().is_some_and(|unit_id| {
+            self.validate(&Command::ActivateClassAction {
+                unit_id: unit_id.clone(),
+            })
+            .is_ok()
+        })
+    }
+
     pub fn end_player_phase(&mut self, config: &GameConfig) {
         if self.tactical.phase != TacticalPhase::Player || self.battle_is_over() {
             return;
         }
+        self.advance_statuses(Team::Colony);
         self.tactical.phase = TacticalPhase::Enemy;
         self.push_event(BattleEvent::PhaseStarted {
             phase: TacticalPhase::Enemy,
             round: self.tactical.round,
         });
         self.refresh_team(Team::Hostile, config.max_action_points);
-        self.resolve_enemy_phase();
+        crate::tactical_ai::resolve_enemy_phase(self);
+        self.advance_statuses(Team::Hostile);
         if self.battle_is_over() {
             return;
         }
@@ -599,86 +625,7 @@ impl GameSession {
         )
     }
 
-    fn resolve_enemy_phase(&mut self) {
-        let mut enemies = self
-            .tactical
-            .units
-            .iter()
-            .filter(|unit| unit.team == Team::Hostile && !unit.incapacitated)
-            .map(|unit| unit.id.clone())
-            .collect::<Vec<_>>();
-        enemies.sort();
-        for enemy_id in enemies {
-            if self.battle_is_over() {
-                break;
-            }
-            if let Some(target_id) = self.best_attack_target(&enemy_id) {
-                let _ = self.execute(Command::Attack {
-                    attacker_id: enemy_id.clone(),
-                    target_id,
-                });
-                continue;
-            }
-            if let Some(destination) = self.best_enemy_move(&enemy_id) {
-                let _ = self.execute(Command::Move {
-                    unit_id: enemy_id.clone(),
-                    to: destination,
-                });
-            }
-            if let Some(target_id) = self.best_attack_target(&enemy_id) {
-                let _ = self.execute(Command::Attack {
-                    attacker_id: enemy_id.clone(),
-                    target_id,
-                });
-            }
-        }
-    }
-
-    fn best_attack_target(&self, attacker_id: &str) -> Option<String> {
-        let mut targets = self
-            .tactical
-            .units
-            .iter()
-            .filter(|unit| {
-                unit.team == Team::Colony
-                    && !unit.incapacitated
-                    && self
-                        .validate(&Command::Attack {
-                            attacker_id: attacker_id.to_owned(),
-                            target_id: unit.id.clone(),
-                        })
-                        .is_ok()
-            })
-            .collect::<Vec<_>>();
-        targets.sort_by_key(|unit| (unit.health, unit.id.clone()));
-        targets.first().map(|unit| unit.id.clone())
-    }
-
-    fn best_enemy_move(&self, enemy_id: &str) -> Option<TilePos> {
-        let enemy = self.unit(enemy_id)?;
-        let target = self
-            .tactical
-            .units
-            .iter()
-            .filter(|unit| unit.team == Team::Colony && !unit.incapacitated)
-            .min_by_key(|unit| (manhattan(enemy.position, unit.position), unit.id.clone()))?;
-        let mut candidates = enemy
-            .position
-            .neighbors_4way()
-            .into_iter()
-            .filter(|to| {
-                self.validate(&Command::Move {
-                    unit_id: enemy_id.to_owned(),
-                    to: *to,
-                })
-                .is_ok()
-            })
-            .collect::<Vec<_>>();
-        candidates.sort_by_key(|to| (manhattan(*to, target.position), to.y, to.x));
-        candidates.first().copied()
-    }
-
-    fn check_outcome(&mut self, events: &mut Vec<BattleEvent>) {
+    pub(crate) fn check_outcome(&mut self, events: &mut Vec<BattleEvent>) {
         let colonists_alive = self
             .tactical
             .units
@@ -721,6 +668,7 @@ impl GameSession {
             if unit.team == team && !unit.incapacitated {
                 unit.action_points = action_points;
                 unit.mutation_gift_used = false;
+                unit.class_action_used = false;
                 unit.temporary_armour = 0;
                 unit.temporary_accuracy = 0;
                 unit.temporary_move_range = 0;
@@ -728,7 +676,24 @@ impl GameSession {
                 if unit.round_regeneration > 0 {
                     unit.health = (unit.health + unit.round_regeneration).min(unit.max_health);
                 }
+                if unit.has_status(StatusKind::Regenerating) {
+                    unit.health = (unit.health + 1).min(unit.max_health);
+                }
             }
+        }
+    }
+
+    fn advance_statuses(&mut self, team: Team) {
+        for unit in self
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == team)
+        {
+            for status in &mut unit.statuses {
+                status.remaining_phases = status.remaining_phases.saturating_sub(1);
+            }
+            unit.statuses.retain(|status| status.remaining_phases > 0);
         }
     }
 
@@ -1000,7 +965,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.8.0");
+        assert_eq!(migrated.version, "0.9.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

@@ -20,11 +20,29 @@ pub enum ObjectiveState {
     Failed,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StatusKind {
+    Focused,
+    Guarded,
+    Quickened,
+    Disrupted,
+    Regenerating,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StatusEffect {
+    pub kind: StatusKind,
+    pub remaining_phases: u8,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnitState {
     pub id: String,
     pub name: String,
     pub role: String,
+    #[serde(default)]
+    pub class_id: String,
     pub mutation: String,
     pub team: Team,
     pub position: TilePos,
@@ -49,6 +67,10 @@ pub struct UnitState {
     pub temporary_move_range: u8,
     #[serde(default)]
     pub temporary_weapon_damage: i32,
+    #[serde(default)]
+    pub class_action_used: bool,
+    #[serde(default)]
+    pub statuses: Vec<StatusEffect>,
 }
 
 impl UnitState {
@@ -57,6 +79,7 @@ impl UnitState {
             id: def.id.clone(),
             name: def.name.clone(),
             role: def.role.clone(),
+            class_id: def.class_id.clone(),
             mutation: def.mutation.clone(),
             team: def.team,
             position: TilePos::new(def.position[0], def.position[1]),
@@ -76,23 +99,52 @@ impl UnitState {
             temporary_accuracy: 0,
             temporary_move_range: 0,
             temporary_weapon_damage: 0,
+            class_action_used: false,
+            statuses: Vec::new(),
         }
     }
 
     pub fn effective_armour(&self) -> i32 {
-        self.armour + self.temporary_armour
+        self.armour
+            + self.temporary_armour
+            + if self.has_status(StatusKind::Guarded) {
+                2
+            } else {
+                0
+            }
     }
 
     pub fn effective_accuracy(&self) -> i32 {
-        self.accuracy + self.temporary_accuracy
+        self.accuracy
+            + self.temporary_accuracy
+            + if self.has_status(StatusKind::Focused) {
+                15
+            } else {
+                0
+            }
+            - if self.has_status(StatusKind::Disrupted) {
+                20
+            } else {
+                0
+            }
     }
 
     pub fn effective_move_range(&self) -> u8 {
-        self.move_range.saturating_add(self.temporary_move_range)
+        self.move_range
+            .saturating_add(self.temporary_move_range)
+            .saturating_add(if self.has_status(StatusKind::Quickened) {
+                2
+            } else {
+                0
+            })
     }
 
     pub fn effective_weapon_damage(&self) -> i32 {
         self.weapon_damage + self.temporary_weapon_damage
+    }
+
+    pub fn has_status(&self, kind: StatusKind) -> bool {
+        self.statuses.iter().any(|status| status.kind == kind)
     }
 }
 
@@ -110,6 +162,9 @@ pub enum Command {
         unit_id: String,
     },
     ActivateMutation {
+        unit_id: String,
+    },
+    ActivateClassAction {
         unit_id: String,
     },
 }
@@ -133,6 +188,7 @@ pub enum RuleError {
     InvalidTarget,
     ObjectiveUnavailable,
     MutationUnavailable,
+    ClassActionUnavailable,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -162,6 +218,14 @@ pub enum BattleEvent {
     MutationActivated {
         unit_id: String,
         gift: String,
+    },
+    ClassActionActivated {
+        unit_id: String,
+        action: String,
+    },
+    StatusApplied {
+        unit_id: String,
+        status: StatusKind,
     },
     UnitHealed {
         unit_id: String,

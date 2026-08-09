@@ -307,6 +307,7 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
         .find(|entry| entry.id == character.active_class);
     if let Some(class) = class {
         unit.role = class.name.clone();
+        unit.class_id = class.id.clone();
         unit.max_health += class.health_bonus;
         unit.accuracy += class.accuracy_bonus;
         unit.move_range = add_signed(unit.move_range, class.move_bonus);

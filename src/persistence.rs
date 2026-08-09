@@ -42,10 +42,44 @@ pub fn migrate_save_value(
                 .map_err(|err| format!("Could not create migrated strategy: {}", err))?,
         );
     }
+    add_class_action_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
     save.version = data.config.version.clone();
     Ok(save)
+}
+
+fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
+    let Some(units) = value
+        .get_mut("tactical")
+        .and_then(Value::as_object_mut)
+        .and_then(|tactical| tactical.get_mut("units"))
+        .and_then(Value::as_array_mut)
+    else {
+        return Ok(());
+    };
+    for unit in units {
+        let unit = unit
+            .as_object_mut()
+            .ok_or_else(|| "Tactical unit is not an object".to_owned())?;
+        let class_id = match unit.get("role").and_then(Value::as_str).unwrap_or("") {
+            "Soldier" => "soldier",
+            "Defender" => "defender",
+            "Scout" => "scout",
+            "Medic" => "medic",
+            "Engineer" => "engineer",
+            "Psionic" => "psionic",
+            "Biotech Specialist" => "biotech",
+            _ => "",
+        };
+        unit.entry("class_id".to_owned())
+            .or_insert_with(|| serde_json::json!(class_id));
+        unit.entry("class_action_used".to_owned())
+            .or_insert_with(|| serde_json::json!(false));
+        unit.entry("statuses".to_owned())
+            .or_insert_with(|| serde_json::json!([]));
+    }
+    Ok(())
 }
 
 fn add_character_runtime_defaults(value: &mut Value) -> Result<(), String> {
@@ -127,7 +161,7 @@ mod tests {
             unit.as_object_mut().unwrap().remove("round_regeneration");
         }
         let migrated = migrate_save_value(Some("0.2.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.8.0");
+        assert_eq!(migrated.version, "0.9.0");
         assert_eq!(migrated.campaign.roster.len(), 4);
         assert!(migrated.tactical.is_some());
     }
@@ -164,7 +198,7 @@ mod tests {
             .unwrap()
             .remove("strategy");
         let migrated = migrate_save_value(Some("0.4.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.8.0");
+        assert_eq!(migrated.version, "0.9.0");
         assert_eq!(migrated.campaign.strategy.factions.len(), 3);
     }
 
@@ -188,7 +222,7 @@ mod tests {
         }
         let migrated = migrate_save_value(Some("0.5.0".to_owned()), legacy, &data).unwrap();
         let tactical = migrated.tactical.as_ref().unwrap();
-        assert_eq!(migrated.version, "0.8.0");
+        assert_eq!(migrated.version, "0.9.0");
         assert!(!tactical.units[0].mutation_gift_used);
         assert_eq!(tactical.units[0].temporary_armour, 0);
     }
@@ -210,7 +244,7 @@ mod tests {
             mission.as_object_mut().unwrap().remove("objective_kind");
         }
         let migrated = migrate_save_value(Some("0.6.0".to_owned()), legacy, &data).unwrap();
-        assert_eq!(migrated.version, "0.8.0");
+        assert_eq!(migrated.version, "0.9.0");
         assert_eq!(
             migrated.tactical.unwrap().objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
@@ -219,5 +253,31 @@ mod tests {
             migrated.campaign.strategy.mission_offers[0].objective_kind,
             crate::data::ObjectiveKind::SecureAndClear
         );
+    }
+
+    #[test]
+    fn faction_save_gains_class_actions_and_statuses() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("0.8.0", &campaign)).unwrap();
+        for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+            let unit = unit.as_object_mut().unwrap();
+            unit.remove("class_id");
+            unit.remove("class_action_used");
+            unit.remove("statuses");
+        }
+        let migrated = migrate_save_value(Some("0.8.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, "0.9.0");
+        let kira = migrated
+            .tactical
+            .unwrap()
+            .units
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap();
+        assert_eq!(kira.class_id, "scout");
+        assert!(!kira.class_action_used);
+        assert!(kira.statuses.is_empty());
     }
 }

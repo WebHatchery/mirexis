@@ -4,6 +4,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::capture;
 
 mod campaign;
+mod class_actions;
 mod colony;
 mod colony_ui;
 mod data;
@@ -13,7 +14,9 @@ mod persistence;
 mod state;
 mod strategy;
 mod tactical;
+mod tactical_ai;
 mod ui;
+mod ui_widgets;
 
 use game::Game;
 

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 0.8.0
+Save/content version: 0.9.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -67,14 +67,17 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
-| `state.rs` | Tactical commands, validation, execution, AI, events, outcomes | Drawing, colony mutation |
+| `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
+| `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
+| `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
 | `persistence.rs` | Project schema migrations inside toolkit slots | Platform storage paths |
 | `ui.rs` | Title, briefing, tactical, debrief rendering and intents | Direct state mutation |
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
+| `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
@@ -86,8 +89,9 @@ multi-objective logic that would push it toward the source limit.
 
 `TacticalState` owns the grid, occupancy, terrain costs, edge cover, units, phase,
 round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
-commands are move, attack, interact, and activate mutation. Ending a phase is a
-session operation that runs hostile commands and advances the round.
+commands are move, attack, interact, activate mutation, and activate class action.
+Ending a phase is a session operation that resolves timed statuses, runs hostile
+commands, and advances the round.
 
 The authority boundary is:
 
@@ -144,6 +148,17 @@ Seven initial class families are loaded from `classes.json`. Aptitude changes th
 material cost of training but never class eligibility. Switching classes retains
 learned fundamentals while `active_skills` is truncated to the active class's slot
 limit.
+
+Every base class has one once-per-round tactical action. Soldier focuses its shots;
+Defender braces through the hostile phase; Scout converts Surge into action points and
+movement; Medic dresses the squad's worst wound; Engineer launches an armour-ignoring
+shock drone; Psionic disrupts the nearest hostile; and Biotech grants short-lived squad
+regeneration. Class identity is carried into `UnitState` rather than inferred from text.
+
+Focused, Guarded, Quickened, Disrupted, and Regenerating are serialized timed statuses.
+Their modifiers feed the same effective-stat methods used by command validation,
+attacks, and hostile AI. Phase ownership controls expiry so defensive and hostile
+debuffs survive long enough to affect the opposing phase.
 
 Mutation definitions contain composable gift and complication stat modifiers. The
 five implemented mutations exercise these hooks:
@@ -259,6 +274,7 @@ Migration coverage:
 | 0.4.0 | Isolation strategy, pressure, and seeded offers |
 | 0.5.0 | Tactical mutation-use and temporary combat fields |
 | 0.6.0 | Typed objective fields for tactical state and mission offers |
+| 0.8.0 | Class identity, action-use flag, and timed tactical statuses |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -299,7 +315,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (28 domain/migration tests plus the shared source-size gate)
+- `cargo test` (31 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -327,8 +343,8 @@ boundaries when continuing:
 
 - Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
   beyond the three implemented objective types.
-- Elevation, destructible cover, targeted class abilities, items, persistent statuses,
-  reactions, and animation/audio consumers are not yet implemented.
+- Elevation, destructible cover, player-targeted abilities, items, long-lived injuries
+  as tactical statuses, reactions, and animation/audio consumers are not yet implemented.
 - The three current map recipes are fixed authored layouts. Procedural variation,
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
@@ -340,6 +356,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is status resolution and class abilities, followed
-by richer enemy behavior. Those additions should deepen squad and faction identity
-without requiring a strategic rewrite.
+The recommended next vertical slice is richer enemy behavior and reinforcement rules,
+followed by player-targeted abilities. Those additions should deepen squad and faction
+identity without requiring a strategic rewrite.

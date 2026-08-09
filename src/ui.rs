@@ -3,13 +3,12 @@
 use crate::campaign::CampaignState;
 use crate::data::{GameData, MissionDef, ObjectiveKind, Team};
 use crate::grid_ui::GridView;
-use crate::state::{
-    BattleEvent, GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState,
-};
+use crate::state::{GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState};
+use crate::ui_widgets::{action_status, button, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
-use macroquad_toolkit::ui::{draw_ui_text_ex, RectExt, VirtualUi};
+use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
@@ -34,6 +33,7 @@ pub enum UiAction {
     AttackSelected(String),
     InteractObjective,
     ActivateMutation,
+    ActivateClassAction,
     EndPhase,
     Save,
     Load,
@@ -522,7 +522,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             Some(&format!("VITALS {}/{}", unit.health, unit.max_health)),
         );
         draw_ui_text_ex(
-            mutation_status(unit),
+            &action_status(unit),
             x,
             panel.y + 332.0,
             TextStyle::new(14.0, dark::TEXT_DIM).params(),
@@ -563,13 +563,30 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         "Symbiotic Organism" => "FEEDING FRENZY",
         _ => "MUTATION GIFT",
     });
+    let action_width = (panel.w - 44.0) * 0.5;
     if button(
-        Rect::new(x, panel.bottom() - 144.0, panel.w - 36.0, 38.0),
+        Rect::new(x, panel.bottom() - 144.0, action_width, 38.0),
         mutation_label,
         ctx.session.can_activate_selected_mutation(),
         mouse,
     ) {
         actions.push(UiAction::ActivateMutation);
+    }
+    let class_label = selected
+        .and_then(|unit| crate::class_actions::action_name(&unit.class_id))
+        .unwrap_or("CLASS ACTION");
+    if button(
+        Rect::new(
+            x + action_width + 8.0,
+            panel.bottom() - 144.0,
+            action_width,
+            38.0,
+        ),
+        class_label,
+        ctx.session.can_activate_selected_class_action(),
+        mouse,
+    ) {
+        actions.push(UiAction::ActivateClassAction);
     }
     if button(
         Rect::new(x, panel.bottom() - 100.0, panel.w - 36.0, 44.0),
@@ -658,78 +675,6 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         y + 28.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
-}
-
-pub(crate) fn event_summary(event: &BattleEvent) -> String {
-    match event {
-        BattleEvent::UnitMoved { unit_id, cost, .. } => format!("{} moved · {} AP", unit_id, cost),
-        BattleEvent::AttackRolled {
-            roll, hit_chance, ..
-        } => {
-            format!("Attack roll {} · {}% target", roll, hit_chance)
-        }
-        BattleEvent::DamageApplied {
-            amount, remaining, ..
-        } => {
-            format!("{} damage · {} vitality remains", amount, remaining)
-        }
-        BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
-        BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
-        BattleEvent::MutationActivated { gift, .. } => gift.clone(),
-        BattleEvent::UnitHealed {
-            amount, remaining, ..
-        } => format!("{} vitality restored · {} remains", amount, remaining),
-        BattleEvent::PhaseStarted { phase, round } => {
-            format!("{:?} phase · round {}", phase, round)
-        }
-        BattleEvent::BattleEnded { outcome } => format!("Operation {:?}", outcome),
-    }
-}
-
-fn mutation_status(unit: &UnitState) -> &'static str {
-    if !unit.mutation_gift_used {
-        return "Mutation gift ready · costs 1 AP";
-    }
-    match unit.mutation.as_str() {
-        "Neural Bloom" => "Neural focus active · +20 accuracy",
-        "Chitinous Growth" => "Carapace hardened · +3 armour",
-        "Regenerative Tissue" => "Regeneration spent until next round",
-        "Elastic Musculature" => "Muscles coiled · movement range extended",
-        "Symbiotic Organism" => "Symbiote feeding · +2 weapon damage",
-        _ => "Mutation gift spent until next round",
-    }
-}
-
-fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
-    let hovered = enabled && rect.contains_point(mouse);
-    let fill = if !enabled {
-        Color::new(0.09, 0.11, 0.12, 1.0)
-    } else if hovered {
-        Color::new(0.18, 0.43, 0.37, 1.0)
-    } else {
-        Color::new(0.10, 0.28, 0.25, 1.0)
-    };
-    draw_surface(
-        rect,
-        &SurfaceStyle::new(fill).with_border(
-            1.0,
-            if enabled {
-                Color::new(0.33, 0.72, 0.60, 1.0)
-            } else {
-                Color::new(0.20, 0.24, 0.25, 1.0)
-            },
-        ),
-    );
-    draw_text_centered_in_box(
-        label,
-        rect.x,
-        rect.y,
-        rect.w,
-        rect.h,
-        16.0,
-        if enabled { dark::TEXT } else { dark::TEXT_DIM },
-    );
-    hovered && is_mouse_button_released(MouseButton::Left)
 }
 
 pub fn tile_move_from_keys() -> Option<(i32, i32)> {
