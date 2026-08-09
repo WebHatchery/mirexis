@@ -181,6 +181,18 @@ pub struct MutationDef {
     pub name: String,
     pub gift: Vec<StatModifier>,
     pub complication: Vec<StatModifier>,
+    #[serde(default)]
+    pub evolutions: Vec<MutationEvolutionDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MutationEvolutionDef {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub biomass_cost: i32,
+    pub gift: Vec<StatModifier>,
+    pub complication: Vec<StatModifier>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -389,6 +401,19 @@ impl GameData {
             "mutation",
             self.mutations.iter().map(|entry| entry.id.as_str()),
         )?;
+        for mutation in &self.mutations {
+            ensure_unique(
+                "mutation evolution",
+                mutation.evolutions.iter().map(|entry| entry.id.as_str()),
+            )?;
+            if mutation
+                .evolutions
+                .iter()
+                .any(|evolution| evolution.biomass_cost <= 0)
+            {
+                return Err(format!("Mutation {} has a free evolution", mutation.id));
+            }
+        }
         ensure_unique(
             "equipment",
             self.equipment.iter().map(|entry| entry.id.as_str()),

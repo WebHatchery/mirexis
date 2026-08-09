@@ -15,6 +15,7 @@ impl Game {
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),
             "adaptation" => self.capture_adaptation(),
+            "evolution" => self.capture_evolution(),
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
@@ -117,6 +118,15 @@ impl Game {
             .craft_equipment("sol_cairn", "ascendant_phase_lens", &self.data)
             .expect("Contact capture prototype is crafted");
         self.state = AppState::Colony;
+    }
+
+    fn capture_evolution(&mut self) {
+        self.capture_adaptation();
+        self.campaign
+            .choose_mutation_evolution("kira_voss", "expanded_cortex", &self.data)
+            .expect("Adaptation capture evolution is available");
+        self.campaign.selected_character_id = "kira_voss".to_owned();
+        self.state = AppState::Roster;
     }
 
     fn capture_legacy(&mut self) {

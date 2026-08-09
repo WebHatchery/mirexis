@@ -44,6 +44,8 @@ pub struct CharacterRecord {
     pub learned_skills: Vec<String>,
     pub active_skills: Vec<String>,
     pub mutation_id: String,
+    #[serde(default)]
+    pub mutation_evolution_id: String,
     pub injuries: Vec<InjuryRecord>,
     pub availability: Availability,
     #[serde(default = "deployment_selected_default")]
@@ -68,6 +70,7 @@ impl CharacterRecord {
             learned_skills: vec![starter_skill.clone()],
             active_skills: vec![starter_skill],
             mutation_id: def.mutation.clone(),
+            mutation_evolution_id: String::new(),
             injuries: Vec::new(),
             availability: Availability::Ready,
             deployment_selected: true,
@@ -484,6 +487,48 @@ impl CampaignState {
                 && (!equipment.requires_contact_trace || self.strategy.contact_trace_completed))
     }
 
+    pub fn choose_mutation_evolution(
+        &mut self,
+        character_id: &str,
+        evolution_id: &str,
+        data: &GameData,
+    ) -> Result<String, String> {
+        if !self.strategy.contact_complete {
+            return Err("Mutation evolution unlocks in Adaptation".to_owned());
+        }
+        let character = self
+            .roster
+            .iter()
+            .find(|character| character.id == character_id)
+            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
+        if !character.mutation_evolution_id.is_empty() {
+            return Err(format!("{}'s mutation has already evolved", character.name));
+        }
+        let mutation = data
+            .mutations
+            .iter()
+            .find(|mutation| mutation.id == character.mutation_id)
+            .ok_or_else(|| format!("Unknown mutation: {}", character.mutation_id))?;
+        let evolution = mutation
+            .evolutions
+            .iter()
+            .find(|evolution| evolution.id == evolution_id)
+            .ok_or_else(|| format!("Unknown mutation evolution: {}", evolution_id))?;
+        if self.colony.resources.biomass < evolution.biomass_cost {
+            return Err(format!(
+                "{} requires {} biomass",
+                evolution.name, evolution.biomass_cost
+            ));
+        }
+        self.colony.resources.biomass -= evolution.biomass_cost;
+        self.roster
+            .iter_mut()
+            .find(|character| character.id == character_id)
+            .expect("evolution character was validated")
+            .mutation_evolution_id = evolution.id.clone();
+        Ok(evolution.name.clone())
+    }
+
     pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
         let character = self
             .roster
@@ -557,6 +602,15 @@ pub fn derived_mutation_traits(
         .find(|entry| entry.id == character.mutation_id)
     {
         apply_mutation(mutation, &mut traits);
+        if let Some(evolution) = mutation
+            .evolutions
+            .iter()
+            .find(|evolution| evolution.id == character.mutation_evolution_id)
+        {
+            for modifier in evolution.gift.iter().chain(&evolution.complication) {
+                *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
+            }
+        }
     }
     traits
 }
@@ -588,6 +642,8 @@ fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> 
         traits.get("movement").copied().unwrap_or(0) as i8,
     );
     unit.round_regeneration = traits.get("round_regeneration").copied().unwrap_or(0);
+    unit.accuracy += traits.get("accuracy").copied().unwrap_or(0);
+    unit.weapon_damage += traits.get("weapon_damage").copied().unwrap_or(0);
     if let Some(mutation) = data
         .mutations
         .iter()
@@ -1003,5 +1059,36 @@ mod tests {
             .unwrap();
         assert!(campaign.strategy.contact_complete);
         assert_eq!(campaign.strategy.phase_id, "adaptation");
+    }
+
+    #[test]
+    fn adaptation_evolution_applies_its_gift_and_complication() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        let accuracy_before = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap()
+            .accuracy;
+        let food_before = campaign.deployment_food_cost(&data);
+        assert_eq!(
+            campaign
+                .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
+                .unwrap(),
+            "Expanded Cortex"
+        );
+        let accuracy_after = campaign
+            .deployment_roster(&data, &data.mission)
+            .into_iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap()
+            .accuracy;
+        assert_eq!(accuracy_after, accuracy_before + 10);
+        assert_eq!(campaign.deployment_food_cost(&data), food_before + 1);
+        assert!(campaign
+            .choose_mutation_evolution("kira_voss", "echo_mind", &data)
+            .is_err());
     }
 }

@@ -361,6 +361,18 @@ fn draw_operations(
     }
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
+    let evolution_character = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "kira_voss");
+    let evolution_mutation = evolution_character.and_then(|character| {
+        data.mutations
+            .iter()
+            .find(|mutation| mutation.id == character.mutation_id)
+    });
+    let choosing_evolution = campaign.strategy.contact_complete
+        && evolution_character.is_some_and(|character| character.mutation_evolution_id.is_empty())
+        && evolution_mutation.is_some_and(|mutation| !mutation.evolutions.is_empty());
     if choosing_contact {
         draw_ui_text_ex(
             "FIRST CONTACT // SPEND 2 COMPONENTS // CHOOSE ONE",
@@ -385,6 +397,39 @@ fn draw_operations(
                 actions.push(UiAction::ChooseContactProtocol(protocol.id.clone()));
             }
         }
+    } else if choosing_evolution {
+        let character = evolution_character.expect("Adaptation character was found");
+        let mutation = evolution_mutation.expect("Adaptation mutation was found");
+        draw_ui_text_ex(
+            "ADAPT KIRA'S NEURAL BLOOM // CHOOSE ONE",
+            878.0,
+            514.0,
+            TextStyle::new(11.0, dark::ACCENT).params(),
+        );
+        for (index, evolution) in mutation.evolutions.iter().take(2).enumerate() {
+            let button_y = 520.0 + index as f32 * 48.0;
+            if colony_button(
+                Rect::new(878.0, button_y, 362.0, 30.0),
+                &format!(
+                    "{} // {} BIOMASS",
+                    evolution.name.to_uppercase(),
+                    evolution.biomass_cost
+                ),
+                campaign.colony.resources.biomass >= evolution.biomass_cost,
+                mouse,
+            ) {
+                actions.push(UiAction::ChooseMutationEvolution(
+                    character.id.clone(),
+                    evolution.id.clone(),
+                ));
+            }
+            draw_ui_text_ex(
+                &evolution.description,
+                882.0,
+                button_y + 40.0,
+                TextStyle::new(10.0, dark::TEXT_DIM).params(),
+            );
+        }
     } else {
         if let Some(research) = campaign
             .strategy
@@ -408,7 +453,7 @@ fn draw_operations(
             draw_character_event(campaign, data, event, mouse, actions);
         }
     }
-    if !choosing_contact {
+    if !choosing_contact && !choosing_evolution {
         draw_ui_text_ex(
             "ACTIVE DOCTRINES",
             878.0,

@@ -7,7 +7,11 @@
   {
     "id": "neural_bloom", "name": "Neural Bloom",
     "gift": [{ "stat": "psionic_access", "amount": 1 }],
-    "complication": [{ "stat": "psychic_resistance", "amount": -2 }]
+    "complication": [{ "stat": "psychic_resistance", "amount": -2 }],
+    "evolutions": [
+      { "id": "expanded_cortex", "name": "Expanded Cortex", "description": "+10 accuracy, but +1 deployment food.", "biomass_cost": 8, "gift": [{ "stat": "accuracy", "amount": 10 }], "complication": [{ "stat": "food_upkeep", "amount": 1 }] },
+      { "id": "echo_mind", "name": "Echo Mind", "description": "+2 weapon damage, but -1 movement.", "biomass_cost": 8, "gift": [{ "stat": "weapon_damage", "amount": 2 }], "complication": [{ "stat": "movement", "amount": -1 }] }
+    ]
   },
   {
     "id": "regenerative_tissue", "name": "Regenerative Tissue",

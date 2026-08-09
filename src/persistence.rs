@@ -642,4 +642,25 @@ mod tests {
         assert!(migrated.campaign.strategy.contact_complete);
         assert_eq!(migrated.campaign.strategy.phase_id, "adaptation");
     }
+
+    #[test]
+    fn adaptation_save_gains_unevolved_character_mutations() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.11.0", &campaign)).unwrap();
+        for character in legacy["campaign"]["roster"].as_array_mut().unwrap() {
+            character
+                .as_object_mut()
+                .unwrap()
+                .remove("mutation_evolution_id");
+        }
+        let migrated = migrate_save_value(Some("1.11.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(migrated
+            .campaign
+            .roster
+            .iter()
+            .all(|character| character.mutation_evolution_id.is_empty()));
+    }
 }

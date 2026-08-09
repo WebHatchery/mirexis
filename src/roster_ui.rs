@@ -126,6 +126,20 @@ fn draw_selected_character(
         .map_or(character.mutation_id.as_str(), |mutation| {
             mutation.name.as_str()
         });
+    let evolution = data
+        .mutations
+        .iter()
+        .find(|entry| entry.id == character.mutation_id)
+        .and_then(|mutation| {
+            mutation
+                .evolutions
+                .iter()
+                .find(|evolution| evolution.id == character.mutation_evolution_id)
+        });
+    let mutation = evolution.map_or_else(
+        || mutation.to_owned(),
+        |evolution| format!("{} / {}", mutation, evolution.name),
+    );
     draw_ui_text_ex(
         &character.name,
         344.0,

@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase One — Isolation
+## Current Slice: Phase Three — Adaptation
 
 The completed roadmap slice includes:
 
@@ -42,6 +42,9 @@ The completed roadmap slice includes:
   and leave a permanent character legacy on Kira, Mara, or Sol
 - a visible Contact completion contract—trace, aftermath, and fielded prototype—that
   advances the persistent campaign into Phase Three: Adaptation
+- an irreversible, biomass-funded Neural Bloom evolution for Kira: Expanded Cortex
+  trades higher accuracy for food upkeep, while Echo Mind trades weapon damage for
+  movement; the chosen gift and complication both affect later deployments
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 
@@ -79,6 +82,6 @@ Capture all application scenes with:
 ## Data
 
 Embedded content under `assets/data/` covers configuration, the authored mission,
-tactical baselines, persistent characters, classes, mutations, equipment, Phase One
-campaign content, and the texture manifest. `GameData::load()` validates IDs and
+tactical baselines, persistent characters, classes, mutations, equipment, campaign
+content through the Adaptation entry, and the texture manifest. `GameData::load()` validates IDs and
 cross-references before the game starts.

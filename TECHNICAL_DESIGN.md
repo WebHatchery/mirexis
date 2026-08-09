@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — Adaptation entry
-Save/content version: 1.11.0
+Current campaign slice: Phase Three — Adaptation mutation evolution
+Save/content version: 1.12.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -243,6 +243,13 @@ vitality, Elastic Musculature adds immediate action economy and movement range, 
 Symbiotic Organism temporarily increases weapon damage. Round refresh clears temporary
 bonuses and makes the gift available again.
 
+After Contact completes, Kira can irreversibly evolve Neural Bloom by spending eight
+biomass. Expanded Cortex grants 10 deployment accuracy and adds one food to deployment
+upkeep; Echo Mind grants two weapon damage and removes one movement. Evolution options
+are data-backed gift/complication pairs, the chosen evolution ID persists on the
+character, and the ordinary derived-stat path applies both halves. Further mutations
+can gain evolution options without character-specific simulation branches.
+
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
 
@@ -418,6 +425,7 @@ Migration coverage:
 | 1.8.0 | Persistent trace aftermath and protocol-gated workshop prototypes |
 | 1.9.0 | Protocol-gated aftermath events with faction and character consequences |
 | 1.10.0 | Persistent Contact completion and Adaptation transition |
+| 1.11.0 | Persistent mutation evolution choice and derived gift/complication fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -449,7 +457,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `legacy`,
+`construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `evolution`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
@@ -464,8 +472,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (71 domain/migration tests plus the shared source-size gate)
-- deterministic twenty-seven-scene capture with visual inspection
+- `cargo test` (73 domain/migration tests plus the shared source-size gate)
+- deterministic twenty-eight-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -498,15 +506,16 @@ boundaries when continuing:
   transforms, elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades/Power Plants;
   population, other facility construction, and free placement for every building remain.
-- Mutation evolution, advanced classes, relationships, permanent death, and additional
-  equipment families need content beyond the starter roster screen.
+- Additional mutation evolutions, advanced classes, relationships, permanent death,
+  and additional equipment families need content beyond the starter roster screen.
 - Isolation has a visible completion gate and advances into a persistent Contact
   state with one faction-flavoured economic protocol and matching signal-trace
   operation whose victory unlocks a matching equipment prototype and aftermath event.
-  Completing all three Contact gates advances into Adaptation. Adaptation-specific
-  mutation evolution, operations, and later phases remain future content.
+  Completing all three Contact gates advances into Adaptation. Neural Bloom has the
+  first irreversible gift/complication evolution; Adaptation-specific operations,
+  evolution options for the remaining mutations, and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is the first Adaptation mechanic: a visible,
-player-chosen mutation evolution with a tactical gift and a strategic complication.
+The recommended next vertical slice is an Adaptation operation that puts the selected
+Neural Bloom evolution's tactical gift and strategic complication under visible pressure.

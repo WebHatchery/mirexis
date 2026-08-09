@@ -275,6 +275,20 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::ChooseMutationEvolution(character_id, evolution_id) => {
+                match self.campaign.choose_mutation_evolution(
+                    &character_id,
+                    &evolution_id,
+                    &self.data,
+                ) {
+                    Ok(name) => {
+                        self.notifications
+                            .success(format!("Mutation evolved: {}", name));
+                        self.autosave_campaign_only("Mutation evolution autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::ResolveCharacterEvent => {
                 match self.campaign.resolve_first_character_event(&self.data) {
                     Ok(title) => {
