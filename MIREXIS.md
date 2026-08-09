@@ -408,6 +408,10 @@ A reachable movement destination also traces the exact validated route in cyan. 
 entered tile labels its own terrain cost, making blocked-cell detours and expensive ground
 visible alongside the existing total AP preview before the move is committed.
 
+Directional cover is drawn as a reinforced cyan edge on the protected side of its tile.
+The nearby number names the accuracy penalty imposed from that facing, so stronger cover
+and exposed flanks can be read directly from battlefield geometry before units exchange fire.
+
 The tactical footer also opens a field manual that pauses command input and summarizes
 selection, action points, previews, enemy intent, hazard symbols, objective reading, and
 keyboard controls. It can be closed through its return button, `H`, or Escape.

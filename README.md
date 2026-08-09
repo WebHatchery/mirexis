@@ -60,6 +60,8 @@ The completed roadmap slice includes:
   when that unit can no longer act during the current colony phase
 - compact on-grid vitality bars for every combatant plus `A#` effective-armour labels,
   exposing damage and defensive strength without changing the current selection
+- directional cyan cover edges with visible protection strength, making defended facings
+  and open flanks readable from the tactical grid before attacks are exchanged
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

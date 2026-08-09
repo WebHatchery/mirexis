@@ -1,11 +1,38 @@
 //! Deterministic tactical mechanic showcase scenes.
 
 use super::{AppState, Game};
-use crate::data::{OperationModifier, Team};
+use crate::data::{CoverEdgeDef, EdgeDirection, OperationModifier, Team};
 use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
+    pub(super) fn capture_cover_edges(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session.tactical.cover_edges = vec![
+            CoverEdgeDef {
+                position: [3, 2],
+                direction: EdgeDirection::North,
+                strength: 20,
+            },
+            CoverEdgeDef {
+                position: [4, 3],
+                direction: EdgeDirection::East,
+                strength: 25,
+            },
+            CoverEdgeDef {
+                position: [3, 4],
+                direction: EdgeDirection::South,
+                strength: 30,
+            },
+            CoverEdgeDef {
+                position: [2, 3],
+                direction: EdgeDirection::West,
+                strength: 35,
+            },
+        ];
+        self.session.tactical.selected_tile = self.session.selected_unit().unwrap().position;
+    }
+
     pub(super) fn capture_movement_route(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.blocked.insert(TilePos::new(2, 2));

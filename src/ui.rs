@@ -384,6 +384,7 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             );
         }
     }
+    crate::cover_ui::draw_edges(view, &ctx.session.tactical.cover_edges);
     crate::reinforcement_ui::draw(ctx.session, view);
     crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
     let preview_tile = view

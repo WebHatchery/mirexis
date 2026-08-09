@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.52.0
+Save/content version: 1.53.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -122,7 +122,7 @@ Important transition payloads:
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 | `formation.rs` | Safe deterministic wedge, line, and column colony entry placement | Tactical persistence |
-| `cover_ui.rs` | Cover integrity bars and attackable-tile outlines | Simulation mutation |
+| `cover_ui.rs` | Directional cover strength plus integrity and targetability presentation | Simulation mutation |
 | `tactical_unit_ui.rs` | Unit tokens, selection/target outlines, AP readiness, vitality, and effective armour | Simulation mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
@@ -624,6 +624,7 @@ Migration coverage:
 | 1.49.0 | No new fields; readiness markers derive from existing unit AP and incapacitation state |
 | 1.50.0 | No new fields; vitality and effective armour derive from existing unit combat state |
 | 1.51.0 | No new fields; movement routes reuse deterministic tactical pathfinding state |
+| 1.52.0 | No new fields; cover rendering reads existing directional edge definitions |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -661,7 +662,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`, `readiness_markers`, `vitality_markers`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -676,7 +677,7 @@ The completion baseline is:
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test` (144 domain/migration tests plus the shared source-size gate)
-- deterministic seventy-seven-scene capture with visual inspection
+- deterministic seventy-eight-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -732,5 +733,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is directional cover-edge rendering, making protected
-facings and exposed flanks readable directly from battlefield geometry.
+The recommended next vertical slice is invalid-command feedback for blocked shots and moves,
+explaining why a focused destination cannot be used instead of silently omitting its preview.
