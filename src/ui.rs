@@ -1,7 +1,8 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::campaign::CampaignState;
-use crate::data::{GameData, MissionDef, Team};
+use crate::data::{GameData, MissionDef, ObjectiveKind, Team};
+use crate::grid_ui::GridView;
 use crate::state::{
     BattleEvent, GameSession, MissionOutcome, ObjectiveState, TacticalPhase, UnitState,
 };
@@ -349,7 +350,11 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         panel.w - 48.0,
         panel.h - 82.0,
     );
-    let view = GridView::new(ctx, grid_rect);
+    let view = GridView::new(
+        ctx.session.tactical.fog.width,
+        ctx.session.tactical.fog.height,
+        grid_rect,
+    );
     for (position, _) in ctx.session.tactical.fog.iter_with_pos() {
         let rect = view.tile_rect(position);
         let mut color = if (position.x + position.y) % 2 == 0 {
@@ -381,7 +386,8 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
                 Color::new(0.78, 0.94, 0.63, 1.0),
             );
         }
-        if position == ctx.session.tactical.objective_tile
+        if ctx.mission.objective_kind == ObjectiveKind::SecureAndClear
+            && position == ctx.session.tactical.objective_tile
             && ctx.session.tactical.objective_state == ObjectiveState::Active
         {
             draw_circle_lines(
@@ -473,7 +479,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     );
     let x = panel.x + 18.0;
     draw_ui_text_ex(
-        "OBJECTIVE",
+        &format!("OBJECTIVE // {}", objective_progress(ctx)),
         x,
         panel.y + 78.0,
         TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
@@ -536,9 +542,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             TextStyle::new(18.0, dark::TEXT_DIM).params(),
         );
     }
+    let objective_action = match ctx.mission.objective_kind {
+        ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",
+        ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
+        ObjectiveKind::Holdout => "HOLD THE PERIMETER",
+    };
     if button(
         Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
-        "COMPLETE OBJECTIVE",
+        objective_action,
         ctx.session.can_interact_selected(),
         mouse,
     ) {
@@ -584,6 +595,33 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             panel.bottom() - 14.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
+    }
+}
+
+fn objective_progress(ctx: &UiContext<'_>) -> String {
+    let hostiles = ctx
+        .session
+        .tactical
+        .units
+        .iter()
+        .filter(|unit| unit.team == Team::Hostile && !unit.incapacitated)
+        .count();
+    match ctx.mission.objective_kind {
+        ObjectiveKind::SecureAndClear => match ctx.session.tactical.objective_state {
+            ObjectiveState::Active => format!("UNSECURED · {} HOSTILES", hostiles),
+            ObjectiveState::Secured => format!("SECURED · {} HOSTILES", hostiles),
+            ObjectiveState::Victory => "SECURED · AREA CLEAR".to_owned(),
+            ObjectiveState::Failed => "FAILED".to_owned(),
+        },
+        ObjectiveKind::EliminateAll => format!("{} HOSTILES", hostiles),
+        ObjectiveKind::Holdout => {
+            let remaining = ctx
+                .mission
+                .round_limit
+                .saturating_sub(ctx.session.tactical.round)
+                + 1;
+            format!("{} ROUNDS · {} HOSTILES", remaining, hostiles)
+        }
     }
 }
 
@@ -705,48 +743,5 @@ pub fn tile_move_from_keys() -> Option<(i32, i32)> {
         Some((-1, 0))
     } else {
         None
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-struct GridView {
-    origin: Vec2,
-    tile_size: f32,
-    width: usize,
-    height: usize,
-}
-
-impl GridView {
-    fn new(ctx: &UiContext<'_>, rect: Rect) -> Self {
-        let width = ctx.session.tactical.fog.width;
-        let height = ctx.session.tactical.fog.height;
-        let tile_size = (rect.w / width as f32).min(rect.h / height as f32).floor();
-        Self {
-            origin: vec2(
-                rect.x + (rect.w - width as f32 * tile_size) * 0.5,
-                rect.y + (rect.h - height as f32 * tile_size) * 0.5,
-            ),
-            tile_size,
-            width,
-            height,
-        }
-    }
-
-    fn tile_rect(self, tile: TilePos) -> Rect {
-        Rect::new(
-            self.origin.x + tile.x as f32 * self.tile_size,
-            self.origin.y + tile.y as f32 * self.tile_size,
-            self.tile_size,
-            self.tile_size,
-        )
-    }
-
-    fn tile_at(self, point: Vec2) -> Option<TilePos> {
-        let tile = TilePos::new(
-            ((point.x - self.origin.x) / self.tile_size).floor() as i32,
-            ((point.y - self.origin.y) / self.tile_size).floor() as i32,
-        );
-        (tile.x >= 0 && tile.y >= 0 && tile.x < self.width as i32 && tile.y < self.height as i32)
-            .then_some(tile)
     }
 }

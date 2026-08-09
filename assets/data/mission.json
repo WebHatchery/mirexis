@@ -3,6 +3,7 @@
   "name": "OPERATION GLASSROOT",
   "briefing": "A survey team is sealed inside an emergency refuge beyond the western floodlights. Stabilise their failing shelter before the shapes in the mire overrun it.",
   "objective": "Reach and stabilise the marked survey refuge before round 8, then neutralise the remaining Brood so the trapped team can evacuate.",
+  "objective_kind": "secure_and_clear",
   "round_limit": 8,
   "materials_reward": 30,
   "seed": 1296651091,

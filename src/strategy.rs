@@ -1,7 +1,9 @@
 //! Phase One campaign pressure, research, events, and mission generation.
 
 use crate::colony::ColonyState;
-use crate::data::{CoverEdgeDef, EdgeDirection, GameData, MissionDef, MissionTemplateDef};
+use crate::data::{
+    CoverEdgeDef, EdgeDirection, GameData, MissionDef, MissionTemplateDef, ObjectiveKind,
+};
 use crate::state::{MissionOutcome, ObjectiveState};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
@@ -50,6 +52,8 @@ pub struct MissionInstance {
     pub name: String,
     pub briefing: String,
     pub objective: String,
+    #[serde(default)]
+    pub objective_kind: ObjectiveKind,
     pub faction_id: String,
     pub map_recipe: String,
     pub seed: u64,
@@ -79,6 +83,7 @@ impl StrategyState {
             name: data.mission.name.clone(),
             briefing: data.mission.briefing.clone(),
             objective: data.mission.objective.clone(),
+            objective_kind: data.mission.objective_kind,
             faction_id: "brood".to_owned(),
             map_recipe: "outer_mire".to_owned(),
             seed: data.config.battle_seed,
@@ -169,6 +174,7 @@ impl StrategyState {
             name: instance.name.clone(),
             briefing: instance.briefing.clone(),
             objective: instance.objective.clone(),
+            objective_kind: instance.objective_kind,
             round_limit: instance.round_limit,
             materials_reward: instance.materials_reward,
             seed: instance.seed,
@@ -304,6 +310,7 @@ impl StrategyState {
                 ),
                 objective: "Hold the command centre and break the assault before the colony falls."
                     .to_owned(),
+                objective_kind: ObjectiveKind::EliminateAll,
                 faction_id: threat.faction_id.clone(),
                 map_recipe: "colony_defense".to_owned(),
                 seed: self.rng.next_u64(),
@@ -353,6 +360,7 @@ impl StrategyState {
                 template.faction
             ),
             objective: template.objective.clone(),
+            objective_kind: template.objective_kind,
             faction_id: template.faction.clone(),
             map_recipe: "outer_mire".to_owned(),
             seed,

@@ -12,6 +12,7 @@ The completed roadmap slice includes:
 - a title → colony → briefing → tactical → debrief campaign loop
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
+- secure-and-clear, elimination, and holdout mission objectives with live progress
 - four persistent recruits with aptitudes, classes, mutations, equipment, XP, injury,
   and operation-based recovery
 - colony resources, barracks, infirmary, workshop, physical construction placement,

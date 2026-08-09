@@ -1,7 +1,7 @@
 //! Deterministic tactical command simulation and persistence model.
 
 use crate::campaign::CampaignState;
-use crate::data::{EdgeDirection, GameConfig, MissionDef, Team, UnitDef};
+use crate::data::{EdgeDirection, GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
 use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
 pub use crate::tactical::{
     BattleEvent, Command, CommandCost, ObjectiveState, RuleError, TacticalPhase, TacticalState,
@@ -85,6 +85,7 @@ impl GameSession {
                 selected_unit,
                 selected_tile,
                 objective_tile: tile(mission.objective_tile),
+                objective_kind: mission.objective_kind,
                 objective_state: ObjectiveState::Active,
                 phase: TacticalPhase::Player,
                 round: 1,
@@ -261,9 +262,16 @@ impl GameSession {
         });
         self.refresh_team(Team::Hostile, config.max_action_points);
         self.resolve_enemy_phase();
+        if self.battle_is_over() {
+            return;
+        }
         self.tactical.round += 1;
         if self.tactical.round > self.tactical.round_limit && !self.battle_is_over() {
-            self.finish_battle(ObjectiveState::Failed);
+            self.finish_battle(if self.tactical.objective_kind == ObjectiveKind::Holdout {
+                ObjectiveState::Victory
+            } else {
+                ObjectiveState::Failed
+            });
             return;
         }
         self.tactical.phase = TacticalPhase::Player;
@@ -366,7 +374,8 @@ impl GameSession {
 
     fn validate_interact(&self, unit_id: &str) -> Result<CommandCost, RuleError> {
         let unit = self.active_unit_for_phase(unit_id)?;
-        if self.tactical.objective_state != ObjectiveState::Active
+        if self.tactical.objective_kind != ObjectiveKind::SecureAndClear
+            || self.tactical.objective_state != ObjectiveState::Active
             || manhattan(unit.position, self.tactical.objective_tile) > 1
         {
             return Err(RuleError::ObjectiveUnavailable);
@@ -682,10 +691,19 @@ impl GameSession {
             .any(|unit| unit.team == Team::Hostile && !unit.incapacitated);
         let outcome = if !colonists_alive {
             Some(ObjectiveState::Failed)
-        } else if !hostiles_alive && self.tactical.objective_state == ObjectiveState::Secured {
-            Some(ObjectiveState::Victory)
         } else {
-            None
+            match self.tactical.objective_kind {
+                ObjectiveKind::SecureAndClear
+                    if !hostiles_alive
+                        && self.tactical.objective_state == ObjectiveState::Secured =>
+                {
+                    Some(ObjectiveState::Victory)
+                }
+                ObjectiveKind::EliminateAll | ObjectiveKind::Holdout if !hostiles_alive => {
+                    Some(ObjectiveState::Victory)
+                }
+                _ => None,
+            }
         };
         if let Some(outcome) = outcome {
             self.tactical.objective_state = outcome;
@@ -885,6 +903,52 @@ mod tests {
     }
 
     #[test]
+    fn typed_objectives_resolve_with_distinct_victory_rules() {
+        let (_, base) = session();
+
+        let mut eliminate = base.clone();
+        eliminate.tactical.objective_kind = ObjectiveKind::EliminateAll;
+        for hostile in eliminate
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == Team::Hostile)
+        {
+            hostile.incapacitated = true;
+        }
+        let mut events = Vec::new();
+        eliminate.check_outcome(&mut events);
+        assert_eq!(eliminate.tactical.objective_state, ObjectiveState::Victory);
+
+        let mut secure = base.clone();
+        for hostile in secure
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == Team::Hostile)
+        {
+            hostile.incapacitated = true;
+        }
+        secure.check_outcome(&mut Vec::new());
+        assert_eq!(secure.tactical.objective_state, ObjectiveState::Active);
+
+        let (config, mut holdout) = session();
+        holdout.tactical.objective_kind = ObjectiveKind::Holdout;
+        holdout.tactical.round_limit = 1;
+        for colonist in holdout
+            .tactical
+            .units
+            .iter_mut()
+            .filter(|unit| unit.team == Team::Colony)
+        {
+            colonist.health = 100;
+            colonist.max_health = 100;
+        }
+        holdout.end_player_phase(&config);
+        assert_eq!(holdout.tactical.objective_state, ObjectiveState::Victory);
+    }
+
+    #[test]
     fn ending_phase_runs_deterministic_enemy_ai_and_refreshes_colonists() {
         let (config, mut session) = session();
         let before = session.tactical.event_log.len();
@@ -936,7 +1000,7 @@ mod tests {
         let migrated =
             crate::persistence::migrate_save_value(Some("0.1.0".to_owned()), legacy, &data)
                 .unwrap();
-        assert_eq!(migrated.version, "0.6.0");
+        assert_eq!(migrated.version, "0.7.0");
         assert!(!migrated.tactical.unwrap().units.is_empty());
     }
 

@@ -1,6 +1,6 @@
 //! Serializable tactical types shared by simulation, presentation, and saves.
 
-use crate::data::{CoverEdgeDef, Team, UnitDef};
+use crate::data::{CoverEdgeDef, ObjectiveKind, Team, UnitDef};
 use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::rng::SeededRng;
 use serde::{Deserialize, Serialize};
@@ -187,6 +187,8 @@ pub struct TacticalState {
     pub selected_unit: Option<String>,
     pub selected_tile: TilePos,
     pub objective_tile: TilePos,
+    #[serde(default)]
+    pub objective_kind: ObjectiveKind,
     pub objective_state: ObjectiveState,
     pub phase: TacticalPhase,
     pub round: u32,

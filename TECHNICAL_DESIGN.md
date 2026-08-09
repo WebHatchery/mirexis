@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 4 roadmap complete
 Current campaign slice: Phase One — Isolation
-Save/content version: 0.6.0
+Save/content version: 0.7.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -74,6 +74,7 @@ Important transition payloads:
 | `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
 | `persistence.rs` | Project schema migrations inside toolkit slots | Platform storage paths |
 | `ui.rs` | Title, briefing, tactical, debrief rendering and intents | Direct state mutation |
+| `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 
 Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
@@ -117,9 +118,11 @@ Resolution order is fixed:
 5. Apply critical bonus, armour mitigation, damage, and incapacitation.
 6. Emit roll, damage, incapacitation, objective, and battle-end events in order.
 
-Victory currently requires completing the interactive objective and neutralizing all
-hostiles. Failure occurs when every colonist is incapacitated or the round limit is
-passed. Generated missions reuse this common objective contract.
+`ObjectiveKind` selects one of three victory contracts. `SecureAndClear` requires an
+adjacent interaction followed by neutralizing all hostiles. `EliminateAll` resolves as
+soon as the last hostile falls. `Holdout` resolves when the squad survives beyond the
+round limit, or earlier if it neutralizes every attacker. Every contract still fails if
+all colonists are incapacitated; non-holdout missions also fail at their deadline.
 
 ### 5.4 Enemy AI
 
@@ -253,6 +256,7 @@ Migration coverage:
 | 0.3.0 | Colony state while preserving character XP |
 | 0.4.0 | Isolation strategy, pressure, and seeded offers |
 | 0.5.0 | Tactical mutation-use and temporary combat fields |
+| 0.6.0 | Typed objective fields for tactical state and mission offers |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -293,7 +297,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (24 domain/migration tests plus the shared source-size gate)
+- `cargo test` (26 domain/migration tests plus the shared source-size gate)
 - deterministic five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -319,8 +323,8 @@ project-standard publisher.
 The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
 boundaries when continuing:
 
-- Tactical combat currently has one shared interactive-objective contract. Add typed
-  objective variants before authoring escort, holdout, or multi-stage missions.
+- Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
+  beyond the three implemented objective types.
 - Elevation, destructible cover, targeted class abilities, items, persistent statuses,
   reactions, and animation/audio consumers are not yet implemented.
 - Generated outer-mire missions reuse Glassroot geometry with different seeds,
@@ -334,6 +338,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is typed tactical objectives and status resolution,
-followed by data-backed map recipes. Those additions exercise the existing command/event
-boundary without requiring a strategic rewrite.
+The recommended next vertical slice is data-backed map and hostile recipes, followed by
+status resolution. Those additions should make faction missions mechanically distinct
+without requiring a strategic rewrite.

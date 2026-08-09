@@ -8,6 +8,7 @@ mod colony;
 mod colony_ui;
 mod data;
 mod game;
+mod grid_ui;
 mod persistence;
 mod state;
 mod strategy;

@@ -32,6 +32,8 @@ pub struct MissionDef {
     pub name: String,
     pub briefing: String,
     pub objective: String,
+    #[serde(default)]
+    pub objective_kind: ObjectiveKind,
     pub round_limit: u32,
     pub materials_reward: i32,
     pub seed: u64,
@@ -41,6 +43,15 @@ pub struct MissionDef {
     pub terrain_costs: Vec<TerrainCostDef>,
     #[serde(default)]
     pub cover_edges: Vec<CoverEdgeDef>,
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ObjectiveKind {
+    #[default]
+    SecureAndClear,
+    EliminateAll,
+    Holdout,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -180,6 +191,7 @@ pub struct MissionTemplateDef {
     pub id: String,
     pub name: String,
     pub objective: String,
+    pub objective_kind: ObjectiveKind,
     pub faction: String,
     pub materials_reward: i32,
     pub round_limit: u32,
@@ -384,5 +396,12 @@ mod tests {
         assert!(data.mutations.len() >= 5);
         assert_eq!(data.campaign.phase_id, "isolation");
         assert!(data.campaign.mission_templates.len() >= 3);
+        let objective_kinds = data
+            .campaign
+            .mission_templates
+            .iter()
+            .map(|mission| mission.objective_kind)
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(objective_kinds.len(), 3);
     }
 }
