@@ -1,252 +1,330 @@
 # Mirexis Technical Design
 
-Status: Phase 0 foundation  
-Target platforms: Windows and browser/WASM  
+Status: Phase 0 through Phase 4 roadmap complete
+Current campaign slice: Phase One — Isolation
+Save/content version: 0.5.0
+Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
 ## 1. Purpose
 
-This document turns the game design in `MIREXIS.md` into an implementation plan.
-It defines ownership boundaries, deterministic simulation rules, data contracts,
-save policy, testing expectations, and an incremental roadmap. The design favors
-small modules and replaceable placeholder systems so the game can grow without a
-large rewrite.
+This is the implementation contract for the game design in `MIREXIS.md`. It now
+describes the working Phase One vertical slice rather than a future roadmap. Keep
+it accurate when schemas, ownership, simulation order, or save behavior changes.
 
-## 2. Phase 0 Baseline
+The implemented slice proves all roadmap systems together:
 
-The current executable proves the full platform path and a narrow tactical loop:
+1. Start or continue a persistent colony.
+2. Inspect resources, faction attention, an assault countdown, research, events,
+   recruits, facilities, and mission offers.
+3. Place construction, train a colonist, treat injuries, and craft equipment.
+4. Select an authored or seeded generated mission and deploy available recruits.
+5. Resolve deterministic movement, attacks, an interactive objective, enemy AI,
+   victory, or failure.
+6. Apply rewards, XP, injury, recovery, pressure, threat, and new mission offers.
+7. Return through debrief to the same saved colony.
 
-1. Load embedded configuration, mission, roster, and texture-manifest JSON.
-2. Enter a title screen.
-3. Start a deterministic tactical sandbox.
-4. Select named colonists and move across a validated grid using action points.
-5. End the colony phase and resolve deterministic placeholder hostile movement.
-6. Save, load, delete, and migrate versioned state through macroquad-toolkit.
-7. Render through a 1280×720 virtual UI on native and WASM targets.
+## 2. Architectural Principles
 
-Phase 0 is complete when native tests, linting, WASM compilation, and the project
-publisher pass. It is not intended to prove final combat balance or campaign UX.
+- Simulation owns rules; presentation emits `UiAction` intents only.
+- Content and balance are embedded JSON; Rust owns schemas and invariants.
+- A tactical outcome is reproducible from battle state plus ordered commands.
+- Persistent `CharacterRecord` values are separate from deployed `UnitState` values.
+- Tactical outcomes cross into strategy through `MissionOutcome`; tactical code does
+  not directly edit resources, injuries, construction, or faction pressure.
+- Stable snake_case IDs are save contracts. Display names may change independently.
+- Derived values such as deployment stats and colony-defense maps are recomputed.
+- Reusable runtime behavior belongs in macroquad-toolkit. Project-local behavior is
+  limited to Mirexis rules and presentation.
+- Every `.rs` file stays below 800 non-test lines. Add named sibling modules rather
+  than `mod.rs` files as ownership grows.
 
-## 3. Architectural Principles
+## 3. Runtime State and Transitions
 
-- Simulation owns rules; presentation emits intents and never mutates state.
-- Content and balance are JSON-backed; Rust supplies schemas and invariants.
-- A tactical outcome must be reproducible from initial state plus ordered commands.
-- Runtime-only types do not leak into long-lived campaign data without a reason.
-- IDs are stable snake_case strings. Display names may change without breaking saves.
-- Shared rendering, input, persistence, camera, asset, and pathfinding needs should
-  use macroquad-toolkit before project-local equivalents are introduced.
-- Source files stay under the shared 800 non-test-line limit and should normally
-  remain in the 200–400 line range.
-
-## 4. Current Module Ownership
-
-| Module | Owns | Must not own |
-|---|---|---|
-| `main.rs` | Window configuration, frame loop, capture harness | Gameplay rules |
-| `game.rs` | App state, UI-intent dispatch, persistence integration | Tactical calculations |
-| `data.rs` | JSON schemas and embedded content loading | Mutable runtime state |
-| `state.rs` | Tactical state, movement validation, turns, save schema | Drawing and raw input |
-| `ui.rs` | Title/tactical drawing and `UiAction` production | Direct state mutation |
-
-As systems grow, use named parent files (`combat.rs`, `combat/resolution.rs`) and
-do not create `mod.rs` files.
-
-## 5. Target Runtime State Machine
-
-The Phase 0 `Title -> Tactical` flow should evolve into explicit application states:
+The implemented application state machine is:
 
 ```text
 Boot -> Title -> Colony -> MissionBriefing -> Tactical -> Debrief -> Colony
-                   |                           |
-                   +---- Campaign events <-----+
+          |         |             |              |
+          |         +-- strategic actions       +-- manual tactical save/load
+          +-- continue saved colony/battle
 ```
 
-Transitions carry typed payloads. For example, tactical deployment receives a
-`MissionInstance` and `SquadLoadout`; debrief returns a `MissionOutcome`. Tactical
-code must not directly edit colony resources, injuries, or faction pressure.
+Important transition payloads:
 
-## 6. Tactical Simulation
+- `StrategyState::selected_mission()` returns an immutable `MissionInstance`.
+- `materialize_selected()` derives a `MissionDef` and map recipe for deployment.
+- `CampaignState::deployment_roster()` derives tactical `UnitDef` values.
+- `GameSession::mission_outcome()` returns a `MissionOutcome` for debrief.
+- `CampaignState::apply_mission_outcome()` is the single strategic application path.
 
-### 6.1 Core Types
+`game.rs` coordinates these services. It must not absorb their calculations.
 
-Introduce these in the first tactical milestone:
+## 4. Module Ownership
 
-- `BattleState`: map, units, round, phase, objective state, deterministic RNG.
-- `MapState`: terrain grid, elevation, cover edges, hazards, interactables.
-- `CombatantState`: stable character/enemy ID, stats, resources, statuses, position.
-- `Command`: move, attack, ability, item, interact, defend, end activation/phase.
-- `CommandResult`: ordered events describing movement, damage, statuses, and deaths.
-- `BattleEvent`: serializable facts consumed by animation, audio, logs, and tests.
+| Module | Owns | Must not own |
+|---|---|---|
+| `main.rs` | Window configuration, frame loop, capture entry | Game rules |
+| `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
+| `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
+| `state.rs` | Tactical commands, validation, execution, AI, events, outcomes | Drawing, colony mutation |
+| `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
+| `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
+| `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
+| `persistence.rs` | Project schema migrations inside toolkit slots | Platform storage paths |
+| `ui.rs` | Title, briefing, tactical, debrief rendering and intents | Direct state mutation |
+| `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
 
-The simulation API should follow `validate(command) -> Result<cost, RuleError>` and
-`execute(command) -> Vec<BattleEvent>`. UI previews use validation; only execution
-mutates battle state.
+Split `state.rs` by cohesive responsibility before adding abilities, statuses, or
+multi-objective logic that would push it toward the source limit.
 
-### 6.2 Turn Economy
+## 5. Tactical Simulation Contract
 
-Retain alternating player and enemy phases initially. Each combatant receives a
-small action-point budget at phase start. Movement costs one point per orthogonal
-tile before modifiers. Attacks and abilities declare point costs in data. Avoid
-special-case “move plus action” booleans because they make hybrid classes harder.
+### 5.1 State and commands
 
-### 6.3 Grid and Pathfinding
+`TacticalState` owns the grid, occupancy, terrain costs, edge cover, units, phase,
+round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
+commands are move, attack, and interact. Ending a phase is a session operation that
+runs hostile commands and advances the round.
 
-Use `macroquad_toolkit::grid` types. Replace Phase 0 Manhattan-only movement with
-weighted flood-fill/pathfinding that accounts for occupancy, elevation, hazards,
-movement traits, and mutation exceptions. Store cover on tile edges rather than on
-the occupying tile so attacks from different directions resolve correctly.
-
-### 6.4 Combat Resolution
-
-Centralize hit, damage, armour, critical, and status calculations in a stateless
-resolver. Suggested initial order:
-
-1. Validate range, line of sight, target, resources, and phase.
-2. Build accuracy from weapon, user stats, range band, cover, elevation, statuses.
-3. Draw from the battle-owned deterministic RNG.
-4. Apply armour/shield mitigation and damage channels.
-5. Emit injury, incapacitation, objective, and reaction events.
-
-Numbers belong in data, while the order of operations and invariants belong in Rust.
-
-### 6.5 Enemy AI
-
-Replace direct placeholder movement with a scoring AI. Candidate actions are
-generated by the same command validator used by the player. A faction behavior
-profile weights safety, objective pressure, focus fire, range, biomass spread,
-teleport control, or suppression. Deterministic tie-breaking is mandatory.
-
-## 7. Character and Progression Model
-
-Separate persistent `CharacterRecord` from deployed `CombatantState`.
-`CharacterRecord` should hold identity, biography keys, aptitudes, learned skills,
-class history, mutation path, injuries, relationships, equipment IDs, and campaign
-availability. Deployment derives tactical stats from that record and content data.
-
-Aptitudes modify training cost or rate, never eligibility. Class switching should
-use skill-slot and prerequisite constraints so a character cannot eventually equip
-every learned ability. Mutation gift, complication, and evolution should be modeled
-as composable rule hooks, not one large mutation switch statement.
-
-## 8. Colony and Campaign
-
-The strategic layer should own:
-
-- resources and population
-- buildings, construction queue, damage, and physical footprint
-- roster availability, training, recovery, and injuries
-- research opportunities and completed projects
-- faction threat/attention and telegraphed crises
-- mission offers, deadlines, and campaign flags
-
-Colony buildings need stable placement coordinates from their first implementation,
-even if the initial UI uses fixed slots. The same placement data later generates
-colony-defense tactical maps. Campaign time advances through explicit operations or
-events, never wall-clock time.
-
-Mission generation consumes campaign state and emits an immutable `MissionInstance`
-containing seed, map recipe, participants, objectives, rewards, and consequences.
-Debrief applies the result through one campaign service so rewards and failures are
-auditable and testable.
-
-## 9. Data Layout Target
-
-Grow `assets/data/` by domain:
+The authority boundary is:
 
 ```text
-assets/data/
-  config/
-  characters/
-  classes/
-  mutations/
-  abilities/
-  equipment/
-  enemies/
-  factions/
-  missions/
-  colony/
-  research/
-  localization/
+validate(&Command) -> Result<CommandCost, RuleError>
+execute(Command)  -> Result<Vec<BattleEvent>, RuleError>
 ```
 
-Each definition has an `id`, optional schema version, and references other content
-by ID. Loading should validate duplicate IDs, missing references, invalid numeric
-ranges, impossible placements, and cyclic prerequisites. CI tests should load and
-validate the complete registry.
+UI highlighting and hostile candidate generation both call the same validator.
+Only `execute` mutates tactical state or consumes RNG.
+
+### 5.2 Movement
+
+- `macroquad_toolkit::pathfinding::find_path_with` supplies weighted A*.
+- Orthogonal movement accounts for bounds, blocked tiles, living occupancy, terrain
+  cost, action points, and each unit's derived move range.
+- Paths and their total cost are emitted in `BattleEvent::UnitMoved`.
+- Colony-defense blocked tiles are derived from saved building coordinates.
+
+### 5.3 Attacks and outcomes
+
+Resolution order is fixed:
+
+1. Validate phase, teams, incapacitation, range, and action points.
+2. Calculate accuracy from the attacker, range falloff, and the target-facing cover edge.
+3. Draw 1–100 from the battle-owned toolkit `SeededRng`.
+4. Apply critical bonus, armour mitigation, damage, and incapacitation.
+5. Emit roll, damage, incapacitation, objective, and battle-end events in order.
+
+Victory currently requires completing the interactive objective and neutralizing all
+hostiles. Failure occurs when every colonist is incapacitated or the round limit is
+passed. Generated missions reuse this common objective contract.
+
+### 5.4 Enemy AI
+
+Hostiles are ordered by stable ID. They attack the lowest-health valid colonist,
+otherwise move toward the nearest colonist using validated commands, then try to
+attack again. Ties use stable health/ID or distance/coordinate ordering. Brood hunters
+and Sporecasters differ through data-backed range, movement, armour, accuracy, and
+damage profiles.
+
+## 6. Character and Progression Contract
+
+`CharacterRecord` persists identity, biography, aptitude ratings, XP, level, active
+class, class history, learned and active skills, mutation ID, injuries, availability,
+and equipment IDs. `UnitState` is disposable battle state.
+
+Seven initial class families are loaded from `classes.json`. Aptitude changes the
+material cost of training but never class eligibility. Switching classes retains
+learned fundamentals while `active_skills` is truncated to the active class's slot
+limit.
+
+Mutation definitions contain composable gift and complication stat modifiers. The
+five implemented mutations exercise these hooks:
+
+| Mutation | Current gift behavior | Current complication hook |
+|---|---|---|
+| Chitinous Growth | Deployment armour | Reduced movement |
+| Neural Bloom | Psionic access trait | Psychic-resistance trait |
+| Regenerative Tissue | Health at phase refresh | Longer injury recovery |
+| Elastic Musculature | Increased movement | Heavy-armour-efficiency trait |
+| Symbiotic Organism | Biological-damage trait | Food-upkeep trait |
+
+Trait hooks whose owning combat or economy system does not yet exist remain derived
+values; extend the owning system rather than adding mutation-specific switches.
+
+Mission completion grants XP. Incapacitated colonists receive an operation-counted
+injury and cannot deploy until recovery completes. The infirmary can accelerate the
+first active recovery.
+
+## 7. Colony Contract
+
+`ColonyState` owns materials, power, food, biomass, alien components, completed
+buildings, construction reservations, and a monotonic building serial.
+
+Initial facilities have stable coordinates:
+
+- Command Centre: mission access and a critical defense objective.
+- Barracks: aptitude-priced class training.
+- Infirmary: injury treatment.
+- Workshop: equipment crafting.
+
+Clicking an empty colony plot reserves a barricade, deducts 20 materials, and queues
+one operation of construction. Reserved plots cannot be reused. Campaign time only
+advances when an operation resolves; it never depends on wall-clock time.
+
+`ColonyState::defense_map()` derives blocked tiles, cover tiles, and critical
+objectives from completed buildings. An expired assault materializes those values
+into the tactical mission, so colony placement and defense geometry share one source.
+
+## 8. Phase One Strategy Contract
+
+`StrategyState` owns Phase One: Isolation:
+
+- Directorate, Brood, and Ascendant attention values from 0–100.
+- A telegraphed Directorate assault with operation countdown and strength.
+- Data-backed research opportunities and resource effects.
+- Data-backed character events with participant validation and choice costs.
+- Seeded, immutable mission offers and the selected mission ID.
+
+Mission resolution adjusts the responsible faction's attention, advances threats,
+and generates two offers from `campaign.json` templates. Generation uses the
+serialized toolkit RNG, so saving and loading preserves the future stream.
+
+When an assault reaches zero, the only offer becomes a colony-defense mission.
+Winning resets the countdown and reduces strength; failure returns it sooner and
+stronger. This is the first escalation loop, not the full five-phase campaign.
+
+## 9. Content Registry
+
+Current embedded files under `assets/data/` are:
+
+| File | Content |
+|---|---|
+| `game_config.json` | Identity, save version, grid, AP budget, root seed |
+| `mission.json` | Authored Glassroot mission and tactical map data |
+| `roster.json` | Tactical baselines and hostile archetypes |
+| `characters.json` | Persistent recruits and aptitude/loadout references |
+| `classes.json` | Class families and deployment modifiers |
+| `mutations.json` | Gift and complication hooks |
+| `equipment.json` | Starter equipment modifiers |
+| `campaign.json` | Isolation factions, research, events, mission templates |
+| `texture_manifest.json` | Runtime texture declarations |
+
+`GameData::load()` rejects duplicate IDs, missing character/class/mutation/equipment
+references, invalid aptitude ranges, missing event participants, and mission templates
+that reference unknown factions. Add validation in the same change as every new
+cross-reference or numeric invariant.
+
+The files can move into domain subdirectories when volume warrants it; `include_str!`
+paths and publisher asset packaging must be updated together.
 
 ## 10. Save and Compatibility Policy
 
-Use a single campaign save envelope containing:
+Platform storage is entirely owned by macroquad-toolkit:
 
-- `schema_version`
-- build/content version
-- campaign seed
-- persistent campaign state
-- optional in-progress battle state
+- `save_to_slot_with_version` writes atomic native files and WASM storage.
+- `load_from_slot_with_migration` dispatches project schema migrations.
+- `slot_exists` and `delete_slot` support title/management UI.
+- `AutoSaveManager::force` coordinates event autosaves.
 
-Never serialize textures, UI layout, caches, or derived reachability. Recompute
-derived data after loading. Every schema change adds a migration from the immediately
-previous version and fixtures for older representative saves. Unknown content IDs
-must produce a useful error rather than a panic or silent deletion.
+`SaveData` contains a version, persistent `CampaignState`, and optional
+`TacticalState`. Colony saves omit tactical state; deployment and manual tactical
+saves include it. Textures, UI layout, derived deployment stats, path caches, and
+derived defense maps are never serialized.
 
-Autosave at colony entry, mission deployment, and debrief completion. Manual saves
-are safe in the colony. Mid-battle saves can remain a later decision, though the
-Phase 0 state demonstrates technical feasibility.
+Autosaves occur at new-colony creation, colony entry, mission selection, construction,
+training, treatment, crafting, research, character-event resolution, deployment, and
+debrief completion. Manual tactical save/load remains available.
 
-## 11. Rendering and UX
+Migration coverage:
 
-Keep world rendering and screen-space UI separate. Layout uses the toolkit virtual
-resolution; camera viewports must use toolkit logical-to-physical conversion for
-high-DPI displays. Input maps to semantic actions before simulation sees it.
+| From | Adds |
+|---|---|
+| 0.1.0 | Tactical combat fields, deterministic RNG, event log |
+| 0.2.0 | Persistent character campaign and mutation runtime defaults |
+| 0.3.0 | Colony state while preserving character XP |
+| 0.4.0 | Isolation strategy, pressure, and seeded offers |
 
-The first art pass should emphasize faction readability through shape and palette:
-industrial Directorate, organic Brood, luminous geometric Ascendants, and visibly
-improvised colony hybrids. Gameplay cannot rely on color alone. Add icons, silhouettes,
-and text labels for accessibility, plus rebindable inputs and scalable text later.
+Every future schema bump must migrate the immediately previous version and add a
+fixture test. Validate saved content IDs before adding content removal or renaming.
 
-## 12. Testing Strategy
+## 11. Toolkit Utilization Gate
 
-- Unit tests: costs, pathing, line of sight, cover, damage, mutations, status order.
-- Data tests: all JSON loads, IDs are unique, references resolve, values are valid.
-- Scenario tests: execute command sequences and compare final state/event streams.
-- Save tests: round trips plus migration fixtures.
-- UI capture: deterministic title, colony, tactical, and debrief scenes.
-- Build gates: fmt, clippy with warnings denied, tests, native release, WASM release.
+Before introducing project-local infrastructure, check macroquad-toolkit and extend
+it when the behavior is reusable. Mirexis currently uses:
 
-Do not base simulation tests on frame timing or rendering output.
+| Concern | Toolkit facility |
+|---|---|
+| Native/WASM saves and migrations | `persistence` slots and `AutoSaveManager` |
+| Deterministic simulation/generation | `rng::SeededRng` |
+| Weighted movement | `pathfinding::find_path_with` |
+| Grid storage/positions | `grid::FlatGrid`, `TilePos` |
+| Virtual resolution and semantic input | `VirtualUi`, `InputState` |
+| Assets and embedded JSON | `AssetManager`, `data_loader` |
+| Intent queue and feedback | `EventBus`, `NotificationManager` |
+| Deterministic screenshots | `capture` harness |
+| Source-size enforcement | `source_gate` |
 
-## 13. Milestone Roadmap
+Mirexis-specific command validation, campaign pressure, colony placement, content
+schemas, and immediate-mode styling remain local because they encode this game's rules.
 
-### Phase 1A — Tactical Rules
+## 12. Rendering, Input, and Capture
 
-Add weighted pathfinding, activation/action economy, attacks, accuracy, cover,
-armour, incapacitation, objective completion, and a battle event stream.
+Rendering uses a fixed 1280×720 toolkit virtual UI. Raw keyboard/mouse input is
+translated into `UiAction` or tactical commands before simulation mutation. Tactical
+units use labels as well as faction color, and colony buildings use text labels.
 
-### Phase 1B — Vertical Mission
+`scripts/capture_ui.ps1` captures `title`, `colony`, `briefing`, `gameplay`, and
+`debrief` by default. `Game::begin_capture_scene()` seeds each scene deterministically.
+Committed captures under `docs/verification/` are the visual regression references.
 
-Ship one authored rescue mission with four colonists, two enemy archetypes, one
-interactive objective, deployment, victory/failure, and debrief consequences.
+## 13. Verification
 
-### Phase 2 — Character Identity
+The completion baseline is:
 
-Add persistent recruits, aptitudes, initial class families, five mutations with
-gift/complication behavior, equipment, experience, injury, and recovery.
+- `cargo fmt -- --check`
+- `cargo clippy --all-targets --all-features -- -D warnings`
+- `cargo test` (21 domain/migration tests plus the shared source-size gate)
+- deterministic five-scene capture with visual inspection
+- `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
+  preview deployment, and catalog update)
 
-### Phase 3 — Colony Loop
+Simulation tests never depend on frame timing or rendered pixels.
 
-Add colony hub, resources, barracks, infirmary, workshop, construction placement,
-mission selection, and a colony-defense map generated from placement data.
+## 14. Completed Milestones
 
-### Phase 4 — Campaign Pressure
+| Milestone | Implemented evidence | Commit |
+|---|---|---|
+| Phase 0 — Foundation | Native/WASM runtime, toolkit persistence, grid sandbox | `1d7dad2` |
+| Phase 1A — Tactical Rules | Weighted pathing, AP, attacks, cover, armour, events, AI | `64dafdf` |
+| Phase 1B — Vertical Mission | Four-person rescue, two archetypes, briefing/debrief | `7e0ab44` |
+| Phase 2 — Character Identity | Records, aptitudes, classes, mutations, gear, XP/injury | `6114654` |
+| Phase 3 — Colony Loop | Resources, facilities, placement, construction, defense map | `d8065ef` |
+| Phase 4 — Campaign Pressure | Attention, assaults, research, events, generated Isolation missions | `50e80ae` |
 
-Add faction attention, telegraphed attacks, research opportunities, character events,
-mission generation, and Phase One: Isolation content.
+All milestones in the original roadmap are complete and validated through the
+project-standard publisher.
 
-## 14. Immediate Next Slice
+## 15. Current Boundaries and Next Development
 
-The next development task should implement Phase 1A as a narrow end-to-end slice:
-one weapon, one attack command, cover-aware accuracy, damage/incapacitation events,
-an objective tile, a deterministic enemy action, and a debrief transition. This
-tests the intended command/event boundary before class, mutation, or colony breadth
-adds pressure to the architecture.
+The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
+boundaries when continuing:
+
+- Tactical combat currently has one shared interactive-objective contract. Add typed
+  objective variants before authoring escort, holdout, or multi-stage missions.
+- True line of sight, elevation, destructible cover, abilities, items, statuses,
+  reactions, and animation/audio consumers are not yet implemented.
+- Generated outer-mire missions reuse Glassroot geometry with different seeds,
+  objectives, rewards, and limits. Add data-backed map recipes before adding volume.
+- The colony has fixed initial facilities and placeable barricades; population,
+  building damage/repair, power demand, and free placement for every building remain.
+- Mutation evolution, advanced classes, relationships, permanent death, and richer
+  equipment slots need content and UI beyond the existing rule hooks.
+- Isolation is a repeatable Phase One loop. Story gates and Phases Two–Five remain
+  future campaign content.
+- Saved content references need explicit validation before definitions can be removed
+  or renamed safely.
+
+The recommended next vertical slice is typed tactical objectives plus line of sight
+and status resolution, followed by data-backed map recipes. Those additions exercise
+the existing command/event boundary without requiring a strategic rewrite.

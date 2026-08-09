@@ -6,18 +6,18 @@
   "canvas_rendering": "auto",
   "about": [
     "A turn-based grid tactics game about named colonists, strange mutations, and one settlement caught between three overwhelming powers.",
-    "Phase 0 is a development-readiness prototype with a deterministic tactical grid, unit selection, movement, turns, and save/load support."
+    "Phase One: Isolation connects deterministic tactical missions to persistent recruits, colony construction, faction pressure, research, character events, and telegraphed colony attacks."
   ],
   "controls": [
-    { "key": "Mouse", "desc": "Select a colonist or move to a highlighted tile" },
+    { "key": "Mouse", "desc": "Manage the colony, select missions, move colonists, attack, and complete objectives" },
     { "key": "Arrow Keys", "desc": "Move the tactical cursor" },
-    { "key": "Enter", "desc": "End the colony phase" },
-    { "key": "S / L", "desc": "Save / load tactical state" },
-    { "key": "Escape", "desc": "Return to title" }
+    { "key": "Enter", "desc": "Confirm screens or end the tactical colony phase" },
+    { "key": "S / L", "desc": "Save / load an in-progress battle" },
+    { "key": "Escape", "desc": "Step back or return to title" }
   ],
   "details": [
     { "label": "Genre", "value": "Turn-Based Grid Tactics" },
     { "label": "Engine", "value": "Rust + Macroquad" },
-    { "label": "Milestone", "value": "Phase 0" }
+    { "label": "Milestone", "value": "Phase 4 — Isolation" }
   ]
 }
