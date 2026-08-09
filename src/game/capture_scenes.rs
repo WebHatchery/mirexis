@@ -1,7 +1,7 @@
 //! Deterministic UI-reference scene construction.
 
 use super::{AppState, Game, TacticalTargeting};
-use crate::data::Team;
+use crate::data::{ObjectiveKind, Team};
 use crate::state::{GameSession, ObjectiveState};
 use macroquad_toolkit::grid::TilePos;
 
@@ -13,6 +13,7 @@ impl Game {
             "colony" => self.state = AppState::Colony,
             "roster" => self.state = AppState::Roster,
             "briefing" => self.state = AppState::MissionBriefing,
+            "extraction" => self.capture_extraction(),
             "equipment" => self.capture_equipment_target(),
             "class_target" => self.capture_class_target(),
             "breach" => self.capture_breach(),
@@ -52,6 +53,43 @@ impl Game {
             unit_id: "kira_voss".to_owned(),
             equipment_id: "survey_harness".to_owned(),
         });
+    }
+
+    fn capture_extraction(&mut self) {
+        self.active_mission.name = "ISOLATION: LAST TRANSMISSION".to_owned();
+        self.active_mission.objective =
+            "Get any colonist carrying the stolen coordinates to extraction.".to_owned();
+        self.active_mission.objective_kind = ObjectiveKind::Extraction;
+        self.active_mission.hostile_faction = "directorate".to_owned();
+        self.active_mission.round_limit = 6;
+        let recipe = self
+            .data
+            .campaign
+            .map_recipes
+            .iter()
+            .find(|recipe| recipe.id == "directorate_checkpoint")
+            .expect("extraction capture recipe exists");
+        self.active_mission.blocked_tiles = recipe.blocked_tiles.clone();
+        self.active_mission.objective_tile = recipe.objective_tile;
+        self.active_mission.terrain_costs = recipe.terrain_costs.clone();
+        self.active_mission.cover_edges = recipe.cover_edges.clone();
+        self.reset_capture_session(AppState::Tactical);
+        let evac = self.session.tactical.objective_tile;
+        let colonist = self
+            .session
+            .tactical
+            .selected_unit
+            .clone()
+            .expect("capture session selects a colonist");
+        let unit = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == colonist)
+            .expect("selected capture colonist exists");
+        unit.position = TilePos::new(evac.x - 1, evac.y);
+        self.session.tactical.selected_tile = unit.position;
     }
 
     fn capture_class_target(&mut self) {

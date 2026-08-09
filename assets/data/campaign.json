@@ -19,7 +19,8 @@
   "mission_templates": [
     { "id": "supply_recovery", "name": "ISOLATION: DEAD FREIGHT", "objective": "Reach the stranded supply crawler, recover its manifest, and clear the approach.", "objective_kind": "secure_and_clear", "faction": "directorate", "map_recipe": "directorate_yard", "materials_reward": 28, "round_limit": 8 },
     { "id": "nest_suppression", "name": "ISOLATION: ROOT BURN", "objective": "Eliminate every Brood organism guarding the growth before it can relocate.", "objective_kind": "eliminate_all", "faction": "brood", "map_recipe": "brood_hollow", "materials_reward": 32, "round_limit": 7 },
-    { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "map_recipe": "ascendant_ruin", "materials_reward": 24, "round_limit": 6 }
+    { "id": "ruin_survey", "name": "ISOLATION: COLD SIGNAL", "objective": "Hold the survey perimeter for six rounds while the alien field is mapped.", "objective_kind": "holdout", "faction": "ascendants", "map_recipe": "ascendant_ruin", "materials_reward": 24, "round_limit": 6 },
+    { "id": "courier_extraction", "name": "ISOLATION: LAST TRANSMISSION", "objective": "Break through the Directorate cordon and get any colonist carrying the stolen coordinates to extraction.", "objective_kind": "extraction", "faction": "directorate", "map_recipe": "directorate_checkpoint", "materials_reward": 30, "round_limit": 6 }
   ],
   "map_recipes": [
     {
@@ -35,6 +36,13 @@
       "objective_tile": [9, 4],
       "terrain_costs": [{ "position": [4, 3], "cost": 2 }, { "position": [4, 4], "cost": 2 }, { "position": [8, 2], "cost": 2 }, { "position": [8, 5], "cost": 2 }],
       "cover_edges": [{ "position": [6, 2], "direction": "west", "strength": 20 }, { "position": [9, 5], "direction": "south", "strength": 20 }]
+    },
+    {
+      "id": "directorate_checkpoint",
+      "blocked_tiles": [[3, 1], [3, 2], [3, 5], [3, 6], [7, 2], [7, 3], [9, 5]],
+      "objective_tile": [10, 4],
+      "terrain_costs": [{ "position": [5, 3], "cost": 2 }, { "position": [5, 4], "cost": 2 }, { "position": [8, 5], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 2], "direction": "west", "strength": 25 }, { "position": [8, 4], "direction": "east", "strength": 25 }]
     },
     {
       "id": "ascendant_ruin",

@@ -144,11 +144,16 @@ integrity the cover and any attached directional edge are removed, emitting an o
 destruction event. Strategic colony structures are unchanged after the operation;
 persistent building damage remains a separate campaign concern.
 
-`ObjectiveKind` selects one of three victory contracts. `SecureAndClear` requires an
+`ObjectiveKind` selects one of four victory contracts. `SecureAndClear` requires an
 adjacent interaction followed by neutralizing all hostiles. `EliminateAll` resolves as
 soon as the last hostile falls. `Holdout` resolves when the squad survives beyond the
 round limit, or earlier if it neutralizes every attacker. Every contract still fails if
 all colonists are incapacitated; non-holdout missions also fail at their deadline.
+
+`Extraction` is the fourth contract: any active colonist adjacent to the evac tile may
+spend one action point to end the operation immediately, even while hostiles remain.
+The shorter Directorate courier template uses this rule to turn movement, cover
+breaching, and defensive abilities into an alternate route to victory.
 
 ### 5.4 Enemy AI
 
@@ -357,8 +362,8 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `roster`, `briefing`, `gameplay`,
-`equipment`, `class_target`, `breach`, and `debrief` by default. Capture setup seeds each
-scene deterministically, including equipment/class targeting and breached-cover states.
+`extraction`, `equipment`, `class_target`, `breach`, and `debrief` by default. Capture
+setup seeds each scene deterministically, including objective and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
 
 ## 13. Verification
@@ -368,7 +373,7 @@ The completion baseline is:
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
 - `cargo test` (43 domain/migration tests plus the shared source-size gate)
-- deterministic nine-scene capture with visual inspection
+- deterministic ten-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -393,11 +398,11 @@ project-standard publisher.
 The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
 boundaries when continuing:
 
-- Escort, defense-target integrity, extraction, and multi-stage mission contracts remain
-  beyond the three implemented objective types.
+- Escort, defense-target integrity, and multi-stage mission contracts remain beyond the
+  four implemented objective types.
 - Elevation, long-lived injuries as tactical statuses, reactions, and animation/audio
   consumers are not yet implemented.
-- The three current map recipes are fixed authored layouts. Procedural variation,
+- The four current map recipes are fixed authored layouts. Procedural variation,
   elevation, spawn recipes, and additional battlefield families remain future work.
 - The colony has fixed initial facilities and placeable barricades; population,
   building damage/repair, power demand, and free placement for every building remain.

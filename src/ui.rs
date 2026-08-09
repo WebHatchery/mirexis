@@ -412,8 +412,10 @@ fn draw_map(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
                 Color::new(0.78, 0.94, 0.63, 1.0),
             );
         }
-        if ctx.mission.objective_kind == ObjectiveKind::SecureAndClear
-            && position == ctx.session.tactical.objective_tile
+        if matches!(
+            ctx.mission.objective_kind,
+            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction
+        ) && position == ctx.session.tactical.objective_tile
             && ctx.session.tactical.objective_state == ObjectiveState::Active
         {
             draw_circle_lines(
@@ -590,6 +592,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",
         ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
         ObjectiveKind::Holdout => "HOLD THE PERIMETER",
+        ObjectiveKind::Extraction => "EXTRACT COLONIST",
     };
     if button(
         Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
@@ -695,6 +698,12 @@ fn objective_progress(ctx: &UiContext<'_>) -> String {
                 remaining, hostiles, waves
             )
         }
+        ObjectiveKind::Extraction => match ctx.session.tactical.objective_state {
+            ObjectiveState::Active => format!("REACH EVAC · {} HOSTILES", hostiles),
+            ObjectiveState::Victory => "COLONIST EVACUATED".to_owned(),
+            ObjectiveState::Failed => "EVACUATION FAILED".to_owned(),
+            ObjectiveState::Secured => "EVACUATION CONFIRMED".to_owned(),
+        },
     }
 }
 

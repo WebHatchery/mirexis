@@ -12,7 +12,7 @@
     ./scripts/capture_ui.ps1 -Frames 60 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("title", "colony", "roster", "briefing", "gameplay", "equipment", "class_target", "breach", "debrief"),
+    [string[]]$Scenes = @("title", "colony", "roster", "briefing", "gameplay", "extraction", "equipment", "class_target", "breach", "debrief"),
     [int]$Frames = 150,
     [string]$OutputDir = "docs\verification",
     [switch]$SkipBuild

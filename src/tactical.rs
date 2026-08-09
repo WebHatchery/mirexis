@@ -252,6 +252,9 @@ pub enum BattleEvent {
     ObjectiveSecured {
         unit_id: String,
     },
+    ExtractionCompleted {
+        unit_id: String,
+    },
     MutationActivated {
         unit_id: String,
         gift: String,

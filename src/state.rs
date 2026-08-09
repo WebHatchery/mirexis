@@ -412,8 +412,10 @@ impl GameSession {
 
     fn validate_interact(&self, unit_id: &str) -> Result<CommandCost, RuleError> {
         let unit = self.active_unit_for_phase(unit_id)?;
-        if self.tactical.objective_kind != ObjectiveKind::SecureAndClear
-            || self.tactical.objective_state != ObjectiveState::Active
+        if !matches!(
+            self.tactical.objective_kind,
+            ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction
+        ) || self.tactical.objective_state != ObjectiveState::Active
             || manhattan(unit.position, self.tactical.objective_tile) > 1
         {
             return Err(RuleError::ObjectiveUnavailable);
@@ -538,8 +540,13 @@ impl GameSession {
             .unwrap()
             .action_points -= 1;
         self.tactical.objective_state = ObjectiveState::Secured;
-        let mut events = vec![BattleEvent::ObjectiveSecured {
-            unit_id: unit_id.to_owned(),
+        let mut events = vec![match self.tactical.objective_kind {
+            ObjectiveKind::Extraction => BattleEvent::ExtractionCompleted {
+                unit_id: unit_id.to_owned(),
+            },
+            _ => BattleEvent::ObjectiveSecured {
+                unit_id: unit_id.to_owned(),
+            },
         }];
         self.check_outcome(&mut events);
         events
@@ -671,6 +678,11 @@ impl GameSession {
                 ObjectiveKind::EliminateAll if !hostiles_alive => Some(ObjectiveState::Victory),
                 ObjectiveKind::Holdout
                     if !hostiles_alive && self.tactical.reinforcement_waves.is_empty() =>
+                {
+                    Some(ObjectiveState::Victory)
+                }
+                ObjectiveKind::Extraction
+                    if self.tactical.objective_state == ObjectiveState::Secured =>
                 {
                     Some(ObjectiveState::Victory)
                 }
@@ -921,6 +933,34 @@ mod tests {
         }
         secure.check_outcome(&mut Vec::new());
         assert_eq!(secure.tactical.objective_state, ObjectiveState::Active);
+
+        let mut extraction = base.clone();
+        extraction.tactical.objective_kind = ObjectiveKind::Extraction;
+        let colonist_id = extraction.tactical.selected_unit.clone().unwrap();
+        extraction
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == colonist_id)
+            .unwrap()
+            .position = TilePos::new(
+            extraction.tactical.objective_tile.x - 1,
+            extraction.tactical.objective_tile.y,
+        );
+        let events = extraction
+            .execute(Command::Interact {
+                unit_id: colonist_id,
+            })
+            .unwrap();
+        assert_eq!(extraction.tactical.objective_state, ObjectiveState::Victory);
+        assert!(extraction
+            .tactical
+            .units
+            .iter()
+            .any(|unit| unit.team == Team::Hostile && !unit.incapacitated));
+        assert!(events
+            .iter()
+            .any(|event| matches!(event, BattleEvent::ExtractionCompleted { .. })));
 
         let (config, mut holdout) = session();
         holdout.tactical.objective_kind = ObjectiveKind::Holdout;

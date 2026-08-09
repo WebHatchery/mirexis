@@ -53,6 +53,7 @@ pub enum ObjectiveKind {
     SecureAndClear,
     EliminateAll,
     Holdout,
+    Extraction,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -477,13 +478,13 @@ mod tests {
         assert!(data.classes.len() >= 7);
         assert!(data.mutations.len() >= 5);
         assert_eq!(data.campaign.phase_id, "isolation");
-        assert!(data.campaign.mission_templates.len() >= 3);
+        assert!(data.campaign.mission_templates.len() >= 4);
         let objective_kinds = data
             .campaign
             .mission_templates
             .iter()
             .map(|mission| mission.objective_kind)
             .collect::<std::collections::HashSet<_>>();
-        assert_eq!(objective_kinds.len(), 3);
+        assert_eq!(objective_kinds.len(), 4);
     }
 }

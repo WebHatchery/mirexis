@@ -461,6 +461,6 @@ mod tests {
             assert_eq!(mission.hostile_faction, template.faction);
             assert!(layouts.insert(mission.blocked_tiles));
         }
-        assert_eq!(layouts.len(), 3);
+        assert_eq!(layouts.len(), 4);
     }
 }

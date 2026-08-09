@@ -12,7 +12,7 @@ The completed roadmap slice includes:
 - a title → colony → briefing → tactical → debrief campaign loop
 - deterministic weighted movement, attacks, cover, armour, objectives, and enemy AI
 - obstacle-blocked firing lanes and once-per-round tactical mutation gifts
-- secure-and-clear, elimination, and holdout mission objectives with live progress
+- secure-and-clear, elimination, holdout, and extraction objectives with live progress
 - faction-specific battlefields and Brood, Directorate, or Ascendant enemy squads
 - seven class actions, explicit Medic/Engineer/Psionic targeting, and combat statuses
 - role-aware hostile activations and deterministic holdout reinforcements
