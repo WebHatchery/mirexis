@@ -50,6 +50,8 @@ The completed roadmap slice includes:
   important enemy movements, attacks, abilities, reinforcements, and phase handoff in beats
 - briefing-selectable wedge, line, and column deployment formations with deterministic
   fallback around blocked, hazardous, occupied, objective, or out-of-bounds entry cells
+- a two-step end-phase readiness guard when active colonists retain action points, cancelled
+  by any intervening tactical command and bypassed when nobody can act
 - persistent three-colonist squad selection with a visible reserve
 - persistent pair relationships that grow through shared victories and character
   events, surface in roster and briefing screens, and grant bounded trusted-squad bonuses

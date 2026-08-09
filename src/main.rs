@@ -39,6 +39,7 @@ mod objective_ui;
 mod operation_modifiers;
 mod overwatch;
 mod persistence;
+mod phase_readiness;
 mod phase_refresh;
 mod phase_replay;
 mod reinforcement_ui;

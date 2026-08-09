@@ -75,6 +75,10 @@ impl Game {
             }
             "combat_feedback" => self.capture_combat_feedback(),
             "phase_replay" => self.capture_phase_replay(),
+            "end_phase_guard" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.end_phase_armed = true;
+            }
             "line_formation" => self.capture_line_formation(),
             "breakwater" => self.capture_template_operation(
                 "escalation_bastion_breakwater",

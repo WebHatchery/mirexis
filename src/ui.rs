@@ -60,6 +60,7 @@ pub enum TargetingView<'a> {
 pub struct UiContext<'a> {
     pub feedback: &'a crate::combat_feedback::CombatFeedback,
     pub phase_replay: &'a crate::phase_replay::PhaseReplay,
+    pub end_phase_armed: bool,
     pub data: &'a GameData,
     pub mission: &'a MissionDef,
     pub session: &'a GameSession,
@@ -614,6 +615,14 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         actions,
     );
     let phase_width = (panel.w - 44.0) * 0.46;
+    let ready = crate::phase_readiness::ready_count(ctx.session);
+    let end_phase_label = if ctx.end_phase_armed {
+        format!("CONFIRM END · {} READY", ready)
+    } else if ready > 0 {
+        format!("END PHASE · {} READY", ready)
+    } else {
+        "END COLONY PHASE".to_owned()
+    };
     if button(
         Rect::new(x, panel.bottom() - 100.0, phase_width, 44.0),
         "OVERWATCH",
@@ -629,7 +638,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             panel.w - 44.0 - phase_width,
             44.0,
         ),
-        "END COLONY PHASE",
+        &end_phase_label,
         true,
         mouse,
     ) {

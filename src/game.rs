@@ -66,6 +66,7 @@ pub struct Game {
     observed_event_count: usize,
     phase_replay: PhaseReplay,
     deployment_formation: FormationKind,
+    end_phase_armed: bool,
 }
 
 impl Game {
@@ -112,6 +113,7 @@ impl Game {
             observed_event_count: 0,
             phase_replay: PhaseReplay::default(),
             deployment_formation: FormationKind::default(),
+            end_phase_armed: false,
         }
     }
 
@@ -155,6 +157,7 @@ impl Game {
             AppState::Tactical => ui::draw_tactical(UiContext {
                 feedback: &self.combat_feedback,
                 phase_replay: &self.phase_replay,
+                end_phase_armed: self.end_phase_armed,
                 data: &self.data,
                 mission: &self.active_mission,
                 session: &self.session,
@@ -197,6 +200,9 @@ impl Game {
     }
 
     fn apply_action(&mut self, action: UiAction) {
+        if !matches!(&action, UiAction::EndPhase) {
+            self.end_phase_armed = false;
+        }
         match action {
             UiAction::StartMission => {
                 self.targeting = None;
@@ -585,6 +591,17 @@ impl Game {
                 }
             }
             UiAction::EndPhase => {
+                let ready = crate::phase_readiness::ready_count(&self.session);
+                if ready > 0 && !self.end_phase_armed {
+                    self.end_phase_armed = true;
+                    self.notifications.warning(format!(
+                        "{} colonist{} still ready · end phase again to confirm",
+                        ready,
+                        if ready == 1 { "" } else { "s" }
+                    ));
+                    return;
+                }
+                self.end_phase_armed = false;
                 self.targeting = None;
                 let first_event = self.session.tactical.event_log.len();
                 self.session.end_player_phase(&self.data.config);

@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.47.0
+Save/content version: 1.48.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -105,6 +105,7 @@ Important transition payloads:
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |
 | `phase_refresh.rs` | Team AP, regeneration, temporary-stat, and per-phase-use reset | Command validation or drawing |
+| `phase_readiness.rs` | Read-only active colonist count for guarded phase handoff | Command execution or persistence |
 | `phase_replay.rs` | Bounded timed hostile-event playback and skip affordance | Simulation ordering or persistence |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
@@ -618,6 +619,7 @@ Migration coverage:
 | 1.44.0 | No new fields; transient combat feedback derives from newly appended battle events |
 | 1.45.0 | No new fields; hostile-phase playback is bounded presentation state only |
 | 1.46.0 | No new fields; formation choice is applied only while creating a new session |
+| 1.47.0 | No new fields; end-phase confirmation is transient application UI state |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -655,7 +657,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`, `combat_feedback`, `phase_replay`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -669,8 +671,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (143 domain/migration tests plus the shared source-size gate)
-- deterministic seventy-three-scene capture with visual inspection
+- `cargo test` (144 domain/migration tests plus the shared source-size gate)
+- deterministic seventy-four-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -726,5 +728,5 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an end-phase readiness guard that reports colonists
-with meaningful actions remaining and requires an explicit second confirmation to proceed.
+The recommended next vertical slice is next-ready-colonist cycling from keyboard and the
+tactical footer, reducing repeated map scanning during multi-character turns.

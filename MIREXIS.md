@@ -447,6 +447,11 @@ The chosen shape is applied only when a new tactical session is created. Any pre
 that is blocked, hazardous, occupied, reserved for the objective, or outside the map falls
 back deterministically to a safe western entry cell; loaded battles retain realized positions.
 
+Ending a colony phase while active colonists retain action points now arms a readiness
+warning instead of immediately yielding to hostiles. The button reports how many colonists
+are still ready and requires a second End Phase command; any intervening tactical action
+cancels the warning, while a fully spent squad hands off without an unnecessary confirmation.
+
 Each briefing roster row also selects that colonist for a derived loadout summary beside
 the threat report. Mutation, primary weapon, health, accuracy, armour, movement, damage,
 range, weapon AP, and lasting scars can be compared while toggling the three-person squad.
