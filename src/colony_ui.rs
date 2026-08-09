@@ -247,8 +247,16 @@ fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
-    let phase_progress = if campaign.strategy.contact_complete {
-        "ADAPTATION // CONTACT COMPLETE // MUTATION PRESSURE RISING".to_owned()
+    let phase_progress = if campaign.strategy.adaptation_complete {
+        "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
+    } else if campaign.strategy.contact_complete {
+        let (operation, evolved, lab) = campaign.adaptation_completion_progress();
+        format!(
+            "ADAPTATION // GLASS {} // EVOLVED {}/2 // LAB {}",
+            if operation { "WON" } else { "PENDING" },
+            evolved.min(2),
+            if lab { "READY" } else { "PENDING" }
+        )
     } else if campaign.strategy.isolation_complete {
         data.campaign
             .contact_protocols

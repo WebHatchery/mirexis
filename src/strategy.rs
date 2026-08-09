@@ -105,6 +105,10 @@ pub struct StrategyState {
     pub contact_trace_completed: bool,
     #[serde(default)]
     pub contact_complete: bool,
+    #[serde(default)]
+    pub adaptation_operation_completed: bool,
+    #[serde(default)]
+    pub adaptation_complete: bool,
     rng: SeededRng,
 }
 
@@ -174,6 +178,8 @@ impl StrategyState {
             contact_protocol_id: String::new(),
             contact_trace_completed: false,
             contact_complete: false,
+            adaptation_operation_completed: false,
+            adaptation_complete: false,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -303,6 +309,15 @@ impl StrategyState {
             {
                 self.contact_trace_completed = true;
             }
+            if data
+                .campaign
+                .mission_templates
+                .iter()
+                .find(|template| template.id == mission.template_id)
+                .is_some_and(|template| template.required_phase == "adaptation")
+            {
+                self.adaptation_operation_completed = true;
+            }
         }
         if let Some(faction) = self
             .factions
@@ -426,6 +441,28 @@ impl StrategyState {
         self.phase_name = "PHASE THREE: ADAPTATION".to_owned();
         self.phase_summary =
             "Contact changed Mirexis. The colony must now decide which changes it can survive."
+                .to_owned();
+        true
+    }
+
+    pub fn refresh_adaptation_completion(
+        &mut self,
+        enough_evolutions: bool,
+        gene_lab_powered: bool,
+    ) -> bool {
+        if self.adaptation_complete
+            || !self.contact_complete
+            || !self.adaptation_operation_completed
+            || !enough_evolutions
+            || !gene_lab_powered
+        {
+            return false;
+        }
+        self.adaptation_complete = true;
+        self.phase_id = "escalation".to_owned();
+        self.phase_name = "PHASE FOUR: ESCALATION".to_owned();
+        self.phase_summary =
+            "Mirexis has learned to direct its changes. The three powers now move openly against it."
                 .to_owned();
         true
     }

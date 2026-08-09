@@ -1,8 +1,8 @@
 # Mirexis Technical Design
 
 Status: Phase 0 through Phase 4 roadmap complete
-Current campaign slice: Phase Three — full-roster mutation evolution
-Save/content version: 1.17.0
+Current campaign slice: Phase Four — Escalation entry
+Save/content version: 1.18.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -396,6 +396,13 @@ and preserves the existing selected-colonist state. The facility can be damaged,
 repaired, or disabled by insufficient power. Migrating an evolved 1.13 save adds the
 lab to an open colony plot without changing the established evolution.
 
+Adaptation has a persistent three-gate completion contract: win Glass Nerve, evolve
+at least two colonists, and keep the Gene Lab operational. The colony hub displays
+each gate. Meeting all three advances the saved phase to Phase Four: Escalation,
+regenerates mission offers without the Adaptation-only operation, and leaves unfinished
+Gene Lab paths available. A transition can occur after either the operation or the
+second evolution, so both orderings share one idempotent refresh path.
+
 ## 9. Content Registry
 
 Current embedded files under `assets/data/` are:
@@ -467,6 +474,7 @@ Migration coverage:
 | 1.14.0 | Data-backed Chitinous Growth evolution paths for unevolved Mara saves |
 | 1.15.0 | Data-backed Regenerative Tissue evolution paths for unevolved Ilya saves |
 | 1.16.0 | Data-backed Elastic Musculature evolution paths for unevolved Sol saves |
+| 1.17.0 | Persistent Glass Nerve and Adaptation completion gates |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -499,7 +507,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `contact`, `damage`, `power`,
 `construction`, `research`, `roster`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
-`mara_evolution`, `ilya_evolution`, `sol_evolution`,
+`mara_evolution`, `ilya_evolution`, `sol_evolution`, `escalation`,
 `adaptation_operation`, `glass_nerve`, `legacy`,
 `briefing`, `pressure`, `gameplay`,
 `extraction`, `variant`, `sporefield`, `vault`, `black_channel`, `living_chorus`,
@@ -515,8 +523,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (83 domain/migration tests plus the shared source-size gate)
-- deterministic thirty-four-scene capture with visual inspection
+- `cargo test` (85 domain/migration tests plus the shared source-size gate)
+- deterministic thirty-five-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
@@ -556,11 +564,11 @@ boundaries when continuing:
   operation whose victory unlocks a matching equipment prototype and aftermath event.
   Completing all three Contact gates advances into Adaptation. Neural Bloom has the
   first irreversible gift/complication evolution and its own scavenging operation;
-  more Adaptation operations, evolution options for the remaining mutations, and later
-  phases remain future content.
+  two evolved colonists and an operational Gene Lab complete Adaptation and enter
+  Escalation. Escalation-specific operations and later phases remain future content.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is an Adaptation completion contract: win Glass
-Nerve and stabilize multiple colonists in the powered Gene Lab, then advance the saved
-campaign into Phase Four: Escalation with a visible set of gates.
+The recommended next vertical slice is the first Escalation-specific operation, with
+open three-faction contest pressure and a battlefield objective that distinguishes the
+new phase from the Contact and Adaptation mission pools.

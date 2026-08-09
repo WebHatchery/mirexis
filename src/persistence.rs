@@ -807,4 +807,19 @@ mod tests {
             2
         );
     }
+
+    #[test]
+    fn full_roster_save_gains_adaptation_completion_gates() {
+        let data = GameData::load().unwrap();
+        let campaign = CampaignState::new(&data);
+        let session = GameSession::new(&data.config, &data.mission, &data.roster);
+        let mut legacy = serde_json::to_value(session.to_save("1.17.0", &campaign)).unwrap();
+        let strategy = legacy["campaign"]["strategy"].as_object_mut().unwrap();
+        strategy.remove("adaptation_operation_completed");
+        strategy.remove("adaptation_complete");
+        let migrated = migrate_save_value(Some("1.17.0".to_owned()), legacy, &data).unwrap();
+        assert_eq!(migrated.version, data.config.version);
+        assert!(!migrated.campaign.strategy.adaptation_operation_completed);
+        assert!(!migrated.campaign.strategy.adaptation_complete);
+    }
 }

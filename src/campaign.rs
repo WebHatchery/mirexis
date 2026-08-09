@@ -269,6 +269,7 @@ impl CampaignState {
             }
         }
         self.refresh_contact_completion(data);
+        self.refresh_adaptation_completion(data);
     }
 
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
@@ -529,8 +530,32 @@ impl CampaignState {
             .find(|character| character.id == character_id)
             .expect("evolution character was validated")
             .mutation_evolution_id = evolution.id.clone();
-        self.strategy.regenerate_missions(data);
+        if !self.refresh_adaptation_completion(data) {
+            self.strategy.regenerate_missions(data);
+        }
         Ok(evolution.name.clone())
+    }
+
+    pub fn adaptation_completion_progress(&self) -> (bool, usize, bool) {
+        (
+            self.strategy.adaptation_operation_completed,
+            self.roster
+                .iter()
+                .filter(|character| !character.mutation_evolution_id.is_empty())
+                .count(),
+            self.colony.has_facility(BuildingKind::GeneLab),
+        )
+    }
+
+    pub fn refresh_adaptation_completion(&mut self, data: &GameData) -> bool {
+        let (_, evolved, lab) = self.adaptation_completion_progress();
+        let changed = self
+            .strategy
+            .refresh_adaptation_completion(evolved >= 2, lab);
+        if changed {
+            self.strategy.regenerate_missions(data);
+        }
+        changed
     }
 
     pub fn training_cost(&self, character_id: &str, class: &ClassDef) -> Option<u32> {
@@ -1189,5 +1214,38 @@ mod tests {
         let after = derive_unit(base, &campaign.roster[3], &data);
         assert_eq!(after.armour, before.armour + 1);
         assert_eq!(after.weapon_damage, before.weapon_damage - 1);
+    }
+
+    #[test]
+    fn adaptation_completion_requires_glass_nerve_and_two_evolutions() {
+        let data = GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.contact_complete = true;
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        campaign.colony.ensure_gene_lab();
+        campaign.colony.resources.power += 2;
+        campaign.colony.resources.biomass = 50;
+        campaign
+            .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
+            .unwrap();
+        campaign
+            .choose_mutation_evolution("mara_venn", "fortress_carapace", &data)
+            .unwrap();
+        assert!(!campaign.strategy.adaptation_complete);
+        let mission = campaign.strategy.selected_mission().unwrap().clone();
+        assert_eq!(mission.template_id, "adaptation_glass_nerve");
+        let outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: mission.materials_reward,
+            biomass_awarded: mission.biomass_reward,
+            power_awarded: mission.power_reward,
+        };
+        campaign.apply_mission_outcome(&outcome, &mission, &data);
+        assert!(campaign.strategy.adaptation_operation_completed);
+        assert!(campaign.strategy.adaptation_complete);
+        assert_eq!(campaign.strategy.phase_id, "escalation");
     }
 }

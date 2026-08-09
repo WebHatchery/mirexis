@@ -5,7 +5,7 @@ colony caught between the Directorate, the Brood, and the Ascendants. The comple
 game concept is in [MIREXIS.md](MIREXIS.md); current architecture and continuation
 contracts are in [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md).
 
-## Current Slice: Phase Three — Adaptation
+## Current Slice: Phase Four — Escalation
 
 The completed roadmap slice includes:
 
@@ -58,6 +58,9 @@ The completed roadmap slice includes:
 - an Adaptation-only Glass Nerve operation generated immediately after evolution,
   with a distinct Ascendant cradle battlefield, a six-round secure-and-clear contract,
   and visible materials, biomass, and power recovery
+- a visible Adaptation completion contract—Glass Nerve victory, two evolved colonists,
+  and an operational Gene Lab—that advances the persisted campaign into Phase Four:
+  Escalation
 - versioned native/WASM saves and event autosaves through macroquad-toolkit
 - deterministic visual captures and schema migrations from every prior project version
 

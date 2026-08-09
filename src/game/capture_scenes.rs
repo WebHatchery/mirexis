@@ -20,6 +20,7 @@ impl Game {
             "mara_evolution" => self.capture_mara_evolution(),
             "ilya_evolution" => self.capture_ilya_evolution(),
             "sol_evolution" => self.capture_sol_evolution(),
+            "escalation" => self.capture_escalation(),
             "adaptation_operation" => self.capture_adaptation_operation(),
             "glass_nerve" => self.capture_template_operation(
                 "adaptation_glass_nerve",
@@ -183,6 +184,20 @@ impl Game {
             .expect("Sol's Adaptation capture evolution is available");
         self.campaign.selected_character_id = "sol_cairn".to_owned();
         self.state = AppState::GeneLab;
+    }
+
+    fn capture_escalation(&mut self) {
+        self.capture_gene_lab();
+        self.campaign.colony.resources.biomass += 10;
+        self.campaign
+            .choose_mutation_evolution("kira_voss", "expanded_cortex", &self.data)
+            .expect("Escalation capture can evolve Kira");
+        self.campaign
+            .choose_mutation_evolution("mara_venn", "fortress_carapace", &self.data)
+            .expect("Escalation capture can evolve Mara");
+        self.campaign.strategy.adaptation_operation_completed = true;
+        assert!(self.campaign.refresh_adaptation_completion(&self.data));
+        self.state = AppState::Colony;
     }
 
     fn capture_adaptation_operation(&mut self) {
