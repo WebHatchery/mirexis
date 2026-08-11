@@ -67,10 +67,7 @@ impl BuildingKind {
     }
 
     pub fn footprint(self) -> &'static [[i32; 2]] {
-        match self {
-            Self::Barracks | Self::Barricade => &[[0, 0], [1, 0]],
-            _ => &[[0, 0]],
-        }
+        &[[0, 0], [1, 0]]
     }
 
     fn occupies(self, anchor: [i32; 2], position: [i32; 2]) -> bool {

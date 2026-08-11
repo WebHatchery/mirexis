@@ -106,13 +106,40 @@ fn wide_structure_footprints_reserve_and_report_both_plots() {
 }
 
 #[test]
+fn every_building_kind_claims_its_second_plot() {
+    let colony = ColonyState::new();
+    for building in &colony.buildings {
+        let second = [building.position[0] + 1, building.position[1]];
+        assert_eq!(
+            colony.building_at(second).map(|found| found.id.as_str()),
+            Some(building.id.as_str()),
+            "{} left its second plot open",
+            building.kind.name()
+        );
+    }
+
+    for kind in [
+        BuildingKind::CommandCentre,
+        BuildingKind::Barracks,
+        BuildingKind::Infirmary,
+        BuildingKind::Workshop,
+        BuildingKind::Barricade,
+        BuildingKind::Hydroponics,
+        BuildingKind::PowerPlant,
+        BuildingKind::GeneLab,
+    ] {
+        assert_eq!(kind.footprint(), &[[0, 0], [1, 0]]);
+    }
+}
+
+#[test]
 fn multi_plot_structures_must_fit_inside_the_colony_boundary() {
     let mut colony = ColonyState::new();
     assert!(colony
         .place_construction(BuildingKind::Barricade, [COLONY_WIDTH - 1, 1])
         .is_err());
     assert!(colony
-        .place_construction(BuildingKind::PowerPlant, [COLONY_WIDTH - 1, 1])
+        .place_construction(BuildingKind::PowerPlant, [COLONY_WIDTH - 2, 1])
         .is_ok());
 }
 
