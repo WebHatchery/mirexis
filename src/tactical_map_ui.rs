@@ -72,6 +72,9 @@ pub(crate) fn draw(
     );
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     let camera_dragged = input_enabled && camera.update(grid_rect, mouse);
+    if camera_control_clicked {
+        camera.guard_next_primary_release();
+    }
     let suppress_map_click = !input_enabled || camera_control_clicked || camera_dragged;
     camera.clamp_isometric_with_insets(
         ctx.session.tactical.fog.width,

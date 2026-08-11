@@ -65,7 +65,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 36 | damage | `ui_damage.png` | 376934 | `f9b6c3cb6cb4d0f4482ee1755df0e0f8ba53469bcf4bc5145976b35ee32eb115` |
 | 37 | repair | `ui_repair.png` | 383921 | `79a6f7f239a6638e20c1447cfc575810fd0bbd4f726e15147d2d89cd4a33babc` |
 | 38 | power | `ui_power.png` | 375195 | `0ca2b22eefc22a282e9929754a7cd51dca92485e802e88e1d7d3c049c0324102` |
-| 39 | construction | `ui_construction.png` | 380447 | `f7b093bd737b5562136b9bf4cd0464566360997bd245bc1564b9737e574602b0` |
+| 39 | construction | `ui_construction.png` | 380927 | `e867ce136cc9f7ea2c344983a048055be47b8ff978da0ae57ed0e1ff8c751d5f` |
 | 40 | research | `ui_research.png` | 365816 | `e40a5fed080d82287b48c7bd8a7afa228a3eea95e14091d7f4b35912a4381d98` |
 | 41 | roster | `ui_roster.png` | 248628 | `ab7b20d1cf773328ceca779831f316cc25ca36f636c2f629db88884b7574e8f8` |
 | 42 | advanced_roster | `ui_advanced_roster.png` | 247375 | `1b186947c5ea5b66b3b62295520d5c34103c5523975c2c72d55d21033a70885a` |

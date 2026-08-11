@@ -32,6 +32,8 @@ pub(crate) struct WorldCamera {
     primary_drag_start: Option<Vec2>,
     primary_drag_anchor: Option<Vec2>,
     primary_dragged: bool,
+    primary_release_pending: bool,
+    pending_colony_plot: Option<[i32; 2]>,
     tracked_tile: Option<TilePos>,
 }
 
@@ -44,6 +46,8 @@ impl WorldCamera {
             primary_drag_start: None,
             primary_drag_anchor: None,
             primary_dragged: false,
+            primary_release_pending: false,
+            pending_colony_plot: None,
             tracked_tile: Some(tile),
         }
     }
@@ -56,6 +60,8 @@ impl WorldCamera {
             primary_drag_start: None,
             primary_drag_anchor: None,
             primary_dragged: false,
+            primary_release_pending: false,
+            pending_colony_plot: None,
             tracked_tile: Some(tracked_tile),
         }
     }
@@ -72,6 +78,8 @@ impl WorldCamera {
             primary_drag_start: None,
             primary_drag_anchor: None,
             primary_dragged: false,
+            primary_release_pending: false,
+            pending_colony_plot: None,
             tracked_tile: None,
         }
     }
@@ -91,10 +99,12 @@ impl WorldCamera {
         }
 
         let primary_down = is_mouse_button_down(MouseButton::Left);
+        let primary_pressed = is_mouse_button_pressed(MouseButton::Left);
+        self.begin_primary_press(inside, primary_pressed);
         let track_primary = primary_tracking(
             self.primary_drag_start.is_some(),
             inside,
-            is_mouse_button_pressed(MouseButton::Left),
+            primary_pressed,
             primary_down,
         );
         let suppress_primary_click = self.update_primary_drag(
@@ -114,6 +124,34 @@ impl WorldCamera {
         self.primary_drag_start.is_some()
     }
 
+    pub(crate) fn guard_next_primary_release(&mut self) {
+        self.primary_release_pending = true;
+    }
+
+    pub(crate) fn pending_colony_plot(&self) -> Option<[i32; 2]> {
+        self.pending_colony_plot
+    }
+
+    pub(crate) fn confirm_colony_plot(&mut self, position: [i32; 2]) -> bool {
+        if self.pending_colony_plot == Some(position) {
+            self.pending_colony_plot = None;
+            true
+        } else {
+            self.pending_colony_plot = Some(position);
+            false
+        }
+    }
+
+    pub(crate) fn clear_pending_colony_plot(&mut self) {
+        self.pending_colony_plot = None;
+    }
+
+    fn begin_primary_press(&mut self, inside: bool, pressed: bool) {
+        if inside && pressed {
+            self.primary_release_pending = false;
+        }
+    }
+
     fn update_primary_drag(&mut self, down: bool, released: bool, mouse: Vec2) -> bool {
         if down {
             let start = *self.primary_drag_start.get_or_insert(mouse);
@@ -123,6 +161,7 @@ impl WorldCamera {
             } else if (mouse - start).length() >= 7.0 {
                 self.pan_screen(mouse - start);
                 self.primary_dragged = true;
+                self.primary_release_pending = true;
             }
             self.primary_drag_anchor = Some(mouse);
             return false;
@@ -134,11 +173,15 @@ impl WorldCamera {
             && release_delta.is_some_and(|delta| delta.length() >= 7.0);
         if crossed_threshold_on_release {
             self.pan_screen(release_delta.expect("threshold requires a drag origin"));
+            self.primary_release_pending = true;
         }
-        let suppress = released && (self.primary_dragged || crossed_threshold_on_release);
+        let suppress = released && self.primary_release_pending;
         self.primary_drag_start = None;
         self.primary_drag_anchor = None;
         self.primary_dragged = false;
+        if released {
+            self.primary_release_pending = false;
+        }
         suppress
     }
 

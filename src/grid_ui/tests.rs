@@ -295,6 +295,38 @@ fn primary_release_recovers_a_threshold_crossing_between_render_frames() {
 }
 
 #[test]
+fn primary_drag_suppression_survives_a_browser_frame_without_button_state() {
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    assert!(!camera.update_primary_drag(true, false, vec2(100.0, 100.0)));
+    assert!(!camera.update_primary_drag(true, false, vec2(112.0, 106.0)));
+
+    assert!(!camera.update_primary_drag(false, false, vec2(112.0, 106.0)));
+    assert!(camera.update_primary_drag(false, true, vec2(112.0, 106.0)));
+}
+
+#[test]
+fn camera_control_guard_blocks_an_untracked_release_but_not_a_new_map_press() {
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    camera.guard_next_primary_release();
+    assert!(camera.update_primary_drag(false, true, vec2(200.0, 200.0)));
+
+    camera.guard_next_primary_release();
+    camera.begin_primary_press(true, true);
+    assert!(!camera.update_primary_drag(true, false, vec2(200.0, 200.0)));
+    assert!(!camera.update_primary_drag(false, true, vec2(200.0, 200.0)));
+}
+
+#[test]
+fn colony_plot_actions_require_two_taps_on_the_same_plot() {
+    let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+    assert!(!camera.confirm_colony_plot([12, 11]));
+    assert_eq!(camera.pending_colony_plot(), Some([12, 11]));
+    assert!(!camera.confirm_colony_plot([13, 11]));
+    assert!(camera.confirm_colony_plot([13, 11]));
+    assert_eq!(camera.pending_colony_plot(), None);
+}
+
+#[test]
 fn primary_tap_does_not_pan_or_suppress_selection() {
     let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
     let before = camera.center;

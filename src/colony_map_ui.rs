@@ -51,6 +51,12 @@ pub(crate) fn draw(
         !camera.primary_gesture_active(),
     );
     let camera_dragged = camera.update(viewport, mouse);
+    if camera_control_clicked {
+        camera.guard_next_primary_release();
+    }
+    if camera_control_clicked || camera_dragged {
+        camera.clear_pending_colony_plot();
+    }
     let suppress_plot_click = camera_control_clicked || camera_dragged;
     camera.clamp_isometric_with_insets(
         COLONY_WIDTH as usize,
@@ -87,8 +93,8 @@ pub(crate) fn draw(
     draw_inhabitants(campaign, assets, visuals, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
-    draw_hover_card(campaign, hovered);
-    handle_plot_click(campaign, hovered, suppress_plot_click, actions);
+    draw_hover_card(campaign, hovered, camera.pending_colony_plot());
+    handle_plot_click(campaign, camera, hovered, suppress_plot_click, actions);
     draw_build_controls(campaign, mouse, actions);
     draw_text(
         format!(
@@ -610,7 +616,7 @@ fn draw_blueprint(center: Vec2, kind: BuildingKind) {
     );
 }
 
-fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>) {
+fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending: Option<[i32; 2]>) {
     let Some(position) = hovered else { return };
     let building = campaign
         .colony
@@ -645,6 +651,11 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>) {
             campaign.colony.planned_construction.material_cost()
         )
     };
+    let text = if pending == Some(position) {
+        format!("TAP AGAIN TO CONFIRM // {text}")
+    } else {
+        format!("TAP TO ARM // {text}")
+    };
     draw_rectangle(
         70.0,
         566.0,
@@ -657,6 +668,7 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>) {
 
 fn handle_plot_click(
     campaign: &CampaignState,
+    camera: &mut WorldCamera,
     hovered: Option<[i32; 2]>,
     suppress_click: bool,
     actions: &mut Vec<UiAction>,
@@ -665,6 +677,9 @@ fn handle_plot_click(
         return;
     }
     let Some(position) = hovered else { return };
+    if !camera.confirm_colony_plot(position) {
+        return;
+    }
     if let Some(building) = campaign
         .colony
         .buildings
