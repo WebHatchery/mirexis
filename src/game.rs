@@ -13,6 +13,7 @@ use crate::colony_ui;
 use crate::combat_feedback::CombatFeedback;
 use crate::data::{GameData, MissionDef};
 use crate::formation::FormationKind;
+use crate::grid_ui::WorldCamera;
 use crate::phase_replay::PhaseReplay;
 use crate::state::{GameSession, MissionOutcome};
 use crate::ui::{self, TargetingView, UiAction, UiContext};
@@ -76,6 +77,8 @@ pub struct Game {
     title_focus_continue: bool,
     title_focus_active: bool,
     title_hover_preview: bool,
+    tactical_camera: WorldCamera,
+    colony_camera: WorldCamera,
 }
 
 impl Game {
@@ -114,6 +117,8 @@ impl Game {
             ));
         }
 
+        let tactical_camera = WorldCamera::tactical_start(session.tactical.selected_tile);
+        let colony_camera = WorldCamera::colony_start([3, 3]);
         Self {
             data,
             session,
@@ -140,6 +145,8 @@ impl Game {
             title_focus_continue: false,
             title_focus_active: false,
             title_hover_preview: false,
+            tactical_camera,
+            colony_camera,
         }
     }
 
@@ -184,6 +191,7 @@ impl Game {
                 &self.assets,
                 &self.visuals,
                 &virtual_ui,
+                &mut self.colony_camera,
             ),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -208,33 +216,36 @@ impl Game {
                 &self.visuals,
                 &virtual_ui,
             ),
-            AppState::Tactical => ui::draw_tactical(UiContext {
-                feedback: &self.combat_feedback,
-                phase_replay: &self.phase_replay,
-                end_phase_armed: self.end_phase_armed,
-                data: &self.data,
-                assets: &self.assets,
-                visuals: &self.visuals,
-                mission: &self.active_mission,
-                session: &self.session,
-                save_exists: self.save_exists,
-                loaded_assets: self.assets.len(),
-                ui: &virtual_ui,
-                targeting: self.targeting.as_ref().map(|targeting| match targeting {
-                    TacticalTargeting::Equipment {
-                        unit_id,
-                        equipment_id,
-                    } => TargetingView::Equipment {
-                        unit_id,
-                        equipment_id,
-                    },
-                    TacticalTargeting::ClassAction { unit_id } => {
-                        TargetingView::ClassAction { unit_id }
-                    }
-                }),
-                show_help: self.show_tactical_help,
-                show_battle_log: self.show_battle_log,
-            }),
+            AppState::Tactical => ui::draw_tactical(
+                UiContext {
+                    feedback: &self.combat_feedback,
+                    phase_replay: &self.phase_replay,
+                    end_phase_armed: self.end_phase_armed,
+                    data: &self.data,
+                    assets: &self.assets,
+                    visuals: &self.visuals,
+                    mission: &self.active_mission,
+                    session: &self.session,
+                    save_exists: self.save_exists,
+                    loaded_assets: self.assets.len(),
+                    ui: &virtual_ui,
+                    targeting: self.targeting.as_ref().map(|targeting| match targeting {
+                        TacticalTargeting::Equipment {
+                            unit_id,
+                            equipment_id,
+                        } => TargetingView::Equipment {
+                            unit_id,
+                            equipment_id,
+                        },
+                        TacticalTargeting::ClassAction { unit_id } => {
+                            TargetingView::ClassAction { unit_id }
+                        }
+                    }),
+                    show_help: self.show_tactical_help,
+                    show_battle_log: self.show_battle_log,
+                },
+                &mut self.tactical_camera,
+            ),
             AppState::Debrief => crate::ui_debrief::draw_debrief(
                 &self.active_mission,
                 self.last_outcome
@@ -389,6 +400,8 @@ impl Game {
                     );
                     self.session =
                         GameSession::new(&self.data.config, &self.active_mission, &roster);
+                    self.tactical_camera =
+                        WorldCamera::tactical_start(self.session.tactical.selected_tile);
                     self.state = AppState::Tactical;
                     self.autosave_current("Deployment autosaved");
                     self.notifications.success(format!(

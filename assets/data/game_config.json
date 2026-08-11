@@ -3,8 +3,8 @@
   "display_name": "Mirexis",
   "save_slot": "campaign_autosave",
   "version": "1.57.0",
-  "world_width": 12,
-  "world_height": 8,
+  "world_width": 40,
+  "world_height": 40,
   "max_action_points": 5,
   "battle_seed": 1296651091
 }

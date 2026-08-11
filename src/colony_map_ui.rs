@@ -2,6 +2,7 @@
 
 use crate::campaign::CampaignState;
 use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH};
+use crate::grid_ui::WorldCamera;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
@@ -9,52 +10,127 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
+use macroquad_toolkit::ui::VirtualUi;
 
-const TILE_W: f32 = 78.0;
-const TILE_H: f32 = 40.0;
-const ORIGIN: Vec2 = Vec2::new(392.0, 200.0);
+pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
+pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
+
+#[derive(Clone, Copy)]
+struct ColonyView {
+    viewport: Rect,
+    origin: Vec2,
+    half_width: f32,
+    half_height: f32,
+    zoom: f32,
+}
+
+impl ColonyView {
+    fn new(viewport: Rect, camera: &WorldCamera) -> Self {
+        Self {
+            viewport,
+            origin: viewport.center() - camera.center * camera.zoom,
+            half_width: COLONY_HALF_WIDTH * camera.zoom,
+            half_height: COLONY_HALF_HEIGHT * camera.zoom,
+            zoom: camera.zoom,
+        }
+    }
+
+    fn plot_center(self, position: [i32; 2]) -> Vec2 {
+        vec2(
+            self.origin.x + (position[0] - position[1]) as f32 * self.half_width,
+            self.origin.y + (position[0] + position[1]) as f32 * self.half_height,
+        )
+    }
+
+    fn visible(self, position: [i32; 2], margin: f32) -> bool {
+        let center = self.plot_center(position);
+        center.x >= self.viewport.x - margin
+            && center.x <= self.viewport.right() + margin
+            && center.y >= self.viewport.y - margin
+            && center.y <= self.viewport.bottom() + margin
+    }
+}
 
 pub(crate) fn draw(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
+    ui: &VirtualUi,
+    camera: &mut WorldCamera,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let panel = Rect::new(18.0, 96.0, 820.0, 580.0);
+    let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
     draw_surface_with_title(
         panel,
-        Some("MIREXIS SETTLEMENT // BUILD, REPAIR, SURVIVE"),
+        Some("MIREXIS SETTLEMENT // EXPANSION CAMERA"),
         &SurfaceStyle::new(Color::new(0.026, 0.047, 0.053, 0.98))
             .with_border(1.0, Color::new(0.20, 0.50, 0.48, 0.9))
             .with_inner_border(6.0, 1.0, Color::new(0.12, 0.28, 0.27, 0.7))
-            .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
-        TextStyle::new(15.0, dark::TEXT),
+            .with_header(28.0, Color::new(0.06, 0.10, 0.11, 1.0)),
+        TextStyle::new(13.0, dark::TEXT),
     );
-    draw_wetland_backdrop(panel);
-    draw_campaign_evolution(campaign);
-    draw_service_paths(campaign);
-    let hovered = hovered_plot(mouse);
+    let viewport = Rect::new(
+        panel.x + 8.0,
+        panel.y + 32.0,
+        panel.w - 16.0,
+        panel.h - 102.0,
+    );
+    camera.update(viewport, mouse);
+    camera.clamp_isometric(
+        COLONY_WIDTH as usize,
+        COLONY_HEIGHT as usize,
+        COLONY_HALF_WIDTH,
+        COLONY_HALF_HEIGHT,
+        viewport,
+    );
+    let view = ColonyView::new(viewport, camera);
+    draw_wetland_backdrop(viewport);
+    crate::ui::set_ui_clip(ui, Some(viewport));
+    draw_campaign_evolution(campaign, view);
+    draw_service_paths(campaign, view);
+    let hovered = hovered_plot(view, mouse);
     for sum in 0..(COLONY_WIDTH + COLONY_HEIGHT - 1) {
         for y in 0..COLONY_HEIGHT {
             let x = sum - y;
             if !(0..COLONY_WIDTH).contains(&x) {
                 continue;
             }
-            draw_plot(campaign, assets, visuals, [x, y], hovered == Some([x, y]));
+            if view.visible([x, y], 80.0) {
+                draw_plot(
+                    campaign,
+                    assets,
+                    visuals,
+                    view,
+                    [x, y],
+                    hovered == Some([x, y]),
+                );
+            }
         }
     }
-    draw_inhabitants(campaign, assets, visuals);
-    draw_ending_manifestation(campaign, assets, visuals);
+    draw_inhabitants(campaign, assets, visuals, view);
+    draw_ending_manifestation(campaign, assets, visuals, view);
+    crate::ui::set_ui_clip(ui, None);
     draw_hover_card(campaign, hovered);
     handle_plot_click(campaign, hovered, actions);
     draw_build_controls(campaign, mouse, actions);
+    draw_text(
+        format!(
+            "DRAG MIDDLE/RIGHT TO PAN  //  WHEEL TO ZOOM  //  {}%",
+            (camera.zoom * 100.0) as i32
+        ),
+        panel.x + 14.0,
+        panel.bottom() - 76.0,
+        11.0,
+        Color::new(0.46, 0.68, 0.66, 1.0),
+    );
 }
 
 fn draw_ending_manifestation(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
+    view: ColonyView,
 ) {
     if !campaign.strategy.campaign_complete {
         return;
@@ -62,7 +138,7 @@ fn draw_ending_manifestation(
     match campaign.strategy.mirexis_path_id.as_str() {
         "human_redoubt" => {
             for position in [[1, 1], [5, 1], [1, 4], [5, 4]] {
-                let center = plot_center(position);
+                let center = view.plot_center(position);
                 visuals.draw_atlas_cell(
                     assets,
                     &visuals.colony,
@@ -81,7 +157,7 @@ fn draw_ending_manifestation(
         }
         "living_commonwealth" => {
             for position in [[1, 1], [5, 1], [1, 4], [5, 4]] {
-                let center = plot_center(position);
+                let center = view.plot_center(position);
                 visuals.draw_atlas_cell(
                     assets,
                     &visuals.colony,
@@ -138,7 +214,7 @@ fn draw_ending_manifestation(
     }
 }
 
-fn draw_campaign_evolution(campaign: &CampaignState) {
+fn draw_campaign_evolution(campaign: &CampaignState, view: ColonyView) {
     let (accent, label) = if campaign.strategy.campaign_complete {
         match campaign.strategy.mirexis_path_id.as_str() {
             "human_redoubt" => (Color::new(0.35, 0.72, 0.92, 0.54), "REDOUBT BULWARK"),
@@ -158,7 +234,7 @@ fn draw_campaign_evolution(campaign: &CampaignState) {
     } else {
         return;
     };
-    let anchor = vec2(690.0, 226.0);
+    let anchor = view.plot_center([11, 3]);
     for ring in 0..4 {
         draw_poly_lines(
             anchor.x,
@@ -191,20 +267,16 @@ fn draw_campaign_evolution(campaign: &CampaignState) {
     );
 }
 
-fn plot_center(position: [i32; 2]) -> Vec2 {
-    vec2(
-        ORIGIN.x + (position[0] - position[1]) as f32 * TILE_W * 0.5,
-        ORIGIN.y + (position[0] + position[1]) as f32 * TILE_H * 0.5,
-    )
-}
-
-fn hovered_plot(mouse: Vec2) -> Option<[i32; 2]> {
+fn hovered_plot(view: ColonyView, mouse: Vec2) -> Option<[i32; 2]> {
+    if !view.viewport.contains(mouse) {
+        return None;
+    }
     let mut hovered = None;
     for y in 0..COLONY_HEIGHT {
         for x in 0..COLONY_WIDTH {
-            let c = plot_center([x, y]);
-            let dx = (mouse.x - c.x).abs() / (TILE_W * 0.5);
-            let dy = (mouse.y - c.y).abs() / (TILE_H * 0.5);
+            let c = view.plot_center([x, y]);
+            let dx = (mouse.x - c.x).abs() / view.half_width;
+            let dy = (mouse.y - c.y).abs() / view.half_height;
             if dx + dy <= 1.0 {
                 hovered = Some([x, y]);
             }
@@ -248,10 +320,11 @@ fn draw_plot(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
+    view: ColonyView,
     position: [i32; 2],
     hovered: bool,
 ) {
-    let center = plot_center(position);
+    let center = view.plot_center(position);
     let building = campaign
         .colony
         .buildings
@@ -271,22 +344,23 @@ fn draw_plot(
         Color::new(0.075, 0.15, 0.15, 1.0)
     };
     draw_diamond(
+        view,
         center + vec2(0.0, 7.0),
         Color::new(0.025, 0.065, 0.064, 1.0),
     );
-    draw_diamond(center, top);
+    draw_diamond(view, center, top);
     draw_line(
-        center.x - TILE_W * 0.5,
+        center.x - view.half_width,
         center.y,
         center.x,
-        center.y + TILE_H * 0.5,
+        center.y + view.half_height,
         1.0,
         Color::new(0.20, 0.42, 0.37, 0.6),
     );
     draw_line(
         center.x,
-        center.y + TILE_H * 0.5,
-        center.x + TILE_W * 0.5,
+        center.y + view.half_height,
+        center.x + view.half_width,
         center.y,
         1.0,
         Color::new(0.05, 0.13, 0.13, 0.9),
@@ -303,7 +377,12 @@ fn draw_plot(
             assets,
             &visuals.colony,
             index,
-            Rect::new(center.x - 58.0, center.y - 86.0, 116.0, 116.0),
+            Rect::new(
+                center.x - 35.0 * view.zoom,
+                center.y - 52.0 * view.zoom,
+                70.0 * view.zoom,
+                70.0 * view.zoom,
+            ),
             tint,
         );
         draw_building_state(center, building.damaged, powered);
@@ -312,7 +391,12 @@ fn draw_plot(
             assets,
             &visuals.colony,
             building_index(project.kind),
-            Rect::new(center.x - 55.0, center.y - 82.0, 110.0, 110.0),
+            Rect::new(
+                center.x - 33.0 * view.zoom,
+                center.y - 49.0 * view.zoom,
+                66.0 * view.zoom,
+                66.0 * view.zoom,
+            ),
             Color::new(0.35, 0.78, 0.72, 0.22),
         );
         draw_project(center, project.kind);
@@ -385,13 +469,13 @@ fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
     }
 }
 
-fn draw_service_paths(campaign: &CampaignState) {
-    let hub = plot_center([3, 2]);
+fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
+    let hub = view.plot_center([3, 2]);
     for building in &campaign.colony.buildings {
         if building.position == [3, 2] {
             continue;
         }
-        let target = plot_center(building.position);
+        let target = view.plot_center(building.position);
         draw_line(
             hub.x,
             hub.y + 9.0,
@@ -411,10 +495,15 @@ fn draw_service_paths(campaign: &CampaignState) {
     }
 }
 
-fn draw_inhabitants(campaign: &CampaignState, assets: &AssetManager, visuals: &VisualCatalog) {
+fn draw_inhabitants(
+    campaign: &CampaignState,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+    view: ColonyView,
+) {
     let stations = [[1, 2], [2, 0], [4, 0], [5, 2], [3, 4]];
     for (index, character) in campaign.roster.iter().take(5).enumerate() {
-        let center = plot_center(stations[index]);
+        let center = view.plot_center(stations[index]);
         let side = if index % 2 == 0 { -1.0 } else { 1.0 };
         let person = center + vec2(side * 8.0, 9.0);
         draw_ellipse(
@@ -445,17 +534,17 @@ fn draw_inhabitants(campaign: &CampaignState, assets: &AssetManager, visuals: &V
     }
 }
 
-fn draw_diamond(center: Vec2, color: Color) {
+fn draw_diamond(view: ColonyView, center: Vec2, color: Color) {
     draw_triangle(
-        vec2(center.x, center.y - TILE_H * 0.5),
-        vec2(center.x - TILE_W * 0.5, center.y),
-        vec2(center.x, center.y + TILE_H * 0.5),
+        vec2(center.x, center.y - view.half_height),
+        vec2(center.x - view.half_width, center.y),
+        vec2(center.x, center.y + view.half_height),
         color,
     );
     draw_triangle(
-        vec2(center.x, center.y - TILE_H * 0.5),
-        vec2(center.x + TILE_W * 0.5, center.y),
-        vec2(center.x, center.y + TILE_H * 0.5),
+        vec2(center.x, center.y - view.half_height),
+        vec2(center.x + view.half_width, center.y),
+        vec2(center.x, center.y + view.half_height),
         color,
     );
 }

@@ -4,6 +4,7 @@ use super::Game;
 use crate::campaign::CampaignState;
 use crate::combat_feedback::CombatFeedback;
 use crate::formation::FormationKind;
+use crate::grid_ui::WorldCamera;
 use crate::phase_replay::PhaseReplay;
 use crate::state::GameSession;
 use macroquad_toolkit::events::EventBus;
@@ -37,5 +38,7 @@ impl Game {
         self.deployment_formation = FormationKind::default();
         self.end_phase_armed = false;
         self.title_hover_preview = false;
+        self.tactical_camera = WorldCamera::tactical_start(self.session.tactical.selected_tile);
+        self.colony_camera = WorldCamera::colony_start([3, 3]);
     }
 }

@@ -3,8 +3,8 @@
 use macroquad_toolkit::grid::TilePos;
 use serde::{Deserialize, Serialize};
 
-pub const COLONY_WIDTH: i32 = 8;
-pub const COLONY_HEIGHT: i32 = 6;
+pub const COLONY_WIDTH: i32 = 20;
+pub const COLONY_HEIGHT: i32 = 20;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -479,6 +479,17 @@ mod tests {
         assert!(colony.buildings.iter().any(
             |building| building.kind == BuildingKind::PowerPlant && building.position == [1, 1]
         ));
+    }
+
+    #[test]
+    fn colony_build_area_extends_far_beyond_the_initial_settlement() {
+        let mut colony = ColonyState::new();
+        colony
+            .place_construction(
+                BuildingKind::Barricade,
+                [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+            )
+            .expect("the far colony frontier remains buildable");
     }
 
     #[test]

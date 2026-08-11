@@ -1,7 +1,7 @@
 //! Three-quarter battlefield rendering, projected overlays, depth, and hit handling.
 
 use crate::data::{ObjectiveKind, Team};
-use crate::grid_ui::GridView;
+use crate::grid_ui::{GridView, WorldCamera};
 use crate::state::ObjectiveState;
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
@@ -10,33 +10,51 @@ use macroquad_toolkit::prelude::{
     dark, draw_surface, draw_surface_with_title, SurfaceStyle, TextStyle,
 };
 
-pub(crate) fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(18.0, 96.0, 820.0, 530.0);
+pub(crate) fn draw(
+    ctx: &UiContext<'_>,
+    camera: &mut WorldCamera,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
     draw_surface_with_title(
         panel,
-        Some("OUTER SETTLEMENT // THREE-QUARTER TACTICAL DIORAMA"),
+        Some("OUTER SETTLEMENT // TACTICAL CAMERA"),
         &SurfaceStyle::new(Color::new(0.018, 0.034, 0.040, 0.99))
             .with_border(1.0, Color::new(0.20, 0.50, 0.48, 0.9))
             .with_inner_border(6.0, 1.0, Color::new(0.16, 0.28, 0.28, 0.7))
-            .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
-        TextStyle::new(17.0, dark::TEXT),
+            .with_header(28.0, Color::new(0.06, 0.10, 0.11, 1.0)),
+        TextStyle::new(13.0, dark::TEXT),
     );
     let grid_rect = Rect::new(
-        panel.x + 20.0,
-        panel.y + 52.0,
-        panel.w - 40.0,
-        panel.h - 72.0,
+        panel.x + 8.0,
+        panel.y + 32.0,
+        panel.w - 16.0,
+        panel.h - 40.0,
     );
-    let view = GridView::new(
+    camera.update(grid_rect, mouse);
+    camera.clamp_isometric(
+        ctx.session.tactical.fog.width,
+        ctx.session.tactical.fog.height,
+        crate::grid_ui::TACTICAL_HALF_WIDTH,
+        crate::grid_ui::TACTICAL_HALF_HEIGHT,
+        grid_rect,
+    );
+    let view = GridView::with_camera(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,
         grid_rect,
+        camera,
     );
     draw_backdrop(grid_rect);
     if !ctx.session.tactical.hazards.is_empty() {
         crate::hazard_ui::draw_legend(panel);
     }
-    let hovered = view.tile_at(mouse);
+    let hovered = grid_rect
+        .contains(mouse)
+        .then(|| view.tile_at(mouse))
+        .flatten();
+    crate::ui::set_ui_clip(ctx.ui, Some(grid_rect));
     let mut tiles = ctx
         .session
         .tactical
@@ -47,10 +65,14 @@ pub(crate) fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>
     tiles.sort_by_key(|position| position.x + position.y);
 
     for position in &tiles {
-        draw_terrain_tile(ctx, view, *position, hovered);
+        if view.is_visible(*position, grid_rect, 30.0) {
+            draw_terrain_tile(ctx, view, *position, hovered);
+        }
     }
     for position in &tiles {
-        draw_tile_contents(ctx, view, *position);
+        if view.is_visible(*position, grid_rect, 90.0) {
+            draw_tile_contents(ctx, view, *position);
+        }
     }
 
     crate::cover_ui::draw_edges(view, &ctx.session.tactical.cover_edges);
@@ -87,17 +109,21 @@ pub(crate) fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>
     draw_foreground(ctx, view, hovered);
     ctx.feedback
         .draw(ctx.session, view, ctx.assets, ctx.visuals);
+    crate::ui::set_ui_clip(ctx.ui, None);
     crate::action_preview_ui::draw(ctx.session, preview_tile, panel, ctx.assets, ctx.visuals);
     if ctx.targeting.is_some() {
         draw_targeting_card(ctx, preview_tile, panel);
     }
     draw_ui_text_ex(
-        "CYAN SOLID  MOVE / ALLY    RED HATCH  THREAT    AMBER DOUBLE  OBJECTIVE    H0-H2  HEIGHT",
+        &format!(
+            "DRAG MIDDLE/RIGHT TO PAN  //  WHEEL TO ZOOM  //  {:>3}%",
+            (camera.zoom * 100.0) as i32
+        ),
         panel.x + 22.0,
         panel.bottom() - 7.0,
         TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
     );
-    handle_click(ctx, view, mouse, actions);
+    handle_click(ctx, view, grid_rect, mouse, actions);
 }
 
 fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {
@@ -553,8 +579,17 @@ fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
     }
 }
 
-fn handle_click(ctx: &UiContext<'_>, view: GridView, mouse: Vec2, actions: &mut Vec<UiAction>) {
+fn handle_click(
+    ctx: &UiContext<'_>,
+    view: GridView,
+    viewport: Rect,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     if !is_mouse_button_released(MouseButton::Left) {
+        return;
+    }
+    if !viewport.contains(mouse) {
         return;
     }
     let Some(tile) = view.tile_at(mouse) else {

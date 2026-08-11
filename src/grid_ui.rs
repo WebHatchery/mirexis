@@ -1,7 +1,97 @@
 //! Three-quarter tactical projection shared by rendering and inverse hit testing.
 
-use macroquad::prelude::{vec2, Rect, Vec2};
+use macroquad::prelude::{is_mouse_button_down, mouse_wheel, vec2, MouseButton, Rect, Vec2};
 use macroquad_toolkit::grid::TilePos;
+
+pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
+pub(crate) const TACTICAL_HALF_HEIGHT: f32 = 12.0;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct WorldCamera {
+    pub(crate) center: Vec2,
+    pub(crate) zoom: f32,
+    drag_anchor: Option<Vec2>,
+}
+
+impl WorldCamera {
+    pub(crate) fn tactical_start(tile: TilePos) -> Self {
+        Self {
+            center: projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
+            zoom: 1.0,
+            drag_anchor: None,
+        }
+    }
+
+    pub(crate) fn colony_start(position: [i32; 2]) -> Self {
+        Self {
+            center: projected_tile(
+                TilePos::new(position[0], position[1]),
+                crate::colony_map_ui::COLONY_HALF_WIDTH,
+                crate::colony_map_ui::COLONY_HALF_HEIGHT,
+            ),
+            zoom: 1.0,
+            drag_anchor: None,
+        }
+    }
+
+    pub(crate) fn update(&mut self, viewport: Rect, mouse: Vec2) {
+        let inside = viewport.contains(mouse);
+        let dragging = inside
+            && (is_mouse_button_down(MouseButton::Middle)
+                || is_mouse_button_down(MouseButton::Right));
+        if dragging {
+            if let Some(previous) = self.drag_anchor {
+                self.center -= (mouse - previous) / self.zoom;
+            }
+            self.drag_anchor = Some(mouse);
+        } else {
+            self.drag_anchor = None;
+        }
+
+        let wheel = mouse_wheel().1;
+        if inside && wheel.abs() > f32::EPSILON {
+            let old_zoom = self.zoom;
+            self.zoom = (self.zoom * 1.13_f32.powf(wheel)).clamp(0.65, 1.85);
+            let from_center = mouse - viewport.center();
+            self.center += from_center / old_zoom - from_center / self.zoom;
+        }
+    }
+
+    pub(crate) fn clamp_isometric(
+        &mut self,
+        width: usize,
+        height: usize,
+        half_width: f32,
+        half_height: f32,
+        viewport: Rect,
+    ) {
+        let min = vec2(-(height.saturating_sub(1) as f32) * half_width, 0.0);
+        let max = vec2(
+            width.saturating_sub(1) as f32 * half_width,
+            (width.saturating_add(height).saturating_sub(2) as f32) * half_height,
+        );
+        let visible_half = viewport.size() * 0.5 / self.zoom;
+        self.center.x = clamp_axis(self.center.x, min.x, max.x, visible_half.x);
+        self.center.y = clamp_axis(self.center.y, min.y, max.y, visible_half.y);
+    }
+}
+
+fn clamp_axis(value: f32, min: f32, max: f32, visible_half: f32) -> f32 {
+    let lower = min + visible_half;
+    let upper = max - visible_half;
+    if lower <= upper {
+        value.clamp(lower, upper)
+    } else {
+        (min + max) * 0.5
+    }
+}
+
+fn projected_tile(tile: TilePos, half_width: f32, half_height: f32) -> Vec2 {
+    vec2(
+        (tile.x - tile.y) as f32 * half_width,
+        (tile.x + tile.y) as f32 * half_height,
+    )
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct GridView {
@@ -14,20 +104,30 @@ pub(crate) struct GridView {
 }
 
 impl GridView {
+    #[cfg(test)]
     pub(crate) fn new(width: usize, height: usize, rect: Rect) -> Self {
-        let diagonal = (width + height).max(1) as f32;
-        let half_width_from_width = (rect.w - 18.0).max(80.0) / diagonal;
-        let half_height_from_height = (rect.h - 52.0).max(60.0) / (diagonal + 3.0);
-        let half_width = half_width_from_width
-            .min(half_height_from_height * 2.0)
-            .floor();
-        let half_height = (half_width * 0.5).floor();
+        Self::with_camera(
+            width,
+            height,
+            rect,
+            &WorldCamera::tactical_start(TilePos::new(
+                width.saturating_sub(1) as i32 / 2,
+                height.saturating_sub(1) as i32 / 2,
+            )),
+        )
+    }
+
+    pub(crate) fn with_camera(
+        width: usize,
+        height: usize,
+        rect: Rect,
+        camera: &WorldCamera,
+    ) -> Self {
+        let half_width = TACTICAL_HALF_WIDTH * camera.zoom;
+        let half_height = TACTICAL_HALF_HEIGHT * camera.zoom;
         let elevation_step = (half_height * 0.82).max(8.0);
         Self {
-            origin: vec2(
-                rect.x + rect.w * 0.5,
-                rect.y + 10.0 + elevation_step * 2.0 + half_height,
-            ),
+            origin: rect.center() - camera.center * camera.zoom,
             half_width,
             half_height,
             elevation_step,
@@ -86,6 +186,14 @@ impl GridView {
 
     pub(crate) fn elevation_step(self) -> f32 {
         self.elevation_step
+    }
+
+    pub(crate) fn is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
+        let rect = self.tile_rect(tile);
+        rect.right() >= viewport.x - margin
+            && rect.x <= viewport.right() + margin
+            && rect.bottom() >= viewport.y - margin
+            && rect.y <= viewport.bottom() + margin
     }
 
     pub(crate) fn tile_at(self, point: Vec2) -> Option<TilePos> {
@@ -162,6 +270,32 @@ mod tests {
         assert_eq!(
             view.tile_at(visibly_covered_point),
             Some(TilePos::new(5, 0))
+        );
+    }
+
+    #[test]
+    fn tactical_tile_scale_is_independent_of_world_and_viewport_size() {
+        let small = GridView::new(12, 8, Rect::new(0.0, 0.0, 780.0, 450.0));
+        let large = GridView::new(50, 50, Rect::new(0.0, 0.0, 1180.0, 620.0));
+        assert_eq!(small.half_width, TACTICAL_HALF_WIDTH);
+        assert_eq!(large.half_width, TACTICAL_HALF_WIDTH);
+        assert_eq!(small.half_height, TACTICAL_HALF_HEIGHT);
+        assert_eq!(large.half_height, TACTICAL_HALF_HEIGHT);
+    }
+
+    #[test]
+    fn forty_tile_world_is_cropped_at_default_zoom() {
+        let viewport = Rect::new(0.0, 0.0, 884.0, 568.0);
+        let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+        camera.clamp_isometric(40, 40, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT, viewport);
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        let visible = (0..40)
+            .flat_map(|y| (0..40).map(move |x| TilePos::new(x, y)))
+            .filter(|tile| view.is_visible(*tile, viewport, 0.0))
+            .count();
+        assert!(
+            visible < 40 * 40 / 2,
+            "default view exposed {visible} tiles"
         );
     }
 }

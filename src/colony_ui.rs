@@ -24,6 +24,7 @@ pub fn draw_colony(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     ui: &VirtualUi,
+    camera: &mut crate::grid_ui::WorldCamera,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
@@ -34,8 +35,8 @@ pub fn draw_colony(
         LOGICAL_HEIGHT,
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
+    crate::colony_map_ui::draw(campaign, assets, visuals, ui, camera, mouse, &mut actions);
     draw_header(campaign);
-    crate::colony_map_ui::draw(campaign, assets, visuals, mouse, &mut actions);
     draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
         "PAD // D-PAD SELECT MISSION · A BRIEF · X ROSTER · B TITLE  //  MOUSE // BUILD · RESEARCH · CHOOSE",
@@ -48,27 +49,27 @@ pub fn draw_colony(
 
 fn draw_header(campaign: &CampaignState) {
     draw_surface(
-        Rect::new(18.0, 16.0, LOGICAL_WIDTH - 36.0, 66.0),
+        Rect::new(10.0, 10.0, LOGICAL_WIDTH - 20.0, 52.0),
         &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
             .with_border(1.0, Color::new(0.22, 0.62, 0.56, 0.8))
             .with_left_accent(5.0, Color::new(0.34, 0.86, 0.68, 1.0)),
     );
     draw_ui_text_ex(
         "MIREXIS COLONY",
-        42.0,
-        57.0,
-        TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
+        32.0,
+        44.0,
+        TextStyle::new(24.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
         &campaign.strategy.phase_name,
-        292.0,
-        54.0,
+        250.0,
+        40.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     draw_ui_text_ex(
         &format!("OPERATIONS COMPLETED  {}", campaign.operations_completed),
-        940.0,
-        54.0,
+        974.0,
+        40.0,
         TextStyle::new(16.0, dark::TEXT_DIM).params(),
     );
 }
@@ -81,7 +82,7 @@ fn draw_operations(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let panel = Rect::new(856.0, 96.0, 406.0, 580.0);
+    let panel = Rect::new(920.0, 74.0, 350.0, 608.0);
     draw_surface_with_title(
         panel,
         Some("COLONY OPERATIONS"),

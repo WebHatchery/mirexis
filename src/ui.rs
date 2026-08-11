@@ -28,6 +28,27 @@ pub(crate) fn draw_ui_text_ex<'a>(
     draw_text_ex(text, x, y, params)
 }
 
+pub(crate) fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
+    let clip = rect.map(|rect| {
+        let dpi = screen_dpi_scale();
+        let x = (ui.offset.x + rect.x * ui.scale) * dpi;
+        let top = (ui.offset.y + rect.y * ui.scale) * dpi;
+        let width = rect.w * ui.scale * dpi;
+        let height = rect.h * ui.scale * dpi;
+        (
+            x.round() as i32,
+            top.round() as i32,
+            width.round() as i32,
+            height.round() as i32,
+        )
+    });
+    // Macroquad's scissor uses physical framebuffer pixels; callers use the
+    // logical coordinate system established by `VirtualUi`.
+    unsafe {
+        get_internal_gl().quad_gl.scissor(clip);
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn draw_text_block(
     text: &str,
@@ -260,11 +281,14 @@ fn draw_mission_vignette(
     );
 }
 
-pub fn draw_tactical(ctx: UiContext<'_>) -> Vec<UiAction> {
+pub fn draw_tactical(
+    ctx: UiContext<'_>,
+    camera: &mut crate::grid_ui::WorldCamera,
+) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ctx.ui.mouse_position();
+    crate::tactical_map_ui::draw(&ctx, camera, mouse, &mut actions);
     draw_header(&ctx);
-    crate::tactical_map_ui::draw(&ctx, mouse, &mut actions);
     draw_sidebar(&ctx, mouse, &mut actions);
     draw_footer(&ctx, mouse, &mut actions);
     if ctx.show_help {
@@ -282,7 +306,7 @@ pub fn draw_tactical(ctx: UiContext<'_>) -> Vec<UiAction> {
 }
 
 fn draw_header(ctx: &UiContext<'_>) {
-    let rect = Rect::new(18.0, 16.0, LOGICAL_WIDTH - 36.0, 66.0);
+    let rect = Rect::new(10.0, 10.0, LOGICAL_WIDTH - 20.0, 52.0);
     draw_surface(
         rect,
         &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
@@ -292,23 +316,23 @@ fn draw_header(ctx: &UiContext<'_>) {
     draw_ui_text_ex(
         "MIREXIS",
         rect.x + 22.0,
-        rect.y + 39.0,
-        TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
+        rect.y + 34.0,
+        TextStyle::new(24.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
         &ctx.mission.name,
         rect.x + 190.0,
-        rect.y + 38.0,
-        TextStyle::new(18.0, dark::TEXT_DIM).params(),
+        rect.y + 31.0,
+        TextStyle::new(15.0, dark::TEXT_DIM).params(),
     );
     draw_ui_text_ex(
         "DIRECTORATE // BROOD // ASCENDANT",
         rect.x + 190.0,
-        rect.y + 57.0,
+        rect.y + 46.0,
         TextStyle::new(10.0, Color::new(0.34, 0.58, 0.57, 1.0)).params(),
     );
     draw_badge(
-        Rect::new(rect.right() - 300.0, rect.y + 18.0, 126.0, 30.0),
+        Rect::new(rect.right() - 280.0, rect.y + 11.0, 116.0, 28.0),
         &format!("ROUND {}", ctx.session.tactical.round),
         Color::new(0.12, 0.22, 0.24, 1.0),
         dark::TEXT,
@@ -318,7 +342,7 @@ fn draw_header(ctx: &UiContext<'_>) {
         TacticalPhase::Enemy => "HOSTILE PHASE",
     };
     draw_badge(
-        Rect::new(rect.right() - 160.0, rect.y + 18.0, 140.0, 30.0),
+        Rect::new(rect.right() - 152.0, rect.y + 11.0, 136.0, 28.0),
         phase,
         Color::new(0.13, 0.29, 0.24, 1.0),
         dark::TEXT,
@@ -332,7 +356,7 @@ fn draw_header(ctx: &UiContext<'_>) {
 }
 
 fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(856.0, 96.0, 406.0, 530.0);
+    let panel = Rect::new(920.0, 74.0, 350.0, 608.0);
     draw_surface_with_title(
         panel,
         Some(ctx.mission.name.as_str()),
@@ -547,15 +571,15 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
 }
 
 fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let y = 644.0;
-    if button(Rect::new(18.0, y, 105.0, 44.0), "TITLE", true, mouse) {
+    let y = 686.0;
+    if button(Rect::new(10.0, y, 82.0, 28.0), "TITLE", true, mouse) {
         actions.push(UiAction::ReturnToTitle);
     }
-    if button(Rect::new(133.0, y, 90.0, 44.0), "SAVE [S]", true, mouse) {
+    if button(Rect::new(98.0, y, 82.0, 28.0), "SAVE [S]", true, mouse) {
         actions.push(UiAction::Save);
     }
     if button(
-        Rect::new(233.0, y, 90.0, 44.0),
+        Rect::new(186.0, y, 82.0, 28.0),
         "LOAD [L]",
         ctx.save_exists,
         mouse,
@@ -563,21 +587,21 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::Load);
     }
     if button(
-        Rect::new(333.0, y, 130.0, 44.0),
+        Rect::new(274.0, y, 110.0, 28.0),
         "DELETE SAVE",
         ctx.save_exists,
         mouse,
     ) {
         actions.push(UiAction::DeleteSave);
     }
-    if button(Rect::new(473.0, y, 90.0, 44.0), "HELP [H]", true, mouse) {
+    if button(Rect::new(390.0, y, 82.0, 28.0), "HELP [H]", true, mouse) {
         actions.push(UiAction::ToggleTacticalHelp);
     }
-    if button(Rect::new(573.0, y, 80.0, 44.0), "LOG [B]", true, mouse) {
+    if button(Rect::new(478.0, y, 78.0, 28.0), "LOG [B]", true, mouse) {
         actions.push(UiAction::ToggleBattleLog);
     }
     if button(
-        Rect::new(663.0, y, 145.0, 44.0),
+        Rect::new(562.0, y, 136.0, 28.0),
         "NEXT READY [TAB]",
         crate::phase_readiness::ready_count(ctx.session) > 0,
         mouse,
@@ -598,9 +622,9 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             },
             ctx.loaded_assets
         ),
-        824.0,
-        y + 28.0,
-        TextStyle::new(14.0, dark::TEXT_DIM).params(),
+        710.0,
+        y + 20.0,
+        TextStyle::new(11.0, dark::TEXT_DIM).params(),
     );
 }
 
