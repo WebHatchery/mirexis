@@ -689,6 +689,7 @@ impl Game {
                     self.session.tactical.round
                 ));
             }
+            UiAction::SkipPhaseReplay => self.phase_replay.clear(),
             UiAction::ToggleTacticalHelp => {
                 self.show_tactical_help = !self.show_tactical_help;
                 self.show_battle_log = false;

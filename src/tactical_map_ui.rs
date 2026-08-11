@@ -153,7 +153,7 @@ pub(crate) fn draw(
     crate::ui::set_ui_clip(ctx.ui, None);
     crate::action_preview_ui::draw(ctx.session, preview_tile, panel, ctx.assets, ctx.visuals);
     if ctx.targeting.is_some() {
-        draw_targeting_card(ctx, preview_tile, panel);
+        draw_targeting_card(ctx, preview_tile, panel, mouse, actions);
     }
     draw_ui_text_ex(
         &format!(
@@ -168,8 +168,22 @@ pub(crate) fn draw(
     camera_dragged
 }
 
-fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {
-    let card = Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 80.0);
+fn targeting_card_bounds(panel: Rect) -> Rect {
+    Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 80.0)
+}
+
+fn cancel_targeting_bounds(card: Rect) -> Rect {
+    Rect::new(card.right() - 232.0, card.bottom() - 36.0, 146.0, 28.0)
+}
+
+fn draw_targeting_card(
+    ctx: &UiContext<'_>,
+    tile: TilePos,
+    panel: Rect,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    let card = targeting_card_bounds(panel);
     draw_surface(
         card,
         &SurfaceStyle::new(Color::new(0.026, 0.052, 0.058, 0.98))
@@ -263,7 +277,7 @@ fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {
             );
             draw_ui_text_ex(
                 &format!(
-                    "{} // {} // B OR ESC CANCEL",
+                    "{} // {}",
                     target.map_or("NO UNIT SELECTED", |unit| unit.name.as_str()),
                     if valid {
                         "VALID TARGET"
@@ -301,11 +315,14 @@ fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {
         );
     }
     draw_ui_text_ex(
-        "CLICK / A CONFIRM    B / ESC CANCEL",
-        card.right() - 318.0,
+        "TAP HIGHLIGHTED UNIT / A CONFIRM",
+        card.x + 82.0,
         card.bottom() - 9.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
+    if crate::ui_widgets::button(cancel_targeting_bounds(card), "CANCEL TARGET", true, mouse) {
+        actions.push(UiAction::CancelTargeting);
+    }
 }
 
 fn draw_backdrop(rect: Rect) {

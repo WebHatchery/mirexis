@@ -44,6 +44,7 @@ pub enum UiAction {
     UseEquipmentOn(String),
     SetOverwatch,
     EndPhase,
+    SkipPhaseReplay,
     ToggleTacticalHelp,
     ToggleBattleLog,
     Save,

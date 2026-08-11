@@ -94,7 +94,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 65 | help | `ui_help.png` | 329869 | `93fa0976e405e804898220a561aa894f7fcbaf5086337168128ea57f31425ae2` |
 | 66 | battle_log | `ui_battle_log.png` | 372008 | `3bbc442f2f8608c8b5cf352fab1a629a467ce8a32563e2bb51592a891544cb79` |
 | 67 | combat_feedback | `ui_combat_feedback.png` | 598655 | `10aa17a6d5fcc76f52af19f76576e34f6dbfc3dde810fac30d7f2a9a9fd58a7f` |
-| 68 | phase_replay | `ui_phase_replay.png` | 562129 | `606ef468d539fa0a00fce711f6a365d853cd3d594733079e707feb4b445b4e76` |
+| 68 | phase_replay | `ui_phase_replay.png` | 559393 | `84efbf8e41997a20c3017c1b6988b675f05964a48c68faa3082b2c6d85c411e3` |
 | 69 | end_phase_guard | `ui_end_phase_guard.png` | 590435 | `d90ed462845a8937fe6f880add4b3f985577e01379eb313ef9fa195535557f11` |
 | 70 | readiness_markers | `ui_readiness_markers.png` | 592962 | `5d1aee3884b407762c04adaaeacd2c36463357a2c8e4305cae228ac8bda661df` |
 | 71 | vitality_markers | `ui_vitality_markers.png` | 593403 | `c1e432775b1a3b82cc6f4bb41daa78f77585f1485726c31cbafd7580e9e97812` |
@@ -106,9 +106,9 @@ Manifest: `scripts/capture_ui.ps1`
 | 77 | living_chorus | `ui_living_chorus.png` | 608881 | `39d396ceb5072561c4b8eb5d33f9baf5c8d76262ae80fff80bb4affd96f61cbb` |
 | 78 | open_circuit | `ui_open_circuit.png` | 601720 | `553f022ebe2baa2d5201df58ae63d35a40f642129d7584f91ed6aac7d4af9bb0` |
 | 79 | trace_active | `ui_trace_active.png` | 586985 | `003c8651ffad0eea8e110aa929735fc62c78a43184f78f7028b5772a74bf74d3` |
-| 80 | equipment | `ui_equipment.png` | 536938 | `7fc993ea89ee0a92553546c9de1ffeee6db778154a920e19c25227dd91d6e144` |
+| 80 | equipment | `ui_equipment.png` | 538235 | `924203d077cd07fab30c19d38f0c8fcdb2a2f86f0be63242f7a44f32b82de22e` |
 | 81 | weapon_profile | `ui_weapon_profile.png` | 590280 | `29dc30638b18e9bd37a5ddb2eaf40b26dc05829d4d6201f33fb255b1d74d9921` |
-| 82 | class_target | `ui_class_target.png` | 547781 | `27beb2e1aa2af719747141f3bd53ee51d56ab6ef631180d7a87a25270b7c259e` |
+| 82 | class_target | `ui_class_target.png` | 545216 | `9587e29f47569bf6cd05eab9f35a9dbca2f815da605f861632f7bbc237dd5af3` |
 | 83 | breach | `ui_breach.png` | 685836 | `03442630a758f273ae0e12da41c309b1908ddf696c3c96bce6dcfc9f2cb5195c` |
 | 84 | debrief | `ui_debrief.png` | 195735 | `4990a8de76dd2694877dc7f0d9172e37f9425361ce161e710240f33ed9762015` |
 | 85 | trauma_debrief | `ui_trauma_debrief.png` | 202757 | `741df737bd0bc2c157e5e2a1398d3198a8220400f5a3ef7d23f7a62bcef45510` |

@@ -319,7 +319,7 @@ pub fn draw_tactical(
     }
     if ctx.phase_replay.is_active() {
         actions.clear();
-        ctx.phase_replay.draw();
+        ctx.phase_replay.draw(mouse, &mut actions);
     }
     suppress_map_release_actions(&mut actions, suppress_actions);
     actions

@@ -1,11 +1,17 @@
 //! Brief, skippable presentation beats for an atomically resolved hostile phase.
 
 use crate::state::BattleEvent;
+use crate::ui::UiAction;
+use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
 const BEAT_SECONDS: f32 = 0.48;
 const MAX_BEATS: usize = 8;
+
+fn skip_bounds() -> Rect {
+    Rect::new(650.0, 560.0, 168.0, 36.0)
+}
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct PhaseReplay {
@@ -86,7 +92,7 @@ impl PhaseReplay {
         self.remaining = 0.0;
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self, mouse: Vec2, actions: &mut Vec<UiAction>) {
         let Some(beat) = self.beats.get(self.current) else {
             return;
         };
@@ -111,7 +117,7 @@ impl PhaseReplay {
         );
         draw_text_ex(
             format!(
-                "HOSTILE ACTIVITY {}/{}  ·  SPACE SKIPS",
+                "HOSTILE ACTIVITY {}/{}  ·  AUTO ADVANCE",
                 self.current + 1,
                 self.beats.len()
             ),
@@ -154,6 +160,9 @@ impl PhaseReplay {
             558.0,
             TextStyle::new(11.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
         );
+        if button(skip_bounds(), "SKIP REPLAY", true, mouse) {
+            actions.push(UiAction::SkipPhaseReplay);
+        }
     }
 }
 
