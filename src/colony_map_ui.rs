@@ -86,7 +86,7 @@ pub(crate) fn draw(
                     visuals,
                     view,
                     [x, y],
-                    hovered == Some([x, y]),
+                    footprint_is_hovered(campaign, hovered, [x, y]),
                 );
             }
         }
@@ -108,6 +108,27 @@ pub(crate) fn draw(
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
     camera_dragged
+}
+
+fn footprint_is_hovered(
+    campaign: &CampaignState,
+    hovered: Option<[i32; 2]>,
+    position: [i32; 2],
+) -> bool {
+    let Some(hovered) = hovered else { return false };
+    if let Some(owner) = campaign.colony.building_at(hovered) {
+        return campaign
+            .colony
+            .building_at(position)
+            .is_some_and(|building| building.id == owner.id);
+    }
+    if let Some(owner) = campaign.colony.project_at(hovered) {
+        return campaign
+            .colony
+            .project_at(position)
+            .is_some_and(|project| project.id == owner.id);
+    }
+    position == hovered
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {

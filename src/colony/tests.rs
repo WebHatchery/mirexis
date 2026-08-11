@@ -24,7 +24,9 @@ fn physical_placement_generates_the_colony_defense_map() {
         .unwrap();
     colony.advance_operation();
     let map = colony.defense_map();
-    assert!(map.cover_tiles.contains(&TilePos::new(3, 2)));
+    for tile in [TilePos::new(3, 2), TilePos::new(2, 2), TilePos::new(3, 1)] {
+        assert!(map.cover_tiles.contains(&tile));
+    }
     assert!(map.critical_objectives.contains(&TilePos::new(12, 11)));
 }
 
@@ -84,40 +86,44 @@ fn power_plant_construction_adds_redundant_grid_capacity() {
 }
 
 #[test]
-fn wide_structure_footprints_reserve_and_report_both_plots() {
-    let mut colony = ColonyState::new();
-    colony
-        .place_construction(BuildingKind::Barricade, [3, 3])
-        .unwrap();
+fn building_footprints_reserve_both_visible_rear_plots() {
+    for kind in [
+        BuildingKind::Barricade,
+        BuildingKind::PowerPlant,
+        BuildingKind::GeneLab,
+    ] {
+        let mut colony = ColonyState::new();
+        colony.place_construction(kind, [3, 3]).unwrap();
+        for support in [[2, 3], [3, 2]] {
+            assert_eq!(
+                colony.project_at(support).map(|project| project.kind),
+                Some(kind),
+                "queued {} left support {support:?} open",
+                kind.name()
+            );
+            assert!(
+                colony
+                    .place_construction(BuildingKind::Barricade, support)
+                    .is_err(),
+                "construction overlapped queued {} at {support:?}",
+                kind.name()
+            );
+        }
 
-    assert_eq!(
-        colony.project_at([3, 2]).map(|project| project.kind),
-        Some(BuildingKind::Barricade)
-    );
-    assert!(colony
-        .place_construction(BuildingKind::Barricade, [3, 2])
-        .is_err());
-
-    colony.advance_operation();
-    assert_eq!(
-        colony.building_at([3, 2]).map(|building| building.kind),
-        Some(BuildingKind::Barricade)
-    );
+        colony.advance_operation();
+        for support in [[2, 3], [3, 2]] {
+            assert_eq!(
+                colony.building_at(support).map(|building| building.kind),
+                Some(kind),
+                "completed {} left support {support:?} open",
+                kind.name()
+            );
+        }
+    }
 }
 
 #[test]
-fn every_building_kind_claims_its_second_plot() {
-    let colony = ColonyState::new();
-    for building in &colony.buildings {
-        let second = [building.position[0], building.position[1] - 1];
-        assert_eq!(
-            colony.building_at(second).map(|found| found.id.as_str()),
-            Some(building.id.as_str()),
-            "{} left its second plot open",
-            building.kind.name()
-        );
-    }
-
+fn every_building_kind_claims_both_visible_support_plots() {
     for kind in [
         BuildingKind::CommandCentre,
         BuildingKind::Barracks,
@@ -128,7 +134,24 @@ fn every_building_kind_claims_its_second_plot() {
         BuildingKind::PowerPlant,
         BuildingKind::GeneLab,
     ] {
-        assert_eq!(kind.footprint(), &[[0, 0], [0, -1]]);
+        let mut colony = ColonyState::new();
+        colony.buildings.clear();
+        colony.buildings.push(BuildingState {
+            id: "footprint_probe".to_owned(),
+            kind,
+            position: [3, 3],
+            level: 1,
+            damaged: false,
+        });
+        for support in [[2, 3], [3, 2]] {
+            assert_eq!(
+                colony.building_at(support).map(|found| found.id.as_str()),
+                Some("footprint_probe"),
+                "{} left visible support plot {support:?} open",
+                kind.name()
+            );
+        }
+        assert_eq!(kind.footprint(), &[[0, 0], [-1, 0], [0, -1]]);
     }
 }
 
@@ -137,6 +160,9 @@ fn multi_plot_structures_must_fit_inside_the_colony_boundary() {
     let mut colony = ColonyState::new();
     assert!(colony
         .place_construction(BuildingKind::Barricade, [1, 0])
+        .is_err());
+    assert!(colony
+        .place_construction(BuildingKind::Barricade, [0, 1])
         .is_err());
     assert!(colony
         .place_construction(BuildingKind::PowerPlant, [1, 1])

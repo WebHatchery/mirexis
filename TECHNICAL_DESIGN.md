@@ -2,7 +2,7 @@
 
 Status: Phase 0 through Phase 5 campaign arc complete
 Current campaign slice: complete identity-branched campaign
-Save/content version: 1.60.0
+Save/content version: 1.61.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -346,9 +346,10 @@ Initial facilities have stable coordinates:
 - Power Plant: four power supply and a critical defense objective.
 
 The colony grid always offers a 20-material Barricade or a 45-material Power Plant.
-Adaptation adds one unique 50-material Gene Lab. All three reserve their plot and
-complete after one resolved operation. Reserved plots cannot be reused. Campaign time
-never depends on wall-clock time.
+Adaptation adds one unique 50-material Gene Lab. Every building reserves its anchor plus
+the northwest and northeast foundation plots visibly beneath its isometric art. Projects
+claim the same complete footprint immediately and finish after one resolved operation;
+none of those plots can be reused. Campaign time never depends on wall-clock time.
 
 Power is a derived capacity model. Base recovered power and operational Power Plants
 form supply; undamaged facilities form demand. A 7-demand/8-supply starting grid has

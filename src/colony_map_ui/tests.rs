@@ -10,6 +10,34 @@ fn colony_ground_has_basin_plain_shelf_and_settlement_levels() {
 }
 
 #[test]
+fn building_support_offsets_project_to_both_visible_rear_diamonds() {
+    let camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+    let view = ColonyView::new(Rect::new(18.0, 106.0, 826.0, 506.0), &camera);
+    let anchor = view.plot_center([3, 3]);
+    let northwest = view.plot_center([2, 3]);
+    let northeast = view.plot_center([3, 2]);
+
+    assert!(northwest.x < anchor.x && northwest.y < anchor.y);
+    assert!(northeast.x > anchor.x && northeast.y < anchor.y);
+}
+
+#[test]
+fn hovering_any_building_plot_highlights_its_complete_footprint() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let anchor = SETTLEMENT_CENTER;
+    let northwest = [anchor[0] - 1, anchor[1]];
+    let northeast = [anchor[0], anchor[1] - 1];
+
+    for hovered in [anchor, northwest, northeast] {
+        assert!(footprint_is_hovered(&campaign, Some(hovered), anchor));
+        assert!(footprint_is_hovered(&campaign, Some(hovered), northwest));
+        assert!(footprint_is_hovered(&campaign, Some(hovered), northeast));
+        assert!(!footprint_is_hovered(&campaign, Some(hovered), [0, 0]));
+    }
+}
+
+#[test]
 fn transformed_colony_centers_round_trip_through_hover_testing() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
     for (focus, zoom) in [([3, 3], 1.0), ([14, 12], 0.72), ([9, 16], 1.7)] {
