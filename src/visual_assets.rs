@@ -267,13 +267,14 @@ impl VisualCatalog {
             cell_width,
             texture.height(),
         );
+        let destination = aspect_fit(source.size(), rect);
         draw_texture_ex(
             texture,
-            rect.x,
-            rect.y,
+            destination.x,
+            destination.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(vec2(rect.w, rect.h)),
+                dest_size: Some(destination.size()),
                 source: Some(source),
                 ..Default::default()
             },
@@ -320,6 +321,17 @@ impl VisualCatalog {
         );
         true
     }
+}
+
+fn aspect_fit(source: Vec2, destination: Rect) -> Rect {
+    let scale = (destination.w / source.x).min(destination.h / source.y);
+    let size = source * scale;
+    Rect::new(
+        destination.x + (destination.w - size.x) * 0.5,
+        destination.y + destination.h - size.y,
+        size.x,
+        size.y,
+    )
 }
 
 pub(crate) fn equipment_index(id: &str) -> Option<usize> {

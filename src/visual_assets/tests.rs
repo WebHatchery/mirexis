@@ -1,4 +1,12 @@
 use super::*;
+
+#[test]
+fn portrait_fit_preserves_source_aspect_ratio() {
+    let fitted = aspect_fit(vec2(434.0, 724.0), Rect::new(10.0, 20.0, 80.0, 72.0));
+    assert!((fitted.w / fitted.h - 434.0 / 724.0).abs() < 0.001);
+    assert!(fitted.x >= 10.0 && fitted.right() <= 90.0);
+    assert!(fitted.y >= 20.0 && fitted.bottom() <= 92.0);
+}
 use std::collections::{BTreeMap, BTreeSet};
 use std::hash::{DefaultHasher, Hash, Hasher};
 

@@ -15,6 +15,7 @@ use macroquad_toolkit::ui::VirtualUi;
 pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
 pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
 
+mod terrain;
 mod view;
 use view::ColonyView;
 
@@ -27,7 +28,7 @@ pub(crate) fn draw(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) -> bool {
-    let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
+    let panel = Rect::new(10.0, 74.0, 842.0, 608.0);
     draw_surface_with_title(
         panel,
         Some("MIREXIS SETTLEMENT // EXPANSION CAMERA"),
@@ -43,7 +44,7 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 102.0,
     );
-    let camera_control_clicked = crate::camera_controls::draw(
+    let camera_control_clicked = crate::camera_controls::draw_zoom(
         camera,
         viewport,
         mouse,
@@ -98,7 +99,7 @@ pub(crate) fn draw(
     draw_build_controls(campaign, mouse, actions);
     draw_text(
         format!(
-            "DRAG MAP // PAN < ^ v > // WHEEL OR -/+ ZOOM // {}%",
+            "DRAG MAP TO PAN // WHEEL OR -/+ ZOOM // {}%",
             (camera.zoom * 100.0) as i32
         ),
         panel.x + 14.0,
@@ -110,7 +111,7 @@ pub(crate) fn draw(
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {
-    vec2(panel.right() - 330.0, panel.bottom() - 65.0)
+    vec2(panel.right() - 104.0, panel.bottom() - 65.0)
 }
 
 fn draw_ending_manifestation(
@@ -312,16 +313,8 @@ fn draw_plot(
     hovered: bool,
 ) {
     let center = view.plot_center(position);
-    let building = campaign
-        .colony
-        .buildings
-        .iter()
-        .find(|b| b.position == position);
-    let project = campaign
-        .colony
-        .construction_queue
-        .iter()
-        .find(|p| p.position == position);
+    let building = campaign.colony.building_at(position);
+    let project = campaign.colony.project_at(position);
     let occupied = building.is_some() || project.is_some();
     let top = if hovered {
         Color::new(0.18, 0.39, 0.34, 1.0)
@@ -330,12 +323,7 @@ fn draw_plot(
     } else {
         Color::new(0.085, 0.19, 0.18, 1.0)
     };
-    draw_diamond(
-        view,
-        center + vec2(0.0, 7.0),
-        Color::new(0.025, 0.065, 0.064, 1.0),
-    );
-    draw_diamond(view, center, top);
+    terrain::draw_ground(assets, visuals, view, position, top, hovered, occupied);
     draw_diamond_outline(
         view,
         center,
@@ -361,7 +349,7 @@ fn draw_plot(
         1.0,
         Color::new(0.05, 0.13, 0.13, 0.9),
     );
-    if let Some(building) = building {
+    if let Some(building) = building.filter(|building| building.position == position) {
         let powered = !building.damaged && campaign.colony.building_is_powered(&building.id);
         let index = building_index(building.kind) + usize::from(building.damaged) * 8;
         let tint = if powered || building.damaged {
@@ -382,7 +370,7 @@ fn draw_plot(
             tint,
         );
         draw_building_state(center, building.damaged, powered);
-    } else if let Some(project) = project {
+    } else if let Some(project) = project.filter(|project| project.position == position) {
         visuals.draw_atlas_cell(
             assets,
             &visuals.colony,
@@ -530,21 +518,6 @@ fn draw_inhabitants(
     }
 }
 
-fn draw_diamond(view: ColonyView, center: Vec2, color: Color) {
-    draw_triangle(
-        vec2(center.x, center.y - view.half_height),
-        vec2(center.x - view.half_width, center.y),
-        vec2(center.x, center.y + view.half_height),
-        color,
-    );
-    draw_triangle(
-        vec2(center.x, center.y - view.half_height),
-        vec2(center.x + view.half_width, center.y),
-        vec2(center.x, center.y + view.half_height),
-        color,
-    );
-}
-
 fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
     let points = [
         vec2(center.x, center.y - view.half_height),
@@ -618,11 +591,7 @@ fn draw_blueprint(center: Vec2, kind: BuildingKind) {
 
 fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending: Option<[i32; 2]>) {
     let Some(position) = hovered else { return };
-    let building = campaign
-        .colony
-        .buildings
-        .iter()
-        .find(|b| b.position == position);
+    let building = campaign.colony.building_at(position);
     let text = if let Some(building) = building {
         if building.damaged {
             format!(
@@ -644,6 +613,12 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending:
                 building.level
             )
         }
+    } else if let Some(project) = campaign.colony.project_at(position) {
+        format!(
+            "{} // UNDER CONSTRUCTION // {} OPERATION",
+            project.kind.name().to_uppercase(),
+            project.operations_remaining
+        )
     } else {
         format!(
             "OPEN PLOT // BUILD {} // {} MAT",
@@ -680,12 +655,7 @@ fn handle_plot_click(
     if !camera.confirm_colony_plot(position) {
         return;
     }
-    if let Some(building) = campaign
-        .colony
-        .buildings
-        .iter()
-        .find(|b| b.position == position)
-    {
+    if let Some(building) = campaign.colony.building_at(position) {
         if building.damaged {
             actions.push(UiAction::RepairBuilding(building.id.clone()));
         } else if building.kind == BuildingKind::GeneLab
@@ -693,12 +663,7 @@ fn handle_plot_click(
         {
             actions.push(UiAction::OpenGeneLab);
         }
-    } else if campaign
-        .colony
-        .construction_queue
-        .iter()
-        .all(|p| p.position != position)
-    {
+    } else if campaign.colony.project_at(position).is_none() {
         actions.push(UiAction::ConstructBuilding(
             campaign.colony.planned_construction,
             position,

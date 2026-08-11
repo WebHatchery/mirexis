@@ -84,12 +84,45 @@ fn power_plant_construction_adds_redundant_grid_capacity() {
 }
 
 #[test]
+fn wide_structure_footprints_reserve_and_report_both_plots() {
+    let mut colony = ColonyState::new();
+    colony
+        .place_construction(BuildingKind::Barricade, [1, 1])
+        .unwrap();
+
+    assert_eq!(
+        colony.project_at([2, 1]).map(|project| project.kind),
+        Some(BuildingKind::Barricade)
+    );
+    assert!(colony
+        .place_construction(BuildingKind::Barricade, [2, 1])
+        .is_err());
+
+    colony.advance_operation();
+    assert_eq!(
+        colony.building_at([2, 1]).map(|building| building.kind),
+        Some(BuildingKind::Barricade)
+    );
+}
+
+#[test]
+fn multi_plot_structures_must_fit_inside_the_colony_boundary() {
+    let mut colony = ColonyState::new();
+    assert!(colony
+        .place_construction(BuildingKind::Barricade, [COLONY_WIDTH - 1, 1])
+        .is_err());
+    assert!(colony
+        .place_construction(BuildingKind::PowerPlant, [COLONY_WIDTH - 1, 1])
+        .is_ok());
+}
+
+#[test]
 fn colony_build_area_extends_far_beyond_the_initial_settlement() {
     let mut colony = ColonyState::new();
     colony
         .place_construction(
             BuildingKind::Barricade,
-            [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+            [COLONY_WIDTH - 2, COLONY_HEIGHT - 1],
         )
         .expect("the far colony frontier remains buildable");
 }

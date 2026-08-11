@@ -500,7 +500,7 @@ fn terrain_art_index(
     } else if pattern.is_multiple_of(13) {
         Some(0)
     } else {
-        None
+        Some(0)
     }
 }
 

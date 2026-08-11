@@ -25,10 +25,43 @@ impl ColonyView {
     }
 
     pub(super) fn plot_center(self, position: [i32; 2]) -> Vec2 {
+        let elevation = self.elevation(position) as f32;
         vec2(
             self.origin.x + (position[0] - position[1]) as f32 * self.half_width,
-            self.origin.y + (position[0] + position[1]) as f32 * self.half_height,
+            self.origin.y + (position[0] + position[1]) as f32 * self.half_height
+                - elevation * self.elevation_step(),
         )
+    }
+
+    pub(super) fn elevation(self, position: [i32; 2]) -> i8 {
+        let distance = (position[0] - 10).abs() + (position[1] - 10).abs();
+        if distance <= 4 {
+            2
+        } else if distance <= 8 {
+            1
+        } else if (position[0] <= 4 && position[1] >= 12) || (position[0] >= 16 && position[1] <= 7)
+        {
+            -1
+        } else {
+            0
+        }
+    }
+
+    pub(super) fn elevation_step(self) -> f32 {
+        (self.half_height * 0.62).max(6.0)
+    }
+
+    pub(super) fn cliff_drop(self, position: [i32; 2], neighbor: [i32; 2]) -> u8 {
+        if neighbor[0] < 0
+            || neighbor[1] < 0
+            || neighbor[0] >= crate::colony::COLONY_WIDTH
+            || neighbor[1] >= crate::colony::COLONY_HEIGHT
+        {
+            return 0;
+        }
+        self.elevation(position)
+            .saturating_sub(self.elevation(neighbor))
+            .max(0) as u8
     }
 
     pub(super) fn plot_render_bounds(self, position: [i32; 2]) -> Rect {

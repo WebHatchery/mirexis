@@ -1,6 +1,15 @@
 use super::*;
 
 #[test]
+fn colony_ground_has_basin_plain_shelf_and_settlement_levels() {
+    let camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+    let view = ColonyView::new(Rect::new(18.0, 106.0, 826.0, 506.0), &camera);
+    let levels =
+        [[2, 16], [0, 0], [5, 10], SETTLEMENT_CENTER].map(|position| view.elevation(position));
+    assert_eq!(levels, [-1, 0, 1, 2]);
+}
+
+#[test]
 fn transformed_colony_centers_round_trip_through_hover_testing() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
     for (focus, zoom) in [([3, 3], 1.0), ([14, 12], 0.72), ([9, 16], 1.7)] {

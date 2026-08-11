@@ -65,6 +65,19 @@ impl BuildingKind {
             _ => 25,
         }
     }
+
+    pub fn footprint(self) -> &'static [[i32; 2]] {
+        match self {
+            Self::Barracks | Self::Barricade => &[[0, 0], [1, 0]],
+            _ => &[[0, 0]],
+        }
+    }
+
+    fn occupies(self, anchor: [i32; 2], position: [i32; 2]) -> bool {
+        self.footprint()
+            .iter()
+            .any(|offset| [anchor[0] + offset[0], anchor[1] + offset[1]] == position)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -157,19 +170,19 @@ impl ColonyState {
         for building in &mut self.buildings {
             if let Some(position) = founding_building_position(&building.id) {
                 building.position = position;
-                occupied.insert(position);
+                reserve_footprint(&mut occupied, building.kind, position);
             }
         }
         for building in &mut self.buildings {
             if founding_building_position(&building.id).is_some() {
                 continue;
             }
-            building.position = migrated_open_plot(building.position, &occupied);
-            occupied.insert(building.position);
+            building.position = migrated_open_plot(building.kind, building.position, &occupied);
+            reserve_footprint(&mut occupied, building.kind, building.position);
         }
         for project in &mut self.construction_queue {
-            project.position = migrated_open_plot(project.position, &occupied);
-            occupied.insert(project.position);
+            project.position = migrated_open_plot(project.kind, project.position, &occupied);
+            reserve_footprint(&mut occupied, project.kind, project.position);
         }
         true
     }
@@ -223,14 +236,14 @@ impl ColonyState {
         kind: BuildingKind,
         position: [i32; 2],
     ) -> Result<String, String> {
-        if position[0] < 0
-            || position[1] < 0
-            || position[0] >= COLONY_WIDTH
-            || position[1] >= COLONY_HEIGHT
-        {
+        if !footprint_in_bounds(kind, position) {
             return Err("Plot is outside the colony footprint".to_owned());
         }
-        if self.is_occupied(position) {
+        if kind
+            .footprint()
+            .iter()
+            .any(|offset| self.is_occupied([position[0] + offset[0], position[1] + offset[1]]))
+        {
             return Err("Plot is already occupied or reserved".to_owned());
         }
         if kind == BuildingKind::GeneLab
@@ -342,17 +355,22 @@ impl ColonyState {
         let mut cover_tiles = Vec::new();
         let mut critical_objectives = Vec::new();
         for building in &self.buildings {
-            let position = TilePos::new(building.position[0] + 2, building.position[1] + 1);
-            blocked_tiles.push(position);
-            match building.kind {
-                BuildingKind::Barricade | BuildingKind::Barracks | BuildingKind::Workshop => {
-                    cover_tiles.push(position)
+            for offset in building.kind.footprint() {
+                let position = TilePos::new(
+                    building.position[0] + offset[0] + 2,
+                    building.position[1] + offset[1] + 1,
+                );
+                blocked_tiles.push(position);
+                match building.kind {
+                    BuildingKind::Barricade | BuildingKind::Barracks | BuildingKind::Workshop => {
+                        cover_tiles.push(position)
+                    }
+                    BuildingKind::CommandCentre
+                    | BuildingKind::Infirmary
+                    | BuildingKind::Hydroponics
+                    | BuildingKind::PowerPlant
+                    | BuildingKind::GeneLab => critical_objectives.push(position),
                 }
-                BuildingKind::CommandCentre
-                | BuildingKind::Infirmary
-                | BuildingKind::Hydroponics
-                | BuildingKind::PowerPlant
-                | BuildingKind::GeneLab => critical_objectives.push(position),
             }
         }
         ColonyDefenseMap {
@@ -365,11 +383,23 @@ impl ColonyState {
     fn is_occupied(&self, position: [i32; 2]) -> bool {
         self.buildings
             .iter()
-            .any(|building| building.position == position)
+            .any(|building| building.kind.occupies(building.position, position))
             || self
                 .construction_queue
                 .iter()
-                .any(|project| project.position == position)
+                .any(|project| project.kind.occupies(project.position, position))
+    }
+
+    pub(crate) fn building_at(&self, position: [i32; 2]) -> Option<&BuildingState> {
+        self.buildings
+            .iter()
+            .find(|building| building.kind.occupies(building.position, position))
+    }
+
+    pub(crate) fn project_at(&self, position: [i32; 2]) -> Option<&ConstructionProject> {
+        self.construction_queue
+            .iter()
+            .find(|project| project.kind.occupies(project.position, position))
     }
 
     pub fn ensure_phase_one_infrastructure(&mut self, migrate_power: bool) {
@@ -378,7 +408,7 @@ impl ColonyState {
             .iter()
             .any(|building| building.kind == BuildingKind::Hydroponics)
         {
-            let position = self.first_open_plot([7, 13]);
+            let position = self.first_open_plot(BuildingKind::Hydroponics, [7, 13]);
             self.buildings
                 .push(building("hydroponics", BuildingKind::Hydroponics, position));
         }
@@ -387,7 +417,7 @@ impl ColonyState {
             .iter()
             .any(|building| building.kind == BuildingKind::PowerPlant)
         {
-            let position = self.first_open_plot([13, 13]);
+            let position = self.first_open_plot(BuildingKind::PowerPlant, [13, 13]);
             self.buildings
                 .push(building("power_plant", BuildingKind::PowerPlant, position));
             if migrate_power {
@@ -404,18 +434,24 @@ impl ColonyState {
         {
             return;
         }
-        let position = self.first_open_plot([10, 14]);
+        let position = self.first_open_plot(BuildingKind::GeneLab, [10, 14]);
         self.buildings
             .push(building("gene_lab", BuildingKind::GeneLab, position));
     }
 
-    fn first_open_plot(&self, preferred: [i32; 2]) -> [i32; 2] {
-        if !self.is_occupied(preferred) {
+    fn first_open_plot(&self, kind: BuildingKind, preferred: [i32; 2]) -> [i32; 2] {
+        let open = |position: [i32; 2]| {
+            footprint_in_bounds(kind, position)
+                && kind.footprint().iter().all(|offset| {
+                    !self.is_occupied([position[0] + offset[0], position[1] + offset[1]])
+                })
+        };
+        if open(preferred) {
             return preferred;
         }
         (0..COLONY_HEIGHT)
             .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
-            .find(|position| !self.is_occupied(*position))
+            .find(|position| open(*position))
             .expect("the colony has room for required Phase One infrastructure")
     }
 }
@@ -433,6 +469,7 @@ fn founding_building_position(id: &str) -> Option<[i32; 2]> {
 }
 
 fn migrated_open_plot(
+    kind: BuildingKind,
     legacy: [i32; 2],
     occupied: &std::collections::HashSet<[i32; 2]>,
 ) -> [i32; 2] {
@@ -442,7 +479,12 @@ fn migrated_open_plot(
     ];
     (0..COLONY_HEIGHT)
         .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
-        .filter(|position| !occupied.contains(position))
+        .filter(|position| {
+            footprint_in_bounds(kind, *position)
+                && kind.footprint().iter().all(|offset| {
+                    !occupied.contains(&[position[0] + offset[0], position[1] + offset[1]])
+                })
+        })
         .min_by_key(|position| {
             (
                 (position[0] - preferred[0]).abs() + (position[1] - preferred[1]).abs(),
@@ -451,6 +493,26 @@ fn migrated_open_plot(
             )
         })
         .expect("the expanded colony has room for migrated construction")
+}
+
+fn footprint_in_bounds(kind: BuildingKind, anchor: [i32; 2]) -> bool {
+    kind.footprint().iter().all(|offset| {
+        let position = [anchor[0] + offset[0], anchor[1] + offset[1]];
+        position[0] >= 0
+            && position[1] >= 0
+            && position[0] < COLONY_WIDTH
+            && position[1] < COLONY_HEIGHT
+    })
+}
+
+fn reserve_footprint(
+    occupied: &mut std::collections::HashSet<[i32; 2]>,
+    kind: BuildingKind,
+    anchor: [i32; 2],
+) {
+    for offset in kind.footprint() {
+        occupied.insert([anchor[0] + offset[0], anchor[1] + offset[1]]);
+    }
 }
 
 fn building(id: &str, kind: BuildingKind, position: [i32; 2]) -> BuildingState {

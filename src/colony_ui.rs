@@ -57,7 +57,7 @@ fn draw_operations(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let panel = Rect::new(920.0, 74.0, 350.0, 608.0);
+    let panel = Rect::new(862.0, 74.0, 408.0, 608.0);
     draw_surface_with_title(
         panel,
         Some("COLONY OPERATIONS"),

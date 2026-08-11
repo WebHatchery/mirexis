@@ -39,8 +39,26 @@ pub(crate) fn draw(
             activated = true;
         }
     }
+    activated
+        | draw_zoom(
+            camera,
+            viewport,
+            mouse,
+            vec2(origin.x + 174.0, origin.y),
+            allow_activation,
+        )
+}
+
+pub(crate) fn draw_zoom(
+    camera: &mut WorldCamera,
+    viewport: Rect,
+    mouse: Vec2,
+    origin: Vec2,
+    allow_activation: bool,
+) -> bool {
+    let mut activated = false;
     if button(
-        Rect::new(origin.x + 174.0, origin.y, CONTROL_WIDTH, CONTROL_HEIGHT),
+        Rect::new(origin.x, origin.y, CONTROL_WIDTH, CONTROL_HEIGHT),
         "-",
         true,
         mouse,
@@ -50,7 +68,7 @@ pub(crate) fn draw(
         activated = true;
     }
     if button(
-        Rect::new(origin.x + 216.0, origin.y, CONTROL_WIDTH, CONTROL_HEIGHT),
+        Rect::new(origin.x + 42.0, origin.y, CONTROL_WIDTH, CONTROL_HEIGHT),
         "+",
         true,
         mouse,
