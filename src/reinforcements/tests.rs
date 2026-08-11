@@ -44,3 +44,31 @@ fn entry_tiles_telegraph_only_during_the_round_before_arrival() {
     session.tactical.round = 3;
     assert!(telegraphed_wave(&session).is_none());
 }
+
+#[test]
+fn fallback_entry_skips_objectives_hazards_obstacles_and_live_units() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let preferred = TilePos::new(39, 20);
+    session.tactical.objective_tile = preferred;
+    session.tactical.hazards.push(crate::state::HazardTile {
+        position: TilePos::new(38, 20),
+        kind: crate::data::HazardKind::SporeBloom,
+    });
+    session.tactical.blocked.insert(TilePos::new(39, 19));
+    session.tactical.units[0].position = TilePos::new(39, 21);
+
+    let position = reinforcement_position(&session, preferred).unwrap();
+    assert_ne!(position, session.tactical.objective_tile);
+    assert!(!session.tactical.blocked.contains(&position));
+    assert!(!session
+        .tactical
+        .hazards
+        .iter()
+        .any(|hazard| hazard.position == position));
+    assert!(!session
+        .tactical
+        .units
+        .iter()
+        .any(|unit| !unit.incapacitated && unit.position == position));
+}

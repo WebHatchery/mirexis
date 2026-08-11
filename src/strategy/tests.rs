@@ -264,6 +264,66 @@ fn each_faction_template_materializes_its_own_battlefield() {
 }
 
 #[test]
+fn every_reinforcement_operation_enters_safely_across_the_large_world() {
+    use crate::campaign::CampaignState;
+    use crate::state::GameSession;
+    use macroquad_toolkit::grid::TilePos;
+
+    let data = GameData::load().unwrap();
+    let colony = ColonyState::new();
+    let campaign = CampaignState::new(&data);
+    for template in data.campaign.mission_templates.iter().filter(|template| {
+        matches!(
+            template.objective_kind,
+            ObjectiveKind::Holdout | ObjectiveKind::SignalTrace
+        )
+    }) {
+        let mut strategy = StrategyState::new(&data);
+        let instance = strategy.instantiate(template);
+        strategy.selected_mission_id = instance.id.clone();
+        strategy.mission_offers = vec![instance];
+        let mission = strategy.materialize_selected(&data, &colony);
+        let roster = campaign.deployment_roster(&data, &mission);
+        let session = GameSession::new(&data.config, &mission, &roster);
+        assert!(!session.tactical.reinforcement_waves.is_empty());
+
+        for wave in session.tactical.reinforcement_waves.clone() {
+            let mut arrival = session.clone();
+            arrival.tactical.round = wave.round;
+            for unit in &wave.units {
+                arrival.tactical.blocked.insert(unit.position);
+            }
+            crate::reinforcements::deploy(&mut arrival, data.config.max_action_points);
+            let arrived = arrival
+                .tactical
+                .units
+                .iter()
+                .filter(|unit| unit.id.ends_with(&format!("_reinforcement_{}", wave.round)))
+                .collect::<Vec<_>>();
+            assert_eq!(
+                arrived.len(),
+                wave.units.len(),
+                "{} R{}",
+                template.id,
+                wave.round
+            );
+            let positions = arrived
+                .iter()
+                .map(|unit| unit.position)
+                .collect::<std::collections::HashSet<_>>();
+            assert_eq!(positions.len(), arrived.len());
+            assert!(arrived.iter().all(|unit| {
+                unit.position
+                    .in_bounds(data.config.world_width, data.config.world_height)
+                    && !arrival.tactical.blocked.contains(&unit.position)
+                    && unit.position
+                        != TilePos::new(mission.objective_tile[0], mission.objective_tile[1])
+            }));
+        }
+    }
+}
+
+#[test]
 fn new_faction_operations_have_distinct_objectives_and_recovery() {
     let data = GameData::load().unwrap();
     let sporefield = data

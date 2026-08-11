@@ -157,6 +157,12 @@ fn reinforcement_position(session: &GameSession, preferred: TilePos) -> Option<T
         .filter(|position| {
             session.tactical.fog.is_valid(*position)
                 && !session.tactical.blocked.contains(position)
+                && *position != session.tactical.objective_tile
+                && !session
+                    .tactical
+                    .hazards
+                    .iter()
+                    .any(|hazard| hazard.position == *position)
                 && !session
                     .tactical
                     .units
