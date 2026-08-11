@@ -329,20 +329,21 @@ fn draw_terrain_tile(
     };
     draw_diamond_fill(top, top_color);
 
-    let atlas_index = terrain_art_index(ctx, position, blocked, terrain_cost);
-    let (scale, pivot) = if blocked {
-        (STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT)
-    } else {
-        (TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT)
-    };
-    let art_rect = view.art_bounds(position, scale, pivot);
-    ctx.visuals.draw_atlas_cell(
-        ctx.assets,
-        &ctx.visuals.terrain,
-        atlas_index,
-        art_rect,
-        Color::new(0.92, 0.96, 0.94, if blocked { 0.90 } else { 0.78 }),
-    );
+    if let Some(atlas_index) = terrain_art_index(ctx, position, blocked, terrain_cost) {
+        let (scale, pivot) = if blocked {
+            (STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT)
+        } else {
+            (TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT)
+        };
+        let art_rect = view.art_bounds(position, scale, pivot);
+        ctx.visuals.draw_atlas_cell(
+            ctx.assets,
+            &ctx.visuals.terrain,
+            atlas_index,
+            art_rect,
+            Color::new(0.92, 0.96, 0.94, if blocked { 0.90 } else { 0.78 }),
+        );
+    }
 
     if terrain_cost > 1 && !blocked {
         draw_projected_hatch(top, Color::new(0.90, 0.58, 0.20, 0.50));
@@ -419,18 +420,29 @@ fn draw_cliff_face(
     }
 }
 
-fn terrain_art_index(ctx: &UiContext<'_>, position: TilePos, blocked: bool, cost: u8) -> usize {
+fn terrain_art_index(
+    ctx: &UiContext<'_>,
+    position: TilePos,
+    blocked: bool,
+    cost: u8,
+) -> Option<usize> {
     if blocked {
-        return 3;
+        return Some(3);
     }
     if cost > 1 {
-        return 1;
+        return Some(1);
     }
-    if (position.x + position.y) % 4 == 0 {
-        ctx.visuals
-            .faction_terrain_cell(&ctx.mission.hostile_faction)
+    let pattern =
+        (position.x as u32).wrapping_mul(73_856_093) ^ (position.y as u32).wrapping_mul(19_349_663);
+    if pattern.is_multiple_of(31) {
+        Some(
+            ctx.visuals
+                .faction_terrain_cell(&ctx.mission.hostile_faction),
+        )
+    } else if pattern.is_multiple_of(13) {
+        Some(0)
     } else {
-        0
+        None
     }
 }
 
@@ -470,7 +482,7 @@ fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {
 }
 
 fn draw_foreground(ctx: &UiContext<'_>, view: GridView, hovered: Option<TilePos>) {
-    let canopy_tiles = [TilePos::new(13, 12), TilePos::new(14, 12)];
+    let canopy_tiles = [TilePos::new(12, 19), TilePos::new(13, 19)];
     for tile in canopy_tiles {
         if tile.x >= ctx.session.tactical.fog.width as i32
             || tile.y >= ctx.session.tactical.fog.height as i32

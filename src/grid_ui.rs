@@ -5,12 +5,13 @@ use macroquad_toolkit::grid::TilePos;
 
 pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
 pub(crate) const TACTICAL_HALF_HEIGHT: f32 = 12.0;
-pub(crate) const TERRAIN_ART_SCALE: f32 = 1.70;
-pub(crate) const TERRAIN_ART_PIVOT: [f32; 2] = [0.50, 0.46];
-pub(crate) const STRUCTURE_ART_SCALE: f32 = 1.78;
-pub(crate) const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.64];
-pub(crate) const CANOPY_ART_SCALE: f32 = 2.10;
-pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.70];
+pub(crate) const TERRAIN_ART_SCALE: f32 = 1.06;
+pub(crate) const TERRAIN_ART_PIVOT: [f32; 2] = [0.50, 0.58];
+pub(crate) const STRUCTURE_ART_SCALE: f32 = 1.10;
+pub(crate) const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.68];
+pub(crate) const CANOPY_ART_SCALE: f32 = 1.15;
+pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.65];
+pub(crate) const TERRAIN_ART_ASPECT: f32 = 4.0 / 3.0;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct WorldCamera {
@@ -195,12 +196,13 @@ impl GridView {
 
     pub(crate) fn art_bounds(self, tile: TilePos, scale: f32, pivot: [f32; 2]) -> Rect {
         let anchor = self.ground_anchor(tile);
-        let size = self.half_width * 2.0 * scale;
+        let width = self.half_width * 2.0 * scale;
+        let height = width * TERRAIN_ART_ASPECT;
         Rect::new(
-            anchor.x - size * pivot[0],
-            anchor.y - size * pivot[1],
-            size,
-            size,
+            anchor.x - width * pivot[0],
+            anchor.y - height * pivot[1],
+            width,
+            height,
         )
     }
 
@@ -225,9 +227,9 @@ impl GridView {
     }
 
     pub(crate) fn elevation(self, tile: TilePos) -> i8 {
-        if inside_region(tile, 13, 12, 3, 2) || inside_region(tile, 29, 17, 3, 3) {
+        if inside_region(tile, 12, 19, 3, 2) || inside_region(tile, 29, 17, 3, 3) {
             2
-        } else if inside_region(tile, 13, 12, 7, 5) || inside_region(tile, 29, 17, 6, 5) {
+        } else if inside_region(tile, 12, 19, 6, 5) || inside_region(tile, 29, 17, 6, 5) {
             1
         } else if inside_region(tile, 20, 29, 7, 5) || inside_region(tile, 7, 31, 4, 4) {
             -1

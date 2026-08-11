@@ -82,6 +82,37 @@ fn every_recruit_and_hostile_record_resolves_to_authored_unit_and_portrait_art()
 }
 
 #[test]
+fn terrain_atlas_visible_cells_share_the_declared_horizontal_ground_axis() {
+    let bytes = std::fs::read("assets/art/terrain/terrain_atlas.png").unwrap();
+    let image = Image::from_file_with_format(&bytes, None).unwrap();
+    let columns = 4usize;
+    let rows = 3usize;
+    let width = image.width as usize;
+    let cell_width = width / columns;
+    let cell_height = image.height as usize / rows;
+    for row in 0..rows {
+        for column in 0..columns {
+            let mut min_x = cell_width;
+            let mut max_x = 0usize;
+            for y in row * cell_height..(row + 1) * cell_height {
+                for local_x in 0..cell_width {
+                    let x = column * cell_width + local_x;
+                    if image.bytes[(y * width + x) * 4 + 3] > 12 {
+                        min_x = min_x.min(local_x);
+                        max_x = max_x.max(local_x);
+                    }
+                }
+            }
+            let visible_axis = (min_x + max_x) as f32 / (2.0 * cell_width as f32);
+            assert!(
+                (visible_axis - crate::grid_ui::TERRAIN_ART_PIVOT[0]).abs() < 0.04,
+                "terrain cell ({column}, {row}) axis {visible_axis:.3} misses declared pivot"
+            );
+        }
+    }
+}
+
+#[test]
 fn every_declared_atlas_decodes_and_has_art_in_every_cell() {
     let catalog = VisualCatalog::load();
     let manifest: Vec<serde_json::Value> = serde_json::from_str(

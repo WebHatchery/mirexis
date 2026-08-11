@@ -23,7 +23,7 @@ fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
     ];
     for tile in [
         TilePos::new(3, 20),
-        TilePos::new(13, 12),
+        TilePos::new(12, 19),
         TilePos::new(20, 29),
         TilePos::new(29, 17),
     ] {
@@ -38,20 +38,20 @@ fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
 }
 
 #[test]
-fn battlefield_exposes_three_visual_height_bands() {
+fn battlefield_exposes_raised_flat_and_lowered_height_bands() {
     let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
     assert_eq!(view.elevation(TilePos::new(3, 20)), 0);
-    assert_eq!(view.elevation(TilePos::new(17, 12)), 1);
-    assert_eq!(view.elevation(TilePos::new(13, 12)), 2);
+    assert_eq!(view.elevation(TilePos::new(17, 19)), 1);
+    assert_eq!(view.elevation(TilePos::new(12, 19)), 2);
     assert_eq!(view.elevation(TilePos::new(20, 29)), -1);
 }
 
 #[test]
 fn raised_foreground_tile_owns_the_visibly_occluded_transition_area() {
     let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
-    let rim = TilePos::new(13, 17);
+    let rim = TilePos::new(12, 24);
     let basin_rim = TilePos::new(20, 23);
-    assert_eq!(view.cliff_drop(rim, TilePos::new(13, 18)), 1);
+    assert_eq!(view.cliff_drop(rim, TilePos::new(12, 25)), 1);
     assert_eq!(view.cliff_drop(basin_rim, TilePos::new(20, 24)), 1);
     assert_eq!(view.tile_at(view.tile_center(rim)), Some(rim));
     assert_eq!(
@@ -81,8 +81,8 @@ fn elevation_regions_are_large_distributed_and_projected_vertically() {
     assert!(lowered >= 100, "only {lowered} lowered tiles");
 
     for tile in [
-        TilePos::new(13, 12),
-        TilePos::new(17, 12),
+        TilePos::new(12, 19),
+        TilePos::new(17, 19),
         TilePos::new(20, 29),
     ] {
         let plane_y = view.origin.y + (tile.x + tile.y) as f32 * view.half_height;
@@ -96,7 +96,7 @@ fn elevation_regions_are_large_distributed_and_projected_vertically() {
 #[test]
 fn terrain_art_bounds_keep_the_declared_pivot_on_the_tile_anchor() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
-    let tile = TilePos::new(13, 12);
+    let tile = TilePos::new(12, 19);
     for camera in [
         WorldCamera::tactical_view(tile, tile, 0.65),
         WorldCamera::tactical_view(TilePos::new(20, 20), tile, 1.0),
@@ -108,7 +108,7 @@ fn terrain_art_bounds_keep_the_declared_pivot_on_the_tile_anchor() {
         assert!((bounds.x + bounds.w * TERRAIN_ART_PIVOT[0] - anchor.x).abs() < 0.001);
         assert!((bounds.y + bounds.h * TERRAIN_ART_PIVOT[1] - anchor.y).abs() < 0.001);
         assert_eq!(bounds.w, view.tile_rect(tile).w * TERRAIN_ART_SCALE);
-        assert_eq!(bounds.w, bounds.h);
+        assert_eq!(bounds.h, bounds.w * TERRAIN_ART_ASPECT);
     }
 }
 
