@@ -87,20 +87,20 @@ fn power_plant_construction_adds_redundant_grid_capacity() {
 fn wide_structure_footprints_reserve_and_report_both_plots() {
     let mut colony = ColonyState::new();
     colony
-        .place_construction(BuildingKind::Barricade, [1, 1])
+        .place_construction(BuildingKind::Barricade, [3, 3])
         .unwrap();
 
     assert_eq!(
-        colony.project_at([2, 1]).map(|project| project.kind),
+        colony.project_at([3, 2]).map(|project| project.kind),
         Some(BuildingKind::Barricade)
     );
     assert!(colony
-        .place_construction(BuildingKind::Barricade, [2, 1])
+        .place_construction(BuildingKind::Barricade, [3, 2])
         .is_err());
 
     colony.advance_operation();
     assert_eq!(
-        colony.building_at([2, 1]).map(|building| building.kind),
+        colony.building_at([3, 2]).map(|building| building.kind),
         Some(BuildingKind::Barricade)
     );
 }
@@ -109,7 +109,7 @@ fn wide_structure_footprints_reserve_and_report_both_plots() {
 fn every_building_kind_claims_its_second_plot() {
     let colony = ColonyState::new();
     for building in &colony.buildings {
-        let second = [building.position[0] + 1, building.position[1]];
+        let second = [building.position[0], building.position[1] - 1];
         assert_eq!(
             colony.building_at(second).map(|found| found.id.as_str()),
             Some(building.id.as_str()),
@@ -128,7 +128,7 @@ fn every_building_kind_claims_its_second_plot() {
         BuildingKind::PowerPlant,
         BuildingKind::GeneLab,
     ] {
-        assert_eq!(kind.footprint(), &[[0, 0], [1, 0]]);
+        assert_eq!(kind.footprint(), &[[0, 0], [0, -1]]);
     }
 }
 
@@ -136,10 +136,10 @@ fn every_building_kind_claims_its_second_plot() {
 fn multi_plot_structures_must_fit_inside_the_colony_boundary() {
     let mut colony = ColonyState::new();
     assert!(colony
-        .place_construction(BuildingKind::Barricade, [COLONY_WIDTH - 1, 1])
+        .place_construction(BuildingKind::Barricade, [1, 0])
         .is_err());
     assert!(colony
-        .place_construction(BuildingKind::PowerPlant, [COLONY_WIDTH - 2, 1])
+        .place_construction(BuildingKind::PowerPlant, [1, 1])
         .is_ok());
 }
 
@@ -149,7 +149,7 @@ fn colony_build_area_extends_far_beyond_the_initial_settlement() {
     colony
         .place_construction(
             BuildingKind::Barricade,
-            [COLONY_WIDTH - 2, COLONY_HEIGHT - 1],
+            [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
         )
         .expect("the far colony frontier remains buildable");
 }
