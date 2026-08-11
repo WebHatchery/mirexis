@@ -5,6 +5,12 @@ use macroquad_toolkit::grid::TilePos;
 
 pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
 pub(crate) const TACTICAL_HALF_HEIGHT: f32 = 12.0;
+pub(crate) const TERRAIN_ART_SCALE: f32 = 1.70;
+pub(crate) const TERRAIN_ART_PIVOT: [f32; 2] = [0.50, 0.46];
+pub(crate) const STRUCTURE_ART_SCALE: f32 = 1.78;
+pub(crate) const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.64];
+pub(crate) const CANOPY_ART_SCALE: f32 = 2.10;
+pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.70];
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct WorldCamera {
@@ -183,6 +189,21 @@ impl GridView {
         )
     }
 
+    pub(crate) fn ground_anchor(self, tile: TilePos) -> Vec2 {
+        self.tile_center(tile)
+    }
+
+    pub(crate) fn art_bounds(self, tile: TilePos, scale: f32, pivot: [f32; 2]) -> Rect {
+        let anchor = self.ground_anchor(tile);
+        let size = self.half_width * 2.0 * scale;
+        Rect::new(
+            anchor.x - size * pivot[0],
+            anchor.y - size * pivot[1],
+            size,
+            size,
+        )
+    }
+
     pub(crate) fn tile_rect(self, tile: TilePos) -> Rect {
         let center = self.tile_center(tile);
         Rect::new(
@@ -203,20 +224,13 @@ impl GridView {
         ]
     }
 
-    pub(crate) fn base_diamond(self, tile: TilePos) -> [Vec2; 4] {
-        let mut points = self.diamond(tile);
-        let offset = self.elevation(tile) as f32 * self.elevation_step;
-        for point in &mut points {
-            point.y += offset;
-        }
-        points
-    }
-
-    pub(crate) fn elevation(self, tile: TilePos) -> u8 {
-        if tile.x >= 8 && tile.y <= 3 {
+    pub(crate) fn elevation(self, tile: TilePos) -> i8 {
+        if inside_region(tile, 13, 12, 3, 2) || inside_region(tile, 29, 17, 3, 3) {
             2
-        } else if tile.x >= 5 && tile.y <= 5 {
+        } else if inside_region(tile, 13, 12, 7, 5) || inside_region(tile, 29, 17, 6, 5) {
             1
+        } else if inside_region(tile, 20, 29, 7, 5) || inside_region(tile, 7, 31, 4, 4) {
+            -1
         } else {
             0
         }
@@ -226,12 +240,33 @@ impl GridView {
         self.elevation_step
     }
 
+    pub(crate) fn cliff_drop(self, tile: TilePos, neighbor: TilePos) -> u8 {
+        if neighbor.x < 0
+            || neighbor.y < 0
+            || neighbor.x >= self.width as i32
+            || neighbor.y >= self.height as i32
+        {
+            return 0;
+        }
+        self.elevation(tile)
+            .saturating_sub(self.elevation(neighbor))
+            .max(0) as u8
+    }
+
     pub(crate) fn is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
         let rect = self.tile_rect(tile);
         rect.right() >= viewport.x - margin
             && rect.x <= viewport.right() + margin
             && rect.bottom() >= viewport.y - margin
             && rect.y <= viewport.bottom() + margin
+    }
+
+    pub(crate) fn terrain_is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
+        let bounds = self.art_bounds(tile, STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT);
+        bounds.right() >= viewport.x - margin
+            && bounds.x <= viewport.right() + margin
+            && bounds.bottom() >= viewport.y - margin
+            && bounds.y <= viewport.bottom() + margin
     }
 
     pub(crate) fn tile_at(self, point: Vec2) -> Option<TilePos> {
@@ -254,6 +289,12 @@ impl GridView {
         }
         best
     }
+}
+
+fn inside_region(tile: TilePos, cx: i32, cy: i32, rx: i32, ry: i32) -> bool {
+    let dx = tile.x - cx;
+    let dy = tile.y - cy;
+    dx * dx * ry * ry + dy * dy * rx * rx <= rx * rx * ry * ry
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 //! Projected cover edges and authored destructible barricades.
 
 use crate::data::{CoverEdgeDef, EdgeDirection};
-use crate::grid_ui::GridView;
+use crate::grid_ui::{GridView, STRUCTURE_ART_PIVOT, STRUCTURE_ART_SCALE};
 use crate::state::DestructibleCover;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
@@ -67,12 +67,7 @@ pub(crate) fn draw_cover(
         assets,
         &visuals.terrain,
         4,
-        Rect::new(
-            rect.x - 5.0,
-            rect.y - rect.w * 0.82,
-            rect.w + 10.0,
-            rect.w * 1.22,
-        ),
+        view.art_bounds(cover.position, STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT),
         tint,
     );
     let bar = Rect::new(rect.x + 8.0, rect.y - 11.0, rect.w - 16.0, 4.0);

@@ -13,7 +13,7 @@ fn inverse_hit_testing_recovers_every_projected_tile_center() {
 
 #[test]
 fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
-    let view = GridView::new(12, 8, Rect::new(0.0, 0.0, 780.0, 450.0));
+    let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
     let offsets = [
         vec2(0.0, 0.0),
         vec2(view.half_width * 0.32, 0.0),
@@ -21,7 +21,12 @@ fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
         vec2(0.0, view.half_height * 0.32),
         vec2(0.0, -view.half_height * 0.32),
     ];
-    for tile in [TilePos::new(1, 7), TilePos::new(6, 4), TilePos::new(9, 2)] {
+    for tile in [
+        TilePos::new(3, 20),
+        TilePos::new(13, 12),
+        TilePos::new(20, 29),
+        TilePos::new(29, 17),
+    ] {
         for offset in offsets {
             assert_eq!(
                 view.tile_at(view.tile_center(tile) + offset),
@@ -34,21 +39,77 @@ fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
 
 #[test]
 fn battlefield_exposes_three_visual_height_bands() {
-    let view = GridView::new(12, 8, Rect::new(0.0, 0.0, 780.0, 450.0));
-    assert_eq!(view.elevation(TilePos::new(1, 7)), 0);
-    assert_eq!(view.elevation(TilePos::new(6, 4)), 1);
-    assert_eq!(view.elevation(TilePos::new(9, 2)), 2);
+    let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
+    assert_eq!(view.elevation(TilePos::new(3, 20)), 0);
+    assert_eq!(view.elevation(TilePos::new(17, 12)), 1);
+    assert_eq!(view.elevation(TilePos::new(13, 12)), 2);
+    assert_eq!(view.elevation(TilePos::new(20, 29)), -1);
 }
 
 #[test]
 fn raised_foreground_tile_owns_the_visibly_occluded_transition_area() {
-    let view = GridView::new(12, 8, Rect::new(0.0, 0.0, 780.0, 450.0));
-    let lower = TilePos::new(4, 0);
-    let visibly_covered_point = view.tile_center(lower) + vec2(view.half_width * 0.32, 0.0);
+    let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
+    let rim = TilePos::new(13, 17);
+    let basin_rim = TilePos::new(20, 23);
+    assert_eq!(view.cliff_drop(rim, TilePos::new(13, 18)), 1);
+    assert_eq!(view.cliff_drop(basin_rim, TilePos::new(20, 24)), 1);
+    assert_eq!(view.tile_at(view.tile_center(rim)), Some(rim));
     assert_eq!(
-        view.tile_at(visibly_covered_point),
-        Some(TilePos::new(5, 0))
+        view.tile_at(view.tile_center(TilePos::new(20, 24))),
+        Some(TilePos::new(20, 24))
     );
+}
+
+#[test]
+fn elevation_regions_are_large_distributed_and_projected_vertically() {
+    let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
+    let mut raised = 0;
+    let mut high = 0;
+    let mut lowered = 0;
+    for y in 0..40 {
+        for x in 0..40 {
+            match view.elevation(TilePos::new(x, y)) {
+                1 => raised += 1,
+                2 => high += 1,
+                -1 => lowered += 1,
+                _ => {}
+            }
+        }
+    }
+    assert!(raised >= 100, "only {raised} raised tiles");
+    assert!(high >= 30, "only {high} high tiles");
+    assert!(lowered >= 100, "only {lowered} lowered tiles");
+
+    for tile in [
+        TilePos::new(13, 12),
+        TilePos::new(17, 12),
+        TilePos::new(20, 29),
+    ] {
+        let plane_y = view.origin.y + (tile.x + tile.y) as f32 * view.half_height;
+        assert_eq!(
+            view.tile_center(tile).y,
+            plane_y - f32::from(view.elevation(tile)) * view.elevation_step()
+        );
+    }
+}
+
+#[test]
+fn terrain_art_bounds_keep_the_declared_pivot_on_the_tile_anchor() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    let tile = TilePos::new(13, 12);
+    for camera in [
+        WorldCamera::tactical_view(tile, tile, 0.65),
+        WorldCamera::tactical_view(TilePos::new(20, 20), tile, 1.0),
+        WorldCamera::tactical_view(TilePos::new(8, 25), tile, 1.85),
+    ] {
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        let anchor = view.ground_anchor(tile);
+        let bounds = view.art_bounds(tile, TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT);
+        assert!((bounds.x + bounds.w * TERRAIN_ART_PIVOT[0] - anchor.x).abs() < 0.001);
+        assert!((bounds.y + bounds.h * TERRAIN_ART_PIVOT[1] - anchor.y).abs() < 0.001);
+        assert_eq!(bounds.w, view.tile_rect(tile).w * TERRAIN_ART_SCALE);
+        assert_eq!(bounds.w, bounds.h);
+    }
 }
 
 #[test]

@@ -1,7 +1,10 @@
 //! Three-quarter battlefield rendering, projected overlays, depth, and hit handling.
 
 use crate::data::{ObjectiveKind, Team};
-use crate::grid_ui::{GridView, WorldCamera};
+use crate::grid_ui::{
+    GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
+    STRUCTURE_ART_SCALE, TERRAIN_ART_PIVOT, TERRAIN_ART_SCALE,
+};
 use crate::state::ObjectiveState;
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
@@ -66,7 +69,7 @@ pub(crate) fn draw(
     tiles.sort_by_key(|position| position.x + position.y);
 
     for position in &tiles {
-        if view.is_visible(*position, grid_rect, 30.0) {
+        if view.terrain_is_visible(*position, grid_rect, 30.0) {
             draw_terrain_tile(ctx, view, *position, hovered);
         }
     }
@@ -310,51 +313,29 @@ fn draw_terrain_tile(
         .find(|(tile, _)| *tile == position)
         .map_or(1, |(_, cost)| *cost);
     let top = view.diamond(position);
-    let base = view.base_diamond(position);
     let elevation = view.elevation(position);
-    if elevation > 0 {
-        draw_side_quad(
-            top[3],
-            top[2],
-            base[2],
-            base[3],
-            Color::new(0.055, 0.095, 0.10, 1.0),
-        );
-        draw_side_quad(
-            top[2],
-            top[1],
-            base[1],
-            base[2],
-            Color::new(0.035, 0.065, 0.075, 1.0),
-        );
-        for band in 1..=elevation {
-            let y = top[2].y + band as f32 * view.elevation_step();
-            draw_line(
-                top[3].x,
-                y,
-                top[2].x,
-                y + view.tile_rect(position).h * 0.5,
-                1.0,
-                Color::new(0.22, 0.44, 0.42, 0.55),
-            );
-        }
-    }
+    draw_exposed_cliffs(view, position, top);
     let parity = ((position.x * 17 + position.y * 31).unsigned_abs() % 3) as f32;
     let top_color = if blocked {
         Color::new(0.20 + parity * 0.012, 0.16, 0.12, 1.0)
+    } else if elevation >= 2 {
+        Color::new(0.15 + parity * 0.008, 0.23, 0.21, 1.0)
+    } else if elevation == 1 {
+        Color::new(0.11 + parity * 0.008, 0.18, 0.17, 1.0)
+    } else if elevation < 0 {
+        Color::new(0.045 + parity * 0.005, 0.095, 0.11, 1.0)
     } else {
         Color::new(0.080 + parity * 0.008, 0.125 + parity * 0.006, 0.125, 1.0)
     };
     draw_diamond_fill(top, top_color);
 
     let atlas_index = terrain_art_index(ctx, position, blocked, terrain_cost);
-    let bounds = view.tile_rect(position);
-    let art_rect = Rect::new(
-        bounds.x,
-        bounds.y - bounds.w * 0.62,
-        bounds.w,
-        bounds.w * 1.22,
-    );
+    let (scale, pivot) = if blocked {
+        (STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT)
+    } else {
+        (TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT)
+    };
+    let art_rect = view.art_bounds(position, scale, pivot);
     ctx.visuals.draw_atlas_cell(
         ctx.assets,
         &ctx.visuals.terrain,
@@ -389,12 +370,53 @@ fn draw_terrain_tile(
     } else {
         draw_diamond_outline(top, Color::new(0.20, 0.38, 0.36, 0.72), 1.0);
     }
-    draw_text_ex(
-        format!("H{elevation}"),
-        top[3].x + 3.0,
-        top[3].y + 10.0,
-        TextStyle::new(9.5, Color::new(0.48, 0.72, 0.68, 0.88)).params(),
+}
+
+fn draw_exposed_cliffs(view: GridView, position: TilePos, top: [Vec2; 4]) {
+    draw_cliff_face(
+        view,
+        position,
+        TilePos::new(position.x, position.y + 1),
+        top[3],
+        top[2],
+        Color::new(0.07, 0.13, 0.13, 1.0),
     );
+    draw_cliff_face(
+        view,
+        position,
+        TilePos::new(position.x + 1, position.y),
+        top[2],
+        top[1],
+        Color::new(0.035, 0.075, 0.085, 1.0),
+    );
+}
+
+fn draw_cliff_face(
+    view: GridView,
+    position: TilePos,
+    neighbor: TilePos,
+    a: Vec2,
+    b: Vec2,
+    color: Color,
+) {
+    let drop = view.cliff_drop(position, neighbor);
+    if drop == 0 {
+        return;
+    }
+    let offset = vec2(0.0, f32::from(drop) * view.elevation_step());
+    draw_side_quad(a, b, b + offset, a + offset, color);
+    for band in 1..=drop {
+        let t = f32::from(band) / f32::from(drop);
+        let line_offset = offset * t;
+        draw_line(
+            a.x + line_offset.x,
+            a.y + line_offset.y,
+            b.x + line_offset.x,
+            b.y + line_offset.y,
+            1.0,
+            Color::new(0.24, 0.47, 0.43, 0.52),
+        );
+    }
 }
 
 fn terrain_art_index(ctx: &UiContext<'_>, position: TilePos, blocked: bool, cost: u8) -> usize {
@@ -448,7 +470,7 @@ fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {
 }
 
 fn draw_foreground(ctx: &UiContext<'_>, view: GridView, hovered: Option<TilePos>) {
-    let canopy_tiles = [TilePos::new(6, 2), TilePos::new(7, 2)];
+    let canopy_tiles = [TilePos::new(13, 12), TilePos::new(14, 12)];
     for tile in canopy_tiles {
         if tile.x >= ctx.session.tactical.fog.width as i32
             || tile.y >= ctx.session.tactical.fog.height as i32
@@ -463,17 +485,11 @@ fn draw_foreground(ctx: &UiContext<'_>, view: GridView, hovered: Option<TilePos>
                 .units
                 .iter()
                 .any(|unit| unit.position == tile);
-        let bounds = view.tile_rect(tile);
         ctx.visuals.draw_atlas_cell(
             ctx.assets,
             &ctx.visuals.terrain,
             7,
-            Rect::new(
-                bounds.x - 6.0,
-                bounds.y - bounds.w * 1.15,
-                bounds.w + 12.0,
-                bounds.w * 1.55,
-            ),
+            view.art_bounds(tile, CANOPY_ART_SCALE, CANOPY_ART_PIVOT),
             Color::new(1.0, 1.0, 1.0, if focused { 0.18 } else { 0.70 }),
         );
     }
