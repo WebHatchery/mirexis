@@ -291,6 +291,16 @@ fn primary_tap_does_not_pan_or_suppress_selection() {
 }
 
 #[test]
+fn primary_tracking_requires_an_inside_press_and_survives_boundary_excursions() {
+    assert!(primary_tracking(false, true, true, true));
+    assert!(primary_tracking(true, false, false, true));
+    assert!(primary_tracking(true, true, false, true));
+    assert!(!primary_tracking(false, true, false, true));
+    assert!(!primary_tracking(false, false, true, true));
+    assert!(!primary_tracking(true, false, false, false));
+}
+
+#[test]
 fn visible_camera_controls_nudge_at_screen_scale_and_zoom_from_center() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
     let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));

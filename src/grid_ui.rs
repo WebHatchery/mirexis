@@ -1,7 +1,8 @@
 //! Three-quarter tactical projection shared by rendering and inverse hit testing.
 
 use macroquad::prelude::{
-    is_mouse_button_down, is_mouse_button_released, mouse_wheel, vec2, MouseButton, Rect, Vec2,
+    is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released, mouse_wheel, vec2,
+    MouseButton, Rect, Vec2,
 };
 use macroquad_toolkit::grid::TilePos;
 
@@ -81,8 +82,15 @@ impl WorldCamera {
             self.drag_anchor = None;
         }
 
+        let primary_down = is_mouse_button_down(MouseButton::Left);
+        let track_primary = primary_tracking(
+            self.primary_drag_start.is_some(),
+            inside,
+            is_mouse_button_pressed(MouseButton::Left),
+            primary_down,
+        );
         let suppress_primary_click = self.update_primary_drag(
-            inside && !dragging && is_mouse_button_down(MouseButton::Left),
+            track_primary && !dragging,
             is_mouse_button_released(MouseButton::Left),
             mouse,
         );
@@ -172,6 +180,10 @@ impl WorldCamera {
         self.center.x = clamp_axis(self.center.x, min.x, max.x, visible_half.x);
         self.center.y = clamp_axis(self.center.y, min.y, max.y, visible_half.y);
     }
+}
+
+fn primary_tracking(active: bool, inside: bool, pressed: bool, down: bool) -> bool {
+    down && (active || (inside && pressed))
 }
 
 fn clamp_axis(value: f32, min: f32, max: f32, visible_half: f32) -> f32 {
