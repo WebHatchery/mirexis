@@ -5,7 +5,9 @@ use crate::enemy_intent::{self, IntentAction};
 use crate::grid_ui::GridView;
 use crate::state::{Command, GameSession, TacticalPhase};
 use crate::tactical::manhattan;
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 use std::collections::HashSet;
@@ -18,7 +20,13 @@ pub(crate) fn inspected_hostile(session: &GameSession) -> Option<&crate::state::
     })
 }
 
-pub(crate) fn draw_inspector(session: &GameSession, max_ap: u8, panel: Rect) -> bool {
+pub(crate) fn draw_inspector(
+    session: &GameSession,
+    max_ap: u8,
+    panel: Rect,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+) -> bool {
     let Some(unit) = inspected_hostile(session) else {
         return false;
     };
@@ -26,11 +34,23 @@ pub(crate) fn draw_inspector(session: &GameSession, max_ap: u8, panel: Rect) -> 
         return false;
     };
     let x = panel.x + 18.0;
+    let accent = match unit.faction.as_deref() {
+        Some("directorate") => Color::new(1.0, 0.34, 0.22, 1.0),
+        Some("ascendants") => Color::new(0.72, 0.48, 1.0, 1.0),
+        _ => Color::new(0.96, 0.30, 0.34, 1.0),
+    };
+    visuals.draw_portrait(
+        assets,
+        &unit.id,
+        &unit.name,
+        Rect::new(panel.right() - 100.0, panel.y + 174.0, 76.0, 88.0),
+        accent,
+    );
     draw_text_ex(
         "HOSTILE INTENT // INSPECTED",
         x,
         panel.y + 178.0,
-        TextStyle::new(15.0, Color::new(0.96, 0.45, 0.32, 1.0)).params(),
+        TextStyle::new(15.0, accent).params(),
     );
     draw_text_ex(
         &unit.name,
@@ -104,20 +124,20 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     let Some(target) = target else {
         return;
     };
-    let from = view.tile_rect(unit.position);
-    let to = view.tile_rect(target);
+    let from = view.tile_center(unit.position);
+    let to = view.tile_center(target);
     draw_line(
-        from.x + from.w * 0.5,
-        from.y + from.h * 0.5,
-        to.x + to.w * 0.5,
-        to.y + to.h * 0.5,
+        from.x,
+        from.y,
+        to.x,
+        to.y,
         4.0,
         Color::new(0.98, 0.48, 0.25, 0.8),
     );
     draw_circle_lines(
-        to.x + to.w * 0.5,
-        to.y + to.h * 0.5,
-        to.w * 0.36,
+        to.x,
+        to.y,
+        view.tile_rect(target).h * 0.40,
         3.0,
         Color::new(0.98, 0.48, 0.25, 0.9),
     );
@@ -131,35 +151,30 @@ fn draw_weapon_range(session: &GameSession, hostile_id: &str, max_ap: u8, view: 
         .into_iter()
         .filter(|tile| !stationary.contains(tile))
     {
-        let rect = view.tile_rect(tile);
+        let points = view.diamond(tile);
         let color = Color::new(0.93, 0.31, 0.48, 0.42);
-        let corner = 8.0;
-        for (x, y, dx) in [
-            (rect.x + 6.0, rect.y + 6.0, corner),
-            (rect.right() - 6.0, rect.y + 6.0, -corner),
-            (rect.x + 6.0, rect.bottom() - 6.0, corner),
-            (rect.right() - 6.0, rect.bottom() - 6.0, -corner),
-        ] {
-            draw_line(x, y, x + dx, y, 1.5, color);
+        for point in points {
+            draw_poly(point.x, point.y, 4, 2.5, 45.0, color);
         }
     }
     for tile in stationary {
-        let rect = view.tile_rect(tile);
-        draw_rectangle(
-            rect.x + 3.0,
-            rect.y + 3.0,
-            rect.w - 6.0,
-            rect.h - 6.0,
-            Color::new(0.82, 0.20, 0.16, 0.10),
-        );
-        draw_rectangle_lines(
-            rect.x + 4.0,
-            rect.y + 4.0,
-            rect.w - 8.0,
-            rect.h - 8.0,
-            1.0,
-            Color::new(0.96, 0.40, 0.28, 0.34),
-        );
+        let points = view.diamond(tile);
+        let fill = Color::new(0.82, 0.20, 0.16, 0.13);
+        draw_triangle(points[0], points[1], points[2], fill);
+        draw_triangle(points[0], points[2], points[3], fill);
+        for step in 1..4 {
+            let t = step as f32 / 5.0;
+            let start = points[3].lerp(points[0], t);
+            let end = points[2].lerp(points[1], t);
+            draw_line(
+                start.x,
+                start.y,
+                end.x,
+                end.y,
+                1.0,
+                Color::new(0.96, 0.40, 0.28, 0.32),
+            );
+        }
     }
 }
 

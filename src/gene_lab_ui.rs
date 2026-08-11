@@ -3,14 +3,18 @@
 use crate::campaign::CampaignState;
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
-use crate::ui_widgets::button;
+use crate::ui_widgets::{button, button_with_state};
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
 pub(crate) fn draw_gene_lab(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mouse = ui.mouse_position();
@@ -23,8 +27,14 @@ pub(crate) fn draw_gene_lab(
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
     draw_header(campaign);
-    draw_character_list(campaign, data, mouse, &mut actions);
-    draw_evolution_panel(campaign, data, mouse, &mut actions);
+    draw_character_list(campaign, data, assets, visuals, mouse, &mut actions);
+    draw_evolution_panel(campaign, data, assets, visuals, mouse, &mut actions);
+    draw_ui_text_ex(
+        "PAD // D-PAD SELECT COLONIST · B COLONY  //  MOUSE // CHOOSE IRREVERSIBLE EVOLUTION",
+        28.0,
+        707.0,
+        TextStyle::new(10.0, dark::TEXT_DIM).params(),
+    );
     actions
 }
 
@@ -63,6 +73,8 @@ fn draw_header(campaign: &CampaignState) {
 fn draw_character_list(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -91,24 +103,48 @@ fn draw_character_list(
         } else {
             "EVOLVED"
         };
-        if button(
-            Rect::new(36.0, 154.0 + index as f32 * 88.0, 264.0, 72.0),
+        let row = Rect::new(36.0, 154.0 + index as f32 * 88.0, 264.0, 72.0);
+        if button_with_state(
+            row,
+            "",
+            true,
+            character.id == campaign.selected_character_id,
+            mouse,
+        ) {
+            actions.push(UiAction::SelectColonist(character.id.clone()));
+        }
+        crate::portrait_ui::draw_character_portrait(
+            assets,
+            visuals,
+            Rect::new(42.0, 160.0 + index as f32 * 88.0, 54.0, 60.0),
+            &character.id,
+            &character.name,
+            if character.id == campaign.selected_character_id {
+                dark::POSITIVE
+            } else {
+                Color::new(0.24, 0.48, 0.44, 1.0)
+            },
+        );
+        draw_ui_text_ex(
             &format!(
-                "{}{}\n{} // {}",
+                "{}{}",
                 if character.id == campaign.selected_character_id {
                     "> "
                 } else {
                     ""
                 },
-                character.name,
-                mutation_name,
-                status
+                character.name.to_uppercase()
             ),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::SelectColonist(character.id.clone()));
-        }
+            row.x + 70.0,
+            row.y + 28.0,
+            TextStyle::new(14.0, dark::TEXT_BRIGHT).params(),
+        );
+        draw_ui_text_ex(
+            &format!("{} // {}", mutation_name.to_uppercase(), status),
+            row.x + 70.0,
+            row.y + 51.0,
+            TextStyle::new(11.0, dark::TEXT_DIM).params(),
+        );
     }
     draw_text_block(
         "Evolution is irreversible. Every gift carries a complication into later deployments.",
@@ -125,6 +161,8 @@ fn draw_character_list(
 fn draw_evolution_panel(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -147,15 +185,25 @@ fn draw_evolution_panel(
     else {
         return;
     };
+    let portrait = Rect::new(366.0, 158.0, 132.0, 152.0);
+    crate::portrait_ui::draw_character_portrait(
+        assets,
+        visuals,
+        portrait,
+        &character.id,
+        &character.name,
+        Color::new(0.62, 0.86, 0.42, 1.0),
+    );
+    draw_anatomy_scan(portrait, &mutation.name);
     draw_ui_text_ex(
         &character.name,
-        366.0,
+        524.0,
         180.0,
         TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
     );
     draw_ui_text_ex(
         &format!("BASE EXPRESSION // {}", mutation.name.to_uppercase()),
-        366.0,
+        524.0,
         214.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
@@ -167,15 +215,15 @@ fn draw_evolution_panel(
     {
         draw_ui_text_ex(
             &format!("EVOLVED // {}", evolution.name.to_uppercase()),
-            366.0,
+            524.0,
             278.0,
             TextStyle::new(24.0, dark::POSITIVE).params(),
         );
         draw_text_block(
             &evolution.description,
-            366.0,
+            524.0,
             304.0,
-            820.0,
+            650.0,
             70.0,
             18.0,
             5.0,
@@ -183,9 +231,9 @@ fn draw_evolution_panel(
         );
         draw_text_block(
             "The chamber has stabilized this expression. It cannot be replaced.",
-            366.0,
+            524.0,
             410.0,
-            820.0,
+            650.0,
             60.0,
             16.0,
             4.0,
@@ -194,9 +242,9 @@ fn draw_evolution_panel(
     } else if mutation.evolutions.is_empty() {
         draw_text_block(
             "No stable evolution path has been researched for this mutation.",
-            366.0,
+            524.0,
             278.0,
-            820.0,
+            650.0,
             80.0,
             19.0,
             5.0,
@@ -205,14 +253,14 @@ fn draw_evolution_panel(
     } else {
         draw_ui_text_ex(
             "CHOOSE ONE IRREVERSIBLE EXPRESSION",
-            366.0,
+            524.0,
             268.0,
             TextStyle::new(16.0, dark::WARNING).params(),
         );
         for (index, evolution) in mutation.evolutions.iter().enumerate() {
-            let y = 290.0 + index as f32 * 128.0;
+            let y = 324.0 + index as f32 * 118.0;
             draw_surface(
-                Rect::new(366.0, y, 840.0, 108.0),
+                Rect::new(366.0, y, 840.0, 100.0),
                 &SurfaceStyle::new(Color::new(0.06, 0.11, 0.11, 1.0))
                     .with_border(1.0, Color::new(0.22, 0.48, 0.42, 0.9)),
             );
@@ -254,4 +302,25 @@ fn draw_evolution_panel(
     ) {
         actions.push(UiAction::ReturnToColony);
     }
+}
+
+fn draw_anatomy_scan(rect: Rect, mutation: &str) {
+    let scan = Color::new(0.55, 0.95, 0.56, 0.72);
+    for index in 0..3 {
+        let y = rect.y + 28.0 + index as f32 * 36.0;
+        draw_line(rect.right() + 8.0, y, rect.right() + 22.0, y, 1.0, scan);
+        draw_rectangle(
+            rect.right() + 24.0,
+            y - 3.0,
+            44.0 + index as f32 * 18.0,
+            6.0,
+            Color::new(scan.r, scan.g, scan.b, 0.24),
+        );
+    }
+    draw_text_ex(
+        format!("BIO-SCAN // {}", mutation.to_uppercase()),
+        rect.x,
+        rect.bottom() + 18.0,
+        TextStyle::new(11.0, scan).params(),
+    );
 }

@@ -2,7 +2,9 @@
 
 use crate::campaign::CampaignState;
 use crate::data::{GameConfig, MissionDef, ObjectiveKind, Team, UnitDef};
-use crate::tactical::{line_between, manhattan, path_cost, terrain_cost};
+use crate::tactical::{
+    line_between, manhattan, path_cost, terrain_cost, UnitAnimationState, UnitFacing,
+};
 pub use crate::tactical::{
     BattleEvent, Command, CommandCost, DestructibleCover, HazardTile, ObjectiveState,
     ReinforcementWave, RuleError, StatusKind, TacticalPhase, TacticalState, UnitState,
@@ -514,8 +516,11 @@ impl GameSession {
             .iter_mut()
             .find(|unit| unit.id == unit_id)
             .unwrap();
+        unit.facing = UnitFacing::toward(from, to);
         unit.position = to;
         unit.action_points -= cost;
+        unit.presentation_state = UnitAnimationState::Move;
+        unit.presentation_seconds = 0.38;
         if self.tactical.selected_unit.as_deref() == Some(unit_id) {
             self.tactical.selected_tile = to;
         }
@@ -531,12 +536,16 @@ impl GameSession {
         let target = self.unit(target_id).unwrap().clone();
         let hit_chance = self.hit_chance(&attacker, &target);
         let roll = self.tactical.rng.range_i32(1, 101) as u8;
-        self.tactical
+        let attacking_unit = self
+            .tactical
             .units
             .iter_mut()
             .find(|unit| unit.id == attacker_id)
-            .unwrap()
-            .action_points -= attacker.weapon_ap_cost;
+            .unwrap();
+        attacking_unit.action_points -= attacker.weapon_ap_cost;
+        attacking_unit.facing = UnitFacing::toward(attacker.position, target.position);
+        attacking_unit.presentation_state = UnitAnimationState::AttackRelease;
+        attacking_unit.presentation_seconds = 0.52;
         let mut events = vec![BattleEvent::AttackRolled {
             attacker_id: attacker_id.to_owned(),
             target_id: target_id.to_owned(),
@@ -554,6 +563,9 @@ impl GameSession {
                 .iter_mut()
                 .find(|unit| unit.id == target_id)
                 .unwrap();
+            target.facing = UnitFacing::toward(target.position, attacker.position);
+            target.presentation_state = UnitAnimationState::Hit;
+            target.presentation_seconds = 0.42;
             target.health = (target.health - damage).max(0);
             events.push(BattleEvent::DamageApplied {
                 target_id: target_id.to_owned(),

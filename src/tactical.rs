@@ -56,6 +56,38 @@ pub struct HazardTile {
     pub kind: HazardKind,
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum UnitFacing {
+    #[default]
+    SouthEast,
+    SouthWest,
+    NorthEast,
+    NorthWest,
+}
+
+impl UnitFacing {
+    pub fn toward(from: TilePos, to: TilePos) -> Self {
+        match (to.x - from.x, to.y - from.y) {
+            (dx, dy) if dx >= 0 && dy >= 0 => Self::SouthEast,
+            (dx, dy) if dx < 0 && dy >= 0 => Self::SouthWest,
+            (dx, dy) if dx >= 0 && dy < 0 => Self::NorthEast,
+            _ => Self::NorthWest,
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum UnitAnimationState {
+    #[default]
+    Idle,
+    Move,
+    AttackAnticipation,
+    AttackRelease,
+    Hit,
+    Incapacitated,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UnitState {
     pub id: String,
@@ -70,6 +102,8 @@ pub struct UnitState {
     #[serde(default)]
     pub faction: Option<String>,
     pub position: TilePos,
+    #[serde(default)]
+    pub facing: UnitFacing,
     pub health: i32,
     pub max_health: i32,
     pub move_range: u8,
@@ -101,6 +135,10 @@ pub struct UnitState {
     pub overwatching: bool,
     #[serde(default)]
     pub enemy_ability_used: bool,
+    #[serde(skip)]
+    pub presentation_state: UnitAnimationState,
+    #[serde(skip)]
+    pub presentation_seconds: f32,
 }
 
 impl UnitState {
@@ -115,6 +153,11 @@ impl UnitState {
             team: def.team,
             faction: def.faction.clone(),
             position: TilePos::new(def.position[0], def.position[1]),
+            facing: if def.team == Team::Colony {
+                UnitFacing::SouthEast
+            } else {
+                UnitFacing::SouthWest
+            },
             health: def.max_health,
             max_health: def.max_health,
             move_range: def.move_range,
@@ -136,6 +179,20 @@ impl UnitState {
             statuses: Vec::new(),
             overwatching: false,
             enemy_ability_used: false,
+            presentation_state: UnitAnimationState::Idle,
+            presentation_seconds: 0.0,
+        }
+    }
+
+    pub fn visible_animation_state(&self) -> UnitAnimationState {
+        if self.incapacitated {
+            UnitAnimationState::Incapacitated
+        } else if self.overwatching && self.presentation_seconds <= 0.0 {
+            UnitAnimationState::AttackAnticipation
+        } else if self.presentation_seconds > 0.0 {
+            self.presentation_state
+        } else {
+            UnitAnimationState::Idle
         }
     }
 
@@ -185,6 +242,17 @@ impl UnitState {
 
     pub fn has_status(&self, kind: StatusKind) -> bool {
         self.statuses.iter().any(|status| status.kind == kind)
+    }
+}
+
+impl TacticalState {
+    pub fn update_presentation(&mut self, dt: f32) {
+        for unit in &mut self.units {
+            unit.presentation_seconds = (unit.presentation_seconds - dt).max(0.0);
+            if unit.presentation_seconds == 0.0 {
+                unit.presentation_state = UnitAnimationState::Idle;
+            }
+        }
     }
 }
 

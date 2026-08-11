@@ -6,7 +6,7 @@ use crate::ui_widgets::{button, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-const VISIBLE_EVENTS: usize = 15;
+const VISIBLE_EVENTS: usize = 10;
 
 pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.62));
@@ -34,18 +34,37 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
         .len()
         .saturating_sub(VISIBLE_EVENTS);
     for (row, event) in session.tactical.event_log[start..].iter().enumerate() {
-        let y = panel.y + 100.0 + row as f32 * 25.0;
+        let y = panel.y + 92.0 + row as f32 * 39.0;
+        let row_rect = Rect::new(panel.x + 18.0, y, panel.w - 36.0, 34.0);
+        draw_rectangle(
+            row_rect.x,
+            row_rect.y,
+            row_rect.w,
+            row_rect.h,
+            if row % 2 == 0 {
+                Color::new(0.06, 0.095, 0.10, 0.92)
+            } else {
+                Color::new(0.045, 0.075, 0.08, 0.92)
+            },
+        );
+        draw_event_icon(event, vec2(row_rect.x + 18.0, row_rect.y + 17.0));
         draw_text_ex(
             format!("{:02}", start + row + 1),
-            panel.x + 24.0,
-            y,
-            TextStyle::new(12.0, Color::new(0.46, 0.66, 0.62, 1.0)).params(),
+            row_rect.x + 34.0,
+            row_rect.y + 14.0,
+            TextStyle::new(10.0, Color::new(0.46, 0.66, 0.62, 1.0)).params(),
         );
         draw_text_ex(
             event_summary(event).replace('_', " "),
-            panel.x + 62.0,
-            y,
-            TextStyle::new(14.0, event_color(event)).params(),
+            row_rect.x + 65.0,
+            row_rect.y + 23.0,
+            TextStyle::new(13.0, event_color(event)).params(),
+        );
+        draw_text_ex(
+            event_kind(event),
+            row_rect.right() - 92.0,
+            row_rect.y + 12.0,
+            TextStyle::new(10.0, Color::new(0.45, 0.62, 0.60, 1.0)).params(),
         );
     }
     if session.tactical.event_log.is_empty() {
@@ -68,6 +87,55 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
         mouse,
     ) {
         actions.push(UiAction::ToggleBattleLog);
+    }
+}
+
+fn event_kind(event: &crate::state::BattleEvent) -> &'static str {
+    use crate::state::BattleEvent::*;
+    match event {
+        UnitMoved { .. } => "MOVEMENT",
+        AttackRolled { .. } | ReactionTriggered { .. } => "ATTACK",
+        DamageApplied { .. } | UnitIncapacitated { .. } => "IMPACT",
+        PhaseStarted { .. } => "PHASE",
+        BattleEnded { .. } => "OUTCOME",
+        HazardTriggered { .. } => "HAZARD",
+        ReinforcementsArrived { .. } => "WAVE",
+        _ => "ACTION",
+    }
+}
+
+fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
+    let color = event_color(event);
+    match event_kind(event) {
+        "ATTACK" | "IMPACT" => {
+            draw_line(
+                center.x - 6.0,
+                center.y + 6.0,
+                center.x + 6.0,
+                center.y - 6.0,
+                3.0,
+                color,
+            );
+            draw_circle(center.x + 6.0, center.y - 6.0, 3.0, color);
+        }
+        "MOVEMENT" => {
+            draw_line(
+                center.x - 7.0,
+                center.y + 5.0,
+                center.x + 6.0,
+                center.y - 3.0,
+                2.0,
+                color,
+            );
+            draw_triangle(
+                vec2(center.x + 8.0, center.y - 4.0),
+                vec2(center.x + 2.0, center.y - 6.0),
+                vec2(center.x + 5.0, center.y),
+                color,
+            );
+        }
+        "HAZARD" => draw_poly(center.x, center.y, 6, 8.0, 0.0, color),
+        _ => draw_poly(center.x, center.y, 4, 7.0, 45.0, color),
     }
 }
 

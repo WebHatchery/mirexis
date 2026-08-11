@@ -90,7 +90,14 @@ impl PhaseReplay {
         let Some(beat) = self.beats.get(self.current) else {
             return;
         };
-        let rect = Rect::new(220.0, 566.0, 420.0, 42.0);
+        draw_rectangle(
+            18.0,
+            544.0,
+            820.0,
+            82.0,
+            Color::new(0.01, 0.02, 0.025, 0.70),
+        );
+        let rect = Rect::new(220.0, 552.0, 420.0, 54.0);
         draw_surface(
             rect,
             &SurfaceStyle::new(Color::new(0.12, 0.055, 0.045, 0.96))
@@ -99,8 +106,8 @@ impl PhaseReplay {
         draw_text_ex(
             beat,
             rect.x + 12.0,
-            rect.y + 18.0,
-            TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+            rect.y + 24.0,
+            TextStyle::new(14.0, dark::TEXT_BRIGHT).params(),
         );
         draw_text_ex(
             format!(
@@ -109,8 +116,43 @@ impl PhaseReplay {
                 self.beats.len()
             ),
             rect.x + 12.0,
-            rect.y + 34.0,
+            rect.y + 44.0,
             TextStyle::new(10.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
+        );
+        for (index, _) in self.beats.iter().enumerate() {
+            let marker = vec2(52.0 + index as f32 * 20.0, 578.0);
+            let active = index == self.current;
+            let complete = index < self.current;
+            draw_poly(
+                marker.x,
+                marker.y,
+                4,
+                if active { 8.0 } else { 5.0 },
+                45.0,
+                if active {
+                    Color::new(1.0, 0.36, 0.16, 1.0)
+                } else if complete {
+                    dark::POSITIVE
+                } else {
+                    Color::new(0.22, 0.30, 0.31, 1.0)
+                },
+            );
+            if index + 1 < self.beats.len() {
+                draw_line(
+                    marker.x + 7.0,
+                    marker.y,
+                    marker.x + 13.0,
+                    marker.y,
+                    2.0,
+                    Color::new(0.35, 0.48, 0.46, 0.7),
+                );
+            }
+        }
+        draw_text_ex(
+            "PHASE REPLAY",
+            42.0,
+            558.0,
+            TextStyle::new(11.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
         );
     }
 }

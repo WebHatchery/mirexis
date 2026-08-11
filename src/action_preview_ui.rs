@@ -6,14 +6,48 @@ use crate::grid_ui::GridView;
 use crate::state::GameSession;
 use crate::state::RuleError;
 use crate::tactical::terrain_cost;
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos, panel: Rect) {
+pub(crate) fn draw(
+    session: &GameSession,
+    tile: macroquad_toolkit::grid::TilePos,
+    panel: Rect,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+) {
     let Some(preview) = action_preview::for_tile(session, tile) else {
         return;
     };
     let invalid = matches!(preview, ActionPreview::Invalid { .. });
+    if let ActionPreview::Attack {
+        target_name,
+        target_position,
+        cost,
+        hit_chance,
+        cover_penalty,
+        damage,
+        critical_damage,
+        ..
+    } = &preview
+    {
+        draw_attack_comparison(
+            session,
+            *target_position,
+            target_name,
+            *cost,
+            *hit_chance,
+            *cover_penalty,
+            *damage,
+            *critical_damage,
+            panel,
+            assets,
+            visuals,
+        );
+        return;
+    }
     let label = match preview {
         ActionPreview::Move { cost, hazard, .. } => match hazard {
             Some(kind) => format!("MOVE // {} AP // {}", cost, hazard_effect(kind)),
@@ -61,6 +95,84 @@ pub(crate) fn draw(session: &GameSession, tile: macroquad_toolkit::grid::TilePos
         rect.x + 10.0,
         rect.y + 19.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn draw_attack_comparison(
+    session: &GameSession,
+    target_position: macroquad_toolkit::grid::TilePos,
+    target_name: &str,
+    cost: u8,
+    hit_chance: u8,
+    cover_penalty: i32,
+    damage: i32,
+    critical_damage: i32,
+    panel: Rect,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+) {
+    let Some(attacker) = session.selected_unit() else {
+        return;
+    };
+    let Some(target) = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == target_position)
+    else {
+        return;
+    };
+    let rect = Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 84.0);
+    draw_surface(
+        rect,
+        &SurfaceStyle::new(Color::new(0.025, 0.052, 0.058, 0.98))
+            .with_border(2.0, Color::new(0.86, 0.50, 0.24, 0.96)),
+    );
+    visuals.draw_portrait(
+        assets,
+        &attacker.id,
+        &attacker.name,
+        Rect::new(rect.x + 7.0, rect.y + 7.0, 60.0, 70.0),
+        Color::new(0.24, 0.90, 0.76, 1.0),
+    );
+    visuals.draw_portrait(
+        assets,
+        &target.id,
+        &target.name,
+        Rect::new(rect.right() - 67.0, rect.y + 7.0, 60.0, 70.0),
+        Color::new(0.98, 0.28, 0.24, 1.0),
+    );
+    let x = rect.x + 78.0;
+    draw_text_ex(
+        format!(
+            "{}  >  {}",
+            attacker.name.to_uppercase(),
+            target_name.to_uppercase()
+        ),
+        x,
+        rect.y + 22.0,
+        TextStyle::new(14.0, dark::TEXT_BRIGHT).params(),
+    );
+    draw_text_ex(
+        format!(
+            "HIT {hit_chance}%  //  DAMAGE {damage}  //  CRITICAL {critical_damage}  //  {cost} AP"
+        ),
+        x,
+        rect.y + 45.0,
+        TextStyle::new(14.0, Color::new(1.0, 0.72, 0.30, 1.0)).params(),
+    );
+    draw_text_ex(
+        format!(
+            "TARGET VITALITY {} > {}  //  ARMOUR {}  //  COVER -{}",
+            target.health,
+            (target.health - damage).max(0),
+            target.effective_armour(),
+            cover_penalty
+        ),
+        x,
+        rect.y + 67.0,
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
 }
 
@@ -116,7 +228,7 @@ pub(crate) fn draw_route(
     let mut previous: Option<Vec2> = None;
     for (index, position) in path.iter().copied().enumerate() {
         let rect = view.tile_rect(position);
-        let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
+        let center = view.tile_center(position);
         if let Some(from) = previous {
             draw_line(from.x, from.y, center.x, center.y, 3.0, route_color());
         }
@@ -137,8 +249,7 @@ pub(crate) fn draw_route(
 }
 
 fn tile_center(view: GridView, tile: macroquad_toolkit::grid::TilePos) -> Vec2 {
-    let rect = view.tile_rect(tile);
-    vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5)
+    view.tile_center(tile)
 }
 
 fn shot_color() -> Color {

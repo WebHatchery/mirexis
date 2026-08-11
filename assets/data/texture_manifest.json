@@ -1,1 +1,19 @@
-[]
+[
+  { "key": "unit_kira_voss", "path": "assets/art/atlases/kira_voss.png", "filter": "linear" },
+  { "key": "unit_mara_venn", "path": "assets/art/atlases/mara_venn.png", "filter": "linear" },
+  { "key": "unit_ilya_reed", "path": "assets/art/atlases/ilya_reed.png", "filter": "linear" },
+  { "key": "unit_sol_cairn", "path": "assets/art/atlases/sol_cairn.png", "filter": "linear" },
+  { "key": "unit_nadi_vale", "path": "assets/art/atlases/nadi_vale.png", "filter": "linear" },
+  { "key": "unit_brood_stalker", "path": "assets/art/atlases/brood_stalker.png", "filter": "linear" },
+  { "key": "unit_brood_sporecaster", "path": "assets/art/atlases/brood_sporecaster.png", "filter": "linear" },
+  { "key": "unit_directorate_rifleman", "path": "assets/art/atlases/directorate_rifleman.png", "filter": "linear" },
+  { "key": "unit_directorate_drone", "path": "assets/art/atlases/directorate_drone.png", "filter": "linear" },
+  { "key": "unit_ascendant_sentinel", "path": "assets/art/atlases/ascendant_sentinel.png", "filter": "linear" },
+  { "key": "unit_ascendant_warden", "path": "assets/art/atlases/ascendant_warden.png", "filter": "linear" },
+  { "key": "portraits_recruits", "path": "assets/art/portraits/recruits.png", "filter": "linear" },
+  { "key": "portraits_enemies", "path": "assets/art/portraits/enemies.png", "filter": "linear" },
+  { "key": "terrain_atlas", "path": "assets/art/terrain/terrain_atlas.png", "filter": "linear" },
+  { "key": "colony_buildings", "path": "assets/art/colony/buildings_atlas.png", "filter": "linear" },
+  { "key": "equipment_atlas", "path": "assets/art/equipment/equipment_atlas.png", "filter": "linear" },
+  { "key": "effects_atlas", "path": "assets/art/effects/effects_atlas.png", "filter": "linear" }
+]

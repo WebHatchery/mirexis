@@ -2,10 +2,18 @@
 
 use crate::campaign::CampaignState;
 use crate::data::GameData;
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(crate) fn draw(campaign: &CampaignState, data: &GameData, origin: Vec2) {
+pub(crate) fn draw(
+    campaign: &CampaignState,
+    data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+    origin: Vec2,
+) {
     let Some(character) = campaign.selected_character() else {
         return;
     };
@@ -39,6 +47,14 @@ pub(crate) fn draw(campaign: &CampaignState, data: &GameData, origin: Vec2) {
         origin.y,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
+    crate::portrait_ui::draw_character_portrait(
+        assets,
+        visuals,
+        Rect::new(origin.x, origin.y + 14.0, 64.0, 84.0),
+        &character.id,
+        &character.name,
+        dark::ACCENT,
+    );
     for (index, line) in [
         format!(
             "{} // {}",
@@ -65,7 +81,7 @@ pub(crate) fn draw(campaign: &CampaignState, data: &GameData, origin: Vec2) {
     {
         draw_text_ex(
             line,
-            origin.x,
+            origin.x + 76.0,
             origin.y + 20.0 + index as f32 * 17.0,
             TextStyle::new(11.5, dark::TEXT_DIM).params(),
         );

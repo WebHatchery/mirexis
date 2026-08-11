@@ -4,14 +4,18 @@ use crate::campaign::{equipment_cost, CampaignState};
 use crate::colony::BuildingKind;
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
-use crate::ui_widgets::button;
+use crate::ui_widgets::{button, button_with_state};
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
 pub(crate) fn draw_roster(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mouse = ui.mouse_position();
@@ -24,8 +28,14 @@ pub(crate) fn draw_roster(
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
     draw_header(campaign);
-    draw_character_list(campaign, mouse, &mut actions);
-    draw_selected_character(campaign, data, mouse, &mut actions);
+    draw_character_list(campaign, assets, visuals, mouse, &mut actions);
+    draw_selected_character(campaign, data, assets, visuals, mouse, &mut actions);
+    draw_ui_text_ex(
+        "PAD // D-PAD SELECT COLONIST · B COLONY  //  MOUSE // TRAIN · CRAFT · EQUIP",
+        28.0,
+        707.0,
+        TextStyle::new(10.0, dark::TEXT_DIM).params(),
+    );
     actions
 }
 
@@ -51,7 +61,13 @@ fn draw_header(campaign: &CampaignState) {
     );
 }
 
-fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+fn draw_character_list(
+    campaign: &CampaignState,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     let panel = Rect::new(18.0, 96.0, 280.0, 580.0);
     draw_surface_with_title(
         panel,
@@ -73,21 +89,38 @@ fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<
         } else {
             " · LEGACY"
         };
-        if button(
-            Rect::new(36.0, 154.0 + index as f32 * 72.0, 244.0, 58.0),
-            &format!(
-                "{}{} · LV{} · {}{}",
-                if selected { "> " } else { "" },
-                character.name,
-                character.level,
-                deployment,
-                legacy
-            ),
-            true,
-            mouse,
-        ) {
+        let row = Rect::new(36.0, 154.0 + index as f32 * 72.0, 244.0, 58.0);
+        if button_with_state(row, "", true, selected, mouse) {
             actions.push(UiAction::SelectColonist(character.id.clone()));
         }
+        crate::portrait_ui::draw_character_portrait(
+            assets,
+            visuals,
+            Rect::new(row.x + 5.0, row.y + 5.0, 48.0, 48.0),
+            &character.id,
+            &character.name,
+            if selected {
+                dark::POSITIVE
+            } else {
+                Color::new(0.23, 0.48, 0.44, 1.0)
+            },
+        );
+        draw_ui_text_ex(
+            &format!(
+                "{}{}",
+                if selected { "> " } else { "" },
+                character.name.to_uppercase()
+            ),
+            row.x + 62.0,
+            row.y + 24.0,
+            TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+        );
+        draw_ui_text_ex(
+            &format!("LV{} // {}{}", character.level, deployment, legacy),
+            row.x + 62.0,
+            row.y + 43.0,
+            TextStyle::new(10.0, dark::TEXT_DIM).params(),
+        );
     }
     let relationships = campaign.relationship_summaries(&campaign.selected_character_id);
     draw_ui_text_ex(
@@ -108,13 +141,43 @@ fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<
             dark::TEXT_DIM,
         );
     } else {
-        for (index, relationship) in relationships.iter().take(4).enumerate() {
+        for (index, relationship) in relationships.iter().take(2).enumerate() {
             draw_ui_text_ex(
                 relationship,
-                40.0,
-                562.0 + index as f32 * 22.0,
+                92.0,
+                570.0 + index as f32 * 42.0,
                 TextStyle::new(11.0, dark::TEXT_DIM).params(),
             );
+        }
+        let selected_id = &campaign.selected_character_id;
+        for (index, relation) in campaign
+            .relationships
+            .iter()
+            .filter(|relation| {
+                relation.first_id == *selected_id || relation.second_id == *selected_id
+            })
+            .take(2)
+            .enumerate()
+        {
+            let partner_id = if relation.first_id == *selected_id {
+                &relation.second_id
+            } else {
+                &relation.first_id
+            };
+            if let Some(partner) = campaign
+                .roster
+                .iter()
+                .find(|character| character.id == *partner_id)
+            {
+                crate::portrait_ui::draw_character_portrait(
+                    assets,
+                    visuals,
+                    Rect::new(40.0, 548.0 + index as f32 * 42.0, 40.0, 40.0),
+                    &partner.id,
+                    &partner.name,
+                    Color::new(0.45, 0.78, 0.96, 1.0),
+                );
+            }
         }
     }
 }
@@ -122,6 +185,8 @@ fn draw_character_list(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<
 fn draw_selected_character(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -158,17 +223,25 @@ fn draw_selected_character(
         || mutation.to_owned(),
         |evolution| format!("{} / {}", mutation, evolution.name),
     );
+    crate::portrait_ui::draw_character_portrait(
+        assets,
+        visuals,
+        Rect::new(344.0, 150.0, 120.0, 110.0),
+        &character.id,
+        &character.name,
+        Color::new(0.28, 0.88, 0.72, 1.0),
+    );
     draw_ui_text_ex(
         &character.name,
-        344.0,
+        484.0,
         172.0,
         TextStyle::new(30.0, dark::TEXT_BRIGHT).params(),
     );
     draw_text_block(
         &character.biography,
-        344.0,
+        484.0,
         190.0,
-        870.0,
+        730.0,
         52.0,
         17.0,
         4.0,
@@ -180,7 +253,7 @@ fn draw_selected_character(
             character.level, character.experience, mutation, character.availability
         ),
         344.0,
-        260.0,
+        276.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     let equipment = character
@@ -193,7 +266,7 @@ fn draw_selected_character(
     draw_ui_text_ex(
         &format!("LOADOUT  {}", equipment),
         344.0,
-        288.0,
+        298.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
     let mut history = Vec::new();
@@ -319,25 +392,49 @@ fn draw_selected_character(
             && campaign.colony.resources.materials >= cost as i32;
         let column = index % 3;
         let row = index / 3;
-        if button(
-            Rect::new(
-                344.0 + column as f32 * 296.0,
-                518.0 + row as f32 * 36.0,
-                282.0,
-                30.0,
-            ),
-            &if !unlocked {
-                format!("LOCKED: {}", item.name)
-            } else if equipped {
-                format!("EQUIPPED: {}", item.name)
-            } else {
-                format!("CRAFT: {} · {} MAT", item.name, cost)
-            },
-            enabled,
-            mouse,
-        ) {
+        let rect = Rect::new(
+            344.0 + column as f32 * 296.0,
+            518.0 + row as f32 * 36.0,
+            282.0,
+            30.0,
+        );
+        let label = if !unlocked {
+            format!("LOCKED: {}", item.name)
+        } else if equipped {
+            format!("EQUIPPED: {}", item.name)
+        } else {
+            format!("CRAFT: {} · {} MAT", item.name, cost)
+        };
+        if button(rect, "", enabled, mouse) {
             actions.push(UiAction::CraftSelected(item.id.clone()));
         }
+        if let Some(index) = crate::visual_assets::equipment_index(&item.id) {
+            visuals.draw_atlas_cell(
+                assets,
+                &visuals.equipment,
+                index,
+                Rect::new(rect.x + 5.0, rect.y + 2.0, 34.0, 26.0),
+                if unlocked {
+                    WHITE
+                } else {
+                    Color::new(0.35, 0.38, 0.40, 1.0)
+                },
+            );
+        }
+        draw_ui_text_ex(
+            &label.to_uppercase(),
+            rect.x + 46.0,
+            rect.y + 20.0,
+            TextStyle::new(
+                10.0,
+                if enabled || equipped {
+                    dark::TEXT
+                } else {
+                    dark::TEXT_DIM
+                },
+            )
+            .params(),
+        );
     }
     if button(
         Rect::new(1020.0, 103.0, 214.0, 28.0),

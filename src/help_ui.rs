@@ -74,9 +74,16 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
     text(
         "KEYS // ARROWS inspect · TAB next ready · ENTER end phase · S save · L load · H help · B log",
         230.0,
-        526.0,
+        516.0,
         15.0,
         dark::ACCENT,
+    );
+    text(
+        "PAD // D-PAD inspect · A action · B cancel · X log · Y help · RB next · START end phase",
+        230.0,
+        540.0,
+        15.0,
+        Color::new(0.60, 0.82, 0.96, 1.0),
     );
     if button(
         Rect::new(

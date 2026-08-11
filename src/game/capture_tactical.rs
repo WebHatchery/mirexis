@@ -3,6 +3,7 @@
 use super::{AppState, Game};
 use crate::data::{CoverEdgeDef, EdgeDirection, OperationModifier, Team};
 use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase};
+use crate::tactical::UnitAnimationState;
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
@@ -145,6 +146,10 @@ impl Game {
                     unit.temporary_armour = 3;
                 }
                 "brood_stalker_a" => unit.health = (unit.max_health / 2).max(1),
+                "brood_stalker_b" => {
+                    unit.health = 0;
+                    unit.incapacitated = true;
+                }
                 _ => {}
             }
         }
@@ -212,8 +217,34 @@ impl Game {
 
     pub(super) fn capture_combat_feedback(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        if let Some(attacker) = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "brood_stalker_a")
+        {
+            attacker.presentation_state = UnitAnimationState::AttackRelease;
+            attacker.presentation_seconds = 100.0;
+        }
+        if let Some(target) = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "kira_voss")
+        {
+            target.presentation_state = UnitAnimationState::Hit;
+            target.presentation_seconds = 100.0;
+        }
         self.combat_feedback.record_for(
             &[
+                BattleEvent::AttackRolled {
+                    attacker_id: "brood_stalker_a".to_owned(),
+                    target_id: "kira_voss".to_owned(),
+                    roll: 4,
+                    hit_chance: 72,
+                },
                 BattleEvent::DamageApplied {
                     target_id: "kira_voss".to_owned(),
                     amount: 3,

@@ -1,30 +1,32 @@
 //! Application state machine, persistence, and toolkit integration.
 
+mod capture_colony;
+mod capture_debrief;
 mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
 mod input;
+mod persistence_io;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;
 use crate::combat_feedback::CombatFeedback;
 use crate::data::{GameData, MissionDef};
 use crate::formation::FormationKind;
-use crate::persistence::migrate_save_value;
 use crate::phase_replay::PhaseReplay;
-use crate::state::{GameSession, MissionOutcome, SaveData};
+use crate::state::{GameSession, MissionOutcome};
 use crate::ui::{self, TargetingView, UiAction, UiContext};
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::events::EventBus;
 use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
-use macroquad_toolkit::persistence::{
-    delete_slot, load_from_slot_with_migration, save_to_slot_with_version, slot_exists,
-    AutoSaveManager,
+use macroquad_toolkit::persistence::{slot_exists, AutoSaveManager};
+use macroquad_toolkit::prelude::{
+    begin_virtual_ui_frame, dark, end_virtual_ui_frame, GamepadInput,
 };
-use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AppState {
@@ -55,6 +57,7 @@ pub struct Game {
     active_mission: MissionDef,
     state: AppState,
     assets: AssetManager,
+    visuals: VisualCatalog,
     notifications: NotificationManager,
     events: EventBus<UiAction>,
     save_exists: bool,
@@ -68,6 +71,11 @@ pub struct Game {
     phase_replay: PhaseReplay,
     deployment_formation: FormationKind,
     end_phase_armed: bool,
+    gamepad: GamepadInput,
+    gamepad_connected: bool,
+    title_focus_continue: bool,
+    title_focus_active: bool,
+    title_hover_preview: bool,
 }
 
 impl Game {
@@ -75,10 +83,14 @@ impl Game {
         let data = GameData::load()
             .unwrap_or_else(|err| panic!("Mirexis embedded data failed to load: {}", err));
         let mut assets = AssetManager::new();
-        let placeholder = Image::gen_image_color(16, 16, Color::new(0.20, 0.78, 0.58, 1.0));
+        let placeholder = crate::visual_assets::diagnostic_placeholder_image(32);
         assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
         let _ = assets.load_asset_pack("assets.zip").await;
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
+        let visuals = VisualCatalog::load();
+        let missing_visuals = visuals.validate_loaded(&assets);
+        let visual_summary = visuals.diagnostic_summary(&assets);
+        println!("Mirexis visual catalog: {visual_summary}");
         let campaign = CampaignState::new(&data);
         let active_mission = campaign
             .strategy
@@ -91,9 +103,16 @@ impl Game {
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
         let mut notifications = NotificationManager::new();
         notifications.info(format!(
-            "Mission systems online; {} manifest textures loaded",
-            loaded_assets
+            "Visual pipeline online; {} textures; {} sprite definitions",
+            loaded_assets,
+            visuals.units.len()
         ));
+        if !missing_visuals.is_empty() {
+            notifications.danger(format!(
+                "MISSING VISUAL ASSETS: {}",
+                missing_visuals.join(", ")
+            ));
+        }
 
         Self {
             data,
@@ -102,6 +121,7 @@ impl Game {
             active_mission,
             state: AppState::Title,
             assets,
+            visuals,
             notifications,
             events: EventBus::new(),
             save_exists,
@@ -115,10 +135,16 @@ impl Game {
             phase_replay: PhaseReplay::default(),
             deployment_formation: FormationKind::default(),
             end_phase_armed: false,
+            gamepad: GamepadInput::new(),
+            gamepad_connected: false,
+            title_focus_continue: false,
+            title_focus_active: false,
+            title_hover_preview: false,
         }
     }
 
     pub fn update(&mut self, dt: f32) {
+        self.session.tactical.update_presentation(dt);
         self.notifications.update(dt);
         self.combat_feedback.update(dt);
         self.phase_replay.update(dt);
@@ -130,29 +156,56 @@ impl Game {
         for action in actions {
             self.apply_action(action);
         }
-        self.combat_feedback.sync(
+        let impact = self.combat_feedback.sync(
             (self.state == AppState::Tactical).then_some(&self.session.tactical.event_log),
             &mut self.observed_event_count,
         );
+        if impact {
+            self.gamepad.rumble(140, 0.48, 0.76);
+        }
     }
 
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let actions = match self.state {
-            AppState::Title => ui::draw_title(&self.data, self.save_exists, &virtual_ui),
-            AppState::Colony => colony_ui::draw_colony(&self.campaign, &self.data, &virtual_ui),
-            AppState::Roster => {
-                crate::roster_ui::draw_roster(&self.campaign, &self.data, &virtual_ui)
-            }
-            AppState::GeneLab => {
-                crate::gene_lab_ui::draw_gene_lab(&self.campaign, &self.data, &virtual_ui)
-            }
+            AppState::Title => ui::draw_title(
+                &self.data,
+                self.save_exists,
+                &self.assets,
+                &self.visuals,
+                &virtual_ui,
+                self.title_focus_active.then_some(self.title_focus_continue),
+                self.title_hover_preview,
+            ),
+            AppState::Colony => colony_ui::draw_colony(
+                &self.campaign,
+                &self.data,
+                &self.assets,
+                &self.visuals,
+                &virtual_ui,
+            ),
+            AppState::Roster => crate::roster_ui::draw_roster(
+                &self.campaign,
+                &self.data,
+                &self.assets,
+                &self.visuals,
+                &virtual_ui,
+            ),
+            AppState::GeneLab => crate::gene_lab_ui::draw_gene_lab(
+                &self.campaign,
+                &self.data,
+                &self.assets,
+                &self.visuals,
+                &virtual_ui,
+            ),
             AppState::MissionBriefing => ui::draw_mission_briefing(
                 &self.data,
                 &self.campaign,
                 &self.active_mission,
                 self.deployment_formation,
+                &self.assets,
+                &self.visuals,
                 &virtual_ui,
             ),
             AppState::Tactical => ui::draw_tactical(UiContext {
@@ -160,6 +213,8 @@ impl Game {
                 phase_replay: &self.phase_replay,
                 end_phase_armed: self.end_phase_armed,
                 data: &self.data,
+                assets: &self.assets,
+                visuals: &self.visuals,
                 mission: &self.active_mission,
                 session: &self.session,
                 save_exists: self.save_exists,
@@ -186,6 +241,8 @@ impl Game {
                     .as_ref()
                     .expect("debrief requires an outcome"),
                 &self.campaign,
+                &self.assets,
+                &self.visuals,
                 &virtual_ui,
             ),
         };
@@ -655,113 +712,6 @@ impl Game {
             );
             self.state = AppState::Debrief;
             self.autosave_current("Debrief autosaved");
-        }
-    }
-
-    fn autosave_current(&mut self, success_message: &str) {
-        let save = self
-            .session
-            .to_save(&self.data.config.version, &self.campaign);
-        let game_name = self.data.config.game_name.clone();
-        let slot = self.data.config.save_slot.clone();
-        let version = self.data.config.version.clone();
-        match self
-            .autosave
-            .force(move || save_to_slot_with_version(&game_name, &slot, &save, &version))
-        {
-            Ok(()) => {
-                self.save_exists = true;
-                self.notifications.info(success_message);
-            }
-            Err(err) => self
-                .notifications
-                .danger(format!("Autosave failed: {}", err)),
-        }
-    }
-
-    fn autosave_campaign_only(&mut self, success_message: &str) {
-        let save = SaveData::campaign_only(&self.data.config.version, &self.campaign);
-        let game_name = self.data.config.game_name.clone();
-        let slot = self.data.config.save_slot.clone();
-        let version = self.data.config.version.clone();
-        match self
-            .autosave
-            .force(move || save_to_slot_with_version(&game_name, &slot, &save, &version))
-        {
-            Ok(()) => {
-                self.save_exists = true;
-                self.notifications.info(success_message);
-            }
-            Err(err) => self
-                .notifications
-                .danger(format!("Autosave failed: {}", err)),
-        }
-    }
-
-    fn save_game(&mut self) {
-        let save = self
-            .session
-            .to_save(&self.data.config.version, &self.campaign);
-        match save_to_slot_with_version(
-            &self.data.config.game_name,
-            &self.data.config.save_slot,
-            &save,
-            &self.data.config.version,
-        ) {
-            Ok(()) => {
-                self.save_exists = true;
-                self.notifications.success("Tactical state saved");
-            }
-            Err(err) => self.notifications.danger(format!("Save failed: {}", err)),
-        }
-    }
-
-    fn load_game(&mut self) {
-        let loaded: Result<SaveData, String> = load_from_slot_with_migration(
-            &self.data.config.game_name,
-            &self.data.config.save_slot,
-            &self.data.config.version,
-            |version, value| migrate_save_value(version, value, &self.data),
-        );
-        match loaded {
-            Ok(save) => {
-                self.targeting = None;
-                self.campaign = save.campaign;
-                self.active_mission = self
-                    .campaign
-                    .strategy
-                    .materialize_selected(&self.data, &self.campaign.colony);
-                if let Some(tactical) = save.tactical {
-                    self.session = GameSession::from_tactical(tactical);
-                    self.state = if self.session.battle_is_over() {
-                        AppState::Colony
-                    } else {
-                        AppState::Tactical
-                    };
-                } else {
-                    self.session = GameSession::new(
-                        &self.data.config,
-                        &self.active_mission,
-                        &self
-                            .campaign
-                            .deployment_roster(&self.data, &self.active_mission),
-                    );
-                    self.state = AppState::Colony;
-                }
-                self.last_outcome = None;
-                self.notifications.success("Tactical state restored");
-            }
-            Err(err) => self.notifications.warning(format!("Load failed: {}", err)),
-        }
-    }
-
-    fn delete_save(&mut self) {
-        match delete_slot(&self.data.config.game_name, &self.data.config.save_slot) {
-            Ok(()) => {
-                self.save_exists = false;
-                self.notifications.info("Save slot cleared");
-            }
-            Err(err) => self.notifications.danger(format!("Delete failed: {}", err)),
         }
     }
 }

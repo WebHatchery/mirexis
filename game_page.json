@@ -2,7 +2,7 @@
   "title": "Mirexis",
   "wasm": "mirexis",
   "roost_slug": "rust_mirexis",
-  "status": { "text": "Prototype", "class": "prototype" },
+  "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "auto",
   "about": [
     "A turn-based grid tactics game about named colonists, strange mutations, and one settlement caught between three overwhelming powers.",
@@ -12,6 +12,7 @@
     { "key": "Mouse", "desc": "Manage the colony, select missions, move colonists, attack, and complete objectives" },
     { "key": "Arrow Keys", "desc": "Move the tactical cursor" },
     { "key": "Enter", "desc": "Confirm screens or end the tactical colony phase" },
+    { "key": "Controller", "desc": "D-pad moves focus; A confirms; B cancels; X opens the log; Y opens help; Start ends the tactical phase" },
     { "key": "S / L", "desc": "Save / load an in-progress battle" },
     { "key": "Escape", "desc": "Step back or return to title" }
   ],

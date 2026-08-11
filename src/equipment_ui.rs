@@ -3,7 +3,7 @@
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::button;
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::prelude::{Color, Rect, Vec2, WHITE};
 
 pub(crate) fn draw_action_button(
     ctx: &UiContext<'_>,
@@ -25,7 +25,7 @@ pub(crate) fn draw_action_button(
             Some(current)
         ) if active == current
     );
-    if !button(
+    let clicked = button(
         rect,
         if targeting { "CANCEL" } else { equipment_label },
         equipment_id.as_deref().is_some_and(|equipment_id| {
@@ -34,7 +34,23 @@ pub(crate) fn draw_action_button(
             })
         }),
         mouse,
-    ) {
+    );
+    if let Some(id) = equipment_id.as_deref() {
+        if let Some(index) = crate::visual_assets::equipment_index(id) {
+            ctx.visuals.draw_atlas_cell(
+                ctx.assets,
+                &ctx.visuals.equipment,
+                index,
+                Rect::new(rect.x + 5.0, rect.y + 4.0, 34.0, rect.h - 8.0),
+                if targeting {
+                    Color::new(1.0, 0.64, 0.30, 1.0)
+                } else {
+                    WHITE
+                },
+            );
+        }
+    }
+    if !clicked {
         return;
     }
     if targeting {

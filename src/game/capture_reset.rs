@@ -36,5 +36,6 @@ impl Game {
         self.phase_replay = PhaseReplay::default();
         self.deployment_formation = FormationKind::default();
         self.end_phase_armed = false;
+        self.title_hover_preview = false;
     }
 }

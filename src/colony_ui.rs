@@ -1,10 +1,12 @@
 //! Colony hub presentation and strategic intent production.
 
 use crate::campaign::{Availability, CampaignState};
-use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH};
+use crate::colony::BuildingKind;
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
+use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
+use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::VirtualUi;
 
@@ -16,7 +18,13 @@ fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -
     draw_text_ex(text, x, y, params)
 }
 
-pub fn draw_colony(campaign: &CampaignState, data: &GameData, ui: &VirtualUi) -> Vec<UiAction> {
+pub fn draw_colony(
+    campaign: &CampaignState,
+    data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
+    ui: &VirtualUi,
+) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
     draw_rectangle(
@@ -27,8 +35,14 @@ pub fn draw_colony(campaign: &CampaignState, data: &GameData, ui: &VirtualUi) ->
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
     draw_header(campaign);
-    draw_layout(campaign, mouse, &mut actions);
-    draw_operations(campaign, data, mouse, &mut actions);
+    crate::colony_map_ui::draw(campaign, assets, visuals, mouse, &mut actions);
+    draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
+    draw_ui_text_ex(
+        "PAD // D-PAD SELECT MISSION · A BRIEF · X ROSTER · B TITLE  //  MOUSE // BUILD · RESEARCH · CHOOSE",
+        28.0,
+        707.0,
+        TextStyle::new(10.0, dark::TEXT_DIM).params(),
+    );
     actions
 }
 
@@ -59,150 +73,11 @@ fn draw_header(campaign: &CampaignState) {
     );
 }
 
-fn draw_layout(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(18.0, 96.0, 820.0, 580.0);
-    draw_surface_with_title(
-        panel,
-        Some("SETTLEMENT LAYOUT // PLAN CONSTRUCTION // CLICK DAMAGED BUILDINGS TO REPAIR"),
-        &SurfaceStyle::new(Color::new(0.035, 0.052, 0.062, 0.98))
-            .with_border(1.0, Color::new(0.19, 0.40, 0.40, 0.9))
-            .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
-        TextStyle::new(15.0, dark::TEXT),
-    );
-    let origin = vec2(105.0, 172.0);
-    let tile_size = 78.0;
-    for y in 0..COLONY_HEIGHT {
-        for x in 0..COLONY_WIDTH {
-            let rect = Rect::new(
-                origin.x + x as f32 * tile_size,
-                origin.y + y as f32 * tile_size,
-                tile_size - 4.0,
-                tile_size - 4.0,
-            );
-            let building = campaign
-                .colony
-                .buildings
-                .iter()
-                .find(|building| building.position == [x, y]);
-            let project = campaign
-                .colony
-                .construction_queue
-                .iter()
-                .find(|project| project.position == [x, y]);
-            let damaged = building.is_some_and(|building| building.damaged);
-            let unpowered = building.is_some_and(|building| {
-                !building.damaged && !campaign.colony.building_is_powered(&building.id)
-            });
-            let fill = if damaged {
-                Color::new(0.34, 0.10, 0.10, 1.0)
-            } else if unpowered {
-                Color::new(0.13, 0.15, 0.20, 1.0)
-            } else if building.is_some() {
-                Color::new(0.10, 0.30, 0.26, 1.0)
-            } else if project.is_some() {
-                Color::new(0.36, 0.27, 0.10, 1.0)
-            } else if rect.contains_point(mouse) {
-                Color::new(0.12, 0.22, 0.21, 1.0)
-            } else {
-                Color::new(0.07, 0.12, 0.125, 1.0)
-            };
-            draw_surface(
-                rect,
-                &SurfaceStyle::new(fill).with_border(
-                    1.0,
-                    if damaged {
-                        dark::NEGATIVE
-                    } else {
-                        Color::new(0.18, 0.38, 0.36, 0.8)
-                    },
-                ),
-            );
-            if let Some(building) = building {
-                draw_building_label(rect, building.kind.name());
-                if building.damaged {
-                    draw_text(
-                        format!("REPAIR {} MAT", building.kind.repair_cost()),
-                        rect.x + 7.0,
-                        rect.y + 66.0,
-                        10.0,
-                        dark::NEGATIVE,
-                    );
-                    if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
-                        actions.push(UiAction::RepairBuilding(building.id.clone()));
-                    }
-                } else if unpowered {
-                    draw_text("NO POWER", rect.x + 7.0, rect.y + 66.0, 10.0, dark::WARNING);
-                } else if building.kind == BuildingKind::GeneLab {
-                    draw_text("OPEN LAB", rect.x + 7.0, rect.y + 66.0, 10.0, dark::ACCENT);
-                    if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
-                        actions.push(UiAction::OpenGeneLab);
-                    }
-                }
-            } else if let Some(project) = project {
-                draw_building_label(rect, &format!("{}\nPLANNED", project.kind.name()));
-            } else if rect.contains_point(mouse) && is_mouse_button_released(MouseButton::Left) {
-                actions.push(UiAction::ConstructBuilding(
-                    campaign.colony.planned_construction,
-                    [x, y],
-                ));
-            }
-        }
-    }
-    let mut construction_kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
-    if campaign.strategy.contact_complete
-        && !campaign
-            .colony
-            .buildings
-            .iter()
-            .any(|building| building.kind == BuildingKind::GeneLab)
-        && !campaign
-            .colony
-            .construction_queue
-            .iter()
-            .any(|project| project.kind == BuildingKind::GeneLab)
-    {
-        construction_kinds.push(BuildingKind::GeneLab);
-    }
-    for (index, kind) in construction_kinds.into_iter().enumerate() {
-        let selected = campaign.colony.planned_construction == kind;
-        if colony_button(
-            Rect::new(105.0 + index as f32 * 210.0, 640.0, 200.0, 30.0),
-            &format!(
-                "{}PLAN {} // {} MAT",
-                if selected { "> " } else { "" },
-                kind.name().to_uppercase(),
-                kind.material_cost()
-            ),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::SelectConstruction(kind));
-        }
-    }
-}
-
-fn draw_building_label(rect: Rect, label: &str) {
-    let short = match label {
-        "Command Centre" => "COMMAND\nCENTRE",
-        "Power Plant" => "POWER\nPLANT",
-        "Hydroponics" => "HYDRO\nPONICS",
-        "Gene Lab" => "GENE\nLAB",
-        other => other,
-    };
-    for (index, line) in short.lines().enumerate() {
-        draw_text(
-            line,
-            rect.x + 7.0,
-            rect.y + 30.0 + index as f32 * 18.0,
-            14.0,
-            dark::TEXT,
-        );
-    }
-}
-
 fn draw_operations(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -410,43 +285,56 @@ fn draw_operations(
     ) {
         actions.push(UiAction::TreatInjury);
     }
-    draw_ui_text_ex(
-        "MISSION OFFERS",
-        878.0,
-        372.0,
-        TextStyle::new(15.0, dark::ACCENT).params(),
-    );
-    for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
-        let selected = mission.id == campaign.strategy.selected_mission_id;
-        let danger = crate::danger_rating::for_instance(mission, data);
-        if colony_button(
-            Rect::new(878.0, 384.0 + index as f32 * 38.0, 362.0, 32.0),
-            &format!(
-                "{}{} // {}",
-                if selected { "> " } else { "" },
-                mission.name,
-                danger.label()
-            ),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::SelectMission(mission.id.clone()));
-        }
-    }
-    if colony_button(
-        Rect::new(878.0, 462.0, 362.0, 36.0),
-        "BRIEF SELECTED MISSION",
-        campaign.strategy.selected_mission().is_some(),
-        mouse,
-    ) {
-        actions.push(UiAction::OpenMissionBriefing);
-    }
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
     let choosing_escalation = campaign.strategy.escalation_operation_completed
         && campaign.strategy.escalation_response_id.is_empty();
     let choosing_mirexis =
         campaign.strategy.escalation_complete && campaign.strategy.mirexis_path_id.is_empty();
+    let decision = if choosing_contact {
+        Some(crate::colony_decision_ui::DecisionKind::Contact)
+    } else if choosing_escalation {
+        Some(crate::colony_decision_ui::DecisionKind::Escalation)
+    } else if choosing_mirexis {
+        Some(crate::colony_decision_ui::DecisionKind::Mirexis)
+    } else {
+        None
+    };
+    if let Some(decision) = decision {
+        crate::colony_decision_ui::draw_decision_dossier(decision, campaign, assets, visuals);
+    } else {
+        draw_ui_text_ex(
+            "MISSION OFFERS",
+            878.0,
+            372.0,
+            TextStyle::new(15.0, dark::ACCENT).params(),
+        );
+        for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
+            let selected = mission.id == campaign.strategy.selected_mission_id;
+            let danger = crate::danger_rating::for_instance(mission, data);
+            if colony_button(
+                Rect::new(878.0, 384.0 + index as f32 * 38.0, 362.0, 32.0),
+                &format!(
+                    "{}{} // {}",
+                    if selected { "> " } else { "" },
+                    mission.name,
+                    danger.label()
+                ),
+                true,
+                mouse,
+            ) {
+                actions.push(UiAction::SelectMission(mission.id.clone()));
+            }
+        }
+        if colony_button(
+            Rect::new(878.0, 462.0, 362.0, 36.0),
+            "BRIEF SELECTED MISSION",
+            campaign.strategy.selected_mission().is_some(),
+            mouse,
+        ) {
+            actions.push(UiAction::OpenMissionBriefing);
+        }
+    }
     let evolution_pending = campaign.strategy.contact_complete
         && campaign.roster.iter().any(|character| {
             character.mutation_evolution_id.is_empty()
@@ -463,23 +351,24 @@ fn draw_operations(
             .iter()
             .find(|path| path.id == campaign.strategy.mirexis_path_id)
         {
+            draw_ending_card(campaign, assets, visuals);
             draw_ui_text_ex(
                 &path.ending_title,
-                878.0,
-                520.0,
+                968.0,
+                526.0,
                 TextStyle::new(14.0, dark::POSITIVE).params(),
             );
             draw_ui_text_ex(
                 &path.revelation,
-                878.0,
-                544.0,
-                TextStyle::new(11.0, dark::TEXT).params(),
+                968.0,
+                548.0,
+                TextStyle::new(9.5, dark::TEXT).params(),
             );
             draw_ui_text_ex(
                 &path.legacy,
-                878.0,
-                564.0,
-                TextStyle::new(11.0, dark::TEXT_DIM).params(),
+                968.0,
+                565.0,
+                TextStyle::new(9.5, dark::TEXT_DIM).params(),
             );
         }
     } else if choosing_contact {
@@ -598,7 +487,9 @@ fn draw_operations(
             TextStyle::new(11.0, dark::ACCENT).params(),
         );
     } else {
-        if let Some(research) = campaign
+        if let Some(event) = campaign.strategy.available_event() {
+            draw_character_event(campaign, data, assets, visuals, event, mouse, actions);
+        } else if let Some(research) = campaign
             .strategy
             .research
             .iter()
@@ -615,40 +506,92 @@ fn draw_operations(
             ) {
                 actions.push(UiAction::CompleteResearch(research.id.clone()));
             }
-        }
-        if let Some(event) = campaign.strategy.available_event() {
-            draw_character_event(campaign, data, event, mouse, actions);
+            let icon = match research.id.as_str() {
+                "xeno_triage" => 8,
+                "salvage_doctrine" => 10,
+                _ => 5,
+            };
+            visuals.draw_atlas_cell(
+                assets,
+                &visuals.terrain,
+                icon,
+                Rect::new(878.0, 548.0, 48.0, 42.0),
+                WHITE,
+            );
+            draw_rectangle_lines(878.0, 548.0, 48.0, 42.0, 1.0, dark::ACCENT);
+            for (index, line) in wrap_words(&research.description, 46)
+                .into_iter()
+                .take(2)
+                .enumerate()
+            {
+                draw_ui_text_ex(
+                    &line,
+                    936.0,
+                    558.0 + index as f32 * 14.0,
+                    TextStyle::new(10.0, dark::TEXT_DIM).params(),
+                );
+            }
+            draw_ui_text_ex(
+                &format!(
+                    "PROJECT READY // COST {} MAT // GRID POWER +{}",
+                    research.materials_cost, research.power_reward
+                ),
+                936.0,
+                588.0,
+                TextStyle::new(9.5, dark::POSITIVE).params(),
+            );
         }
     }
-    if !choosing_contact && !choosing_escalation && !choosing_mirexis && !evolution_pending {
+    if !choosing_contact
+        && !choosing_escalation
+        && !choosing_mirexis
+        && !evolution_pending
+        && campaign.strategy.available_event().is_none()
+    {
         draw_ui_text_ex(
             "ACTIVE DOCTRINES",
             878.0,
             600.0,
             TextStyle::new(12.0, dark::ACCENT).params(),
         );
-        let mut doctrine_y = 614.0;
-        for research in campaign
+        let completed = campaign
             .strategy
             .research
             .iter()
             .filter(|entry| entry.completed)
-        {
-            draw_ui_text_ex(
-                &format!("{} // {}", research.name, research.description),
-                878.0,
-                doctrine_y,
-                TextStyle::new(10.0, dark::TEXT_DIM).params(),
-            );
-            doctrine_y += 11.0;
-        }
-        if doctrine_y == 614.0 {
+            .collect::<Vec<_>>();
+        if completed.is_empty() {
             draw_ui_text_ex(
                 "No completed field doctrine",
                 878.0,
-                doctrine_y,
+                616.0,
                 TextStyle::new(10.0, dark::TEXT_DIM).params(),
             );
+        } else {
+            for (index, research) in completed.into_iter().take(3).enumerate() {
+                let rect = Rect::new(878.0 + index as f32 * 120.0, 606.0, 114.0, 32.0);
+                draw_rectangle(
+                    rect.x,
+                    rect.y,
+                    rect.w,
+                    rect.h,
+                    Color::new(0.045, 0.105, 0.11, 1.0),
+                );
+                visuals.draw_atlas_cell(
+                    assets,
+                    &visuals.terrain,
+                    [5, 8, 10][index],
+                    Rect::new(rect.x + 2.0, rect.y + 2.0, 30.0, 28.0),
+                    WHITE,
+                );
+                draw_ui_text_ex(
+                    &research.name.to_uppercase(),
+                    rect.x + 36.0,
+                    rect.y + 20.0,
+                    TextStyle::new(10.0, dark::TEXT).params(),
+                );
+                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 1.0, dark::POSITIVE);
+            }
         }
     }
     draw_ui_text_ex(
@@ -667,6 +610,8 @@ fn draw_operations(
 fn draw_character_event(
     campaign: &CampaignState,
     data: &GameData,
+    assets: &AssetManager,
+    visuals: &VisualCatalog,
     event: &crate::strategy::CharacterEventState,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
@@ -702,14 +647,12 @@ fn draw_character_event(
         .iter()
         .find(|faction| faction.id == attention_faction)
         .map_or(attention_faction, |faction| faction.name.as_str());
-    if colony_button(
-        Rect::new(878.0, 548.0, 362.0, 32.0),
-        &format!("EVENT: {}", event.title),
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::ResolveCharacterEvent);
-    }
+    draw_ui_text_ex(
+        "COLONY EVENT // DECISION",
+        878.0,
+        510.0,
+        TextStyle::new(12.0, dark::WARNING).params(),
+    );
     let recipient = campaign
         .roster
         .iter()
@@ -721,6 +664,42 @@ fn draw_character_event(
                 .next()
                 .unwrap_or("UNKNOWN")
         });
+    if let Some(definition) = definition {
+        for (index, participant) in definition.participants.iter().take(2).enumerate() {
+            if let Some(character) = campaign
+                .roster
+                .iter()
+                .find(|character| &character.id == participant)
+            {
+                crate::portrait_ui::draw_character_portrait(
+                    assets,
+                    visuals,
+                    Rect::new(878.0 + index as f32 * 56.0, 518.0, 50.0, 58.0),
+                    &character.id,
+                    &character.name,
+                    dark::WARNING,
+                );
+            }
+        }
+        draw_ui_text_ex(
+            &event.title.to_uppercase(),
+            994.0,
+            526.0,
+            TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+        );
+        for (index, line) in wrap_words(&definition.description, 38)
+            .into_iter()
+            .take(3)
+            .enumerate()
+        {
+            draw_ui_text_ex(
+                &line,
+                994.0,
+                545.0 + index as f32 * 14.0,
+                TextStyle::new(10.0, dark::TEXT_DIM).params(),
+            );
+        }
+    }
     draw_ui_text_ex(
         &format!(
             "CHOICE EFFECT // {} {:+} {} // BOND +2 // {} FOOD // {} {:+}",
@@ -732,30 +711,57 @@ fn draw_character_event(
             event.attention_change
         ),
         878.0,
-        588.0,
+        592.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
+    );
+    if colony_button(
+        Rect::new(878.0, 606.0, 362.0, 32.0),
+        &format!("RESOLVE // {}", event.title.to_uppercase()),
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ResolveCharacterEvent);
+    }
+}
+
+fn wrap_words(value: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in value.split_whitespace() {
+        if !line.is_empty() && line.len() + word.len() + 1 > width {
+            lines.push(std::mem::take(&mut line));
+        }
+        if !line.is_empty() {
+            line.push(' ');
+        }
+        line.push_str(word);
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
+fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &VisualCatalog) {
+    let (cell, accent) = match campaign.strategy.mirexis_path_id.as_str() {
+        "human_redoubt" => (10, Color::new(0.36, 0.70, 0.88, 1.0)),
+        "living_commonwealth" => (9, Color::new(0.64, 0.92, 0.38, 1.0)),
+        "open_threshold" => (11, Color::new(0.72, 0.52, 1.0, 1.0)),
+        _ => (2, dark::ACCENT),
+    };
+    let rect = Rect::new(878.0, 512.0, 80.0, 72.0);
+    visuals.draw_atlas_cell(assets, &visuals.terrain, cell, rect, WHITE);
+    draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 2.0, accent);
+    draw_line(
+        rect.x + 8.0,
+        rect.bottom() - 8.0,
+        rect.right() - 8.0,
+        rect.y + 8.0,
+        2.0,
+        accent,
     );
 }
 
 fn colony_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
-    let hovered = enabled && rect.contains_point(mouse);
-    let fill = if !enabled {
-        Color::new(0.08, 0.10, 0.11, 1.0)
-    } else if hovered {
-        Color::new(0.18, 0.43, 0.37, 1.0)
-    } else {
-        Color::new(0.10, 0.28, 0.25, 1.0)
-    };
-    draw_surface(
-        rect,
-        &SurfaceStyle::new(fill).with_border(1.0, Color::new(0.33, 0.72, 0.60, 1.0)),
-    );
-    draw_text(
-        label,
-        rect.x + 14.0,
-        rect.y + 27.0,
-        15.0,
-        if enabled { dark::TEXT } else { dark::TEXT_DIM },
-    );
-    hovered && is_mouse_button_released(MouseButton::Left)
+    crate::ui_widgets::button(rect, label, enabled, mouse)
 }

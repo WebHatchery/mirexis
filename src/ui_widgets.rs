@@ -3,7 +3,7 @@
 use crate::state::{BattleEvent, UnitState};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{
-    dark, draw_surface, draw_text_centered_in_box_ex, SurfaceStyle, TextStyle,
+    dark, draw_chamfered_surface, draw_text_centered_in_box_ex, ChamferedSurfaceStyle, TextStyle,
 };
 use macroquad_toolkit::ui::RectExt;
 
@@ -90,25 +90,63 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
 }
 
 pub(crate) fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
+    button_with_state(rect, label, enabled, false, mouse)
+}
+
+pub(crate) fn button_with_state(
+    rect: Rect,
+    label: &str,
+    enabled: bool,
+    focused: bool,
+    mouse: Vec2,
+) -> bool {
     let hovered = enabled && rect.contains_point(mouse);
     let fill = if !enabled {
-        Color::new(0.09, 0.11, 0.12, 1.0)
+        Color::new(0.065, 0.085, 0.09, 1.0)
+    } else if focused {
+        Color::new(0.10, 0.31, 0.29, 1.0)
     } else if hovered {
-        Color::new(0.18, 0.43, 0.37, 1.0)
+        Color::new(0.12, 0.40, 0.36, 1.0)
     } else {
-        Color::new(0.10, 0.28, 0.25, 1.0)
+        Color::new(0.075, 0.22, 0.22, 1.0)
     };
-    draw_surface(
+    draw_chamfered_surface(
         rect,
-        &SurfaceStyle::new(fill).with_border(
-            1.0,
-            if enabled {
-                Color::new(0.33, 0.72, 0.60, 1.0)
+        &ChamferedSurfaceStyle::new(
+            fill,
+            if focused {
+                Color::new(0.82, 1.0, 0.50, 1.0)
+            } else if enabled {
+                Color::new(0.30, 0.82, 0.70, 1.0)
             } else {
-                Color::new(0.20, 0.24, 0.25, 1.0)
+                Color::new(0.16, 0.22, 0.23, 1.0)
             },
-        ),
+        )
+        .with_corner(6.0)
+        .with_border_width(if hovered || focused { 2.0 } else { 1.0 }),
     );
+    if enabled {
+        draw_line(
+            rect.x + 12.0,
+            rect.y + 4.0,
+            rect.x + rect.w - 12.0,
+            rect.y + 4.0,
+            1.0,
+            Color::new(0.65, 1.0, 0.90, if hovered { 0.75 } else { 0.28 }),
+        );
+    }
+    if focused {
+        for x in [rect.x + 8.0, rect.right() - 8.0] {
+            draw_poly(
+                x,
+                rect.y + rect.h * 0.5,
+                4,
+                3.5,
+                45.0,
+                Color::new(0.82, 1.0, 0.50, 1.0),
+            );
+        }
+    }
     draw_text_centered_in_box_ex(
         label,
         rect.x,

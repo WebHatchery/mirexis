@@ -10,6 +10,16 @@ impl Game {
         self.reset_capture_world();
         match scene {
             "title" => self.state = AppState::Title,
+            "title_controller" => {
+                self.state = AppState::Title;
+                self.save_exists = true;
+                self.title_focus_continue = true;
+                self.title_focus_active = true;
+            }
+            "title_hover" => {
+                self.state = AppState::Title;
+                self.title_hover_preview = true;
+            }
             "colony" => self.state = AppState::Colony,
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
@@ -136,6 +146,7 @@ impl Game {
                 self.capture_trauma();
                 self.state = AppState::MissionBriefing;
             }
+            "gameplay" => self.reset_capture_session(AppState::Tactical),
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",
@@ -164,6 +175,7 @@ impl Game {
             ),
             "trace_active" => self.capture_active_trace(),
             "damage" => self.capture_colony_damage(),
+            "repair" => self.capture_colony_repair(),
             "power" => self.capture_power_outage(),
             "construction" => self.capture_power_construction(),
             "extraction" => self.capture_extraction(),
@@ -175,7 +187,7 @@ impl Game {
             "breach" => self.capture_breach(),
             "debrief" => self.capture_debrief(),
             "trauma_debrief" => self.capture_trauma_debrief(),
-            _ => self.reset_capture_session(AppState::Tactical),
+            _ => panic!("unsupported Mirexis capture scene: {scene}"),
         }
     }
 
@@ -191,8 +203,11 @@ impl Game {
     }
 
     fn capture_research(&mut self) {
-        for research in &mut self.campaign.strategy.research {
-            research.completed = true;
+        for (index, research) in self.campaign.strategy.research.iter_mut().enumerate() {
+            research.completed = index < 2;
+        }
+        for event in &mut self.campaign.strategy.character_events {
+            event.resolved = true;
         }
         self.state = AppState::Colony;
     }
@@ -589,40 +604,6 @@ impl Game {
         self.session.tactical.objective_integrity = 7;
     }
 
-    fn capture_colony_damage(&mut self) {
-        self.campaign
-            .colony
-            .buildings
-            .iter_mut()
-            .find(|building| building.id == "workshop")
-            .expect("capture colony has a workshop")
-            .damaged = true;
-        self.state = AppState::Colony;
-    }
-
-    fn capture_power_outage(&mut self) {
-        self.campaign
-            .colony
-            .buildings
-            .iter_mut()
-            .find(|building| building.id == "power_plant")
-            .expect("capture colony has a power plant")
-            .damaged = true;
-        self.state = AppState::Colony;
-    }
-
-    fn capture_power_construction(&mut self) {
-        self.campaign
-            .colony
-            .select_construction(crate::colony::BuildingKind::PowerPlant)
-            .expect("power plants are constructible");
-        self.campaign
-            .colony
-            .place_construction(crate::colony::BuildingKind::PowerPlant, [1, 1])
-            .expect("capture plot is open");
-        self.state = AppState::Colony;
-    }
-
     fn capture_equipment_target(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         let kira_position = self
@@ -630,7 +611,7 @@ impl Game {
             .unit("kira_voss")
             .expect("capture roster includes Kira")
             .position;
-        if let Some(hostile) = self
+        let hostile_position = if let Some(hostile) = self
             .session
             .tactical
             .units
@@ -638,6 +619,12 @@ impl Game {
             .find(|unit| unit.team == Team::Hostile)
         {
             hostile.position = TilePos::new(kira_position.x + 3, kira_position.y);
+            Some(hostile.position)
+        } else {
+            None
+        };
+        if let Some(position) = hostile_position {
+            self.session.tactical.selected_tile = position;
         }
         self.targeting = Some(TacticalTargeting::Equipment {
             unit_id: "kira_voss".to_owned(),
@@ -727,8 +714,8 @@ impl Game {
         self.session.tactical.selected_unit = Some("ilya_reed".to_owned());
         self.session.tactical.selected_tile = self
             .session
-            .unit("ilya_reed")
-            .expect("capture roster includes Ilya")
+            .unit("kira_voss")
+            .expect("capture roster includes Kira")
             .position;
         self.targeting = Some(TacticalTargeting::ClassAction {
             unit_id: "ilya_reed".to_owned(),
@@ -765,30 +752,67 @@ impl Game {
             unit.action_points = self.data.config.max_action_points;
         }
     }
+}
 
-    fn capture_debrief(&mut self) {
-        self.reset_capture_session(AppState::Tactical);
-        self.session.tactical.objective_state = ObjectiveState::Victory;
-        for unit in &mut self.session.tactical.units {
-            if unit.team == Team::Hostile {
-                unit.incapacitated = true;
-                unit.health = 0;
-            }
-        }
-        self.last_outcome = self.session.mission_outcome(&self.active_mission);
-        self.state = AppState::Debrief;
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeSet;
+
+    fn capture_manifest() -> Vec<&'static str> {
+        let script = include_str!("../../scripts/capture_ui.ps1");
+        let manifest_line = script
+            .lines()
+            .find(|line| line.contains("[string[]]$Scenes"))
+            .expect("capture script declares its scene manifest");
+        manifest_line.split('"').skip(1).step_by(2).collect()
     }
 
-    fn capture_trauma_debrief(&mut self) {
-        self.reset_capture_session(AppState::Tactical);
-        self.session.tactical.objective_state = ObjectiveState::Victory;
-        for unit in &mut self.session.tactical.units {
-            if unit.team == Team::Hostile || unit.id == "kira_voss" {
-                unit.incapacitated = true;
-                unit.health = 0;
-            }
+    #[test]
+    fn capture_script_manifest_is_unique_and_every_scene_has_an_explicit_builder() {
+        let source = include_str!("capture_scenes.rs");
+        let scenes = capture_manifest();
+        assert_eq!(scenes.len(), 85, "update the audited capture inventory");
+        assert_eq!(
+            scenes.iter().copied().collect::<BTreeSet<_>>().len(),
+            scenes.len(),
+            "capture manifest contains duplicate scene names"
+        );
+        for scene in scenes {
+            assert!(
+                source.contains(&format!("\"{scene}\" =>")),
+                "capture scene '{scene}' falls through to the tactical default"
+            );
         }
-        self.last_outcome = self.session.mission_outcome(&self.active_mission);
-        self.state = AppState::Debrief;
+    }
+
+    #[test]
+    fn acceptance_documents_cover_the_exact_capture_manifest() {
+        let matrix = include_str!("../../docs/verification/UI_GRAPHICS_ACCEPTANCE_MATRIX.md");
+        let documented = matrix
+            .lines()
+            .filter_map(|line| {
+                let marker = "`ui_overhaul_final/ui_";
+                let start = line.find(marker)? + marker.len();
+                let end = line[start..].find(".png`")? + start;
+                Some(&line[start..end])
+            })
+            .collect::<BTreeSet<_>>();
+        let manifest = capture_manifest().into_iter().collect::<BTreeSet<_>>();
+        assert_eq!(documented, manifest, "capture matrix and harness drifted");
+
+        let inventory = include_str!("../../docs/verification/FINAL_CAPTURE_INVENTORY.md");
+        let inventoried = inventory
+            .lines()
+            .filter_map(|line| {
+                let marker = "| `ui_";
+                let start = line.find(marker)? + marker.len();
+                let end = line[start..].find(".png`")? + start;
+                Some(&line[start..end])
+            })
+            .collect::<BTreeSet<_>>();
+        assert_eq!(
+            inventoried, manifest,
+            "capture inventory and harness drifted"
+        );
     }
 }
