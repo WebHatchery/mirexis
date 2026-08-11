@@ -2,6 +2,12 @@
 
 use crate::data::{CoverEdgeDef, EdgeDirection, GameData, HazardDef, MapRecipeDef, TerrainCostDef};
 
+// Campaign recipes were authored inside the original 12x8 combat footprint.
+// The runtime world may be much larger, but recipe variants must stay inside
+// that authored footprint so mirroring never turns a local encounter into a
+// battlefield-spanning deployment.
+const AUTHORED_MAX_Y: i32 = 7;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MapLayout {
     pub blocked_tiles: Vec<[i32; 2]>,
@@ -22,19 +28,18 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
     if seed & 1 == 0 {
         return authored;
     }
-    let max_y = data.config.world_height as i32 - 1;
     let candidate = MapLayout {
         blocked_tiles: authored
             .blocked_tiles
             .iter()
-            .map(|position| mirror_position(*position, max_y))
+            .map(|position| mirror_position(*position, AUTHORED_MAX_Y))
             .collect(),
-        objective_tile: mirror_position(authored.objective_tile, max_y),
+        objective_tile: mirror_position(authored.objective_tile, AUTHORED_MAX_Y),
         terrain_costs: authored
             .terrain_costs
             .iter()
             .map(|entry| TerrainCostDef {
-                position: mirror_position(entry.position, max_y),
+                position: mirror_position(entry.position, AUTHORED_MAX_Y),
                 cost: entry.cost,
             })
             .collect(),
@@ -42,7 +47,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .hazards
             .iter()
             .map(|hazard| HazardDef {
-                position: mirror_position(hazard.position, max_y),
+                position: mirror_position(hazard.position, AUTHORED_MAX_Y),
                 kind: hazard.kind,
             })
             .collect(),
@@ -50,7 +55,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .cover_edges
             .iter()
             .map(|edge| CoverEdgeDef {
-                position: mirror_position(edge.position, max_y),
+                position: mirror_position(edge.position, AUTHORED_MAX_Y),
                 direction: match edge.direction {
                     EdgeDirection::North => EdgeDirection::South,
                     EdgeDirection::South => EdgeDirection::North,
@@ -110,6 +115,25 @@ mod tests {
                 .roster
                 .iter()
                 .all(|unit| !variant.blocked_tiles.contains(&unit.position)));
+            assert!(variant.objective_tile[1] <= AUTHORED_MAX_Y);
+            assert!(variant
+                .blocked_tiles
+                .iter()
+                .all(|position| position[1] <= AUTHORED_MAX_Y));
+        }
+    }
+
+    #[test]
+    fn larger_runtime_world_does_not_stretch_authored_recipe_variants() {
+        let data = GameData::load().unwrap();
+        assert!(data.config.world_height > (AUTHORED_MAX_Y + 1) as usize);
+        for recipe in &data.campaign.map_recipes {
+            let variant = materialize(recipe, &data, 3);
+            let authored = materialize(recipe, &data, 2);
+            assert_eq!(
+                variant.objective_tile[1],
+                AUTHORED_MAX_Y - authored.objective_tile[1]
+            );
         }
     }
 }
