@@ -5,7 +5,8 @@ use crate::colony::ColonyState;
 use crate::data::{GameConfig, GameData};
 use crate::state::SaveData;
 use crate::strategy::StrategyState;
-use crate::tactical::DestructibleCover;
+use crate::tactical::{BattleEvent, DestructibleCover, TacticalState};
+use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
 use macroquad_toolkit::rng::SeededRng;
 use serde_json::Value;
 
@@ -46,6 +47,7 @@ pub fn migrate_save_value(
     add_class_action_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
+    migrate_legacy_tactical_world(&mut save, &data.config)?;
     save.campaign.ensure_roster_characters(data);
     save.campaign.strategy.ensure_character_events(data);
     save.campaign.colony.ensure_phase_one_infrastructure(
@@ -162,6 +164,74 @@ pub fn migrate_save_value(
     }
     save.version = data.config.version.clone();
     Ok(save)
+}
+
+fn migrate_legacy_tactical_world(save: &mut SaveData, config: &GameConfig) -> Result<(), String> {
+    let Some(tactical) = &mut save.tactical else {
+        return Ok(());
+    };
+    if tactical.fog.width == config.world_width && tactical.fog.height == config.world_height {
+        return Ok(());
+    }
+    if tactical.fog.width != 12
+        || tactical.fog.height != 8
+        || config.world_width != 40
+        || config.world_height != 40
+    {
+        return Err(format!(
+            "Cannot migrate tactical grid {}x{} to {}x{}",
+            tactical.fog.width, tactical.fog.height, config.world_width, config.world_height
+        ));
+    }
+
+    tactical.fog = FlatGrid::new(config.world_width, config.world_height, FogState::Visible);
+    tactical.blocked = tactical.blocked.drain().map(project_legacy_tile).collect();
+    for (position, _) in &mut tactical.terrain_costs {
+        *position = project_legacy_tile(*position);
+    }
+    for hazard in &mut tactical.hazards {
+        hazard.position = project_legacy_tile(hazard.position);
+    }
+    for edge in &mut tactical.cover_edges {
+        edge.position = crate::map_variants::project_authored_position(edge.position);
+    }
+    for cover in &mut tactical.destructible_cover {
+        cover.position = project_legacy_tile(cover.position);
+    }
+    for unit in &mut tactical.units {
+        unit.position = project_legacy_tile(unit.position);
+    }
+    for wave in &mut tactical.reinforcement_waves {
+        for unit in &mut wave.units {
+            unit.position = project_legacy_tile(unit.position);
+        }
+    }
+    tactical.selected_tile = project_legacy_tile(tactical.selected_tile);
+    tactical.objective_tile = project_legacy_tile(tactical.objective_tile);
+    migrate_positional_events(tactical);
+    Ok(())
+}
+
+fn migrate_positional_events(tactical: &mut TacticalState) {
+    for event in &mut tactical.event_log {
+        match event {
+            BattleEvent::UnitMoved { path, .. } => {
+                for position in path {
+                    *position = project_legacy_tile(*position);
+                }
+            }
+            BattleEvent::CoverDamaged { position, .. }
+            | BattleEvent::CoverDestroyed { position } => {
+                *position = project_legacy_tile(*position);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn project_legacy_tile(position: TilePos) -> TilePos {
+    let projected = crate::map_variants::project_authored_position([position.x, position.y]);
+    TilePos::new(projected[0], projected[1])
 }
 
 fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {

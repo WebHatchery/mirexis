@@ -94,6 +94,11 @@ impl Game {
                     );
                     self.state = AppState::Colony;
                 }
+                self.tactical_camera = crate::grid_ui::WorldCamera::tactical_start(
+                    self.session.tactical.selected_tile,
+                );
+                self.colony_camera =
+                    crate::grid_ui::WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
                 self.last_outcome = None;
                 self.notifications.success("Tactical state restored");
             }

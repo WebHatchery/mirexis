@@ -24,14 +24,14 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
         blocked_tiles: recipe
             .blocked_tiles
             .iter()
-            .map(|position| battlefield_position(*position))
+            .map(|position| project_authored_position(*position))
             .collect(),
-        objective_tile: battlefield_position(recipe.objective_tile),
+        objective_tile: project_authored_position(recipe.objective_tile),
         terrain_costs: recipe
             .terrain_costs
             .iter()
             .map(|entry| TerrainCostDef {
-                position: battlefield_position(entry.position),
+                position: project_authored_position(entry.position),
                 cost: entry.cost,
             })
             .collect(),
@@ -39,7 +39,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .hazards
             .iter()
             .map(|hazard| HazardDef {
-                position: battlefield_position(hazard.position),
+                position: project_authored_position(hazard.position),
                 kind: hazard.kind,
             })
             .collect(),
@@ -47,7 +47,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .cover_edges
             .iter()
             .map(|edge| CoverEdgeDef {
-                position: battlefield_position(edge.position),
+                position: project_authored_position(edge.position),
                 direction: edge.direction,
                 strength: edge.strength,
             })
@@ -100,7 +100,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
     }
 }
 
-fn battlefield_position(position: [i32; 2]) -> [i32; 2] {
+pub(crate) fn project_authored_position(position: [i32; 2]) -> [i32; 2] {
     [
         BATTLEFIELD_X_OFFSET + position[0] * BATTLEFIELD_X_STRIDE,
         BATTLEFIELD_Y_OFFSET + position[1] * BATTLEFIELD_Y_STRIDE,

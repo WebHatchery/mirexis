@@ -30,6 +30,89 @@ fn gene_lab_save_gains_maras_unevolved_paths() {
 }
 
 #[test]
+fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_world() {
+    use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind};
+    use crate::tactical::{BattleEvent, DestructibleCover, HazardTile, ReinforcementWave};
+    use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
+    use std::collections::HashSet;
+
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let tactical = &mut session.tactical;
+    tactical.fog = FlatGrid::new(12, 8, FogState::Visible);
+    tactical.blocked = HashSet::from([TilePos::new(4, 2)]);
+    tactical.terrain_costs = vec![(TilePos::new(5, 3), 2)];
+    tactical.hazards = vec![HazardTile {
+        position: TilePos::new(6, 4),
+        kind: HazardKind::SporeBloom,
+    }];
+    tactical.cover_edges = vec![CoverEdgeDef {
+        position: [7, 5],
+        direction: EdgeDirection::West,
+        strength: 25,
+    }];
+    tactical.destructible_cover = vec![DestructibleCover {
+        position: TilePos::new(8, 6),
+        health: 4,
+        max_health: 6,
+    }];
+    tactical.units[0].position = TilePos::new(1, 2);
+    let mut reinforcement = tactical.units[0].clone();
+    reinforcement.position = TilePos::new(2, 3);
+    tactical.reinforcement_waves = vec![ReinforcementWave {
+        round: 3,
+        units: vec![reinforcement],
+    }];
+    tactical.selected_tile = TilePos::new(1, 2);
+    tactical.objective_tile = TilePos::new(8, 4);
+    tactical.event_log = vec![
+        BattleEvent::UnitMoved {
+            unit_id: "kira_voss".to_owned(),
+            path: vec![TilePos::new(1, 1), TilePos::new(1, 2)],
+            cost: 1,
+        },
+        BattleEvent::CoverDamaged {
+            position: TilePos::new(8, 6),
+            amount: 2,
+            remaining: 4,
+        },
+    ];
+
+    let legacy = serde_json::to_value(session.to_save(&data.config.version, &campaign)).unwrap();
+    let migrated = migrate_save_value(Some(data.config.version.clone()), legacy, &data).unwrap();
+    let tactical = migrated.tactical.unwrap();
+    assert_eq!((tactical.fog.width, tactical.fog.height), (40, 40));
+    assert!(tactical.blocked.contains(&TilePos::new(18, 13)));
+    assert_eq!(tactical.terrain_costs[0].0, TilePos::new(20, 17));
+    assert_eq!(tactical.hazards[0].position, TilePos::new(22, 21));
+    assert_eq!(tactical.cover_edges[0].position, [24, 25]);
+    assert_eq!(
+        tactical.destructible_cover[0].position,
+        TilePos::new(26, 29)
+    );
+    assert_eq!(tactical.units[0].position, TilePos::new(12, 13));
+    assert_eq!(
+        tactical.reinforcement_waves[0].units[0].position,
+        TilePos::new(14, 17)
+    );
+    assert_eq!(tactical.selected_tile, TilePos::new(12, 13));
+    assert_eq!(tactical.objective_tile, TilePos::new(26, 21));
+    assert!(matches!(
+        &tactical.event_log[0],
+        BattleEvent::UnitMoved { path, .. }
+            if path == &[TilePos::new(12, 9), TilePos::new(12, 13)]
+    ));
+    assert!(matches!(
+        tactical.event_log[1],
+        BattleEvent::CoverDamaged {
+            position: TilePos { x: 26, y: 29 },
+            ..
+        }
+    ));
+}
+
+#[test]
 fn chitin_save_gains_ilyas_unevolved_paths() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);
