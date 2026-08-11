@@ -48,6 +48,7 @@ pub fn migrate_save_value(
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
     migrate_legacy_tactical_world(&mut save, &data.config)?;
+    validate_tactical_world(&save)?;
     save.campaign.colony.migrate_legacy_spatial_layout();
     save.campaign.ensure_roster_characters(data);
     save.campaign.strategy.ensure_character_events(data);
@@ -233,6 +234,63 @@ fn migrate_positional_events(tactical: &mut TacticalState) {
 fn project_legacy_tile(position: TilePos) -> TilePos {
     let projected = crate::map_variants::project_authored_position([position.x, position.y]);
     TilePos::new(projected[0], projected[1])
+}
+
+fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
+    let Some(tactical) = &save.tactical else {
+        return Ok(());
+    };
+    let check = |label: &str, position: TilePos| {
+        if tactical.fog.is_valid(position) {
+            Ok(())
+        } else {
+            Err(format!(
+                "Tactical save {label} ({}, {}) lies outside the {}x{} world",
+                position.x, position.y, tactical.fog.width, tactical.fog.height
+            ))
+        }
+    };
+    check("selection", tactical.selected_tile)?;
+    check("objective", tactical.objective_tile)?;
+    for position in &tactical.blocked {
+        check("blocked tile", *position)?;
+    }
+    for (position, _) in &tactical.terrain_costs {
+        check("terrain tile", *position)?;
+    }
+    for hazard in &tactical.hazards {
+        check("hazard", hazard.position)?;
+    }
+    for edge in &tactical.cover_edges {
+        check(
+            "cover edge",
+            TilePos::new(edge.position[0], edge.position[1]),
+        )?;
+    }
+    for cover in &tactical.destructible_cover {
+        check("destructible cover", cover.position)?;
+    }
+    for unit in &tactical.units {
+        check("unit", unit.position)?;
+    }
+    for wave in &tactical.reinforcement_waves {
+        for unit in &wave.units {
+            check("reinforcement", unit.position)?;
+        }
+    }
+    for event in &tactical.event_log {
+        match event {
+            BattleEvent::UnitMoved { path, .. } => {
+                for position in path {
+                    check("movement history", *position)?;
+                }
+            }
+            BattleEvent::CoverDamaged { position, .. }
+            | BattleEvent::CoverDestroyed { position } => check("cover history", *position)?,
+            _ => {}
+        }
+    }
+    Ok(())
 }
 
 fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {

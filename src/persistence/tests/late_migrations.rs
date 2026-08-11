@@ -57,7 +57,9 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
         health: 4,
         max_health: 6,
     }];
-    tactical.units[0].position = TilePos::new(1, 2);
+    for (index, unit) in tactical.units.iter_mut().enumerate() {
+        unit.position = TilePos::new(index as i32 + 1, 2);
+    }
     let mut reinforcement = tactical.units[0].clone();
     reinforcement.position = TilePos::new(2, 3);
     tactical.reinforcement_waves = vec![ReinforcementWave {
@@ -110,6 +112,100 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
             ..
         }
     ));
+}
+
+#[test]
+fn current_world_save_rejects_every_out_of_bounds_positional_family() {
+    use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind};
+    use crate::tactical::{BattleEvent, DestructibleCover, HazardTile, ReinforcementWave};
+    use macroquad_toolkit::grid::TilePos;
+
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let base = session.to_save(&data.config.version, &campaign);
+    let outside = TilePos::new(data.config.world_width as i32, 0);
+    let mut cases = Vec::new();
+
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().selected_tile = outside;
+    cases.push(("selection", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().objective_tile = outside;
+    cases.push(("objective", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().blocked.insert(outside);
+    cases.push(("blocked tile", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().terrain_costs = vec![(outside, 2)];
+    cases.push(("terrain tile", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().hazards = vec![HazardTile {
+        position: outside,
+        kind: HazardKind::SporeBloom,
+    }];
+    cases.push(("hazard", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().cover_edges = vec![CoverEdgeDef {
+        position: [outside.x, outside.y],
+        direction: EdgeDirection::West,
+        strength: 25,
+    }];
+    cases.push(("cover edge", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().destructible_cover = vec![DestructibleCover {
+        position: outside,
+        health: 4,
+        max_health: 6,
+    }];
+    cases.push(("destructible cover", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().units[0].position = outside;
+    cases.push(("unit", save));
+    let mut save = base.clone();
+    let mut reinforcement = save.tactical.as_ref().unwrap().units[0].clone();
+    reinforcement.position = outside;
+    save.tactical.as_mut().unwrap().reinforcement_waves = vec![ReinforcementWave {
+        round: 2,
+        units: vec![reinforcement],
+    }];
+    cases.push(("reinforcement", save));
+    let mut save = base.clone();
+    save.tactical.as_mut().unwrap().event_log = vec![BattleEvent::UnitMoved {
+        unit_id: "mara_venn".to_owned(),
+        path: vec![outside],
+        cost: 1,
+    }];
+    cases.push(("movement history", save));
+    let mut save = base;
+    save.tactical.as_mut().unwrap().event_log =
+        vec![BattleEvent::CoverDestroyed { position: outside }];
+    cases.push(("cover history", save));
+
+    for (label, save) in cases {
+        let value = serde_json::to_value(save).unwrap();
+        let error =
+            migrate_save_value(Some(data.config.version.clone()), value, &data).unwrap_err();
+        assert!(error.contains(label), "{label}: {error}");
+        assert!(
+            error.contains("outside the 40x40 world"),
+            "{label}: {error}"
+        );
+    }
+}
+
+#[test]
+fn unknown_tactical_grid_dimensions_fail_with_a_clear_migration_error() {
+    use macroquad_toolkit::grid::{FlatGrid, FogState};
+
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut save = session.to_save(&data.config.version, &campaign);
+    save.tactical.as_mut().unwrap().fog = FlatGrid::new(13, 8, FogState::Visible);
+    let value = serde_json::to_value(save).unwrap();
+    let error = migrate_save_value(Some(data.config.version.clone()), value, &data).unwrap_err();
+    assert_eq!(error, "Cannot migrate tactical grid 13x8 to 40x40");
 }
 
 #[test]
