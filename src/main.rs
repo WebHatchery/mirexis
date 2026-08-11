@@ -69,6 +69,29 @@ mod visual_assets;
 
 use game::Game;
 
+const UI_FONT_SIZES: &[u16] = &[
+    9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 30, 34, 82,
+];
+
+fn warm_ui_font_atlases() {
+    // Macroquad grows a font atlas by replacing its GPU texture. If that first
+    // growth happens after text has already been queued in the same frame, the
+    // WebGL batch can retain the deleted texture id. Cache the UI's finite size
+    // set before the first frame so atlas replacement happens before any draw.
+    let mut characters: Vec<char> = (' '..='~').collect();
+    characters.extend(['·', '—']);
+
+    if let Some(font) = macroquad_toolkit::ui::default_ui_font() {
+        for size in UI_FONT_SIZES {
+            font.populate_font_cache(&characters, *size);
+        }
+    }
+    let macroquad_font = get_default_font();
+    for size in UI_FONT_SIZES {
+        macroquad_font.populate_font_cache(&characters, *size);
+    }
+}
+
 fn window_conf() -> Conf {
     capture::capture_window_conf(
         "MIREXIS",
@@ -80,6 +103,7 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
+    warm_ui_font_atlases();
     let mut game = Game::new().await;
 
     if let Some(configs) = capture::CaptureConfig::all_from_env("MIREXIS") {

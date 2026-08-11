@@ -1,0 +1,14 @@
+{
+  "generated": "2026-08-12",
+  "capture_root": "docs/verification",
+  "target_dimensions": [1280, 720],
+  "manifest_scenes": 85,
+  "files_audited": 85,
+  "unique_sha256": 85,
+  "missing_files": 0,
+  "wrong_dimensions": 0,
+  "exact_duplicates": 0,
+  "magenta_diagnostic_frames": 0,
+  "blank_or_low_detail_frames": 0,
+  "issues": []
+}

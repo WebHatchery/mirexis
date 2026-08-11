@@ -12,3 +12,5 @@ dist/
 *.history
 .vscode
 .gemini
+docs/verification/*.log
+docs/verification/*.tsv
