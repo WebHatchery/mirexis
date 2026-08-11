@@ -24,6 +24,8 @@ Capture root: `docs/verification`
 | Standard-resolution visual validation passes | Full root capture suite rendered at 1280 x 720 | 85 unique captures; no missing, duplicate, magenta, blank, wrong-size, or low-detail frame | PASS |
 | Required publisher passes | Windows and WebGL release builds, packaging, preview deployment, and catalog sync completed | `publish.ps1` passed 2026-08-12 | PASS |
 | Published WebGL rendering remains stable | UI font atlases are populated before the first frame, preventing mid-frame GPU texture replacement | Fresh 1280 x 720 published session rendered title and colony after 14:50 with no new console errors; prior deleted-texture entries remained timestamped 14:46 | PASS |
+| Initial settlement is centered with a readable undeveloped frontier | Reposition the starting settlement near the center of the 20 x 20 colony and increase spacing between its buildings; every unoccupied buildable plot must render a visible ground tile rather than disappearing into empty background | Updated colony layout tests plus refreshed `ui_colony.png` and `ui_construction.png` | PENDING |
+| Tactical deployment uses the full battlefield | Rebase allied and hostile deployments to opposite ends of the 40 x 40 map; keep the allied squad coherent while spreading hostiles across a visibly wider approach, with objectives and authored terrain remaining reachable | Deployment-distance/spread regression tests plus refreshed `ui_gameplay.png`, `ui_variant.png`, and targeting/movement captures | PENDING |
 | Minimum active work reaches four hours | Goal timer has not yet reached 14,400 active seconds | Goal status audit | PENDING |
 
 Completion is prohibited while any row remains `PENDING` or otherwise unresolved.
