@@ -30,7 +30,7 @@ ImageGen source masters and chroma-key intermediates are retained in root `art_s
 
 ## Runtime verification
 
-- `cargo test`: 157 crate tests plus the additional target test passed; the source-size audit passed with every touched Rust module below 800 non-test lines (maximum 798).
+- `cargo test --all-targets`: 213 gameplay tests plus the source-limit target test passed; the source-size audit passed with every Rust file at or below 800 physical lines (current maximum 797).
 - `cargo test -p macroquad-toolkit`: 338 library tests and 30 active integration/source tests passed (8 platform-dependent tests ignored).
 - `publish.ps1`: Windows and WebGL release builds passed; both asset packages generated and preview deployment completed.
 - Published Gamepad API bridge exists at `shared-assets/runtime/macroquad-gamepads-0.1.js` and is referenced by the deployed Mirexis page.

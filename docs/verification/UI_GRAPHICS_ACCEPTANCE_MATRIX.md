@@ -158,7 +158,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | Implementation checkpoint 2 | 150 tests + source gate; Windows/WebGL publish; controller bridge/package audit | PASS |
 | Implementation checkpoint 3 | 151 tests + source gate; 82-scene recapture; Windows/WebGL publish; 27-file package audit | PASS |
 | Live WebGL checkpoint | Warning/error-free browser startup; title through tactical deployment and help exercised | PASS |
-| Final implementation gate | `cargo fmt --all -- --check`; 157 crate tests plus additional target test; strict Clippy with warnings denied | PASS |
+| Final implementation gate | `cargo fmt --all -- --check`; 213 gameplay tests plus the source-limit target test; strict Clippy with warnings denied | PASS |
 | Final publish/package gate | `publish.ps1`; Windows and WebGL release builds; 27-file/25.85 MB runtime asset package; preview deploy | PASS |
 | Final full capture | `FINAL_CAPTURE_INVENTORY.md`; 85 PNGs, SHA-256 digests, eight ordered contact sheets inspected, and machine audit in `capture_audit.json` | PASS |
 | Final visual comparison | `UI_GRAPHICS_COMPARISON_AUDIT.md`; five responsive-size audits, final 1024x768 control-cue audit, 14-scene grayscale audit, and contrast/typography audit | PASS |
