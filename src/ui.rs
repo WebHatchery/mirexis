@@ -29,24 +29,25 @@ pub(crate) fn draw_ui_text_ex<'a>(
 }
 
 pub(crate) fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
-    let clip = rect.map(|rect| {
-        let dpi = screen_dpi_scale();
-        let x = (ui.offset.x + rect.x * ui.scale) * dpi;
-        let top = (ui.offset.y + rect.y * ui.scale) * dpi;
-        let width = rect.w * ui.scale * dpi;
-        let height = rect.h * ui.scale * dpi;
-        (
-            x.round() as i32,
-            top.round() as i32,
-            width.round() as i32,
-            height.round() as i32,
-        )
-    });
+    let clip = rect.map(|rect| ui_clip_pixels(ui, rect, screen_dpi_scale()));
     // Macroquad's scissor uses physical framebuffer pixels; callers use the
     // logical coordinate system established by `VirtualUi`.
     unsafe {
         get_internal_gl().quad_gl.scissor(clip);
     }
+}
+
+fn ui_clip_pixels(ui: &VirtualUi, rect: Rect, dpi: f32) -> (i32, i32, i32, i32) {
+    let x = (ui.offset.x + rect.x * ui.scale) * dpi;
+    let top = (ui.offset.y + rect.y * ui.scale) * dpi;
+    let width = rect.w * ui.scale * dpi;
+    let height = rect.h * ui.scale * dpi;
+    (
+        x.round() as i32,
+        top.round() as i32,
+        width.round() as i32,
+        height.round() as i32,
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -639,5 +640,24 @@ pub fn tile_move_from_keys() -> Option<(i32, i32)> {
         Some((-1, 0))
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn logical_clip_rect_converts_to_letterboxed_physical_pixels() {
+        let ui = VirtualUi {
+            logical_width: 1280.0,
+            logical_height: 720.0,
+            scale: 0.8,
+            offset: vec2(40.0, 12.0),
+        };
+        assert_eq!(
+            ui_clip_pixels(&ui, Rect::new(18.0, 106.0, 884.0, 568.0), 1.5),
+            (82, 145, 1061, 682)
+        );
     }
 }
