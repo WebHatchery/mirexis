@@ -78,3 +78,44 @@ fn tactical_clamp_exposes_complete_boundary_art() {
         }
     }
 }
+
+#[test]
+fn tactical_camera_insets_cover_every_declared_static_sprite() {
+    let insets = camera_art_insets(1.0);
+    let tile_width = crate::grid_ui::TACTICAL_HALF_WIDTH * 2.0;
+    let ground_y =
+        -crate::grid_ui::TACTICAL_HALF_HEIGHT + crate::grid_ui::TACTICAL_HALF_HEIGHT * 2.0 * 0.72;
+    for definition in crate::visual_assets::VisualCatalog::load().units {
+        let height = tile_width * definition.scale;
+        let width = height * (2.0 / 3.0);
+        let left = width * definition.pivot[0] - crate::grid_ui::TACTICAL_HALF_WIDTH;
+        let right = width * (1.0 - definition.pivot[0]) - crate::grid_ui::TACTICAL_HALF_WIDTH;
+        let top = height * definition.pivot[1] - (ground_y + crate::grid_ui::TACTICAL_HALF_HEIGHT);
+        let bottom =
+            ground_y + height * (1.0 - definition.pivot[1]) - crate::grid_ui::TACTICAL_HALF_HEIGHT;
+        assert!(left <= insets.left, "{} exceeds left inset", definition.id);
+        assert!(
+            right <= insets.right,
+            "{} exceeds right inset",
+            definition.id
+        );
+        assert!(top <= insets.top, "{} exceeds top inset", definition.id);
+        assert!(
+            bottom <= insets.bottom,
+            "{} exceeds bottom inset",
+            definition.id
+        );
+    }
+    for (scale, pivot) in [
+        (TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT),
+        (STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT),
+        (CANOPY_ART_SCALE, CANOPY_ART_PIVOT),
+    ] {
+        let width = tile_width * scale;
+        let height = width * crate::grid_ui::TERRAIN_ART_ASPECT;
+        assert!(width * pivot[0] - tile_width * 0.5 <= insets.left);
+        assert!(width * (1.0 - pivot[0]) - tile_width * 0.5 <= insets.right);
+        assert!(height * pivot[1] - crate::grid_ui::TACTICAL_HALF_HEIGHT <= insets.top);
+        assert!(height * (1.0 - pivot[1]) - crate::grid_ui::TACTICAL_HALF_HEIGHT <= insets.bottom);
+    }
+}
