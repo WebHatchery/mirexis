@@ -13,13 +13,36 @@ use macroquad_toolkit::prelude::{
     dark, draw_surface, draw_surface_with_title, SurfaceStyle, TextStyle,
 };
 
+#[cfg(test)]
+mod tests;
+
+fn tactical_panel() -> Rect {
+    Rect::new(10.0, 74.0, 900.0, 608.0)
+}
+
+fn tactical_viewport(panel: Rect) -> Rect {
+    Rect::new(
+        panel.x + 8.0,
+        panel.y + 32.0,
+        panel.w - 16.0,
+        panel.h - 40.0,
+    )
+}
+
+fn camera_controls_origin(panel: Rect) -> Vec2 {
+    vec2(
+        panel.right() - crate::camera_controls::STRIP_WIDTH - 6.0,
+        panel.y,
+    )
+}
+
 pub(crate) fn draw(
     ctx: &UiContext<'_>,
     camera: &mut WorldCamera,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
+    let panel = tactical_panel();
     draw_surface_with_title(
         panel,
         Some("OUTER SETTLEMENT // TACTICAL CAMERA"),
@@ -29,18 +52,9 @@ pub(crate) fn draw(
             .with_header(28.0, Color::new(0.06, 0.10, 0.11, 1.0)),
         TextStyle::new(13.0, dark::TEXT),
     );
-    let grid_rect = Rect::new(
-        panel.x + 8.0,
-        panel.y + 32.0,
-        panel.w - 16.0,
-        panel.h - 40.0,
-    );
-    let camera_control_clicked = crate::camera_controls::draw(
-        camera,
-        grid_rect,
-        mouse,
-        vec2(panel.right() - 262.0, panel.y),
-    );
+    let grid_rect = tactical_viewport(panel);
+    let camera_control_clicked =
+        crate::camera_controls::draw(camera, grid_rect, mouse, camera_controls_origin(panel));
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     let camera_dragged = camera.update(grid_rect, mouse);
     let suppress_map_click = camera_control_clicked || camera_dragged;
