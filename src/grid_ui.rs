@@ -11,6 +11,7 @@ pub(crate) struct WorldCamera {
     pub(crate) center: Vec2,
     pub(crate) zoom: f32,
     drag_anchor: Option<Vec2>,
+    tracked_tile: Option<TilePos>,
 }
 
 impl WorldCamera {
@@ -19,6 +20,7 @@ impl WorldCamera {
             center: projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
             zoom: 1.0,
             drag_anchor: None,
+            tracked_tile: Some(tile),
         }
     }
 
@@ -31,6 +33,7 @@ impl WorldCamera {
             ),
             zoom: 1.0,
             drag_anchor: None,
+            tracked_tile: None,
         }
     }
 
@@ -41,7 +44,7 @@ impl WorldCamera {
                 || is_mouse_button_down(MouseButton::Right));
         if dragging {
             if let Some(previous) = self.drag_anchor {
-                self.center -= (mouse - previous) / self.zoom;
+                self.pan_screen(mouse - previous);
             }
             self.drag_anchor = Some(mouse);
         } else {
@@ -50,10 +53,36 @@ impl WorldCamera {
 
         let wheel = mouse_wheel().1;
         if inside && wheel.abs() > f32::EPSILON {
-            let old_zoom = self.zoom;
-            self.zoom = (self.zoom * 1.13_f32.powf(wheel)).clamp(0.65, 1.85);
-            let from_center = mouse - viewport.center();
-            self.center += from_center / old_zoom - from_center / self.zoom;
+            self.zoom_at(viewport, mouse, 1.13_f32.powf(wheel));
+        }
+    }
+
+    fn pan_screen(&mut self, delta: Vec2) {
+        self.center -= delta / self.zoom;
+    }
+
+    fn zoom_at(&mut self, viewport: Rect, cursor: Vec2, factor: f32) {
+        let old_zoom = self.zoom;
+        self.zoom = (self.zoom * factor).clamp(0.65, 1.85);
+        let from_center = cursor - viewport.center();
+        self.center += from_center / old_zoom - from_center / self.zoom;
+    }
+
+    pub(crate) fn reveal_changed_tactical_selection(&mut self, tile: TilePos, viewport: Rect) {
+        if self.tracked_tile == Some(tile) {
+            return;
+        }
+        self.tracked_tile = Some(tile);
+        let projected = projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT);
+        let screen = viewport.center() + (projected - self.center) * self.zoom;
+        let safe = Rect::new(
+            viewport.x + 96.0,
+            viewport.y + 76.0,
+            (viewport.w - 192.0).max(1.0),
+            (viewport.h - 152.0).max(1.0),
+        );
+        if !safe.contains(screen) {
+            self.center = projected;
         }
     }
 
@@ -296,6 +325,43 @@ mod tests {
         assert!(
             visible < 40 * 40 / 2,
             "default view exposed {visible} tiles"
+        );
+    }
+
+    #[test]
+    fn cursor_anchored_zoom_preserves_the_world_point_under_the_pointer() {
+        let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+        let cursor = vec2(670.0, 280.0);
+        let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+        let before = camera.center + (cursor - viewport.center()) / camera.zoom;
+        camera.zoom_at(viewport, cursor, 1.4);
+        let after = camera.center + (cursor - viewport.center()) / camera.zoom;
+        assert!((before - after).length() < 0.001);
+    }
+
+    #[test]
+    fn panning_uses_screen_distance_at_every_zoom() {
+        let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+        camera.zoom = 1.5;
+        let before = camera.center;
+        camera.pan_screen(vec2(150.0, -75.0));
+        assert_eq!(camera.center, before + vec2(-100.0, 50.0));
+    }
+
+    #[test]
+    fn changed_offscreen_selection_recenters_without_fighting_free_pan() {
+        let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+        let start = TilePos::new(2, 2);
+        let mut camera = WorldCamera::tactical_start(start);
+        camera.center += vec2(400.0, 300.0);
+        let freely_panned = camera.center;
+        camera.reveal_changed_tactical_selection(start, viewport);
+        assert_eq!(camera.center, freely_panned);
+        let distant = TilePos::new(30, 30);
+        camera.reveal_changed_tactical_selection(distant, viewport);
+        assert_eq!(
+            camera.center,
+            projected_tile(distant, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT)
         );
     }
 }

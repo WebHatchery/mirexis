@@ -32,6 +32,7 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 40.0,
     );
+    camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     camera.update(grid_rect, mouse);
     camera.clamp_isometric(
         ctx.session.tactical.fog.width,
