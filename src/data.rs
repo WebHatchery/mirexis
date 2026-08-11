@@ -724,7 +724,8 @@ impl GameData {
                 .iter()
                 .chain(std::iter::once(&recipe.objective_tile))
                 .chain(recipe.terrain_costs.iter().map(|entry| &entry.position))
-                .chain(recipe.hazards.iter().map(|entry| &entry.position));
+                .chain(recipe.hazards.iter().map(|entry| &entry.position))
+                .chain(recipe.cover_edges.iter().map(|entry| &entry.position));
             if positions.into_iter().any(|position| {
                 position[0] < 0
                     || position[1] < 0

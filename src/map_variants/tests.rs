@@ -94,3 +94,17 @@ fn every_variant_is_bounded_and_reachable_from_the_allied_approach() {
         }
     }
 }
+
+#[test]
+fn runtime_safety_rejects_out_of_bounds_terrain_and_cover_overlays() {
+    let data = GameData::load().unwrap();
+    let mut layout = materialize(&data.campaign.map_recipes[0], &data, 2);
+    assert!(layout_is_safe(&layout, &data));
+
+    layout.terrain_costs[0].position = [data.config.world_width as i32, 0];
+    assert!(!layout_is_safe(&layout, &data));
+
+    layout = materialize(&data.campaign.map_recipes[0], &data, 2);
+    layout.cover_edges[0].position = [0, data.config.world_height as i32];
+    assert!(!layout_is_safe(&layout, &data));
+}

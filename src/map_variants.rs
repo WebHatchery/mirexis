@@ -131,6 +131,14 @@ fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {
         && layout.hazards.iter().all(|hazard| {
             in_bounds(hazard.position) && !layout.blocked_tiles.contains(&hazard.position)
         })
+        && layout
+            .terrain_costs
+            .iter()
+            .all(|entry| in_bounds(entry.position))
+        && layout
+            .cover_edges
+            .iter()
+            .all(|edge| in_bounds(edge.position))
         && data
             .roster
             .iter()
