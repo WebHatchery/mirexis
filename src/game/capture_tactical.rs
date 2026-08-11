@@ -127,13 +127,87 @@ impl Game {
 
     pub(super) fn capture_movement_route(&mut self) {
         self.reset_capture_session(AppState::Tactical);
-        self.session.tactical.blocked.insert(TilePos::new(2, 2));
+        let origin = self
+            .session
+            .unit("kira_voss")
+            .expect("capture roster includes Kira")
+            .position;
+        self.session
+            .tactical
+            .blocked
+            .insert(TilePos::new(origin.x - 1, origin.y));
         self.session
             .tactical
             .terrain_costs
-            .push((TilePos::new(2, 3), 2));
+            .push((TilePos::new(origin.x - 1, origin.y + 1), 2));
         self.session.tactical.selected_unit = Some("kira_voss".to_owned());
-        self.session.tactical.selected_tile = TilePos::new(4, 3);
+        self.session.tactical.selected_tile = TilePos::new(origin.x - 2, origin.y);
+    }
+
+    pub(super) fn capture_breach(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        let position = self
+            .session
+            .tactical
+            .destructible_cover
+            .first()
+            .expect("capture map includes destructible cover")
+            .position;
+        let staging = [
+            TilePos::new(position.x - 1, position.y),
+            TilePos::new(position.x + 1, position.y),
+            TilePos::new(position.x, position.y - 1),
+            TilePos::new(position.x, position.y + 1),
+        ]
+        .into_iter()
+        .find(|candidate| {
+            candidate.x >= 0
+                && candidate.y >= 0
+                && candidate.x < self.data.config.world_width as i32
+                && candidate.y < self.data.config.world_height as i32
+                && self
+                    .session
+                    .tactical
+                    .units
+                    .iter()
+                    .all(|unit| unit.position != *candidate)
+        })
+        .expect("capture cover has an adjacent staging tile");
+        let selected = self
+            .session
+            .tactical
+            .selected_unit
+            .clone()
+            .expect("capture session selects a colonist");
+        self.session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == selected)
+            .expect("selected capture colonist exists")
+            .position = staging;
+        self.session.tactical.blocked.remove(&staging);
+        self.session.tactical.selected_tile = position;
+
+        while self.session.tactical.blocked.contains(&position) {
+            self.refresh_capture_unit();
+            self.session
+                .attack_selected_cover(position)
+                .expect("adjacent capture cover remains attackable");
+        }
+        self.refresh_capture_unit();
+    }
+
+    fn refresh_capture_unit(&mut self) {
+        if let Some(unit) = self
+            .session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| Some(&unit.id) == self.session.tactical.selected_unit.as_ref())
+        {
+            unit.action_points = self.data.config.max_action_points;
+        }
     }
 
     pub(super) fn capture_vitality_markers(&mut self) {

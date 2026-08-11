@@ -44,7 +44,7 @@ impl Game {
             .expect("power plants are constructible");
         self.campaign
             .colony
-            .place_construction(BuildingKind::PowerPlant, [1, 1])
+            .place_construction(BuildingKind::PowerPlant, [10, 14])
             .expect("capture plot is open");
         self.state = AppState::Colony;
     }

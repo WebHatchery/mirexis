@@ -727,37 +727,6 @@ impl Game {
             unit_id: "ilya_reed".to_owned(),
         });
     }
-
-    fn capture_breach(&mut self) {
-        self.reset_capture_session(AppState::Tactical);
-        let position = self
-            .session
-            .tactical
-            .destructible_cover
-            .iter()
-            .find(|cover| self.session.can_attack_selected_cover(cover.position))
-            .expect("capture map includes attackable cover")
-            .position;
-        while self.session.tactical.blocked.contains(&position) {
-            self.refresh_capture_unit();
-            self.session
-                .attack_selected_cover(position)
-                .expect("capture cover remains attackable");
-        }
-        self.refresh_capture_unit();
-    }
-
-    fn refresh_capture_unit(&mut self) {
-        if let Some(unit) = self
-            .session
-            .tactical
-            .units
-            .iter_mut()
-            .find(|unit| Some(&unit.id) == self.session.tactical.selected_unit.as_ref())
-        {
-            unit.action_points = self.data.config.max_action_points;
-        }
-    }
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 # Mirexis UI Graphics Comparison Audit
 
-Audit date: 2026-08-11  
+Audit date: 2026-08-12
 Research authority: `docs/research/Tactical_RPG_Graphics_Comparative_Report.docx`  
 Written translation: `docs/UI_GRAPHICS_VISUAL_SPEC.md`
 
@@ -8,9 +8,9 @@ Written translation: `docs/UI_GRAPHICS_VISUAL_SPEC.md`
 
 - Starting captures: 82 PNGs in `docs/verification`.
 - Prototype rebuild captures: `docs/verification/ui_rebuild`.
-- Final implementation captures: 85 PNGs in `docs/verification/ui_overhaul_final`, including controller focus, mouse hover, and explicit damaged and repaired settlement states.
+- Final implementation captures: 85 canonical PNGs directly in `docs/verification`, including controller focus, mouse hover, and explicit damaged and repaired settlement states.
 - Immutable file inventory: `FINAL_CAPTURE_INVENTORY.md` records every scene filename, byte count, and SHA-256 digest.
-- Final contact sheets: `contact_01.jpg` through `contact_08.jpg` in `docs/verification/ui_overhaul_final`.
+- Final contact sheets: eight temporary, manifest-ordered sheets generated from the canonical root captures and inspected during the 2026-08-12 audit.
 - Scale checks: 1024 x 768, 1366 x 768, 1440 x 900, 1600 x 900, and 1920 x 1080 capture sets, summarized by `responsive_supported_sizes_contact.jpg`.
 - Final strategy-control scale check: `responsive_final_controls_1024x768` verifies colony, roster, gene lab, briefing, and debrief cues at the smallest supported desktop size.
 - Grayscale checks: `docs/verification/grayscale_audit` and the refreshed 14-scene `grayscale_audit_final` set.
@@ -35,10 +35,10 @@ Written translation: `docs/UI_GRAPHICS_VISUAL_SPEC.md`
 - Visual sameness: faction maps, hazards, campaign phases, and all three endings have distinct material and effect language.
 - Weak hierarchy: title, briefing, forecast, modal, debrief, and event screens now lead with portrait or scene identity before dense detail.
 - Placeholder art: none observed in production-required surfaces.
-- Unclear terrain: projected diamond edges, height labels, sidewalls, cover edges, and pattern-coded overlays remain distinguishable in grayscale.
+- Unclear terrain: projected diamond edges, stepped top surfaces, exposed cliff faces, cover edges, and pattern-coded overlays remain distinguishable without debug height labels.
 - Inconsistent controls: shared button states and stable back/confirm/footer cues are present; Web builds add controller navigation through the shared runtime bridge.
 - Input discoverability: title, strategy, briefing, tactical, modal, and debrief surfaces now expose accurate keyboard/controller cues; the final strategy cues were separately checked at 1024 x 768.
-- Browser runtime: a fresh published WebGL load is warning/error-free; title-to-colony-to-briefing-to-deployment-to-tactical navigation and the tactical help overlay were exercised interactively.
+- Browser runtime: a fresh published WebGL load is warning/error-free; title-to-colony-to-briefing-to-deployment-to-tactical navigation, colony placement, movement selection, and colony/tactical wheel zoom were exercised interactively.
 
 ## Capture verdict
 
