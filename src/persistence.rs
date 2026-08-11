@@ -48,6 +48,7 @@ pub fn migrate_save_value(
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
     migrate_legacy_tactical_world(&mut save, &data.config)?;
+    save.campaign.colony.migrate_legacy_spatial_layout();
     save.campaign.ensure_roster_characters(data);
     save.campaign.strategy.ensure_character_events(data);
     save.campaign.colony.ensure_phase_one_infrastructure(

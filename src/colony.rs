@@ -144,6 +144,36 @@ impl ColonyState {
         })
     }
 
+    pub(crate) fn migrate_legacy_spatial_layout(&mut self) -> bool {
+        let legacy = self
+            .buildings
+            .iter()
+            .any(|building| building.id == "command_centre" && building.position == [3, 2]);
+        if !legacy {
+            return false;
+        }
+
+        let mut occupied = std::collections::HashSet::new();
+        for building in &mut self.buildings {
+            if let Some(position) = founding_building_position(&building.id) {
+                building.position = position;
+                occupied.insert(position);
+            }
+        }
+        for building in &mut self.buildings {
+            if founding_building_position(&building.id).is_some() {
+                continue;
+            }
+            building.position = migrated_open_plot(building.position, &occupied);
+            occupied.insert(building.position);
+        }
+        for project in &mut self.construction_queue {
+            project.position = migrated_open_plot(project.position, &occupied);
+            occupied.insert(project.position);
+        }
+        true
+    }
+
     pub fn power_supply(&self) -> i32 {
         self.resources.power
             + self
@@ -388,6 +418,39 @@ impl ColonyState {
             .find(|position| !self.is_occupied(*position))
             .expect("the colony has room for required Phase One infrastructure")
     }
+}
+
+fn founding_building_position(id: &str) -> Option<[i32; 2]> {
+    match id {
+        "command_centre" => Some(SETTLEMENT_CENTER),
+        "barracks" => Some([6, 8]),
+        "infirmary" => Some([10, 6]),
+        "workshop" => Some([14, 8]),
+        "hydroponics" => Some([7, 13]),
+        "power_plant" => Some([13, 13]),
+        _ => None,
+    }
+}
+
+fn migrated_open_plot(
+    legacy: [i32; 2],
+    occupied: &std::collections::HashSet<[i32; 2]>,
+) -> [i32; 2] {
+    let preferred = [
+        (legacy[0] * 2 + 3).clamp(0, COLONY_WIDTH - 1),
+        (legacy[1] * 2 + 4).clamp(0, COLONY_HEIGHT - 1),
+    ];
+    (0..COLONY_HEIGHT)
+        .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
+        .filter(|position| !occupied.contains(position))
+        .min_by_key(|position| {
+            (
+                (position[0] - preferred[0]).abs() + (position[1] - preferred[1]).abs(),
+                position[1],
+                position[0],
+            )
+        })
+        .expect("the expanded colony has room for migrated construction")
 }
 
 fn building(id: &str, kind: BuildingKind, position: [i32; 2]) -> BuildingState {

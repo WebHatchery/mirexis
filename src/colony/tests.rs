@@ -130,6 +130,83 @@ fn initial_settlement_is_centered_spacious_and_surrounded_by_frontier() {
 }
 
 #[test]
+fn legacy_colony_layout_migrates_founders_and_custom_work_without_collisions() {
+    let mut colony = ColonyState::new();
+    let legacy_founders = [
+        ("command_centre", [3, 2]),
+        ("barracks", [2, 3]),
+        ("infirmary", [4, 3]),
+        ("workshop", [3, 4]),
+        ("hydroponics", [5, 3]),
+        ("power_plant", [5, 4]),
+    ];
+    for (id, position) in legacy_founders {
+        colony
+            .buildings
+            .iter_mut()
+            .find(|building| building.id == id)
+            .unwrap()
+            .position = position;
+    }
+    colony.buildings.push(BuildingState {
+        id: "barricade_7".to_owned(),
+        kind: BuildingKind::Barricade,
+        position: [0, 0],
+        level: 1,
+        damaged: true,
+    });
+    colony.construction_queue.push(ConstructionProject {
+        id: "power_plant_8".to_owned(),
+        kind: BuildingKind::PowerPlant,
+        position: [7, 5],
+        operations_remaining: 1,
+    });
+
+    assert!(colony.migrate_legacy_spatial_layout());
+    assert!(!colony.migrate_legacy_spatial_layout());
+    assert_eq!(
+        colony
+            .buildings
+            .iter()
+            .find(|building| building.id == "command_centre")
+            .unwrap()
+            .position,
+        SETTLEMENT_CENTER
+    );
+    assert_eq!(
+        colony
+            .buildings
+            .iter()
+            .find(|building| building.id == "barricade_7")
+            .unwrap()
+            .position,
+        [3, 4]
+    );
+    assert_eq!(colony.construction_queue[0].position, [17, 14]);
+    let positions = colony
+        .buildings
+        .iter()
+        .map(|building| building.position)
+        .chain(
+            colony
+                .construction_queue
+                .iter()
+                .map(|project| project.position),
+        )
+        .collect::<std::collections::HashSet<_>>();
+    assert_eq!(
+        positions.len(),
+        colony.buildings.len() + colony.construction_queue.len()
+    );
+    assert!(positions.into_iter().all(|position| {
+        position[0] >= 0
+            && position[1] >= 0
+            && position[0] < COLONY_WIDTH
+            && position[1] < COLONY_HEIGHT
+    }));
+}
+
+#[test]
 fn gene_lab_is_unique_and_requires_additional_power() {
     let mut colony = ColonyState::new();
     colony

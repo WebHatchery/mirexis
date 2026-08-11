@@ -113,6 +113,47 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
 }
 
 #[test]
+fn same_version_corner_colony_save_moves_into_the_centered_frontier() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let legacy_founders = [
+        ("command_centre", [3, 2]),
+        ("barracks", [2, 3]),
+        ("infirmary", [4, 3]),
+        ("workshop", [3, 4]),
+        ("hydroponics", [5, 3]),
+        ("power_plant", [5, 4]),
+    ];
+    for (id, position) in legacy_founders {
+        campaign
+            .colony
+            .buildings
+            .iter_mut()
+            .find(|building| building.id == id)
+            .unwrap()
+            .position = position;
+    }
+    let legacy =
+        serde_json::to_value(SaveData::campaign_only(&data.config.version, &campaign)).unwrap();
+
+    let migrated = migrate_save_value(Some(data.config.version.clone()), legacy, &data).unwrap();
+    let command_centre = migrated
+        .campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.id == "command_centre")
+        .unwrap();
+    assert_eq!(command_centre.position, crate::colony::SETTLEMENT_CENTER);
+    assert!(migrated.campaign.colony.buildings.iter().all(|building| {
+        building.position[0] >= 0
+            && building.position[1] >= 0
+            && building.position[0] < crate::colony::COLONY_WIDTH
+            && building.position[1] < crate::colony::COLONY_HEIGHT
+    }));
+}
+
+#[test]
 fn chitin_save_gains_ilyas_unevolved_paths() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);
