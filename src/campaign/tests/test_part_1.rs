@@ -184,6 +184,42 @@ fn deployments_hold_opposite_ends_with_a_broader_hostile_front() {
         }));
     }
 }
+
+#[test]
+fn hostile_front_falls_back_around_unsafe_large_world_entry_cells() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mut mission = data.mission.clone();
+    mission.objective_tile = [35, 10];
+    mission.blocked_tiles.push([33, 20]);
+    mission.hazards.push(crate::data::HazardDef {
+        position: [36, 30],
+        kind: crate::data::HazardKind::SporeBloom,
+    });
+
+    let deployment = campaign.deployment_roster(&data, &mission);
+    let hostiles = deployment
+        .iter()
+        .filter(|unit| unit.team == Team::Hostile)
+        .collect::<Vec<_>>();
+    let positions = hostiles
+        .iter()
+        .map(|unit| unit.position)
+        .collect::<std::collections::HashSet<_>>();
+    assert_eq!(positions.len(), hostiles.len());
+    assert!(hostiles.iter().all(|unit| {
+        unit.position[0] >= data.config.world_width as i32 / 2
+            && unit.position[0] < data.config.world_width as i32
+            && unit.position[1] >= 0
+            && unit.position[1] < data.config.world_height as i32
+            && unit.position != mission.objective_tile
+            && !mission.blocked_tiles.contains(&unit.position)
+            && !mission
+                .hazards
+                .iter()
+                .any(|hazard| hazard.position == unit.position)
+    }));
+}
 #[test]
 fn three_knives_deploys_one_hostile_from_each_power() {
     let data = GameData::load().unwrap();

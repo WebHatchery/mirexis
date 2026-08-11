@@ -250,6 +250,7 @@ fn high_faction_attention_adds_its_pressure_modifier() {
 fn each_faction_template_materializes_its_own_battlefield() {
     let data = GameData::load().unwrap();
     let colony = ColonyState::new();
+    let campaign = crate::campaign::CampaignState::new(&data);
     let mut layouts = std::collections::HashSet::new();
     for template in &data.campaign.mission_templates {
         let mut strategy = StrategyState::new(&data);
@@ -258,6 +259,29 @@ fn each_faction_template_materializes_its_own_battlefield() {
         strategy.mission_offers = vec![instance];
         let mission = strategy.materialize_selected(&data, &colony);
         assert_eq!(mission.hostile_faction, template.faction);
+        let deployment = campaign.deployment_roster(&data, &mission);
+        let positions = deployment
+            .iter()
+            .map(|unit| unit.position)
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            positions.len(),
+            deployment.len(),
+            "{} overlaps",
+            template.id
+        );
+        assert!(deployment.iter().all(|unit| {
+            unit.position[0] >= 0
+                && unit.position[1] >= 0
+                && unit.position[0] < data.config.world_width as i32
+                && unit.position[1] < data.config.world_height as i32
+                && unit.position != mission.objective_tile
+                && !mission.blocked_tiles.contains(&unit.position)
+                && !mission
+                    .hazards
+                    .iter()
+                    .any(|hazard| hazard.position == unit.position)
+        }));
         assert!(layouts.insert(mission.blocked_tiles));
     }
     assert_eq!(layouts.len(), data.campaign.mission_templates.len());

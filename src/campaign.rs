@@ -1,5 +1,7 @@
 //! Persistent character identity, progression, and deployment derivation.
 
+mod deployment;
+
 use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
@@ -172,8 +174,9 @@ impl CampaignState {
                 })
                 .cloned(),
         );
-        spread_hostile_deployment(
+        deployment::spread_hostile_deployment(
             &mut deployment,
+            mission,
             data.config.world_width as i32,
             data.config.world_height as i32,
         );
@@ -615,19 +618,6 @@ impl CampaignState {
             self.strategy.regenerate_missions(data);
         }
         changed
-    }
-}
-
-fn spread_hostile_deployment(roster: &mut [UnitDef], width: i32, height: i32) {
-    let hostile_count = roster
-        .iter()
-        .filter(|unit| unit.team == Team::Hostile)
-        .count() as i32;
-    let mut index = 0;
-    for unit in roster.iter_mut().filter(|unit| unit.team == Team::Hostile) {
-        index += 1;
-        let x_offset = [5, 7, 4][(index as usize - 1) % 3];
-        unit.position = [width - x_offset, index * height / (hostile_count + 1)];
     }
 }
 
