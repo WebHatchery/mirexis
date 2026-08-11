@@ -30,7 +30,7 @@ pub(crate) fn draw_gene_lab(
     draw_character_list(campaign, data, assets, visuals, mouse, &mut actions);
     draw_evolution_panel(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
-        "PAD // D-PAD SELECT COLONIST · B COLONY  //  MOUSE // CHOOSE IRREVERSIBLE EVOLUTION",
+        "TOUCH / MOUSE // TAP COLONIST · EVOLUTION · COLONY  //  PAD // D-PAD · A · B",
         28.0,
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),

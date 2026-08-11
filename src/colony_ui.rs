@@ -452,7 +452,7 @@ fn draw_operations(
         let lab_ready = campaign.colony.has_facility(BuildingKind::GeneLab);
         draw_ui_text_ex(
             if lab_ready {
-                "GENE LAB READY // CLICK THE FACILITY TO EVOLVE A COLONIST"
+                "GENE LAB READY // TAP THE FACILITY TO EVOLVE A COLONIST"
             } else if lab_exists {
                 "GENE LAB OFFLINE // RESTORE POWER OR REPAIR THE FACILITY"
             } else {

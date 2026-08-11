@@ -223,7 +223,7 @@ pub fn draw_mission_briefing(
         &mut actions,
     );
     draw_ui_text_ex(
-        "PAD // D-PAD SELECT · A TOGGLE · X FORMATION · START DEPLOY · B COLONY  //  ENTER DEPLOY · ESC COLONY",
+        "TOUCH // TAP COLONIST · FORMATION · DEPLOY · COLONY  //  PAD // D-PAD · A · X · START · B",
         200.0,
         624.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),

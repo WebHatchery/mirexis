@@ -32,10 +32,10 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         210.0,
         "1 // READ THE FIELD",
         &[
-            "Click a colonist to make them active.",
+            "Tap/click a colonist to make them active.",
             "Green tiles are reachable this activation.",
             "Pan with < ^ v >; zoom with -/+; drag/wheel too.",
-            "Click a hostile to inspect intent or attack.",
+            "Tap/click a hostile to inspect intent or attack.",
         ],
     );
     section(
@@ -72,14 +72,14 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         ],
     );
     text(
-        "KEYS // ARROWS inspect · TAB next ready · ENTER end phase · S save · L load · H help · B log",
+        "TOUCH // TAP MAP TO INSPECT · TAP NEXT READY / END PHASE / SAVE / LOAD / HELP / LOG",
         230.0,
         516.0,
         15.0,
         dark::ACCENT,
     );
     text(
-        "PAD // D-PAD inspect · A action · B cancel · X log · Y help · RB next · START end phase",
+        "OPTIONAL // KEYS ARROWS / TAB / ENTER / S / L / H / B · PAD D-PAD / A / B / X / Y / RB / START",
         230.0,
         540.0,
         15.0,

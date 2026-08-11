@@ -31,7 +31,7 @@ pub(crate) fn draw_roster(
     draw_character_list(campaign, assets, visuals, mouse, &mut actions);
     draw_selected_character(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
-        "PAD // D-PAD SELECT COLONIST · B COLONY  //  MOUSE // TRAIN · CRAFT · EQUIP",
+        "TOUCH / MOUSE // TAP COLONIST · TRAIN · CRAFT · EQUIP · COLONY  //  PAD // D-PAD · A · B",
         28.0,
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),

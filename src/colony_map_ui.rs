@@ -630,7 +630,7 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>) {
                 building.kind.name().to_uppercase()
             )
         } else if building.kind == BuildingKind::GeneLab {
-            "GENE LAB // CLICK TO OPEN EVOLUTION CHAMBER".to_owned()
+            "GENE LAB // TAP TO OPEN EVOLUTION CHAMBER".to_owned()
         } else {
             format!(
                 "{} // ONLINE // LEVEL {}",

@@ -116,7 +116,7 @@ pub fn draw_debrief(
         actions.push(UiAction::ReturnToColony);
     }
     draw_text(
-        "ENTER / SPACE / PAD A // RETURN TO COLONY",
+        "TAP RETURN TO COLONY // ENTER / SPACE / PAD A",
         438.0,
         672.0,
         13.0,
