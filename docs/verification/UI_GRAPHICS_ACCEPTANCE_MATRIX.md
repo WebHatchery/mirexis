@@ -62,91 +62,91 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 
 | Scene | Surface | Baseline principal defect | Final evidence | Status |
 |---|---|---|---|---|
-| title | Title | Geometric tableau / weak world art | `ui_overhaul_final/ui_title.png` | PASS |
-| title_controller | Title/controller focus | No visible gamepad focus or controller-specific confirmation cue | `ui_overhaul_final/ui_title_controller.png` | PASS |
-| title_hover | Title/mouse hover | Hover treatment not represented in deterministic evidence | `ui_overhaul_final/ui_title_hover.png` | PASS |
-| colony | Colony | Prototype island lacks full inhabited/state detail | `ui_overhaul_final/ui_colony.png` | PASS |
-| contact | Colony event | Text and grid dominate event identity | `ui_overhaul_final/ui_contact.png` | PASS |
-| contact_gear | Roster/equipment | No authored equipment art | `ui_overhaul_final/ui_contact_gear.png` | PASS |
-| contact_event | Colony event | Weak event illustration and hierarchy | `ui_overhaul_final/ui_contact_event.png` | PASS |
-| adaptation | Colony | Phase evolution primarily textual | `ui_overhaul_final/ui_adaptation.png` | PASS |
-| gene_lab | Gene lab | No illustrated mutation anatomy | `ui_overhaul_final/ui_gene_lab.png` | PASS |
-| evolution | Roster/gene lab | Evolution visible mainly as text | `ui_overhaul_final/ui_evolution.png` | PASS |
-| mara_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_overhaul_final/ui_mara_evolution.png` | PASS |
-| ilya_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_overhaul_final/ui_ilya_evolution.png` | PASS |
-| sol_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_overhaul_final/ui_sol_evolution.png` | PASS |
-| nadi_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_overhaul_final/ui_nadi_evolution.png` | PASS |
-| escalation | Colony | Campaign visual evolution too weak | `ui_overhaul_final/ui_escalation.png` | PASS |
-| escalation_operation | Briefing | Same text modal language | `ui_overhaul_final/ui_escalation_operation.png` | PASS |
-| escalation_response | Campaign event | Choice identity mainly textual | `ui_overhaul_final/ui_escalation_response.png` | PASS |
-| mirexis | Colony | Late-game hybridisation too weak | `ui_overhaul_final/ui_mirexis.png` | PASS |
-| mirexis_path | Campaign choice | Path identity mainly textual | `ui_overhaul_final/ui_mirexis_path.png` | PASS |
-| redoubt_end | Ending | Ending reuses colony grid | `ui_overhaul_final/ui_redoubt_end.png` | PASS |
-| commonwealth_end | Ending | Ending reuses colony grid | `ui_overhaul_final/ui_commonwealth_end.png` | PASS |
-| threshold_end | Ending | Ending reuses colony grid | `ui_overhaul_final/ui_threshold_end.png` | PASS |
-| finale_debrief | Debrief | Sparse text modal | `ui_overhaul_final/ui_finale_debrief.png` | PASS |
-| adaptation_operation | Briefing | Weak mission scene identity | `ui_overhaul_final/ui_adaptation_operation.png` | PASS |
-| glass_nerve | Tactical | Flat rectangular battlefield | `ui_overhaul_final/ui_glass_nerve.png` | PASS |
-| three_knives | Tactical | Flat rectangular battlefield | `ui_overhaul_final/ui_three_knives.png` | PASS |
-| reinforcement_warning | Tactical/reinforcement | Entry warning lacks authored staging | `ui_overhaul_final/ui_reinforcement_warning.png` | PASS |
-| line_formation | Tactical | Formation lacks sprite population/scale | `ui_overhaul_final/ui_line_formation.png` | PASS |
-| thin_shelter | Tactical/objective | Structure/objective lacks dimensional identity | `ui_overhaul_final/ui_thin_shelter.png` | PASS |
-| breakwater | Tactical | Mission art sameness | `ui_overhaul_final/ui_breakwater.png` | PASS |
-| false_heart | Tactical | Mission art sameness | `ui_overhaul_final/ui_false_heart.png` | PASS |
-| live_wire | Tactical | Mission art sameness | `ui_overhaul_final/ui_live_wire.png` | PASS |
-| last_wall | Tactical | Mission art sameness | `ui_overhaul_final/ui_last_wall.png` | PASS |
-| root_choir | Tactical | Mission art sameness | `ui_overhaul_final/ui_root_choir.png` | PASS |
-| door_of_light | Tactical | Mission art sameness | `ui_overhaul_final/ui_door_of_light.png` | PASS |
-| damage | Colony | Damage is a label/colour state, not damaged architecture | `ui_overhaul_final/ui_damage.png` | PASS |
-| repair | Colony | Restored architecture and repair feedback were not captured explicitly | `ui_overhaul_final/ui_repair.png` | PASS |
-| power | Colony | Unpowered state lacks environmental response | `ui_overhaul_final/ui_power.png` | PASS |
-| construction | Colony | Construction state lacks authored staging | `ui_overhaul_final/ui_construction.png` | PASS |
-| research | Research | Weak technology art and hierarchy | `ui_overhaul_final/ui_research.png` | PASS |
-| roster | Roster | Procedural portrait and dense controls | `ui_overhaul_final/ui_roster.png` | PASS |
-| advanced_roster | Roster | Class change lacks silhouette transformation | `ui_overhaul_final/ui_advanced_roster.png` | PASS |
-| relationships | Relationships | Bonds are text-led | `ui_overhaul_final/ui_relationships.png` | PASS |
-| trauma | Roster | Injury is text-led | `ui_overhaul_final/ui_trauma.png` | PASS |
-| bonded_briefing | Briefing/relationships | No portrait-led relationship cue | `ui_overhaul_final/ui_bonded_briefing.png` | PASS |
-| legacy | Roster | Legacy state lacks visual identity | `ui_overhaul_final/ui_legacy.png` | PASS |
-| briefing | Briefing | Text-heavy with little mission art | `ui_overhaul_final/ui_briefing.png` | PASS |
-| threat_briefing | Briefing | Threat hierarchy and faction art weak | `ui_overhaul_final/ui_threat_briefing.png` | PASS |
-| loadout_briefing | Briefing/loadout | Equipment is text-only | `ui_overhaul_final/ui_loadout_briefing.png` | PASS |
-| pressure | Colony | Pressure state primarily textual | `ui_overhaul_final/ui_pressure.png` | PASS |
-| gameplay | Tactical | Flat rectangular board / procedural units | `ui_overhaul_final/ui_gameplay.png` | PASS |
-| overwatch | Tactical | State cue small and static | `ui_overhaul_final/ui_overwatch.png` | PASS |
-| brood_ability | Tactical/effect | No production Brood effect language | `ui_overhaul_final/ui_brood_ability.png` | PASS |
-| directorate_ability | Tactical/effect | No production Directorate effect language | `ui_overhaul_final/ui_directorate_ability.png` | PASS |
-| ascendant_ability | Tactical/effect | No production Ascendant effect language | `ui_overhaul_final/ui_ascendant_ability.png` | PASS |
-| hazard | Tactical/hazard | Flat hazard marks | `ui_overhaul_final/ui_hazard.png` | PASS |
-| intent | Tactical/forecast | Intent is small text/line | `ui_overhaul_final/ui_intent.png` | PASS |
-| action_preview | Tactical/forecast | Preview lacks portrait comparison/staging | `ui_overhaul_final/ui_action_preview.png` | PASS |
-| movement_route | Tactical/route | Route conforms to rectangles | `ui_overhaul_final/ui_movement_route.png` | PASS |
-| cover_edges | Tactical/cover | Cover is shallow procedural geometry | `ui_overhaul_final/ui_cover_edges.png` | PASS |
-| invalid_command | Tactical/feedback | Weak authored rejection feedback | `ui_overhaul_final/ui_invalid_command.png` | PASS |
-| valid_shot | Tactical/forecast | Weak attack comparison | `ui_overhaul_final/ui_valid_shot.png` | PASS |
-| threat_range | Tactical/overlay | Rectangular threat overlay | `ui_overhaul_final/ui_threat_range.png` | PASS |
-| danger_reach | Tactical/overlay | Rectangular danger overlay | `ui_overhaul_final/ui_danger_reach.png` | PASS |
-| help | Help | Dense small-text modal | `ui_overhaul_final/ui_help.png` | PASS |
-| battle_log | Battle log | Plain chronological text | `ui_overhaul_final/ui_battle_log.png` | PASS |
-| combat_feedback | Tactical/feedback | Minimal impact/recoil/critical treatment | `ui_overhaul_final/ui_combat_feedback.png` | PASS |
-| phase_replay | Tactical/replay | Weak replay staging | `ui_overhaul_final/ui_phase_replay.png` | PASS |
-| end_phase_guard | Tactical/warning | Warning hierarchy is small | `ui_overhaul_final/ui_end_phase_guard.png` | PASS |
-| readiness_markers | Tactical/unit state | Tiny state markers | `ui_overhaul_final/ui_readiness_markers.png` | PASS |
-| vitality_markers | Tactical/unit state | Tiny state markers | `ui_overhaul_final/ui_vitality_markers.png` | PASS |
-| extraction | Tactical/objective | Objective tile lacks dimensional beacon | `ui_overhaul_final/ui_extraction.png` | PASS |
-| variant | Tactical/map | Variant differentiation remains low | `ui_overhaul_final/ui_variant.png` | PASS |
-| sporefield | Tactical/hazard | Brood biome/effect language weak | `ui_overhaul_final/ui_sporefield.png` | PASS |
-| vault | Tactical/map | Ascendant biome/effect language weak | `ui_overhaul_final/ui_vault.png` | PASS |
-| black_channel | Tactical/map | Directorate biome/effect language weak | `ui_overhaul_final/ui_black_channel.png` | PASS |
-| living_chorus | Tactical/map | Late-game hybrid map language weak | `ui_overhaul_final/ui_living_chorus.png` | PASS |
-| open_circuit | Tactical/map | Late-game hybrid map language weak | `ui_overhaul_final/ui_open_circuit.png` | PASS |
-| trace_active | Tactical/objective | Relay activation lacks staging | `ui_overhaul_final/ui_trace_active.png` | PASS |
-| equipment | Tactical/equipment | No equipment art or rich target comparison | `ui_overhaul_final/ui_equipment.png` | PASS |
-| weapon_profile | Tactical/equipment | Profile is text-only | `ui_overhaul_final/ui_weapon_profile.png` | PASS |
-| class_target | Tactical/class action | Targeting cue remains rectangular | `ui_overhaul_final/ui_class_target.png` | PASS |
-| breach | Tactical/cover feedback | Breach effect lacks authored impact | `ui_overhaul_final/ui_breach.png` | PASS |
-| debrief | Debrief | Sparse outcome modal | `ui_overhaul_final/ui_debrief.png` | PASS |
-| trauma_debrief | Debrief | Trauma consequence lacks portrait response | `ui_overhaul_final/ui_trauma_debrief.png` | PASS |
+| title | Title | Geometric tableau / weak world art | `ui_title.png` | PASS |
+| title_controller | Title/controller focus | No visible gamepad focus or controller-specific confirmation cue | `ui_title_controller.png` | PASS |
+| title_hover | Title/mouse hover | Hover treatment not represented in deterministic evidence | `ui_title_hover.png` | PASS |
+| colony | Colony | Prototype island lacks full inhabited/state detail | `ui_colony.png` | PASS |
+| contact | Colony event | Text and grid dominate event identity | `ui_contact.png` | PASS |
+| contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
+| contact_event | Colony event | Weak event illustration and hierarchy | `ui_contact_event.png` | PASS |
+| adaptation | Colony | Phase evolution primarily textual | `ui_adaptation.png` | PASS |
+| gene_lab | Gene lab | No illustrated mutation anatomy | `ui_gene_lab.png` | PASS |
+| evolution | Roster/gene lab | Evolution visible mainly as text | `ui_evolution.png` | PASS |
+| mara_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_mara_evolution.png` | PASS |
+| ilya_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_ilya_evolution.png` | PASS |
+| sol_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_sol_evolution.png` | PASS |
+| nadi_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_nadi_evolution.png` | PASS |
+| escalation | Colony | Campaign visual evolution too weak | `ui_escalation.png` | PASS |
+| escalation_operation | Briefing | Same text modal language | `ui_escalation_operation.png` | PASS |
+| escalation_response | Campaign event | Choice identity mainly textual | `ui_escalation_response.png` | PASS |
+| mirexis | Colony | Late-game hybridisation too weak | `ui_mirexis.png` | PASS |
+| mirexis_path | Campaign choice | Path identity mainly textual | `ui_mirexis_path.png` | PASS |
+| redoubt_end | Ending | Ending reuses colony grid | `ui_redoubt_end.png` | PASS |
+| commonwealth_end | Ending | Ending reuses colony grid | `ui_commonwealth_end.png` | PASS |
+| threshold_end | Ending | Ending reuses colony grid | `ui_threshold_end.png` | PASS |
+| finale_debrief | Debrief | Sparse text modal | `ui_finale_debrief.png` | PASS |
+| adaptation_operation | Briefing | Weak mission scene identity | `ui_adaptation_operation.png` | PASS |
+| glass_nerve | Tactical | Flat rectangular battlefield | `ui_glass_nerve.png` | PASS |
+| three_knives | Tactical | Flat rectangular battlefield | `ui_three_knives.png` | PASS |
+| reinforcement_warning | Tactical/reinforcement | Entry warning lacks authored staging | `ui_reinforcement_warning.png` | PASS |
+| line_formation | Tactical | Formation lacks sprite population/scale | `ui_line_formation.png` | PASS |
+| thin_shelter | Tactical/objective | Structure/objective lacks dimensional identity | `ui_thin_shelter.png` | PASS |
+| breakwater | Tactical | Mission art sameness | `ui_breakwater.png` | PASS |
+| false_heart | Tactical | Mission art sameness | `ui_false_heart.png` | PASS |
+| live_wire | Tactical | Mission art sameness | `ui_live_wire.png` | PASS |
+| last_wall | Tactical | Mission art sameness | `ui_last_wall.png` | PASS |
+| root_choir | Tactical | Mission art sameness | `ui_root_choir.png` | PASS |
+| door_of_light | Tactical | Mission art sameness | `ui_door_of_light.png` | PASS |
+| damage | Colony | Damage is a label/colour state, not damaged architecture | `ui_damage.png` | PASS |
+| repair | Colony | Restored architecture and repair feedback were not captured explicitly | `ui_repair.png` | PASS |
+| power | Colony | Unpowered state lacks environmental response | `ui_power.png` | PASS |
+| construction | Colony | Construction state lacks authored staging | `ui_construction.png` | PASS |
+| research | Research | Weak technology art and hierarchy | `ui_research.png` | PASS |
+| roster | Roster | Procedural portrait and dense controls | `ui_roster.png` | PASS |
+| advanced_roster | Roster | Class change lacks silhouette transformation | `ui_advanced_roster.png` | PASS |
+| relationships | Relationships | Bonds are text-led | `ui_relationships.png` | PASS |
+| trauma | Roster | Injury is text-led | `ui_trauma.png` | PASS |
+| bonded_briefing | Briefing/relationships | No portrait-led relationship cue | `ui_bonded_briefing.png` | PASS |
+| legacy | Roster | Legacy state lacks visual identity | `ui_legacy.png` | PASS |
+| briefing | Briefing | Text-heavy with little mission art | `ui_briefing.png` | PASS |
+| threat_briefing | Briefing | Threat hierarchy and faction art weak | `ui_threat_briefing.png` | PASS |
+| loadout_briefing | Briefing/loadout | Equipment is text-only | `ui_loadout_briefing.png` | PASS |
+| pressure | Colony | Pressure state primarily textual | `ui_pressure.png` | PASS |
+| gameplay | Tactical | Flat rectangular board / procedural units | `ui_gameplay.png` | PASS |
+| overwatch | Tactical | State cue small and static | `ui_overwatch.png` | PASS |
+| brood_ability | Tactical/effect | No production Brood effect language | `ui_brood_ability.png` | PASS |
+| directorate_ability | Tactical/effect | No production Directorate effect language | `ui_directorate_ability.png` | PASS |
+| ascendant_ability | Tactical/effect | No production Ascendant effect language | `ui_ascendant_ability.png` | PASS |
+| hazard | Tactical/hazard | Flat hazard marks | `ui_hazard.png` | PASS |
+| intent | Tactical/forecast | Intent is small text/line | `ui_intent.png` | PASS |
+| action_preview | Tactical/forecast | Preview lacks portrait comparison/staging | `ui_action_preview.png` | PASS |
+| movement_route | Tactical/route | Route conforms to rectangles | `ui_movement_route.png` | PASS |
+| cover_edges | Tactical/cover | Cover is shallow procedural geometry | `ui_cover_edges.png` | PASS |
+| invalid_command | Tactical/feedback | Weak authored rejection feedback | `ui_invalid_command.png` | PASS |
+| valid_shot | Tactical/forecast | Weak attack comparison | `ui_valid_shot.png` | PASS |
+| threat_range | Tactical/overlay | Rectangular threat overlay | `ui_threat_range.png` | PASS |
+| danger_reach | Tactical/overlay | Rectangular danger overlay | `ui_danger_reach.png` | PASS |
+| help | Help | Dense small-text modal | `ui_help.png` | PASS |
+| battle_log | Battle log | Plain chronological text | `ui_battle_log.png` | PASS |
+| combat_feedback | Tactical/feedback | Minimal impact/recoil/critical treatment | `ui_combat_feedback.png` | PASS |
+| phase_replay | Tactical/replay | Weak replay staging | `ui_phase_replay.png` | PASS |
+| end_phase_guard | Tactical/warning | Warning hierarchy is small | `ui_end_phase_guard.png` | PASS |
+| readiness_markers | Tactical/unit state | Tiny state markers | `ui_readiness_markers.png` | PASS |
+| vitality_markers | Tactical/unit state | Tiny state markers | `ui_vitality_markers.png` | PASS |
+| extraction | Tactical/objective | Objective tile lacks dimensional beacon | `ui_extraction.png` | PASS |
+| variant | Tactical/map | Variant differentiation remains low | `ui_variant.png` | PASS |
+| sporefield | Tactical/hazard | Brood biome/effect language weak | `ui_sporefield.png` | PASS |
+| vault | Tactical/map | Ascendant biome/effect language weak | `ui_vault.png` | PASS |
+| black_channel | Tactical/map | Directorate biome/effect language weak | `ui_black_channel.png` | PASS |
+| living_chorus | Tactical/map | Late-game hybrid map language weak | `ui_living_chorus.png` | PASS |
+| open_circuit | Tactical/map | Late-game hybrid map language weak | `ui_open_circuit.png` | PASS |
+| trace_active | Tactical/objective | Relay activation lacks staging | `ui_trace_active.png` | PASS |
+| equipment | Tactical/equipment | No equipment art or rich target comparison | `ui_equipment.png` | PASS |
+| weapon_profile | Tactical/equipment | Profile is text-only | `ui_weapon_profile.png` | PASS |
+| class_target | Tactical/class action | Targeting cue remains rectangular | `ui_class_target.png` | PASS |
+| breach | Tactical/cover feedback | Breach effect lacks authored impact | `ui_breach.png` | PASS |
+| debrief | Debrief | Sparse outcome modal | `ui_debrief.png` | PASS |
+| trauma_debrief | Debrief | Trauma consequence lacks portrait response | `ui_trauma_debrief.png` | PASS |
 
 ## D. Final comparison and validation record
 

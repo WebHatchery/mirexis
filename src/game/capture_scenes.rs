@@ -662,6 +662,12 @@ impl Game {
 
     fn capture_map_variant(&mut self) {
         self.configure_extraction(3, "LAST TRANSMISSION // SOUTHERN APPROACH");
+        let selected = self.session.tactical.selected_tile;
+        self.tactical_camera = crate::grid_ui::WorldCamera::tactical_view(
+            TilePos::new(selected.x + 7, selected.y + 7),
+            selected,
+            0.78,
+        );
     }
 
     fn configure_extraction(&mut self, seed: u64, name: &str) {
@@ -791,7 +797,7 @@ mod tests {
         let documented = matrix
             .lines()
             .filter_map(|line| {
-                let marker = "`ui_overhaul_final/ui_";
+                let marker = "`ui_";
                 let start = line.find(marker)? + marker.len();
                 let end = line[start..].find(".png`")? + start;
                 Some(&line[start..end])

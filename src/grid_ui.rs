@@ -24,6 +24,15 @@ impl WorldCamera {
         }
     }
 
+    pub(crate) fn tactical_view(center_tile: TilePos, tracked_tile: TilePos, zoom: f32) -> Self {
+        Self {
+            center: projected_tile(center_tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
+            zoom: zoom.clamp(0.65, 1.85),
+            drag_anchor: None,
+            tracked_tile: Some(tracked_tile),
+        }
+    }
+
     pub(crate) fn colony_start(position: [i32; 2]) -> Self {
         Self {
             center: projected_tile(
