@@ -70,6 +70,46 @@ fn inverse_hit_testing_survives_panned_and_extreme_zoom_cameras() {
 }
 
 #[test]
+fn inverse_hits_follow_visible_diamond_order_at_every_large_world_center() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    for camera in [
+        WorldCamera::tactical_view(TilePos::new(4, 19), TilePos::new(4, 19), 0.65),
+        WorldCamera::tactical_view(TilePos::new(31, 18), TilePos::new(31, 18), 1.85),
+    ] {
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        let mut draw_order = (0..40)
+            .flat_map(|y| (0..40).map(move |x| TilePos::new(x, y)))
+            .collect::<Vec<_>>();
+        draw_order.sort_by_key(|tile| tile.x + tile.y);
+        for y in 0..40 {
+            for x in 0..40 {
+                let tile = TilePos::new(x, y);
+                for offset in [
+                    Vec2::ZERO,
+                    vec2(view.half_width * 0.4, 0.0),
+                    vec2(-view.half_width * 0.4, 0.0),
+                    vec2(0.0, view.half_height * 0.4),
+                    vec2(0.0, -view.half_height * 0.4),
+                ] {
+                    let point = view.tile_center(tile) + offset;
+                    let expected = draw_order.iter().copied().rev().find(|candidate| {
+                        let center = view.tile_center(*candidate);
+                        (point.x - center.x).abs() / view.half_width
+                            + (point.y - center.y).abs() / view.half_height
+                            <= 1.0
+                    });
+                    assert_eq!(
+                        view.tile_at(point),
+                        expected,
+                        "camera {camera:?} disagreed at {tile:?} offset {offset:?}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn battlefield_exposes_raised_flat_and_lowered_height_bands() {
     let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
     assert_eq!(view.elevation(TilePos::new(3, 20)), 0);
@@ -141,6 +181,44 @@ fn terrain_art_bounds_keep_the_declared_pivot_on_the_tile_anchor() {
         assert!((bounds.y + bounds.h * TERRAIN_ART_PIVOT[1] - anchor.y).abs() < 0.001);
         assert_eq!(bounds.w, view.tile_rect(tile).w * TERRAIN_ART_SCALE);
         assert_eq!(bounds.h, bounds.w * TERRAIN_ART_ASPECT);
+    }
+}
+
+#[test]
+fn terrain_culling_keeps_every_intersecting_art_family_and_cliff_face() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    let overlaps = |a: Rect, b: Rect| {
+        a.right() >= b.x && a.x <= b.right() && a.bottom() >= b.y && a.y <= b.bottom()
+    };
+    for camera in [
+        WorldCamera::tactical_view(TilePos::new(4, 19), TilePos::new(4, 19), 0.65),
+        WorldCamera::tactical_view(TilePos::new(20, 20), TilePos::new(20, 20), 1.0),
+        WorldCamera::tactical_view(TilePos::new(31, 18), TilePos::new(31, 18), 1.85),
+    ] {
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        for y in 0..40 {
+            for x in 0..40 {
+                let tile = TilePos::new(x, y);
+                let mut cliff_bounds = view.tile_rect(tile);
+                let drop = view
+                    .cliff_drop(tile, TilePos::new(x + 1, y))
+                    .max(view.cliff_drop(tile, TilePos::new(x, y + 1)));
+                cliff_bounds.h += f32::from(drop) * view.elevation_step();
+                let intersects = [
+                    view.tile_rect(tile),
+                    view.art_bounds(tile, TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT),
+                    view.art_bounds(tile, STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT),
+                    view.art_bounds(tile, CANOPY_ART_SCALE, CANOPY_ART_PIVOT),
+                    cliff_bounds,
+                ]
+                .into_iter()
+                .any(|bounds| overlaps(bounds, viewport));
+                assert!(
+                    !intersects || view.terrain_is_visible(tile, viewport, 30.0),
+                    "camera {camera:?} culled intersecting art at {tile:?}"
+                );
+            }
+        }
     }
 }
 
@@ -228,8 +306,8 @@ fn visible_camera_controls_nudge_at_screen_scale_and_zoom_from_center() {
 #[test]
 fn camera_clamp_keeps_the_large_world_in_view_at_every_zoom_limit() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
-    let world_min = vec2(-39.0 * TACTICAL_HALF_WIDTH, 0.0);
-    let world_max = vec2(39.0 * TACTICAL_HALF_WIDTH, 78.0 * TACTICAL_HALF_HEIGHT);
+    let world_min = vec2(-40.0 * TACTICAL_HALF_WIDTH, -TACTICAL_HALF_HEIGHT);
+    let world_max = vec2(40.0 * TACTICAL_HALF_WIDTH, 79.0 * TACTICAL_HALF_HEIGHT);
     for zoom in [0.65, 1.0, 1.85] {
         let visible_half = viewport.size() * 0.5 / zoom;
         for extreme in [vec2(-10_000.0, -10_000.0), vec2(10_000.0, 10_000.0)] {
@@ -252,8 +330,8 @@ fn camera_clamp_keeps_the_large_world_in_view_at_every_zoom_limit() {
 #[test]
 fn colony_camera_clamp_handles_world_smaller_and_larger_than_the_view() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
-    let world_min = vec2(-19.0 * COLONY_HALF_WIDTH, 0.0);
-    let world_max = vec2(19.0 * COLONY_HALF_WIDTH, 38.0 * COLONY_HALF_HEIGHT);
+    let world_min = vec2(-20.0 * COLONY_HALF_WIDTH, -COLONY_HALF_HEIGHT);
+    let world_max = vec2(20.0 * COLONY_HALF_WIDTH, 39.0 * COLONY_HALF_HEIGHT);
     for zoom in [0.65, 1.0, 1.85] {
         let visible_half = viewport.size() * 0.5 / zoom;
         for extreme in [vec2(-10_000.0, -10_000.0), vec2(10_000.0, 10_000.0)] {
@@ -275,6 +353,29 @@ fn colony_camera_clamp_handles_world_smaller_and_larger_than_the_view() {
                 camera.center.y,
                 clamp_axis(extreme.y, world_min.y, world_max.y, visible_half.y)
             );
+        }
+    }
+}
+
+#[test]
+fn maximum_pan_keeps_boundary_tile_diamonds_inside_the_viewport() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    for (extreme, boundary, edge) in [
+        (vec2(-10_000.0, 468.0), TilePos::new(0, 39), 0),
+        (vec2(10_000.0, 468.0), TilePos::new(39, 0), 1),
+        (vec2(0.0, -10_000.0), TilePos::new(0, 0), 2),
+        (vec2(0.0, 10_000.0), TilePos::new(39, 39), 3),
+    ] {
+        let mut camera = WorldCamera::tactical_start(TilePos::new(4, 19));
+        camera.center = extreme;
+        camera.clamp_isometric(40, 40, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT, viewport);
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        let bounds = view.tile_rect(boundary);
+        match edge {
+            0 => assert!(bounds.x >= viewport.x - 0.001),
+            1 => assert!(bounds.right() <= viewport.right() + 0.001),
+            2 => assert!(bounds.y >= viewport.y - 0.001),
+            _ => assert!(bounds.bottom() <= viewport.bottom() + 0.001),
         }
     }
 }

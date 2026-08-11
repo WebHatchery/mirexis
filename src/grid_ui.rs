@@ -160,10 +160,13 @@ impl WorldCamera {
         half_height: f32,
         viewport: Rect,
     ) {
-        let min = vec2(-(height.saturating_sub(1) as f32) * half_width, 0.0);
+        let min = vec2(
+            -(height.saturating_sub(1) as f32) * half_width - half_width,
+            -half_height,
+        );
         let max = vec2(
-            width.saturating_sub(1) as f32 * half_width,
-            (width.saturating_add(height).saturating_sub(2) as f32) * half_height,
+            width.saturating_sub(1) as f32 * half_width + half_width,
+            (width.saturating_add(height).saturating_sub(2) as f32) * half_height + half_height,
         );
         let visible_half = viewport.size() * 0.5 / self.zoom;
         self.center.x = clamp_axis(self.center.x, min.x, max.x, visible_half.x);
