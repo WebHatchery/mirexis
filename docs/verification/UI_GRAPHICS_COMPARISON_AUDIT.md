@@ -13,7 +13,7 @@ Written translation: `docs/UI_GRAPHICS_VISUAL_SPEC.md`
 - Final contact sheets: eight temporary, manifest-ordered sheets generated from the canonical root captures and inspected during the 2026-08-12 audit.
 - Scale checks: current-release captures at 1024 x 768, 1366 x 768, 1440 x 900, 1600 x 900, and 1920 x 1080, summarized by `responsive_supported_sizes_contact.jpg` and `responsive_final_critical_scenes.jpg`; both tracked sheets were regenerated after the final camera and touch-control changes.
 - Final minimum-size checks: the 1024 x 768 Mirexis decision, debrief, and equipment/targeting panels in `responsive_final_critical_scenes.jpg` remain fully operable and readable without clipping.
-- Grayscale checks: `docs/verification/grayscale_audit` and the refreshed 14-scene `grayscale_audit_final` set.
+- Grayscale checks: the final 14-scene readability pass was inspected during the audit; temporary derivative sheets were removed afterward to preserve the root-only verification layout.
 
 ## Baseline-to-final findings
 
