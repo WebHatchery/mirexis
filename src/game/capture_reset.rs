@@ -39,6 +39,6 @@ impl Game {
         self.end_phase_armed = false;
         self.title_hover_preview = false;
         self.tactical_camera = WorldCamera::tactical_start(self.session.tactical.selected_tile);
-        self.colony_camera = WorldCamera::colony_start([3, 3]);
+        self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
     }
 }

@@ -28,3 +28,13 @@ fn colony_buildings_retain_fixed_default_world_scale() {
     assert_eq!(small.half_height, COLONY_HALF_HEIGHT);
     assert_eq!(large.half_height, COLONY_HALF_HEIGHT);
 }
+
+#[test]
+fn initial_camera_frames_the_centered_settlement_without_fitting_the_colony() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    let camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+    let view = ColonyView::new(viewport, &camera);
+    assert!(viewport.contains(view.plot_center(SETTLEMENT_CENTER)));
+    assert!(!viewport.contains(view.plot_center([0, COLONY_HEIGHT - 1])));
+    assert!(!viewport.contains(view.plot_center([COLONY_WIDTH - 1, 0])));
+}

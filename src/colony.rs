@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub const COLONY_WIDTH: i32 = 20;
 pub const COLONY_HEIGHT: i32 = 20;
+pub const SETTLEMENT_CENTER: [i32; 2] = [10, 10];
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -120,12 +121,16 @@ impl ColonyState {
                 alien_components: 0,
             },
             buildings: vec![
-                building("command_centre", BuildingKind::CommandCentre, [3, 2]),
-                building("barracks", BuildingKind::Barracks, [2, 3]),
-                building("infirmary", BuildingKind::Infirmary, [4, 3]),
-                building("workshop", BuildingKind::Workshop, [3, 4]),
-                building("hydroponics", BuildingKind::Hydroponics, [5, 3]),
-                building("power_plant", BuildingKind::PowerPlant, [5, 4]),
+                building(
+                    "command_centre",
+                    BuildingKind::CommandCentre,
+                    SETTLEMENT_CENTER,
+                ),
+                building("barracks", BuildingKind::Barracks, [6, 8]),
+                building("infirmary", BuildingKind::Infirmary, [10, 6]),
+                building("workshop", BuildingKind::Workshop, [14, 8]),
+                building("hydroponics", BuildingKind::Hydroponics, [7, 13]),
+                building("power_plant", BuildingKind::PowerPlant, [13, 13]),
             ],
             construction_queue: Vec::new(),
             planned_construction: BuildingKind::Barricade,
@@ -343,7 +348,7 @@ impl ColonyState {
             .iter()
             .any(|building| building.kind == BuildingKind::Hydroponics)
         {
-            let position = self.first_open_plot([5, 3]);
+            let position = self.first_open_plot([7, 13]);
             self.buildings
                 .push(building("hydroponics", BuildingKind::Hydroponics, position));
         }
@@ -352,7 +357,7 @@ impl ColonyState {
             .iter()
             .any(|building| building.kind == BuildingKind::PowerPlant)
         {
-            let position = self.first_open_plot([5, 4]);
+            let position = self.first_open_plot([13, 13]);
             self.buildings
                 .push(building("power_plant", BuildingKind::PowerPlant, position));
             if migrate_power {
@@ -369,7 +374,7 @@ impl ColonyState {
         {
             return;
         }
-        let position = self.first_open_plot([1, 1]);
+        let position = self.first_open_plot([10, 14]);
         self.buildings
             .push(building("gene_lab", BuildingKind::GeneLab, position));
     }

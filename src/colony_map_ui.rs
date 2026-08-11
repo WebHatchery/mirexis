@@ -1,7 +1,7 @@
 //! Interactive isometric colony map and modular settlement building art.
 
 use crate::campaign::CampaignState;
-use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH};
+use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH, SETTLEMENT_CENTER};
 use crate::grid_ui::WorldCamera;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
@@ -337,11 +337,11 @@ fn draw_plot(
         .find(|p| p.position == position);
     let occupied = building.is_some() || project.is_some();
     let top = if hovered {
-        Color::new(0.16, 0.34, 0.30, 1.0)
+        Color::new(0.18, 0.39, 0.34, 1.0)
     } else if occupied {
-        Color::new(0.11, 0.25, 0.23, 1.0)
+        Color::new(0.12, 0.28, 0.25, 1.0)
     } else {
-        Color::new(0.075, 0.15, 0.15, 1.0)
+        Color::new(0.085, 0.19, 0.18, 1.0)
     };
     draw_diamond(
         view,
@@ -349,6 +349,15 @@ fn draw_plot(
         Color::new(0.025, 0.065, 0.064, 1.0),
     );
     draw_diamond(view, center, top);
+    draw_diamond_outline(
+        view,
+        center,
+        if hovered {
+            Color::new(0.42, 0.82, 0.69, 0.92)
+        } else {
+            Color::new(0.18, 0.43, 0.37, 0.72)
+        },
+    );
     draw_line(
         center.x - view.half_width,
         center.y,
@@ -470,9 +479,9 @@ fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
 }
 
 fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
-    let hub = view.plot_center([3, 2]);
+    let hub = view.plot_center(SETTLEMENT_CENTER);
     for building in &campaign.colony.buildings {
-        if building.position == [3, 2] {
+        if building.position == SETTLEMENT_CENTER {
             continue;
         }
         let target = view.plot_center(building.position);
@@ -501,7 +510,7 @@ fn draw_inhabitants(
     visuals: &VisualCatalog,
     view: ColonyView,
 ) {
-    let stations = [[1, 2], [2, 0], [4, 0], [5, 2], [3, 4]];
+    let stations = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12]];
     for (index, character) in campaign.roster.iter().take(5).enumerate() {
         let center = view.plot_center(stations[index]);
         let side = if index % 2 == 0 { -1.0 } else { 1.0 };
@@ -547,6 +556,26 @@ fn draw_diamond(view: ColonyView, center: Vec2, color: Color) {
         vec2(center.x, center.y + view.half_height),
         color,
     );
+}
+
+fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
+    let points = [
+        vec2(center.x, center.y - view.half_height),
+        vec2(center.x + view.half_width, center.y),
+        vec2(center.x, center.y + view.half_height),
+        vec2(center.x - view.half_width, center.y),
+    ];
+    for index in 0..points.len() {
+        let next = (index + 1) % points.len();
+        draw_line(
+            points[index].x,
+            points[index].y,
+            points[next].x,
+            points[next].y,
+            1.0,
+            color,
+        );
+    }
 }
 
 fn draw_project(center: Vec2, kind: BuildingKind) {

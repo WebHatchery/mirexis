@@ -25,7 +25,7 @@ fn physical_placement_generates_the_colony_defense_map() {
     colony.advance_operation();
     let map = colony.defense_map();
     assert!(map.cover_tiles.contains(&TilePos::new(3, 2)));
-    assert!(map.critical_objectives.contains(&TilePos::new(5, 3)));
+    assert!(map.critical_objectives.contains(&TilePos::new(12, 11)));
 }
 
 #[test]
@@ -92,6 +92,41 @@ fn colony_build_area_extends_far_beyond_the_initial_settlement() {
             [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
         )
         .expect("the far colony frontier remains buildable");
+}
+
+#[test]
+fn initial_settlement_is_centered_spacious_and_surrounded_by_frontier() {
+    let colony = ColonyState::new();
+    let positions = colony
+        .buildings
+        .iter()
+        .map(|building| building.position)
+        .collect::<Vec<_>>();
+    assert!(positions.contains(&SETTLEMENT_CENTER));
+
+    for (index, position) in positions.iter().enumerate() {
+        assert!(position[0] >= 5 && position[0] <= COLONY_WIDTH - 5);
+        assert!(position[1] >= 5 && position[1] <= COLONY_HEIGHT - 5);
+        for other in positions.iter().skip(index + 1) {
+            let distance = (position[0] - other[0]).abs() + (position[1] - other[1]).abs();
+            assert!(
+                distance >= 4,
+                "buildings at {position:?} and {other:?} crowd each other"
+            );
+        }
+    }
+
+    for frontier in [
+        [0, 0],
+        [COLONY_WIDTH - 1, 0],
+        [0, COLONY_HEIGHT - 1],
+        [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+    ] {
+        assert!(
+            !colony.is_occupied(frontier),
+            "frontier {frontier:?} must remain open"
+        );
+    }
 }
 
 #[test]

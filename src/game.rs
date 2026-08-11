@@ -118,7 +118,7 @@ impl Game {
         }
 
         let tactical_camera = WorldCamera::tactical_start(session.tactical.selected_tile);
-        let colony_camera = WorldCamera::colony_start([3, 3]);
+        let colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
         Self {
             data,
             session,
