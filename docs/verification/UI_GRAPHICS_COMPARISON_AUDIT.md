@@ -38,7 +38,7 @@ Written translation: `docs/UI_GRAPHICS_VISUAL_SPEC.md`
 - Unclear terrain: projected diamond edges, stepped top surfaces, exposed cliff faces, cover edges, and pattern-coded overlays remain distinguishable without debug height labels.
 - Inconsistent controls: shared button states and stable back/confirm/footer cues are present; Web builds add controller navigation through the shared runtime bridge.
 - Input discoverability: title, strategy, briefing, tactical, modal, and debrief surfaces now expose accurate keyboard/controller cues; the final strategy cues were separately checked at 1024 x 768.
-- Browser runtime: a fresh published WebGL load is warning/error-free; title-to-colony-to-briefing-to-deployment-to-tactical navigation, colony placement, movement selection, and colony/tactical wheel zoom were exercised interactively.
+- Browser runtime: a fresh published WebGL load is warning/error-free; title-to-colony-to-briefing-to-deployment-to-tactical navigation, visible camera-button pan/zoom, transformed colony placement, and transformed tactical movement were exercised interactively.
 
 ## Capture verdict
 

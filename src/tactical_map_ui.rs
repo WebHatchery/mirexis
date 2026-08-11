@@ -35,8 +35,14 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 40.0,
     );
+    crate::camera_controls::draw(
+        camera,
+        grid_rect,
+        mouse,
+        vec2(panel.right() - 262.0, panel.y),
+    );
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
-    camera.update(grid_rect, mouse);
+    let suppress_map_click = camera.update(grid_rect, mouse);
     camera.clamp_isometric(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,
@@ -120,14 +126,14 @@ pub(crate) fn draw(
     }
     draw_ui_text_ex(
         &format!(
-            "DRAG MIDDLE/RIGHT TO PAN  //  WHEEL TO ZOOM  //  {:>3}%",
+            "DRAG MAP // PAN < ^ v > // WHEEL OR -/+ ZOOM // {:>3}%",
             (camera.zoom * 100.0) as i32
         ),
         panel.x + 22.0,
         panel.bottom() - 7.0,
         TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
     );
-    handle_click(ctx, view, grid_rect, mouse, actions);
+    handle_click(ctx, view, grid_rect, mouse, suppress_map_click, actions);
 }
 
 fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {
@@ -613,9 +619,10 @@ fn handle_click(
     view: GridView,
     viewport: Rect,
     mouse: Vec2,
+    suppress_click: bool,
     actions: &mut Vec<UiAction>,
 ) {
-    if !is_mouse_button_released(MouseButton::Left) {
+    if suppress_click || !is_mouse_button_released(MouseButton::Left) {
         return;
     }
     if !viewport.contains(mouse) {

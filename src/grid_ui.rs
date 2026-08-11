@@ -1,6 +1,8 @@
 //! Three-quarter tactical projection shared by rendering and inverse hit testing.
 
-use macroquad::prelude::{is_mouse_button_down, mouse_wheel, vec2, MouseButton, Rect, Vec2};
+use macroquad::prelude::{
+    is_mouse_button_down, is_mouse_button_released, mouse_wheel, vec2, MouseButton, Rect, Vec2,
+};
 use macroquad_toolkit::grid::TilePos;
 
 pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
@@ -18,6 +20,9 @@ pub(crate) struct WorldCamera {
     pub(crate) center: Vec2,
     pub(crate) zoom: f32,
     drag_anchor: Option<Vec2>,
+    primary_drag_start: Option<Vec2>,
+    primary_drag_anchor: Option<Vec2>,
+    primary_dragged: bool,
     tracked_tile: Option<TilePos>,
 }
 
@@ -27,6 +32,9 @@ impl WorldCamera {
             center: projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
             zoom: 1.0,
             drag_anchor: None,
+            primary_drag_start: None,
+            primary_drag_anchor: None,
+            primary_dragged: false,
             tracked_tile: Some(tile),
         }
     }
@@ -36,6 +44,9 @@ impl WorldCamera {
             center: projected_tile(center_tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
             zoom: zoom.clamp(0.65, 1.85),
             drag_anchor: None,
+            primary_drag_start: None,
+            primary_drag_anchor: None,
+            primary_dragged: false,
             tracked_tile: Some(tracked_tile),
         }
     }
@@ -49,11 +60,14 @@ impl WorldCamera {
             ),
             zoom: 1.0,
             drag_anchor: None,
+            primary_drag_start: None,
+            primary_drag_anchor: None,
+            primary_dragged: false,
             tracked_tile: None,
         }
     }
 
-    pub(crate) fn update(&mut self, viewport: Rect, mouse: Vec2) {
+    pub(crate) fn update(&mut self, viewport: Rect, mouse: Vec2) -> bool {
         let inside = viewport.contains(mouse);
         let dragging = inside
             && (is_mouse_button_down(MouseButton::Middle)
@@ -67,14 +81,50 @@ impl WorldCamera {
             self.drag_anchor = None;
         }
 
+        let suppress_primary_click = self.update_primary_drag(
+            inside && !dragging && is_mouse_button_down(MouseButton::Left),
+            is_mouse_button_released(MouseButton::Left),
+            mouse,
+        );
+
         let wheel = mouse_wheel().1;
         if inside && wheel.abs() > f32::EPSILON {
             self.zoom_at(viewport, mouse, 1.13_f32.powf(wheel));
         }
+        suppress_primary_click
+    }
+
+    fn update_primary_drag(&mut self, down: bool, released: bool, mouse: Vec2) -> bool {
+        if down {
+            let start = *self.primary_drag_start.get_or_insert(mouse);
+            let previous = *self.primary_drag_anchor.get_or_insert(mouse);
+            if self.primary_dragged {
+                self.pan_screen(mouse - previous);
+            } else if (mouse - start).length() >= 7.0 {
+                self.pan_screen(mouse - start);
+                self.primary_dragged = true;
+            }
+            self.primary_drag_anchor = Some(mouse);
+            return false;
+        }
+
+        let suppress = released && self.primary_dragged;
+        self.primary_drag_start = None;
+        self.primary_drag_anchor = None;
+        self.primary_dragged = false;
+        suppress
     }
 
     fn pan_screen(&mut self, delta: Vec2) {
         self.center -= delta / self.zoom;
+    }
+
+    pub(crate) fn nudge(&mut self, direction: Vec2) {
+        self.center += direction * 96.0 / self.zoom;
+    }
+
+    pub(crate) fn zoom_center(&mut self, viewport: Rect, factor: f32) {
+        self.zoom_at(viewport, viewport.center(), factor);
     }
 
     fn zoom_at(&mut self, viewport: Rect, cursor: Vec2, factor: f32) {

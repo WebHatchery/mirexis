@@ -1,0 +1,40 @@
+//! Compact visible controls for touch-first tactical and colony cameras.
+
+use crate::grid_ui::WorldCamera;
+use crate::ui_widgets::button;
+use macroquad::prelude::{vec2, Rect, Vec2};
+
+pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin: Vec2) {
+    let controls = [
+        ("<", vec2(-1.0, 0.0)),
+        ("^", vec2(0.0, -1.0)),
+        ("v", vec2(0.0, 1.0)),
+        (">", vec2(1.0, 0.0)),
+    ];
+    for (index, (label, direction)) in controls.into_iter().enumerate() {
+        if button(
+            Rect::new(origin.x + index as f32 * 42.0, origin.y, 40.0, 28.0),
+            label,
+            true,
+            mouse,
+        ) {
+            camera.nudge(direction);
+        }
+    }
+    if button(
+        Rect::new(origin.x + 174.0, origin.y, 40.0, 28.0),
+        "-",
+        true,
+        mouse,
+    ) {
+        camera.zoom_center(viewport, 1.0 / 1.25);
+    }
+    if button(
+        Rect::new(origin.x + 216.0, origin.y, 40.0, 28.0),
+        "+",
+        true,
+        mouse,
+    ) {
+        camera.zoom_center(viewport, 1.25);
+    }
+}

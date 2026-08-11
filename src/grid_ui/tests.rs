@@ -38,6 +38,36 @@ fn inverse_hit_testing_covers_projected_interiors_in_each_height_band() {
 }
 
 #[test]
+fn inverse_hit_testing_survives_panned_and_extreme_zoom_cameras() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    for camera in [
+        WorldCamera::tactical_view(TilePos::new(4, 19), TilePos::new(4, 19), 0.65),
+        WorldCamera::tactical_view(TilePos::new(31, 18), TilePos::new(32, 18), 1.85),
+        WorldCamera::tactical_view(TilePos::new(20, 29), TilePos::new(20, 29), 1.25),
+    ] {
+        let view = GridView::with_camera(40, 40, viewport, &camera);
+        for tile in [
+            TilePos::new(4, 19),
+            TilePos::new(12, 19),
+            TilePos::new(20, 29),
+            TilePos::new(31, 18),
+        ] {
+            for offset in [
+                vec2(0.0, 0.0),
+                vec2(view.half_width * 0.25, 0.0),
+                vec2(0.0, -view.half_height * 0.25),
+            ] {
+                assert_eq!(
+                    view.tile_at(view.tile_center(tile) + offset),
+                    Some(tile),
+                    "camera {camera:?} missed {tile:?} at {offset:?}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn battlefield_exposes_raised_flat_and_lowered_height_bands() {
     let view = GridView::new(40, 40, Rect::new(0.0, 0.0, 780.0, 450.0));
     assert_eq!(view.elevation(TilePos::new(3, 20)), 0);
@@ -156,6 +186,79 @@ fn panning_uses_screen_distance_at_every_zoom() {
     let before = camera.center;
     camera.pan_screen(vec2(150.0, -75.0));
     assert_eq!(camera.center, before + vec2(-100.0, 50.0));
+}
+
+#[test]
+fn primary_drag_pans_after_a_touch_safe_threshold_and_suppresses_release() {
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    camera.zoom = 1.5;
+    let before = camera.center;
+    assert!(!camera.update_primary_drag(true, false, vec2(100.0, 100.0)));
+    assert!(!camera.update_primary_drag(true, false, vec2(104.0, 102.0)));
+    assert_eq!(camera.center, before);
+    assert!(!camera.update_primary_drag(true, false, vec2(112.0, 106.0)));
+    assert_eq!(camera.center, before - vec2(12.0, 6.0) / 1.5);
+    assert!(camera.update_primary_drag(false, true, vec2(112.0, 106.0)));
+}
+
+#[test]
+fn primary_tap_does_not_pan_or_suppress_selection() {
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    let before = camera.center;
+    assert!(!camera.update_primary_drag(true, false, vec2(100.0, 100.0)));
+    assert!(!camera.update_primary_drag(false, true, vec2(103.0, 102.0)));
+    assert_eq!(camera.center, before);
+}
+
+#[test]
+fn visible_camera_controls_nudge_at_screen_scale_and_zoom_from_center() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    camera.zoom = 1.5;
+    let before = camera.center;
+    camera.nudge(vec2(1.0, -1.0));
+    assert_eq!(camera.center, before + vec2(64.0, -64.0));
+    camera.zoom_center(viewport, 1.25);
+    assert_eq!(camera.zoom, 1.85);
+    assert_eq!(camera.center, before + vec2(64.0, -64.0));
+}
+
+#[test]
+fn camera_clamp_keeps_the_large_world_in_view_at_every_zoom_limit() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    let world_min = vec2(-39.0 * TACTICAL_HALF_WIDTH, 0.0);
+    let world_max = vec2(39.0 * TACTICAL_HALF_WIDTH, 78.0 * TACTICAL_HALF_HEIGHT);
+    for zoom in [0.65, 1.0, 1.85] {
+        let visible_half = viewport.size() * 0.5 / zoom;
+        for extreme in [vec2(-10_000.0, -10_000.0), vec2(10_000.0, 10_000.0)] {
+            let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+            camera.zoom = zoom;
+            camera.center = extreme;
+            camera.clamp_isometric(40, 40, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT, viewport);
+            assert_eq!(
+                camera.center.x,
+                clamp_axis(extreme.x, world_min.x, world_max.x, visible_half.x)
+            );
+            assert_eq!(
+                camera.center.y,
+                clamp_axis(extreme.y, world_min.y, world_max.y, visible_half.y)
+            );
+        }
+    }
+}
+
+#[test]
+fn visible_zoom_controls_stop_at_declared_camera_limits() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    for _ in 0..20 {
+        camera.zoom_center(viewport, 1.25);
+    }
+    assert_eq!(camera.zoom, 1.85);
+    for _ in 0..30 {
+        camera.zoom_center(viewport, 1.0 / 1.25);
+    }
+    assert_eq!(camera.zoom, 0.65);
 }
 
 #[test]

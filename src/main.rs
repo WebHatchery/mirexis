@@ -9,6 +9,7 @@ mod battle_log_ui;
 mod briefing_deployment_ui;
 mod briefing_intel_ui;
 mod briefing_loadout_ui;
+mod camera_controls;
 mod campaign;
 mod class_action_ui;
 mod class_actions;

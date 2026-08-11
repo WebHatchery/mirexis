@@ -76,7 +76,13 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 102.0,
     );
-    camera.update(viewport, mouse);
+    crate::camera_controls::draw(
+        camera,
+        viewport,
+        mouse,
+        vec2(panel.right() - 330.0, panel.bottom() - 98.0),
+    );
+    let suppress_plot_click = camera.update(viewport, mouse);
     camera.clamp_isometric(
         COLONY_WIDTH as usize,
         COLONY_HEIGHT as usize,
@@ -112,11 +118,11 @@ pub(crate) fn draw(
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
     draw_hover_card(campaign, hovered);
-    handle_plot_click(campaign, hovered, actions);
+    handle_plot_click(campaign, hovered, suppress_plot_click, actions);
     draw_build_controls(campaign, mouse, actions);
     draw_text(
         format!(
-            "DRAG MIDDLE/RIGHT TO PAN  //  WHEEL TO ZOOM  //  {}%",
+            "DRAG MAP // PAN < ^ v > // WHEEL OR -/+ ZOOM // {}%",
             (camera.zoom * 100.0) as i32
         ),
         panel.x + 14.0,
@@ -677,9 +683,10 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>) {
 fn handle_plot_click(
     campaign: &CampaignState,
     hovered: Option<[i32; 2]>,
+    suppress_click: bool,
     actions: &mut Vec<UiAction>,
 ) {
-    if !is_mouse_button_released(MouseButton::Left) {
+    if suppress_click || !is_mouse_button_released(MouseButton::Left) {
         return;
     }
     let Some(position) = hovered else { return };
