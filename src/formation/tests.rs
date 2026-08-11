@@ -5,7 +5,7 @@ use crate::data::GameData;
 fn formations_are_distinct_and_fall_back_around_unsafe_entry_cells() {
     let data = GameData::load().unwrap();
     let mut mission = data.mission.clone();
-    mission.blocked_tiles.extend([[1, 3], [1, 4]]);
+    mission.blocked_tiles.extend([[4, 19], [4, 20]]);
     let mut shapes = Vec::new();
     for formation in [
         FormationKind::Wedge,

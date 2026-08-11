@@ -135,6 +135,55 @@ fn deployment_uses_only_the_mission_factions_hostiles() {
             .all(|unit| unit.faction.as_deref() == Some(faction)));
     }
 }
+
+#[test]
+fn deployments_hold_opposite_ends_with_a_broader_hostile_front() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    for faction in ["brood", "directorate", "ascendants"] {
+        let mut mission = data.mission.clone();
+        mission.hostile_faction = faction.to_owned();
+        let roster = campaign.deployment_roster(&data, &mission);
+        let allies = roster
+            .iter()
+            .filter(|unit| unit.team == Team::Colony)
+            .collect::<Vec<_>>();
+        let hostiles = roster
+            .iter()
+            .filter(|unit| unit.team == Team::Hostile)
+            .collect::<Vec<_>>();
+
+        let spread = |units: &[&UnitDef]| {
+            units
+                .iter()
+                .enumerate()
+                .flat_map(|(index, unit)| {
+                    units.iter().skip(index + 1).map(move |other| {
+                        (unit.position[0] - other.position[0]).abs()
+                            + (unit.position[1] - other.position[1]).abs()
+                    })
+                })
+                .max()
+                .unwrap_or(0)
+        };
+        assert!(allies.iter().all(|unit| unit.position[0] <= 6));
+        assert!(hostiles.iter().all(|unit| unit.position[0] >= 32));
+        assert!(spread(&allies) <= 4);
+        assert!(spread(&hostiles) >= 18);
+        assert!(spread(&hostiles) > spread(&allies));
+        assert!(allies.iter().all(|ally| hostiles.iter().all(|hostile| {
+            (ally.position[0] - hostile.position[0]).abs()
+                + (ally.position[1] - hostile.position[1]).abs()
+                >= 26
+        })));
+        assert!(roster.iter().all(|unit| {
+            unit.position[0] >= 0
+                && unit.position[1] >= 0
+                && unit.position[0] < data.config.world_width as i32
+                && unit.position[1] < data.config.world_height as i32
+        }));
+    }
+}
 #[test]
 fn three_knives_deploys_one_hostile_from_each_power() {
     let data = GameData::load().unwrap();

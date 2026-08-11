@@ -6,7 +6,7 @@
     "mutation": "Neural Bloom",
     "team": "colony",
     "faction": null,
-    "position": [1, 2],
+    "position": [4, 19],
     "max_health": 9,
     "move_range": 5,
     "armour": 0,
@@ -22,7 +22,7 @@
     "mutation": "Chitinous Growth",
     "team": "colony",
     "faction": null,
-    "position": [1, 4],
+    "position": [5, 18],
     "max_health": 12,
     "move_range": 4,
     "armour": 2,
@@ -38,7 +38,7 @@
     "mutation": "Regenerative Tissue",
     "team": "colony",
     "faction": null,
-    "position": [1, 5],
+    "position": [5, 20],
     "max_health": 10,
     "move_range": 4,
     "armour": 0,
@@ -54,7 +54,7 @@
     "mutation": "Elastic Musculature",
     "team": "colony",
     "faction": null,
-    "position": [2, 3],
+    "position": [6, 19],
     "max_health": 10,
     "move_range": 5,
     "armour": 1,
@@ -70,7 +70,7 @@
     "mutation": "Symbiotic Organism",
     "team": "colony",
     "faction": null,
-    "position": [2, 5],
+    "position": [6, 21],
     "max_health": 10,
     "move_range": 4,
     "armour": 0,
@@ -86,7 +86,7 @@
     "mutation": "Adaptive Talons",
     "team": "hostile",
     "faction": "brood",
-    "position": [10, 2],
+    "position": [34, 10],
     "max_health": 8,
     "move_range": 4,
     "armour": 1,
@@ -102,7 +102,7 @@
     "mutation": "Spore Hide",
     "team": "hostile",
     "faction": "brood",
-    "position": [9, 6],
+    "position": [32, 22],
     "max_health": 8,
     "move_range": 4,
     "armour": 1,
@@ -118,7 +118,7 @@
     "mutation": "Spore Hide",
     "team": "hostile",
     "faction": "brood",
-    "position": [11, 6],
+    "position": [35, 30],
     "max_health": 7,
     "move_range": 3,
     "armour": 0,
@@ -129,32 +129,32 @@
   },
   {
     "id": "directorate_rifle_a", "name": "Directorate Rifleman", "role": "Line Infantry",
-    "mutation": "Powered Armour", "team": "hostile", "faction": "directorate", "position": [10, 2],
+    "mutation": "Powered Armour", "team": "hostile", "faction": "directorate", "position": [34, 11],
     "max_health": 9, "move_range": 4, "armour": 2, "accuracy": 72, "weapon_range": 6, "weapon_damage": 4, "weapon_ap_cost": 2
   },
   {
     "id": "directorate_rifle_b", "name": "Directorate Rifleman", "role": "Line Infantry",
-    "mutation": "Powered Armour", "team": "hostile", "faction": "directorate", "position": [10, 5],
+    "mutation": "Powered Armour", "team": "hostile", "faction": "directorate", "position": [33, 21],
     "max_health": 9, "move_range": 4, "armour": 2, "accuracy": 70, "weapon_range": 6, "weapon_damage": 4, "weapon_ap_cost": 2
   },
   {
     "id": "directorate_drone", "name": "Directorate Suppression Drone", "role": "Combat Drone",
-    "mutation": "Machine Chassis", "team": "hostile", "faction": "directorate", "position": [8, 6],
+    "mutation": "Machine Chassis", "team": "hostile", "faction": "directorate", "position": [35, 29],
     "max_health": 7, "move_range": 5, "armour": 1, "accuracy": 66, "weapon_range": 5, "weapon_damage": 3, "weapon_ap_cost": 2
   },
   {
     "id": "ascendant_sentinel_a", "name": "Ascendant Sentinel", "role": "Energy Construct",
-    "mutation": "Phase Lattice", "team": "hostile", "faction": "ascendants", "position": [9, 1],
+    "mutation": "Phase Lattice", "team": "hostile", "faction": "ascendants", "position": [33, 9],
     "max_health": 8, "move_range": 5, "armour": 1, "accuracy": 74, "weapon_range": 5, "weapon_damage": 4, "weapon_ap_cost": 2
   },
   {
     "id": "ascendant_sentinel_b", "name": "Ascendant Sentinel", "role": "Energy Construct",
-    "mutation": "Phase Lattice", "team": "hostile", "faction": "ascendants", "position": [9, 6],
+    "mutation": "Phase Lattice", "team": "hostile", "faction": "ascendants", "position": [35, 20],
     "max_health": 8, "move_range": 5, "armour": 1, "accuracy": 72, "weapon_range": 5, "weapon_damage": 4, "weapon_ap_cost": 2
   },
   {
     "id": "ascendant_warden", "name": "Ascendant Rift Warden", "role": "Battlefield Controller",
-    "mutation": "Gravity Core", "team": "hostile", "faction": "ascendants", "position": [11, 4],
+    "mutation": "Gravity Core", "team": "hostile", "faction": "ascendants", "position": [32, 31],
     "max_health": 11, "move_range": 3, "armour": 3, "accuracy": 64, "weapon_range": 4, "weapon_damage": 5, "weapon_ap_cost": 2
   }
 ]

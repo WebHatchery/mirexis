@@ -84,9 +84,10 @@ fn every_recruit_and_hostile_record_resolves_to_authored_unit_and_portrait_art()
 #[test]
 fn every_declared_atlas_decodes_and_has_art_in_every_cell() {
     let catalog = VisualCatalog::load();
-    let manifest: Vec<serde_json::Value> =
-        serde_json::from_str(include_str!("../../assets/data/texture_manifest.json"))
-            .expect("texture manifest parses");
+    let manifest: Vec<serde_json::Value> = serde_json::from_str(
+        macroquad_toolkit::include_json_str!("../../assets/data/texture_manifest.json"),
+    )
+    .expect("texture manifest parses");
     let paths = manifest
         .iter()
         .map(|entry| {

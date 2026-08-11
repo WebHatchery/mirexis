@@ -10,17 +10,17 @@
   "biomass_reward": 4,
   "power_reward": 0,
   "seed": 1296651091,
-  "blocked_tiles": [[5, 1], [5, 2], [5, 3], [7, 4], [7, 5], [3, 6]],
-  "objective_tile": [10, 4],
+  "blocked_tiles": [[20, 9], [20, 13], [20, 17], [24, 21], [24, 25], [16, 29]],
+  "objective_tile": [30, 21],
   "terrain_costs": [
-    { "position": [3, 2], "cost": 2 },
-    { "position": [4, 2], "cost": 2 },
-    { "position": [6, 5], "cost": 2 },
-    { "position": [8, 5], "cost": 2 }
+    { "position": [16, 13], "cost": 2 },
+    { "position": [18, 13], "cost": 2 },
+    { "position": [22, 25], "cost": 2 },
+    { "position": [26, 25], "cost": 2 }
   ],
   "cover_edges": [
-    { "position": [4, 4], "direction": "west", "strength": 25 },
-    { "position": [8, 2], "direction": "east", "strength": 25 },
-    { "position": [9, 6], "direction": "south", "strength": 25 }
+    { "position": [18, 21], "direction": "west", "strength": 25 },
+    { "position": [26, 13], "direction": "east", "strength": 25 },
+    { "position": [28, 29], "direction": "south", "strength": 25 }
   ]
 }

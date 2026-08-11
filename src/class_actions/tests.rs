@@ -68,6 +68,13 @@ fn starting_classes_each_change_the_battle_state() {
         .find(|unit| unit.id == "sol_cairn")
         .unwrap()
         .position = TilePos::new(7, 2);
+    engineer
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "brood_stalker_a")
+        .unwrap()
+        .position = TilePos::new(8, 2);
     let before_health = engineer.unit("brood_stalker_a").unwrap().health;
     engineer.tactical.selected_unit = Some("sol_cairn".into());
     engineer
@@ -95,6 +102,13 @@ fn retrained_classes_expose_their_own_status_actions() {
             .unwrap();
         kira.class_id = class_id.to_owned();
         kira.position = TilePos::new(7, 2);
+        session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.id == "brood_stalker_a")
+            .unwrap()
+            .position = TilePos::new(8, 2);
         session.tactical.selected_unit = Some("kira_voss".into());
         if requires_target(class_id) {
             session
@@ -149,7 +163,7 @@ fn advanced_actions_create_hybrid_tactical_roles() {
         .iter_mut()
         .find(|unit| unit.id == "kira_voss")
         .unwrap()
-        .position = TilePos::new(2, 3);
+        .position = TilePos::new(4, 18);
     vanguard.tactical.selected_unit = Some("mara_venn".into());
     vanguard.activate_selected_class_action().unwrap();
     assert!(vanguard
@@ -195,6 +209,13 @@ fn advanced_actions_create_hybrid_tactical_roles() {
         .unwrap();
     kira.class_id = "null_adept".to_owned();
     kira.position = TilePos::new(7, 2);
+    null_adept
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "brood_stalker_a")
+        .unwrap()
+        .position = TilePos::new(8, 2);
     let before = null_adept.unit("brood_stalker_a").unwrap().health;
     null_adept
         .activate_class_action_on("kira_voss", "brood_stalker_a")

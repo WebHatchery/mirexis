@@ -33,9 +33,14 @@ pub(crate) fn create_waves(
                 .map(|(index, template)| {
                     let mut unit = template.clone();
                     unit.id = format!("{}_reinforcement_{}", unit.id, round);
+                    let height = config.world_height as i32;
                     unit.position = TilePos::new(
                         config.world_width.saturating_sub(1) as i32,
-                        1 + index as i32 * config.world_height.saturating_sub(3) as i32,
+                        if index == 0 {
+                            height / 4
+                        } else {
+                            height * 3 / 4
+                        },
                     );
                     unit
                 })

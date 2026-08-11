@@ -34,7 +34,7 @@ fn attack_preview_matches_live_hit_chance_and_armour_damage() {
         .iter_mut()
         .find(|unit| unit.team == Team::Hostile)
         .unwrap();
-    hostile.position = TilePos::new(selected.x + 2, selected.y);
+    hostile.position = TilePos::new(selected.x + 4, selected.y);
     let hostile_tile = hostile.position;
 
     assert!(matches!(

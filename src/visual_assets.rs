@@ -7,7 +7,8 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use serde::Deserialize;
 
-const DEFINITIONS_JSON: &str = include_str!("../assets/data/sprite_definitions.json");
+const DEFINITIONS_JSON: &str =
+    macroquad_toolkit::include_json_str!("../assets/data/sprite_definitions.json");
 
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct AtlasDefinition {

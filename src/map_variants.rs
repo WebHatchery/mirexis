@@ -2,11 +2,13 @@
 
 use crate::data::{CoverEdgeDef, EdgeDirection, GameData, HazardDef, MapRecipeDef, TerrainCostDef};
 
-// Campaign recipes were authored inside the original 12x8 combat footprint.
-// The runtime world may be much larger, but recipe variants must stay inside
-// that authored footprint so mirroring never turns a local encounter into a
-// battlefield-spanning deployment.
+// Campaign recipes retain their compact 12x8 authoring coordinates in JSON.
+// Materialization projects that vocabulary into the 40x40 runtime battlefield.
 const AUTHORED_MAX_Y: i32 = 7;
+const BATTLEFIELD_X_OFFSET: i32 = 10;
+const BATTLEFIELD_Y_OFFSET: i32 = 5;
+const BATTLEFIELD_X_STRIDE: i32 = 2;
+const BATTLEFIELD_Y_STRIDE: i32 = 4;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct MapLayout {
@@ -19,11 +21,37 @@ pub(crate) struct MapLayout {
 
 pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> MapLayout {
     let authored = MapLayout {
-        blocked_tiles: recipe.blocked_tiles.clone(),
-        objective_tile: recipe.objective_tile,
-        terrain_costs: recipe.terrain_costs.clone(),
-        hazards: recipe.hazards.clone(),
-        cover_edges: recipe.cover_edges.clone(),
+        blocked_tiles: recipe
+            .blocked_tiles
+            .iter()
+            .map(|position| battlefield_position(*position))
+            .collect(),
+        objective_tile: battlefield_position(recipe.objective_tile),
+        terrain_costs: recipe
+            .terrain_costs
+            .iter()
+            .map(|entry| TerrainCostDef {
+                position: battlefield_position(entry.position),
+                cost: entry.cost,
+            })
+            .collect(),
+        hazards: recipe
+            .hazards
+            .iter()
+            .map(|hazard| HazardDef {
+                position: battlefield_position(hazard.position),
+                kind: hazard.kind,
+            })
+            .collect(),
+        cover_edges: recipe
+            .cover_edges
+            .iter()
+            .map(|edge| CoverEdgeDef {
+                position: battlefield_position(edge.position),
+                direction: edge.direction,
+                strength: edge.strength,
+            })
+            .collect(),
     };
     if seed & 1 == 0 {
         return authored;
@@ -32,14 +60,14 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
         blocked_tiles: authored
             .blocked_tiles
             .iter()
-            .map(|position| mirror_position(*position, AUTHORED_MAX_Y))
+            .map(|position| mirror_battlefield_position(*position))
             .collect(),
-        objective_tile: mirror_position(authored.objective_tile, AUTHORED_MAX_Y),
+        objective_tile: mirror_battlefield_position(authored.objective_tile),
         terrain_costs: authored
             .terrain_costs
             .iter()
             .map(|entry| TerrainCostDef {
-                position: mirror_position(entry.position, AUTHORED_MAX_Y),
+                position: mirror_battlefield_position(entry.position),
                 cost: entry.cost,
             })
             .collect(),
@@ -47,7 +75,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .hazards
             .iter()
             .map(|hazard| HazardDef {
-                position: mirror_position(hazard.position, AUTHORED_MAX_Y),
+                position: mirror_battlefield_position(hazard.position),
                 kind: hazard.kind,
             })
             .collect(),
@@ -55,7 +83,7 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
             .cover_edges
             .iter()
             .map(|edge| CoverEdgeDef {
-                position: mirror_position(edge.position, AUTHORED_MAX_Y),
+                position: mirror_battlefield_position(edge.position),
                 direction: match edge.direction {
                     EdgeDirection::North => EdgeDirection::South,
                     EdgeDirection::South => EdgeDirection::North,
@@ -72,8 +100,19 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
     }
 }
 
-fn mirror_position(position: [i32; 2], max_y: i32) -> [i32; 2] {
-    [position[0], max_y - position[1]]
+fn battlefield_position(position: [i32; 2]) -> [i32; 2] {
+    [
+        BATTLEFIELD_X_OFFSET + position[0] * BATTLEFIELD_X_STRIDE,
+        BATTLEFIELD_Y_OFFSET + position[1] * BATTLEFIELD_Y_STRIDE,
+    ]
+}
+
+fn mirror_battlefield_position(position: [i32; 2]) -> [i32; 2] {
+    let authored_span = AUTHORED_MAX_Y * BATTLEFIELD_Y_STRIDE;
+    [
+        position[0],
+        BATTLEFIELD_Y_OFFSET + authored_span - (position[1] - BATTLEFIELD_Y_OFFSET),
+    ]
 }
 
 fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {

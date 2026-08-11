@@ -8,17 +8,16 @@ fn destroying_cover_opens_the_blocked_tile() {
     let campaign = CampaignState::new(&data);
     let roster = campaign.deployment_roster(&data, &data.mission);
     let mut session = GameSession::new(&data.config, &data.mission, &roster);
-    let attacker_position = session.selected_unit().unwrap().position;
-    let position = session
+    session
         .tactical
-        .destructible_cover
-        .iter()
-        .find(|cover| {
-            cover.position.y == attacker_position.y
-                && session.can_attack_selected_cover(cover.position)
-        })
-        .expect("authored map has reachable cover")
-        .position;
+        .units
+        .iter_mut()
+        .find(|unit| Some(&unit.id) == session.tactical.selected_unit.as_ref())
+        .unwrap()
+        .position = TilePos::new(18, 17);
+    let attacker_position = session.selected_unit().unwrap().position;
+    let position = TilePos::new(20, 17);
+    assert!(session.can_attack_selected_cover(position));
     let tile_beyond = TilePos::new(position.x + 1, position.y);
     assert!(!session.has_line_of_fire(attacker_position, tile_beyond));
     while session.tactical.blocked.contains(&position) {

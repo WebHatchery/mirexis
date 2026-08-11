@@ -36,17 +36,17 @@ pub(crate) fn apply(
     formation: FormationKind,
 ) {
     let candidates = match formation {
-        FormationKind::Wedge => [[1, 3], [2, 2], [2, 4]],
-        FormationKind::Line => [[1, 2], [1, 4], [1, 6]],
-        FormationKind::Column => [[1, 2], [1, 3], [1, 4]],
+        FormationKind::Wedge => [[4, 19], [5, 18], [5, 20]],
+        FormationKind::Line => [[4, 17], [4, 19], [4, 21]],
+        FormationKind::Column => [[4, 18], [4, 19], [4, 20]],
     };
     let mut occupied = roster
         .iter()
         .filter(|unit| unit.team != Team::Colony)
         .map(|unit| unit.position)
         .collect::<HashSet<_>>();
-    let mut fallback = (0..config.world_width.min(3) as i32)
-        .flat_map(|x| (1..config.world_height as i32).map(move |y| [x, y]));
+    let mut fallback = (3..config.world_width.min(7) as i32)
+        .flat_map(|x| (16..config.world_height.min(24) as i32).map(move |y| [x, y]));
     for (index, unit) in roster
         .iter_mut()
         .filter(|unit| unit.team == Team::Colony)

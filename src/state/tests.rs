@@ -27,6 +27,7 @@ fn weighted_path_spends_terrain_cost() {
         .find(|unit| unit.id == unit_id)
         .unwrap()
         .position = TilePos::new(2, 2);
+    session.tactical.terrain_costs.push((TilePos::new(3, 2), 2));
     let events = session
         .execute(Command::Move {
             unit_id,
@@ -106,6 +107,7 @@ fn attacks_are_deterministic_and_emit_ordered_events() {
             .find(|unit| unit.id == "kira_voss")
             .unwrap()
             .position = TilePos::new(8, 2);
+        unit_mut(session, "brood_stalker_a").position = TilePos::new(10, 2);
     }
     let command = Command::Attack {
         attacker_id: "kira_voss".into(),
@@ -121,11 +123,11 @@ fn attacks_are_deterministic_and_emit_ordered_events() {
 fn edge_cover_reduces_accuracy_from_its_facing_direction() {
     let (_, session) = session();
     let attacker = UnitState {
-        position: TilePos::new(3, 4),
+        position: TilePos::new(17, 21),
         ..session.unit("kira_voss").unwrap().clone()
     };
     let target = UnitState {
-        position: TilePos::new(4, 4),
+        position: TilePos::new(18, 21),
         ..session.unit("brood_stalker_a").unwrap().clone()
     };
     assert_eq!(
@@ -139,6 +141,7 @@ fn edge_cover_reduces_accuracy_from_its_facing_direction() {
 fn solid_obstacles_block_line_of_fire() {
     let (_, mut session) = session();
     unit_mut(&mut session, "kira_voss").position = TilePos::new(8, 2);
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(10, 2);
     session.tactical.blocked.insert(TilePos::new(9, 2));
     assert_eq!(
         session.validate(&Command::Attack {
@@ -199,7 +202,7 @@ fn objective_requires_adjacency_and_one_action_point() {
         .iter_mut()
         .find(|unit| unit.id == id)
         .unwrap()
-        .position = TilePos::new(9, 4);
+        .position = TilePos::new(29, 21);
     assert!(session.execute(Command::Interact { unit_id: id }).is_ok());
     assert_eq!(session.tactical.objective_state, ObjectiveState::Secured);
 }
