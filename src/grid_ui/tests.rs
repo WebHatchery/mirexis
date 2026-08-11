@@ -274,11 +274,24 @@ fn primary_drag_pans_after_a_touch_safe_threshold_and_suppresses_release() {
     camera.zoom = 1.5;
     let before = camera.center;
     assert!(!camera.update_primary_drag(true, false, vec2(100.0, 100.0)));
+    assert!(camera.primary_gesture_active());
     assert!(!camera.update_primary_drag(true, false, vec2(104.0, 102.0)));
     assert_eq!(camera.center, before);
     assert!(!camera.update_primary_drag(true, false, vec2(112.0, 106.0)));
     assert_eq!(camera.center, before - vec2(12.0, 6.0) / 1.5);
     assert!(camera.update_primary_drag(false, true, vec2(112.0, 106.0)));
+    assert!(!camera.primary_gesture_active());
+}
+
+#[test]
+fn primary_release_recovers_a_threshold_crossing_between_render_frames() {
+    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
+    camera.zoom = 1.5;
+    let before = camera.center;
+    assert!(!camera.update_primary_drag(true, false, vec2(100.0, 100.0)));
+    assert!(camera.update_primary_drag(false, true, vec2(112.0, 106.0)));
+    assert_eq!(camera.center, before - vec2(12.0, 6.0) / 1.5);
+    assert!(!camera.primary_gesture_active());
 }
 
 #[test]

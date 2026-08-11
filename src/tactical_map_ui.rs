@@ -41,7 +41,7 @@ pub(crate) fn draw(
     camera: &mut WorldCamera,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
-) {
+) -> bool {
     let panel = tactical_panel();
     draw_surface_with_title(
         panel,
@@ -53,8 +53,13 @@ pub(crate) fn draw(
         TextStyle::new(13.0, dark::TEXT),
     );
     let grid_rect = tactical_viewport(panel);
-    let camera_control_clicked =
-        crate::camera_controls::draw(camera, grid_rect, mouse, camera_controls_origin(panel));
+    let camera_control_clicked = crate::camera_controls::draw(
+        camera,
+        grid_rect,
+        mouse,
+        camera_controls_origin(panel),
+        !camera.primary_gesture_active(),
+    );
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     let camera_dragged = camera.update(grid_rect, mouse);
     let suppress_map_click = camera_control_clicked || camera_dragged;
@@ -149,6 +154,7 @@ pub(crate) fn draw(
         TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
     );
     handle_click(ctx, view, grid_rect, mouse, suppress_map_click, actions);
+    camera_dragged
 }
 
 fn draw_targeting_card(ctx: &UiContext<'_>, tile: TilePos, panel: Rect) {

@@ -35,7 +35,8 @@ pub fn draw_colony(
         LOGICAL_HEIGHT,
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
-    crate::colony_map_ui::draw(campaign, assets, visuals, ui, camera, mouse, &mut actions);
+    let suppress_actions =
+        crate::colony_map_ui::draw(campaign, assets, visuals, ui, camera, mouse, &mut actions);
     draw_header(campaign);
     draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
@@ -44,6 +45,7 @@ pub fn draw_colony(
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
+    crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
     actions
 }
 

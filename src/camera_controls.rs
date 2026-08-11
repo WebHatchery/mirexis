@@ -8,7 +8,13 @@ pub(crate) const CONTROL_WIDTH: f32 = 40.0;
 pub(crate) const CONTROL_HEIGHT: f32 = 28.0;
 pub(crate) const STRIP_WIDTH: f32 = 256.0;
 
-pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin: Vec2) -> bool {
+pub(crate) fn draw(
+    camera: &mut WorldCamera,
+    viewport: Rect,
+    mouse: Vec2,
+    origin: Vec2,
+    allow_activation: bool,
+) -> bool {
     let mut activated = false;
     let controls = [
         ("<", vec2(-1.0, 0.0)),
@@ -27,7 +33,8 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
             label,
             true,
             mouse,
-        ) {
+        ) && allow_activation
+        {
             camera.nudge(direction);
             activated = true;
         }
@@ -37,7 +44,8 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
         "-",
         true,
         mouse,
-    ) {
+    ) && allow_activation
+    {
         camera.zoom_center(viewport, 1.0 / 1.25);
         activated = true;
     }
@@ -46,7 +54,8 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
         "+",
         true,
         mouse,
-    ) {
+    ) && allow_activation
+    {
         camera.zoom_center(viewport, 1.25);
         activated = true;
     }

@@ -13,3 +13,12 @@ fn logical_clip_rect_converts_to_letterboxed_physical_pixels() {
         (82, 145, 1061, 682)
     );
 }
+
+#[test]
+fn map_drag_release_discards_actions_from_controls_under_the_pointer() {
+    let mut actions = vec![UiAction::ReturnToTitle, UiAction::EndPhase];
+    suppress_map_release_actions(&mut actions, false);
+    assert_eq!(actions.len(), 2);
+    suppress_map_release_actions(&mut actions, true);
+    assert!(actions.is_empty());
+}

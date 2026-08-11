@@ -102,6 +102,10 @@ impl WorldCamera {
         suppress_primary_click
     }
 
+    pub(crate) fn primary_gesture_active(&self) -> bool {
+        self.primary_drag_start.is_some()
+    }
+
     fn update_primary_drag(&mut self, down: bool, released: bool, mouse: Vec2) -> bool {
         if down {
             let start = *self.primary_drag_start.get_or_insert(mouse);
@@ -116,7 +120,14 @@ impl WorldCamera {
             return false;
         }
 
-        let suppress = released && self.primary_dragged;
+        let release_delta = self.primary_drag_start.map(|start| mouse - start);
+        let crossed_threshold_on_release = released
+            && !self.primary_dragged
+            && release_delta.is_some_and(|delta| delta.length() >= 7.0);
+        if crossed_threshold_on_release {
+            self.pan_screen(release_delta.expect("threshold requires a drag origin"));
+        }
+        let suppress = released && (self.primary_dragged || crossed_threshold_on_release);
         self.primary_drag_start = None;
         self.primary_drag_anchor = None;
         self.primary_dragged = false;

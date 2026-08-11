@@ -59,7 +59,7 @@ pub(crate) fn draw(
     camera: &mut WorldCamera,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
-) {
+) -> bool {
     let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
     draw_surface_with_title(
         panel,
@@ -76,8 +76,13 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 102.0,
     );
-    let camera_control_clicked =
-        crate::camera_controls::draw(camera, viewport, mouse, camera_controls_origin(panel));
+    let camera_control_clicked = crate::camera_controls::draw(
+        camera,
+        viewport,
+        mouse,
+        camera_controls_origin(panel),
+        !camera.primary_gesture_active(),
+    );
     let camera_dragged = camera.update(viewport, mouse);
     let suppress_plot_click = camera_control_clicked || camera_dragged;
     camera.clamp_isometric(
@@ -127,6 +132,7 @@ pub(crate) fn draw(
         11.0,
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
+    camera_dragged
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {
