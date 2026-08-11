@@ -4,7 +4,8 @@ use crate::grid_ui::WorldCamera;
 use crate::ui_widgets::button;
 use macroquad::prelude::{vec2, Rect, Vec2};
 
-pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin: Vec2) {
+pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin: Vec2) -> bool {
+    let mut activated = false;
     let controls = [
         ("<", vec2(-1.0, 0.0)),
         ("^", vec2(0.0, -1.0)),
@@ -19,6 +20,7 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
             mouse,
         ) {
             camera.nudge(direction);
+            activated = true;
         }
     }
     if button(
@@ -28,6 +30,7 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
         mouse,
     ) {
         camera.zoom_center(viewport, 1.0 / 1.25);
+        activated = true;
     }
     if button(
         Rect::new(origin.x + 216.0, origin.y, 40.0, 28.0),
@@ -36,5 +39,7 @@ pub(crate) fn draw(camera: &mut WorldCamera, viewport: Rect, mouse: Vec2, origin
         mouse,
     ) {
         camera.zoom_center(viewport, 1.25);
+        activated = true;
     }
+    activated
 }

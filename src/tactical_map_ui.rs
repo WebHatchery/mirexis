@@ -35,14 +35,15 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 40.0,
     );
-    crate::camera_controls::draw(
+    let camera_control_clicked = crate::camera_controls::draw(
         camera,
         grid_rect,
         mouse,
         vec2(panel.right() - 262.0, panel.y),
     );
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
-    let suppress_map_click = camera.update(grid_rect, mouse);
+    let camera_dragged = camera.update(grid_rect, mouse);
+    let suppress_map_click = camera_control_clicked || camera_dragged;
     camera.clamp_isometric(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,

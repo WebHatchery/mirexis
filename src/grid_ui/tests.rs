@@ -1,4 +1,6 @@
 use super::*;
+use crate::colony::{COLONY_HEIGHT, COLONY_WIDTH, SETTLEMENT_CENTER};
+use crate::colony_map_ui::{COLONY_HALF_HEIGHT, COLONY_HALF_WIDTH};
 
 #[test]
 fn inverse_hit_testing_recovers_every_projected_tile_center() {
@@ -235,6 +237,36 @@ fn camera_clamp_keeps_the_large_world_in_view_at_every_zoom_limit() {
             camera.zoom = zoom;
             camera.center = extreme;
             camera.clamp_isometric(40, 40, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT, viewport);
+            assert_eq!(
+                camera.center.x,
+                clamp_axis(extreme.x, world_min.x, world_max.x, visible_half.x)
+            );
+            assert_eq!(
+                camera.center.y,
+                clamp_axis(extreme.y, world_min.y, world_max.y, visible_half.y)
+            );
+        }
+    }
+}
+
+#[test]
+fn colony_camera_clamp_handles_world_smaller_and_larger_than_the_view() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    let world_min = vec2(-19.0 * COLONY_HALF_WIDTH, 0.0);
+    let world_max = vec2(19.0 * COLONY_HALF_WIDTH, 38.0 * COLONY_HALF_HEIGHT);
+    for zoom in [0.65, 1.0, 1.85] {
+        let visible_half = viewport.size() * 0.5 / zoom;
+        for extreme in [vec2(-10_000.0, -10_000.0), vec2(10_000.0, 10_000.0)] {
+            let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+            camera.zoom = zoom;
+            camera.center = extreme;
+            camera.clamp_isometric(
+                COLONY_WIDTH as usize,
+                COLONY_HEIGHT as usize,
+                COLONY_HALF_WIDTH,
+                COLONY_HALF_HEIGHT,
+                viewport,
+            );
             assert_eq!(
                 camera.center.x,
                 clamp_axis(extreme.x, world_min.x, world_max.x, visible_half.x)

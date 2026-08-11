@@ -76,13 +76,10 @@ pub(crate) fn draw(
         panel.w - 16.0,
         panel.h - 102.0,
     );
-    crate::camera_controls::draw(
-        camera,
-        viewport,
-        mouse,
-        vec2(panel.right() - 330.0, panel.bottom() - 98.0),
-    );
-    let suppress_plot_click = camera.update(viewport, mouse);
+    let camera_control_clicked =
+        crate::camera_controls::draw(camera, viewport, mouse, camera_controls_origin(panel));
+    let camera_dragged = camera.update(viewport, mouse);
+    let suppress_plot_click = camera_control_clicked || camera_dragged;
     camera.clamp_isometric(
         COLONY_WIDTH as usize,
         COLONY_HEIGHT as usize,
@@ -130,6 +127,10 @@ pub(crate) fn draw(
         11.0,
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
+}
+
+fn camera_controls_origin(panel: Rect) -> Vec2 {
+    vec2(panel.right() - 330.0, panel.bottom() - 65.0)
 }
 
 fn draw_ending_manifestation(
