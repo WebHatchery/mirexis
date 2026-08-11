@@ -22,3 +22,16 @@ fn map_drag_release_discards_actions_from_controls_under_the_pointer() {
     suppress_map_release_actions(&mut actions, true);
     assert!(actions.is_empty());
 }
+
+#[test]
+fn modal_tactical_layers_disable_world_input() {
+    assert!(tactical_world_input_enabled(false, false, false));
+    for state in [
+        (true, false, false),
+        (false, true, false),
+        (false, false, true),
+        (true, true, true),
+    ] {
+        assert!(!tactical_world_input_enabled(state.0, state.1, state.2));
+    }
+}

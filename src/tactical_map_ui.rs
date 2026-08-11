@@ -40,6 +40,7 @@ pub(crate) fn draw(
     ctx: &UiContext<'_>,
     camera: &mut WorldCamera,
     mouse: Vec2,
+    input_enabled: bool,
     actions: &mut Vec<UiAction>,
 ) -> bool {
     let panel = tactical_panel();
@@ -58,11 +59,11 @@ pub(crate) fn draw(
         grid_rect,
         mouse,
         camera_controls_origin(panel),
-        !camera.primary_gesture_active(),
+        input_enabled && !camera.primary_gesture_active(),
     );
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
-    let camera_dragged = camera.update(grid_rect, mouse);
-    let suppress_map_click = camera_control_clicked || camera_dragged;
+    let camera_dragged = input_enabled && camera.update(grid_rect, mouse);
+    let suppress_map_click = !input_enabled || camera_control_clicked || camera_dragged;
     camera.clamp_isometric(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,

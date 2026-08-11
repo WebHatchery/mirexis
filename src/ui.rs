@@ -288,7 +288,13 @@ pub fn draw_tactical(
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = ctx.ui.mouse_position();
-    let suppress_actions = crate::tactical_map_ui::draw(&ctx, camera, mouse, &mut actions);
+    let input_enabled = tactical_world_input_enabled(
+        ctx.show_help,
+        ctx.show_battle_log,
+        ctx.phase_replay.is_active(),
+    );
+    let suppress_actions =
+        crate::tactical_map_ui::draw(&ctx, camera, mouse, input_enabled, &mut actions);
     draw_header(&ctx);
     draw_sidebar(&ctx, mouse, &mut actions);
     draw_footer(&ctx, mouse, &mut actions);
@@ -305,6 +311,10 @@ pub fn draw_tactical(
     }
     suppress_map_release_actions(&mut actions, suppress_actions);
     actions
+}
+
+fn tactical_world_input_enabled(show_help: bool, show_log: bool, replay_active: bool) -> bool {
+    !show_help && !show_log && !replay_active
 }
 
 pub(crate) fn suppress_map_release_actions(actions: &mut Vec<UiAction>, suppress: bool) {
