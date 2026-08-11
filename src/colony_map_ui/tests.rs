@@ -107,6 +107,27 @@ fn colony_clamp_exposes_each_outer_diamond_vertex_without_clipping() {
 }
 
 #[test]
+fn maximum_zoom_culling_retains_scaled_building_edges() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    let position = SETTLEMENT_CENTER;
+    for desired_center in [
+        vec2(viewport.center().x, viewport.bottom() + 90.0),
+        vec2(viewport.right() + 60.0, viewport.center().y),
+    ] {
+        let mut camera = WorldCamera::colony_start(position);
+        camera.zoom = 1.85;
+        camera.center -= (desired_center - viewport.center()) / camera.zoom;
+        let view = ColonyView::new(viewport, &camera);
+        let bounds = view.plot_render_bounds(position);
+        assert!(bounds.right() >= viewport.x);
+        assert!(bounds.x <= viewport.right());
+        assert!(bounds.bottom() >= viewport.y);
+        assert!(bounds.y <= viewport.bottom());
+        assert!(view.visible(position));
+    }
+}
+
+#[test]
 fn colony_buildings_retain_fixed_default_world_scale() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
     let small_world_camera = WorldCamera::colony_start([3, 3]);

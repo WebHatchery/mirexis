@@ -42,12 +42,25 @@ impl ColonyView {
         )
     }
 
-    fn visible(self, position: [i32; 2], margin: f32) -> bool {
+    fn plot_render_bounds(self, position: [i32; 2]) -> Rect {
         let center = self.plot_center(position);
-        center.x >= self.viewport.x - margin
-            && center.x <= self.viewport.right() + margin
-            && center.y >= self.viewport.y - margin
-            && center.y <= self.viewport.bottom() + margin
+        let horizontal = self.half_width.max(35.0 * self.zoom).max(36.0);
+        let above = self.half_height.max(52.0 * self.zoom).max(61.0);
+        let below = (self.half_height + 7.0).max(18.0 * self.zoom);
+        Rect::new(
+            center.x - horizontal,
+            center.y - above,
+            horizontal * 2.0,
+            above + below,
+        )
+    }
+
+    fn visible(self, position: [i32; 2]) -> bool {
+        let bounds = self.plot_render_bounds(position);
+        bounds.right() >= self.viewport.x
+            && bounds.x <= self.viewport.right()
+            && bounds.bottom() >= self.viewport.y
+            && bounds.y <= self.viewport.bottom()
     }
 }
 
@@ -104,7 +117,7 @@ pub(crate) fn draw(
             if !(0..COLONY_WIDTH).contains(&x) {
                 continue;
             }
-            if view.visible([x, y], 80.0) {
+            if view.visible([x, y]) {
                 draw_plot(
                     campaign,
                     assets,

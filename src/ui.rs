@@ -15,6 +15,18 @@ pub use crate::ui_action::UiAction;
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
 
+pub(crate) fn pointer_position(ui: &VirtualUi) -> Vec2 {
+    pointer_position_for_capture(ui, macroquad_toolkit::capture::capture_requested("MIREXIS"))
+}
+
+fn pointer_position_for_capture(ui: &VirtualUi, capturing: bool) -> Vec2 {
+    if capturing {
+        vec2(-1_000.0, -1_000.0)
+    } else {
+        ui.mouse_position()
+    }
+}
+
 // Tactical screens combine dense prose, meters, fitted controls, and notifications.
 // Split ordinary labels and prose onto Macroquad's built-in atlas so neither font atlas
 // is exhausted by a long-running operation or deterministic capture.
@@ -132,7 +144,7 @@ pub fn draw_mission_briefing(
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
-    let mouse = ui.mouse_position();
+    let mouse = pointer_position(ui);
     draw_rectangle(
         0.0,
         0.0,
@@ -287,7 +299,7 @@ pub fn draw_tactical(
     camera: &mut crate::grid_ui::WorldCamera,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
-    let mouse = ctx.ui.mouse_position();
+    let mouse = pointer_position(ctx.ui);
     let input_enabled = tactical_world_input_enabled(
         ctx.show_help,
         ctx.show_battle_log,

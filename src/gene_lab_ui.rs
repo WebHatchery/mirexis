@@ -17,7 +17,7 @@ pub(crate) fn draw_gene_lab(
     visuals: &VisualCatalog,
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
-    let mouse = ui.mouse_position();
+    let mouse = crate::ui::pointer_position(ui);
     let mut actions = Vec::new();
     draw_rectangle(
         0.0,

@@ -35,3 +35,17 @@ fn modal_tactical_layers_disable_world_input() {
         assert!(!tactical_world_input_enabled(state.0, state.1, state.2));
     }
 }
+
+#[test]
+fn capture_pointer_is_fixed_off_canvas() {
+    let ui = VirtualUi {
+        logical_width: 1280.0,
+        logical_height: 720.0,
+        scale: 0.8,
+        offset: vec2(40.0, 12.0),
+    };
+    assert_eq!(
+        pointer_position_for_capture(&ui, true),
+        vec2(-1_000.0, -1_000.0)
+    );
+}

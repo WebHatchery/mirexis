@@ -27,7 +27,7 @@ pub fn draw_colony(
     camera: &mut crate::grid_ui::WorldCamera,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
-    let mouse = ui.mouse_position();
+    let mouse = crate::ui::pointer_position(ui);
     draw_rectangle(
         0.0,
         0.0,

@@ -20,7 +20,7 @@ pub fn draw_debrief(
     ui: &VirtualUi,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
-    let mouse = ui.mouse_position();
+    let mouse = crate::ui::pointer_position(ui);
     draw_rectangle(
         0.0,
         0.0,

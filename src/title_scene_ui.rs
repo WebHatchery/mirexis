@@ -22,7 +22,7 @@ pub(crate) fn draw(
     let mouse = if hover_preview {
         vec2(198.0, 512.0)
     } else {
-        ui.mouse_position()
+        crate::ui::pointer_position(ui)
     };
     draw_background();
     draw_character_tableau(data, assets, visuals);
