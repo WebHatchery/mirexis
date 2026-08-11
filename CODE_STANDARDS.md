@@ -25,7 +25,7 @@ Code should be easy to debug and extend.
 If a pattern already exists in the codebase, follow it even if you dislike it. A consistent codebase is more valuable than a perfect one.
 
 ### 1.3 Data-Driven Design
-All game constants, balance values, and static data should be defined in JSON files under `assets/`. Load this data at startup using Serde for easy balancing and iteration without recompiling code. Avoid hardcoding values in Rust code; reference loaded data structures instead.
+All game constants, balance values, and static data should be defined in JSON files under `assets/`. Load this data through `macroquad_toolkit::data_loader` using Serde-backed project schemas. The toolkit owns generic parsing, embedded/runtime file loading, platform differences, source-labeled diagnostics, and fallback behavior; project code owns only its data types and game-specific validation. Do not create project-local generic JSON loader wrappers or call `serde_json::from_str` directly for game-data files. Avoid hardcoding values in Rust code; reference loaded data structures instead.
 
 ### 1.4 No Unused Code
 - Remove unused variables, fields, and functions immediately
@@ -179,6 +179,8 @@ Game data should be:
 - All game balance and configuration in JSON under `assets/`
 - Load data at application startup; data is embedded at compile time
 - Use structs that mirror JSON structure for type safety
+- Use `macroquad_toolkit::include_json!` for embedded JSON or the typed functions in `macroquad_toolkit::data_loader` for runtime/native loading. Keep platform branching and generic parse/error handling out of projects.
+- Keep semantic validation project-local after deserialization: IDs, references, balance invariants, and game rules belong to the game rather than the loader.
 - Never hardcode magic numbers; reference loaded config data
 
 ### 5.4 Enums for Game Phases

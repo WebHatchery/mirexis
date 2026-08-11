@@ -6,6 +6,7 @@ These instructions apply to all Rust game projects in this workspace.
 
 - Build games with Rust, `macroquad`, and the shared `macroquad-toolkit` by default.
 - Treat missing runtime, rendering, input, asset, or platform behavior as potential `macroquad-toolkit` upgrades before creating project-local alternatives.
+- Route JSON game-data parsing and file loading through `macroquad_toolkit::data_loader`; projects own their typed schemas and game-specific validation, while the toolkit owns embedded/runtime loading, platform differences, source-labeled errors, and fallback behavior. Do not add project-local generic JSON loader wrappers.
 - Only diverge from the shared toolkit when an existing project has a clear, established alternative or the need is genuinely game-specific.
 - Keep every `.rs` file at or below 800 total lines, with no exceptions or excluded sections. Split large files by responsibility before they become difficult to scan or test.
 - Prefer small modules with explicit ownership of input, update logic, rendering, assets, and game state.
