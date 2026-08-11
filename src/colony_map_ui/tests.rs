@@ -107,6 +107,43 @@ fn colony_clamp_exposes_each_outer_diamond_vertex_without_clipping() {
 }
 
 #[test]
+fn colony_clamp_exposes_complete_frontier_plot_art() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    let cases = [
+        (vec2(-10_000.0, 0.0), [0, COLONY_HEIGHT - 1], 0),
+        (vec2(10_000.0, 0.0), [COLONY_WIDTH - 1, 0], 1),
+        (vec2(0.0, -10_000.0), [0, 0], 2),
+        (
+            vec2(0.0, 10_000.0),
+            [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+            3,
+        ),
+    ];
+    for zoom in [0.65, 1.0, 1.85] {
+        for (requested_center, position, edge) in cases {
+            let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+            camera.zoom = zoom;
+            camera.center = requested_center;
+            camera.clamp_isometric_with_insets(
+                COLONY_WIDTH as usize,
+                COLONY_HEIGHT as usize,
+                COLONY_HALF_WIDTH,
+                COLONY_HALF_HEIGHT,
+                viewport,
+                ColonyView::camera_insets(zoom),
+            );
+            let bounds = ColonyView::new(viewport, &camera).plot_render_bounds(position);
+            match edge {
+                0 => assert!(bounds.x >= viewport.x - 0.01),
+                1 => assert!(bounds.right() <= viewport.right() + 0.01),
+                2 => assert!(bounds.y >= viewport.y - 0.01),
+                _ => assert!(bounds.bottom() <= viewport.bottom() + 0.01),
+            }
+        }
+    }
+}
+
+#[test]
 fn maximum_zoom_culling_retains_scaled_building_edges() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
     let position = SETTLEMENT_CENTER;

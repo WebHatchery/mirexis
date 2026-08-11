@@ -16,6 +16,14 @@ pub(crate) const CANOPY_ART_SCALE: f32 = 1.15;
 pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.65];
 pub(crate) const TERRAIN_ART_ASPECT: f32 = 4.0 / 3.0;
 
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct CameraInsets {
+    pub(crate) left: f32,
+    pub(crate) top: f32,
+    pub(crate) right: f32,
+    pub(crate) bottom: f32,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct WorldCamera {
     pub(crate) center: Vec2,
@@ -171,6 +179,7 @@ impl WorldCamera {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn clamp_isometric(
         &mut self,
         width: usize,
@@ -179,14 +188,37 @@ impl WorldCamera {
         half_height: f32,
         viewport: Rect,
     ) {
-        let min = vec2(
+        self.clamp_isometric_with_insets(
+            width,
+            height,
+            half_width,
+            half_height,
+            viewport,
+            CameraInsets::default(),
+        );
+    }
+
+    pub(crate) fn clamp_isometric_with_insets(
+        &mut self,
+        width: usize,
+        height: usize,
+        half_width: f32,
+        half_height: f32,
+        viewport: Rect,
+        insets: CameraInsets,
+    ) {
+        let mut min = vec2(
             -(height.saturating_sub(1) as f32) * half_width - half_width,
             -half_height,
         );
-        let max = vec2(
+        let mut max = vec2(
             width.saturating_sub(1) as f32 * half_width + half_width,
             (width.saturating_add(height).saturating_sub(2) as f32) * half_height + half_height,
         );
+        min.x -= insets.left / self.zoom;
+        min.y -= insets.top / self.zoom;
+        max.x += insets.right / self.zoom;
+        max.y += insets.bottom / self.zoom;
         let visible_half = viewport.size() * 0.5 / self.zoom;
         self.center.x = clamp_axis(self.center.x, min.x, max.x, visible_half.x);
         self.center.y = clamp_axis(self.center.y, min.y, max.y, visible_half.y);

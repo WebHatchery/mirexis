@@ -2,7 +2,7 @@
 
 use crate::data::{ObjectiveKind, Team};
 use crate::grid_ui::{
-    GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
+    CameraInsets, GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
     STRUCTURE_ART_SCALE, TERRAIN_ART_PIVOT, TERRAIN_ART_SCALE,
 };
 use crate::state::ObjectiveState;
@@ -36,6 +36,15 @@ fn camera_controls_origin(panel: Rect) -> Vec2 {
     )
 }
 
+fn camera_art_insets(zoom: f32) -> CameraInsets {
+    CameraInsets {
+        left: 4.0 * zoom,
+        top: 42.0 * zoom,
+        right: 4.0 * zoom,
+        bottom: 18.0 * zoom,
+    }
+}
+
 pub(crate) fn draw(
     ctx: &UiContext<'_>,
     camera: &mut WorldCamera,
@@ -64,12 +73,13 @@ pub(crate) fn draw(
     camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     let camera_dragged = input_enabled && camera.update(grid_rect, mouse);
     let suppress_map_click = !input_enabled || camera_control_clicked || camera_dragged;
-    camera.clamp_isometric(
+    camera.clamp_isometric_with_insets(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,
         crate::grid_ui::TACTICAL_HALF_WIDTH,
         crate::grid_ui::TACTICAL_HALF_HEIGHT,
         grid_rect,
+        camera_art_insets(camera.zoom),
     );
     let view = GridView::with_camera(
         ctx.session.tactical.fog.width,

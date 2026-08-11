@@ -37,43 +37,16 @@ pub fn draw_colony(
     );
     let suppress_actions =
         crate::colony_map_ui::draw(campaign, assets, visuals, ui, camera, mouse, &mut actions);
-    draw_header(campaign);
+    crate::colony_header_ui::draw(campaign, mouse, &mut actions);
     draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
-        "PAD // D-PAD SELECT MISSION · A BRIEF · X ROSTER · B TITLE  //  MOUSE // BUILD · RESEARCH · CHOOSE",
+        "PAD // D-PAD SELECT MISSION · A BRIEF · X ROSTER · B TITLE  //  TAP // TITLE · BUILD · RESEARCH · CHOOSE",
         28.0,
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
     crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
     actions
-}
-
-fn draw_header(campaign: &CampaignState) {
-    draw_surface(
-        Rect::new(10.0, 10.0, LOGICAL_WIDTH - 20.0, 52.0),
-        &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
-            .with_border(1.0, Color::new(0.22, 0.62, 0.56, 0.8))
-            .with_left_accent(5.0, Color::new(0.34, 0.86, 0.68, 1.0)),
-    );
-    draw_ui_text_ex(
-        "MIREXIS COLONY",
-        32.0,
-        44.0,
-        TextStyle::new(24.0, dark::TEXT_BRIGHT).params(),
-    );
-    draw_ui_text_ex(
-        &campaign.strategy.phase_name,
-        250.0,
-        40.0,
-        TextStyle::new(15.0, dark::ACCENT).params(),
-    );
-    draw_ui_text_ex(
-        &format!("OPERATIONS COMPLETED  {}", campaign.operations_completed),
-        974.0,
-        40.0,
-        TextStyle::new(16.0, dark::TEXT_DIM).params(),
-    );
 }
 
 fn draw_operations(

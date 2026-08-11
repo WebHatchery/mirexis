@@ -280,6 +280,7 @@ impl Game {
                     .campaign
                     .strategy
                     .materialize_selected(&self.data, &self.campaign.colony);
+                self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");

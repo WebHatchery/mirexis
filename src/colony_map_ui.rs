@@ -15,54 +15,8 @@ use macroquad_toolkit::ui::VirtualUi;
 pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
 pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
 
-#[derive(Clone, Copy)]
-struct ColonyView {
-    viewport: Rect,
-    origin: Vec2,
-    half_width: f32,
-    half_height: f32,
-    zoom: f32,
-}
-
-impl ColonyView {
-    fn new(viewport: Rect, camera: &WorldCamera) -> Self {
-        Self {
-            viewport,
-            origin: viewport.center() - camera.center * camera.zoom,
-            half_width: COLONY_HALF_WIDTH * camera.zoom,
-            half_height: COLONY_HALF_HEIGHT * camera.zoom,
-            zoom: camera.zoom,
-        }
-    }
-
-    fn plot_center(self, position: [i32; 2]) -> Vec2 {
-        vec2(
-            self.origin.x + (position[0] - position[1]) as f32 * self.half_width,
-            self.origin.y + (position[0] + position[1]) as f32 * self.half_height,
-        )
-    }
-
-    fn plot_render_bounds(self, position: [i32; 2]) -> Rect {
-        let center = self.plot_center(position);
-        let horizontal = self.half_width.max(35.0 * self.zoom).max(36.0);
-        let above = self.half_height.max(52.0 * self.zoom).max(61.0);
-        let below = (self.half_height + 7.0).max(18.0 * self.zoom);
-        Rect::new(
-            center.x - horizontal,
-            center.y - above,
-            horizontal * 2.0,
-            above + below,
-        )
-    }
-
-    fn visible(self, position: [i32; 2]) -> bool {
-        let bounds = self.plot_render_bounds(position);
-        bounds.right() >= self.viewport.x
-            && bounds.x <= self.viewport.right()
-            && bounds.bottom() >= self.viewport.y
-            && bounds.y <= self.viewport.bottom()
-    }
-}
+mod view;
+use view::ColonyView;
 
 pub(crate) fn draw(
     campaign: &CampaignState,
@@ -98,12 +52,13 @@ pub(crate) fn draw(
     );
     let camera_dragged = camera.update(viewport, mouse);
     let suppress_plot_click = camera_control_clicked || camera_dragged;
-    camera.clamp_isometric(
+    camera.clamp_isometric_with_insets(
         COLONY_WIDTH as usize,
         COLONY_HEIGHT as usize,
         COLONY_HALF_WIDTH,
         COLONY_HALF_HEIGHT,
         viewport,
+        ColonyView::camera_insets(camera.zoom),
     );
     let view = ColonyView::new(viewport, camera);
     draw_wetland_backdrop(viewport);
