@@ -26,7 +26,7 @@ Completion rule: a requirement is complete only when current implementation and 
 - File integrity: all 85 byte counts and SHA-256 values in `FINAL_CAPTURE_INVENTORY.md` were recomputed against the frozen PNG set and match in manifest order.
 - Source constraints: every Rust source and test file passes the enforced 800-physical-line limit; the current largest file is `src/strategy.rs`.
 - Shipping integrity: `publish.ps1` creates Windows and WebGL builds with 27 runtime assets (25.85 MB), includes both manifests and all atlas families, and excludes `art_sources`.
-- Browser integrity: a fresh final preview load renders the WebGL canvas at 1200 x 675 with no panic, runtime-error, or WASM-load-error overlay.
+- Browser integrity: a fresh final preview load renders the WebGL canvas at 1200 x 675 with no panic, runtime-error, or WASM-load-error overlay; clicks aimed through the HELP modal at the obscured pan/zoom controls leave 1,131,426 compared battlefield bytes exactly unchanged.
 - Office-suite constraint: no LibreOffice/soffice dependency or invocation exists in the worktree or verification workflow.
 
 ## Remaining gate

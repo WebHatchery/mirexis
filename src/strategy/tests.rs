@@ -1,5 +1,40 @@
 use super::*;
 
+fn positions_are_connected(
+    start: [i32; 2],
+    goal: [i32; 2],
+    blocked: &std::collections::HashSet<[i32; 2]>,
+    width: i32,
+    height: i32,
+) -> bool {
+    use std::collections::{HashSet, VecDeque};
+
+    let mut frontier = VecDeque::from([start]);
+    let mut visited = HashSet::from([start]);
+    while let Some(position) = frontier.pop_front() {
+        if position == goal {
+            return true;
+        }
+        for next in [
+            [position[0] - 1, position[1]],
+            [position[0] + 1, position[1]],
+            [position[0], position[1] - 1],
+            [position[0], position[1] + 1],
+        ] {
+            if next[0] >= 0
+                && next[1] >= 0
+                && next[0] < width
+                && next[1] < height
+                && !blocked.contains(&next)
+                && visited.insert(next)
+            {
+                frontier.push_back(next);
+            }
+        }
+    }
+    false
+}
+
 #[test]
 fn isolation_starts_with_pressure_threats_and_content() {
     let data = GameData::load().unwrap();
@@ -310,6 +345,13 @@ fn every_reinforcement_operation_enters_safely_across_the_large_world() {
         let roster = campaign.deployment_roster(&data, &mission);
         let session = GameSession::new(&data.config, &mission, &roster);
         assert!(!session.tactical.reinforcement_waves.is_empty());
+        let allied_position = session
+            .tactical
+            .units
+            .iter()
+            .find(|unit| unit.team == crate::data::Team::Colony)
+            .unwrap()
+            .position;
 
         for wave in session.tactical.reinforcement_waves.clone() {
             let mut arrival = session.clone();
@@ -343,6 +385,25 @@ fn every_reinforcement_operation_enters_safely_across_the_large_world() {
                     && unit.position
                         != TilePos::new(mission.objective_tile[0], mission.objective_tile[1])
             }));
+            assert!(
+                arrived.iter().all(|unit| {
+                    positions_are_connected(
+                        [unit.position.x, unit.position.y],
+                        [allied_position.x, allied_position.y],
+                        &arrival
+                            .tactical
+                            .blocked
+                            .iter()
+                            .map(|position| [position.x, position.y])
+                            .collect(),
+                        data.config.world_width as i32,
+                        data.config.world_height as i32,
+                    )
+                }),
+                "{} R{} strands a reinforcement fallback",
+                template.id,
+                wave.round
+            );
         }
     }
 }
@@ -353,40 +414,7 @@ fn every_formation_and_hostile_front_can_cross_each_materialized_battlefield() {
     use crate::data::Team;
     use crate::formation::{self, FormationKind};
     use macroquad_toolkit::grid::TilePos;
-    use std::collections::{HashSet, VecDeque};
-
-    fn reachable(
-        start: [i32; 2],
-        goal: [i32; 2],
-        blocked: &HashSet<[i32; 2]>,
-        width: i32,
-        height: i32,
-    ) -> bool {
-        let mut frontier = VecDeque::from([start]);
-        let mut visited = HashSet::from([start]);
-        while let Some(position) = frontier.pop_front() {
-            if position == goal {
-                return true;
-            }
-            for next in [
-                [position[0] - 1, position[1]],
-                [position[0] + 1, position[1]],
-                [position[0], position[1] - 1],
-                [position[0], position[1] + 1],
-            ] {
-                if next[0] >= 0
-                    && next[1] >= 0
-                    && next[0] < width
-                    && next[1] < height
-                    && !blocked.contains(&next)
-                    && visited.insert(next)
-                {
-                    frontier.push_back(next);
-                }
-            }
-        }
-        false
-    }
+    use std::collections::HashSet;
 
     let data = GameData::load().unwrap();
     let colony = ColonyState::new();
@@ -421,7 +449,7 @@ fn every_formation_and_hostile_front_can_cross_each_materialized_battlefield() {
                     first_colonist
                 };
                 assert!(
-                    reachable(
+                    positions_are_connected(
                         unit.position,
                         destination,
                         &blocked,
