@@ -1,7 +1,7 @@
 # Mirexis UI Contrast and Typography Audit
 
-Audit date: 2026-08-11  
-Evidence: final 1280 x 720 capture set plus `responsive_final_typography_1024x768` and `responsive_final_controls_1024x768`
+Audit date: 2026-08-12
+Evidence: final 1280 x 720 capture set plus the tracked `responsive_supported_sizes_contact.jpg` and `responsive_final_critical_scenes.jpg` scale summaries
 
 ## Contrast samples
 
@@ -28,7 +28,7 @@ All sampled functional text exceeds 4.5:1. State is never communicated by colour
 - Body and operational data: 10-15 logical pixels.
 - Captions: 9.5 logical pixels minimum and limited to redundant height/ending metadata.
 
-The final readability pass raised event-kind labels, cover values, armour markers, completed research badges, and height labels. The densest battle log, tactical HUD, cover overlay, research state, controller-focused title, and strategy-screen input cues were recaptured at 1024 x 768. Uniform letterboxing is intentional; no label, footer cue, or focus ring clips at the smallest supported desktop size.
+The final readability pass raised event-kind labels, cover values, armour markers, completed research badges, and height labels. The root capture suite covers the densest battle log, tactical HUD, cover overlay, research state, controller-focused title, and strategy-screen input cues. A current-release 1024 x 768 pass additionally verifies the Mirexis decision, debrief, and equipment/targeting panels. Uniform letterboxing is intentional; no label, footer cue, recovery control, or focus ring clips at the smallest supported desktop size.
 
 ## Verdict
 
