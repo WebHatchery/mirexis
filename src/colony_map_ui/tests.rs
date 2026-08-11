@@ -17,6 +17,96 @@ fn transformed_colony_centers_round_trip_through_hover_testing() {
 }
 
 #[test]
+fn every_visible_colony_plot_round_trips_at_each_zoom_and_clamp_extreme() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    for zoom in [0.65, 1.0, 1.85] {
+        for center in [
+            vec2(-10_000.0, 0.0),
+            vec2(10_000.0, 0.0),
+            vec2(0.0, -10_000.0),
+            vec2(0.0, 10_000.0),
+            vec2(0.0, 0.0),
+        ] {
+            let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+            camera.zoom = zoom;
+            camera.center = center;
+            camera.clamp_isometric(
+                COLONY_WIDTH as usize,
+                COLONY_HEIGHT as usize,
+                COLONY_HALF_WIDTH,
+                COLONY_HALF_HEIGHT,
+                viewport,
+            );
+            let view = ColonyView::new(viewport, &camera);
+            for y in 0..COLONY_HEIGHT {
+                for x in 0..COLONY_WIDTH {
+                    let position = [x, y];
+                    let center = view.plot_center(position);
+                    if viewport.contains(center) {
+                        assert_eq!(
+                            hovered_plot(view, center),
+                            Some(position),
+                            "plot {position:?} failed at zoom {zoom} and camera {:?}",
+                            camera.center
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn colony_clamp_exposes_each_outer_diamond_vertex_without_clipping() {
+    let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
+    let cases = [
+        (
+            vec2(-10_000.0, 0.0),
+            [0, COLONY_HEIGHT - 1],
+            vec2(-1.0, 0.0),
+        ),
+        (vec2(10_000.0, 0.0), [COLONY_WIDTH - 1, 0], vec2(1.0, 0.0)),
+        (vec2(0.0, -10_000.0), [0, 0], vec2(0.0, -1.0)),
+        (
+            vec2(0.0, 10_000.0),
+            [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+            vec2(0.0, 1.0),
+        ),
+    ];
+    for zoom in [0.65, 1.0, 1.85] {
+        for (requested_center, position, vertex_direction) in cases {
+            let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+            camera.zoom = zoom;
+            camera.center = requested_center;
+            camera.clamp_isometric(
+                COLONY_WIDTH as usize,
+                COLONY_HEIGHT as usize,
+                COLONY_HALF_WIDTH,
+                COLONY_HALF_HEIGHT,
+                viewport,
+            );
+            let view = ColonyView::new(viewport, &camera);
+            let vertex = view.plot_center(position)
+                + vec2(
+                    vertex_direction.x * view.half_width,
+                    vertex_direction.y * view.half_height,
+                );
+            assert!(
+                vertex.x >= viewport.x - 0.01
+                    && vertex.x <= viewport.right() + 0.01
+                    && vertex.y >= viewport.y - 0.01
+                    && vertex.y <= viewport.bottom() + 0.01,
+                "outer vertex for {position:?} clipped at zoom {zoom}: {vertex:?}"
+            );
+            assert_eq!(
+                hovered_plot(view, view.plot_center(position)),
+                Some(position)
+            );
+        }
+    }
+}
+
+#[test]
 fn colony_buildings_retain_fixed_default_world_scale() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 506.0);
     let small_world_camera = WorldCamera::colony_start([3, 3]);

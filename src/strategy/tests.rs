@@ -348,6 +348,98 @@ fn every_reinforcement_operation_enters_safely_across_the_large_world() {
 }
 
 #[test]
+fn every_formation_and_hostile_front_can_cross_each_materialized_battlefield() {
+    use crate::campaign::CampaignState;
+    use crate::data::Team;
+    use crate::formation::{self, FormationKind};
+    use macroquad_toolkit::grid::TilePos;
+    use std::collections::{HashSet, VecDeque};
+
+    fn reachable(
+        start: [i32; 2],
+        goal: [i32; 2],
+        blocked: &HashSet<[i32; 2]>,
+        width: i32,
+        height: i32,
+    ) -> bool {
+        let mut frontier = VecDeque::from([start]);
+        let mut visited = HashSet::from([start]);
+        while let Some(position) = frontier.pop_front() {
+            if position == goal {
+                return true;
+            }
+            for next in [
+                [position[0] - 1, position[1]],
+                [position[0] + 1, position[1]],
+                [position[0], position[1] - 1],
+                [position[0], position[1] + 1],
+            ] {
+                if next[0] >= 0
+                    && next[1] >= 0
+                    && next[0] < width
+                    && next[1] < height
+                    && !blocked.contains(&next)
+                    && visited.insert(next)
+                {
+                    frontier.push_back(next);
+                }
+            }
+        }
+        false
+    }
+
+    let data = GameData::load().unwrap();
+    let colony = ColonyState::new();
+    let campaign = CampaignState::new(&data);
+    for template in &data.campaign.mission_templates {
+        let mut strategy = StrategyState::new(&data);
+        let instance = strategy.instantiate(template);
+        strategy.selected_mission_id = instance.id.clone();
+        strategy.mission_offers = vec![instance];
+        let mission = strategy.materialize_selected(&data, &colony);
+        let blocked = mission
+            .blocked_tiles
+            .iter()
+            .copied()
+            .collect::<HashSet<_>>();
+        for formation in [
+            FormationKind::Wedge,
+            FormationKind::Line,
+            FormationKind::Column,
+        ] {
+            let mut deployment = campaign.deployment_roster(&data, &mission);
+            formation::apply(&mut deployment, &mission, &data.config, formation);
+            let first_colonist = deployment
+                .iter()
+                .find(|unit| unit.team == Team::Colony)
+                .unwrap()
+                .position;
+            for unit in &deployment {
+                let destination = if unit.team == Team::Colony {
+                    mission.objective_tile
+                } else {
+                    first_colonist
+                };
+                assert!(
+                    reachable(
+                        unit.position,
+                        destination,
+                        &blocked,
+                        data.config.world_width as i32,
+                        data.config.world_height as i32,
+                    ),
+                    "{} {:?} strands {} at {:?}",
+                    template.id,
+                    formation,
+                    unit.id,
+                    TilePos::new(unit.position[0], unit.position[1])
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn new_faction_operations_have_distinct_objectives_and_recovery() {
     let data = GameData::load().unwrap();
     let sporefield = data
