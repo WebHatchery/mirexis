@@ -597,11 +597,6 @@ fn draw_character_event(
         .events
         .iter()
         .find(|definition| definition.id == event.id);
-    let legacy_character_id = if event.legacy_character_id.is_empty() {
-        definition.map_or("", |definition| definition.legacy_character_id.as_str())
-    } else {
-        event.legacy_character_id.as_str()
-    };
     let legacy_stat = if event.legacy_stat.is_empty() {
         definition.map_or("", |definition| definition.legacy_stat.as_str())
     } else {
@@ -629,17 +624,6 @@ fn draw_character_event(
         510.0,
         TextStyle::new(12.0, dark::WARNING).params(),
     );
-    let recipient = campaign
-        .roster
-        .iter()
-        .find(|character| character.id == legacy_character_id)
-        .map_or("UNKNOWN", |character| {
-            character
-                .name
-                .split_whitespace()
-                .next()
-                .unwrap_or("UNKNOWN")
-        });
     if let Some(definition) = definition {
         for (index, participant) in definition.participants.iter().take(2).enumerate() {
             if let Some(character) = campaign
@@ -678,8 +662,7 @@ fn draw_character_event(
     }
     draw_ui_text_ex(
         &format!(
-            "CHOICE EFFECT // {} {:+} {} // BOND +2 // {} FOOD // {} {:+}",
-            recipient.to_uppercase(),
+            "CHOOSE CARRIER // {:+} {} // BOND +2 // {} FOOD // {} {:+}",
             legacy_amount,
             legacy_stat.to_uppercase(),
             event.food_cost,
@@ -687,16 +670,35 @@ fn draw_character_event(
             event.attention_change
         ),
         878.0,
-        592.0,
+        586.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
-    if colony_button(
-        Rect::new(878.0, 606.0, 362.0, 32.0),
-        &format!("RESOLVE // {}", event.title.to_uppercase()),
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::ResolveCharacterEvent);
+    for (index, participant_id) in event.participants.iter().take(2).enumerate() {
+        let Some(character) = campaign
+            .roster
+            .iter()
+            .find(|character| &character.id == participant_id)
+        else {
+            continue;
+        };
+        let first_name = character
+            .name
+            .split_whitespace()
+            .next()
+            .unwrap_or(&character.name);
+        if colony_button(
+            Rect::new(878.0, 592.0 + index as f32 * 24.0, 362.0, 22.0),
+            &format!(
+                "CHOOSE {} // {:+} {} IN FUTURE BATTLES",
+                first_name.to_uppercase(),
+                legacy_amount,
+                legacy_stat.to_uppercase()
+            ),
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::ResolveCharacterEvent(participant_id.clone()));
+        }
     }
 }
 

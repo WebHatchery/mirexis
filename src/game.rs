@@ -375,8 +375,11 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
-            UiAction::ResolveCharacterEvent => {
-                match self.campaign.resolve_first_character_event(&self.data) {
+            UiAction::ResolveCharacterEvent(character_id) => {
+                match self
+                    .campaign
+                    .resolve_first_character_event_for(&character_id, &self.data)
+                {
                     Ok(title) => {
                         self.notifications
                             .success(format!("Event resolved: {}", title));

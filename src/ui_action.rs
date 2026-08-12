@@ -13,7 +13,7 @@ pub enum UiAction {
     ChooseEscalationResponse(String),
     ChooseMirexisPath(String),
     ChooseMutationEvolution(String, String),
-    ResolveCharacterEvent,
+    ResolveCharacterEvent(String),
     DeployMission,
     CycleFormation,
     ToggleDeployment(String),

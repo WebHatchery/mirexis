@@ -33,7 +33,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 4 | colony | `ui_colony.png` | 376783 | `e083675c92ba721b8dbbd9458e08bafbc2b304ce08d1dc598731ba1a17d7c55d` |
 | 5 | contact | `ui_contact.png` | 393944 | `49062d6925b6f79d448894a6e2c6d774aab321e28825a92f6d923dce89eb3911` |
 | 6 | contact_gear | `ui_contact_gear.png` | 249571 | `f80b5bc361f12ed23eb369f1dce1cfd30628c2830ccedc53b1f8663ecb22bd55` |
-| 7 | contact_event | `ui_contact_event.png` | 379501 | `8e884cc91180142a734101e47895916f277c19492fd20d3224f9ceffb4a49e71` |
+| 7 | contact_event | `ui_contact_event.png` | 877143 | `b8b4d4330b7052d90ab716c774cd79dbec5634e435557ec5d0f594f2a3359c80` |
 | 8 | adaptation | `ui_adaptation.png` | 354242 | `9967ef31d1799de1f599deb6de1ab61097ec56dd444426dd39a3fd869453b00b` |
 | 9 | gene_lab | `ui_gene_lab.png` | 200729 | `147c3324791d4a30c03c71966b6d07c8a3c7bf38dc694e92eec9b65084b8f5fe` |
 | 10 | evolution | `ui_evolution.png` | 248326 | `730d5bb149016333ee92b12f1352451b02cc9b2650160753568a1250be4cc3b4` |

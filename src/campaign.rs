@@ -351,11 +351,44 @@ impl CampaignState {
     }
 
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {
+        let recipient_id = self
+            .strategy
+            .available_event()
+            .and_then(|event| {
+                (!event.legacy_character_id.is_empty())
+                    .then_some(event.legacy_character_id.as_str())
+            })
+            .or_else(|| {
+                self.strategy.available_event().and_then(|event| {
+                    data.campaign
+                        .events
+                        .iter()
+                        .find(|definition| definition.id == event.id)
+                        .map(|definition| definition.legacy_character_id.as_str())
+                })
+            })
+            .ok_or_else(|| "No event legacy recipient".to_owned())?
+            .to_owned();
+        self.resolve_first_character_event_for(&recipient_id, data)
+    }
+
+    pub fn resolve_first_character_event_for(
+        &mut self,
+        recipient_id: &str,
+        data: &GameData,
+    ) -> Result<String, String> {
         let event = self
             .strategy
             .available_event()
             .cloned()
             .ok_or_else(|| "No unresolved character events".to_owned())?;
+        if !event
+            .participants
+            .iter()
+            .any(|participant| participant == recipient_id)
+        {
+            return Err("Choose one of the event participants".to_owned());
+        }
         let data_legacy = data
             .campaign
             .events
@@ -364,29 +397,26 @@ impl CampaignState {
             .map(|definition| {
                 (
                     definition.legacy_name.clone(),
-                    definition.legacy_character_id.clone(),
                     definition.legacy_stat.clone(),
                     definition.legacy_amount,
                 )
             });
-        let (legacy_name, legacy_character_id, legacy_stat, legacy_amount) =
-            if event.legacy_amount != 0 {
-                (
-                    event.legacy_name.clone(),
-                    event.legacy_character_id.clone(),
-                    event.legacy_stat.clone(),
-                    event.legacy_amount,
-                )
-            } else {
-                data_legacy.unwrap_or_default()
-            };
+        let (legacy_name, legacy_stat, legacy_amount) = if event.legacy_amount != 0 {
+            (
+                event.legacy_name.clone(),
+                event.legacy_stat.clone(),
+                event.legacy_amount,
+            )
+        } else {
+            data_legacy.unwrap_or_default()
+        };
         if legacy_amount != 0
             && !self
                 .roster
                 .iter()
-                .any(|character| character.id == legacy_character_id)
+                .any(|character| character.id == recipient_id)
         {
-            return Err(format!("Unknown legacy recipient: {}", legacy_character_id));
+            return Err(format!("Unknown legacy recipient: {}", recipient_id));
         }
         let title = self.strategy.resolve_first_event(&mut self.colony)?;
         self.strengthen_event_participants(&event.participants);
@@ -394,7 +424,7 @@ impl CampaignState {
             let character = self
                 .roster
                 .iter_mut()
-                .find(|character| character.id == legacy_character_id)
+                .find(|character| character.id == recipient_id)
                 .expect("legacy recipient was validated before event mutation");
             if !character
                 .event_legacies

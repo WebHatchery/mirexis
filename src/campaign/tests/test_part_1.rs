@@ -379,6 +379,48 @@ fn character_events_leave_participant_legacies_in_later_deployments() {
     );
     assert_eq!(campaign.relationships.len(), 2);
 }
+
+#[test]
+fn character_event_choice_puts_the_legacy_on_the_selected_participant() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let kira_base = data
+        .roster
+        .iter()
+        .find(|unit| unit.id == "kira_voss")
+        .unwrap();
+    let movement_before = derive_unit(kira_base, &campaign.roster[0], &data).move_range;
+    let food_before = campaign.colony.resources.food;
+
+    assert_eq!(
+        campaign.resolve_first_character_event_for("not_a_participant", &data),
+        Err("Choose one of the event participants".to_owned())
+    );
+    assert_eq!(campaign.colony.resources.food, food_before);
+
+    campaign
+        .resolve_first_character_event_for("kira_voss", &data)
+        .unwrap();
+
+    let kira = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "kira_voss")
+        .unwrap();
+    let sol = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "sol_cairn")
+        .unwrap();
+    assert_eq!(kira.event_legacies[0].name, "Survey Family Routes");
+    assert!(sol.event_legacies.is_empty());
+    assert_eq!(
+        derive_unit(kira_base, kira, &data).move_range,
+        movement_before + 1
+    );
+    assert_eq!(campaign.colony.resources.food, food_before - 2);
+}
+
 #[test]
 fn successful_operations_apply_all_recovered_resources() {
     let data = GameData::load().unwrap();
