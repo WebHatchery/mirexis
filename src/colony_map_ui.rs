@@ -73,6 +73,14 @@ pub(crate) fn draw(
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
     let hovered = hovered_plot(view, mouse);
+    let planning_site = hovered.filter(|position| {
+        campaign.colony.building_at(*position).is_none()
+            && campaign.colony.project_at(*position).is_none()
+            && campaign
+                .colony
+                .validate_construction_site(*position)
+                .is_ok()
+    });
     for sum in 0..(COLONY_WIDTH + COLONY_HEIGHT - 1) {
         for y in 0..COLONY_HEIGHT {
             let x = sum - y;
@@ -87,6 +95,7 @@ pub(crate) fn draw(
                     view,
                     [x, y],
                     hovered == Some([x, y]),
+                    planning_site,
                 );
             }
         }
@@ -311,24 +320,39 @@ fn draw_plot(
     view: ColonyView,
     position: [i32; 2],
     hovered: bool,
+    planning_site: Option<[i32; 2]>,
 ) {
     let center = view.plot_center(position);
     let building = campaign.colony.building_at(position);
     let project = campaign.colony.project_at(position);
     let occupied = building.is_some() || project.is_some();
+    let planning_clearance =
+        planning_site.is_some_and(|anchor| in_clearance_zone(anchor, position));
     let top = if hovered {
         Color::new(0.18, 0.39, 0.34, 1.0)
+    } else if planning_clearance {
+        Color::new(0.12, 0.31, 0.27, 1.0)
     } else if occupied {
         Color::new(0.12, 0.28, 0.25, 1.0)
     } else {
         Color::new(0.085, 0.19, 0.18, 1.0)
     };
-    terrain::draw_ground(assets, visuals, view, position, top, hovered, occupied);
+    terrain::draw_ground(
+        assets,
+        visuals,
+        view,
+        position,
+        top,
+        hovered || planning_clearance,
+        occupied,
+    );
     draw_diamond_outline(
         view,
         center,
         if hovered {
             Color::new(0.42, 0.82, 0.69, 0.92)
+        } else if planning_clearance {
+            Color::new(0.30, 0.67, 0.57, 0.82)
         } else {
             Color::new(0.18, 0.43, 0.37, 0.72)
         },
@@ -384,9 +408,13 @@ fn draw_plot(
             Color::new(0.35, 0.78, 0.72, 0.22),
         );
         draw_project(center, project.kind);
-    } else if hovered && campaign.colony.validate_construction_site(position).is_ok() {
+    } else if planning_site == Some(position) {
         draw_blueprint(center, campaign.colony.planned_construction);
     }
+}
+
+fn in_clearance_zone(anchor: [i32; 2], position: [i32; 2]) -> bool {
+    (anchor[0] - position[0]).abs() <= 1 && (anchor[1] - position[1]).abs() <= 1
 }
 
 fn building_index(kind: BuildingKind) -> usize {

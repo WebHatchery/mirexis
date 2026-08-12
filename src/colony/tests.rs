@@ -98,13 +98,13 @@ fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() 
             colony.project_at([3, 3]).map(|project| project.kind),
             Some(kind)
         );
-        for neighbour in clearance_positions([3, 3]).filter(|tile| *tile != [3, 3]) {
-            assert!(colony.project_at(neighbour).is_none());
+        for candidate in clearance_conflict_positions([3, 3]) {
+            assert!(colony.project_at(candidate).is_none());
             assert!(
                 colony
-                    .place_construction(BuildingKind::Barricade, neighbour)
+                    .place_construction(BuildingKind::Barricade, candidate)
                     .is_err(),
-                "construction was allowed beside queued {} at {neighbour:?}",
+                "construction zone overlapped queued {} at {candidate:?}",
                 kind.name()
             );
         }
@@ -117,9 +117,12 @@ fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() 
         for neighbour in clearance_positions([3, 3]).filter(|tile| *tile != [3, 3]) {
             assert!(colony.building_at(neighbour).is_none());
         }
-        colony
+        assert!(colony
             .place_construction(BuildingKind::Barricade, [5, 3])
-            .expect("one empty column between buildings satisfies clearance");
+            .is_err());
+        colony
+            .place_construction(BuildingKind::Barricade, [6, 3])
+            .expect("non-overlapping 3x3 placement zones satisfy clearance");
     }
 }
 
@@ -155,15 +158,23 @@ fn every_building_kind_owns_only_its_anchor_tile() {
                 "{} incorrectly claimed clearance tile {neighbour:?}",
                 kind.name()
             );
+        }
+        for candidate in clearance_conflict_positions([3, 3]) {
             assert!(
-                colony.validate_construction_site(neighbour).is_err(),
-                "{} allowed construction beside it at {neighbour:?}",
+                colony.validate_construction_site(candidate).is_err(),
+                "{} allowed an overlapping 3x3 zone at {candidate:?}",
                 kind.name()
             );
         }
-        assert!(colony.validate_construction_site([5, 3]).is_ok());
+        assert!(colony.validate_construction_site([6, 3]).is_ok());
         assert_eq!(kind.footprint(), &[[0, 0]]);
     }
+}
+
+fn clearance_conflict_positions(anchor: [i32; 2]) -> impl Iterator<Item = [i32; 2]> {
+    (-2..=2)
+        .flat_map(move |dy| (-2..=2).map(move |dx| [anchor[0] + dx, anchor[1] + dy]))
+        .filter(move |position| *position != anchor)
 }
 
 #[test]

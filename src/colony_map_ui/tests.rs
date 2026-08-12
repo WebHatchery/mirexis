@@ -36,7 +36,28 @@ fn clearance_plots_remain_unowned_but_cannot_be_planned() {
             .validate_construction_site(neighbour)
             .is_err());
     }
-    assert!(campaign.colony.validate_construction_site([5, 3]).is_ok());
+    for overlapping_anchor in [[5, 3], [5, 5], [1, 1]] {
+        assert!(campaign
+            .colony
+            .validate_construction_site(overlapping_anchor)
+            .is_err());
+    }
+    assert!(campaign.colony.validate_construction_site([6, 3]).is_ok());
+}
+
+#[test]
+fn prospective_building_preview_marks_its_complete_three_by_three_zone() {
+    let anchor = [7, 9];
+    let marked = (5..=11)
+        .flat_map(|y| (5..=11).map(move |x| [x, y]))
+        .filter(|position| in_clearance_zone(anchor, *position))
+        .collect::<Vec<_>>();
+
+    assert_eq!(marked.len(), 9);
+    assert!(marked.contains(&anchor));
+    assert!(marked.contains(&[6, 8]));
+    assert!(marked.contains(&[8, 10]));
+    assert!(!marked.contains(&[9, 9]));
 }
 
 #[test]

@@ -368,6 +368,7 @@ impl ColonyState {
         }
     }
 
+    #[cfg(test)]
     fn is_occupied(&self, position: [i32; 2]) -> bool {
         self.buildings
             .iter()
@@ -382,8 +383,16 @@ impl ColonyState {
         if !clearance_in_bounds(position) {
             return Err("Site needs one in-bounds clearance tile on every side".to_owned());
         }
-        if clearance_positions(position).any(|candidate| self.is_occupied(candidate)) {
-            return Err("Site needs one empty clearance tile on every side".to_owned());
+        if self
+            .buildings
+            .iter()
+            .any(|building| clearance_zones_overlap(position, building.position))
+            || self
+                .construction_queue
+                .iter()
+                .any(|project| clearance_zones_overlap(position, project.position))
+        {
+            return Err("Site's 3x3 clearance zone overlaps another structure".to_owned());
         }
         Ok(())
     }
@@ -473,7 +482,9 @@ fn migrated_open_plot(
         .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
         .filter(|position| {
             clearance_in_bounds(*position)
-                && clearance_positions(*position).all(|candidate| !occupied.contains(&candidate))
+                && occupied
+                    .iter()
+                    .all(|anchor| !clearance_zones_overlap(*position, *anchor))
         })
         .min_by_key(|position| {
             (
@@ -496,6 +507,10 @@ fn clearance_in_bounds(anchor: [i32; 2]) -> bool {
 
 fn clearance_positions(anchor: [i32; 2]) -> impl Iterator<Item = [i32; 2]> {
     (-1..=1).flat_map(move |dy| (-1..=1).map(move |dx| [anchor[0] + dx, anchor[1] + dy]))
+}
+
+fn clearance_zones_overlap(left: [i32; 2], right: [i32; 2]) -> bool {
+    (left[0] - right[0]).abs() <= 2 && (left[1] - right[1]).abs() <= 2
 }
 
 fn reserve_anchor(occupied: &mut std::collections::HashSet<[i32; 2]>, anchor: [i32; 2]) {
