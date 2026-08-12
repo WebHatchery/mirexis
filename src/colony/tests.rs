@@ -24,9 +24,9 @@ fn physical_placement_generates_the_colony_defense_map() {
         .unwrap();
     colony.advance_operation();
     let map = colony.defense_map();
-    for tile in [TilePos::new(3, 2), TilePos::new(2, 2), TilePos::new(3, 1)] {
-        assert!(map.cover_tiles.contains(&tile));
-    }
+    assert!(map.cover_tiles.contains(&TilePos::new(3, 2)));
+    assert!(!map.cover_tiles.contains(&TilePos::new(2, 2)));
+    assert!(!map.cover_tiles.contains(&TilePos::new(3, 1)));
     assert!(map.critical_objectives.contains(&TilePos::new(12, 11)));
 }
 
@@ -86,7 +86,7 @@ fn power_plant_construction_adds_redundant_grid_capacity() {
 }
 
 #[test]
-fn building_footprints_reserve_both_visible_rear_plots() {
+fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() {
     for kind in [
         BuildingKind::Barricade,
         BuildingKind::PowerPlant,
@@ -94,36 +94,37 @@ fn building_footprints_reserve_both_visible_rear_plots() {
     ] {
         let mut colony = ColonyState::new();
         colony.place_construction(kind, [3, 3]).unwrap();
-        for support in [[2, 3], [3, 2]] {
-            assert_eq!(
-                colony.project_at(support).map(|project| project.kind),
-                Some(kind),
-                "queued {} left support {support:?} open",
-                kind.name()
-            );
+        assert_eq!(
+            colony.project_at([3, 3]).map(|project| project.kind),
+            Some(kind)
+        );
+        for neighbour in clearance_positions([3, 3]).filter(|tile| *tile != [3, 3]) {
+            assert!(colony.project_at(neighbour).is_none());
             assert!(
                 colony
-                    .place_construction(BuildingKind::Barricade, support)
+                    .place_construction(BuildingKind::Barricade, neighbour)
                     .is_err(),
-                "construction overlapped queued {} at {support:?}",
+                "construction was allowed beside queued {} at {neighbour:?}",
                 kind.name()
             );
         }
 
         colony.advance_operation();
-        for support in [[2, 3], [3, 2]] {
-            assert_eq!(
-                colony.building_at(support).map(|building| building.kind),
-                Some(kind),
-                "completed {} left support {support:?} open",
-                kind.name()
-            );
+        assert_eq!(
+            colony.building_at([3, 3]).map(|building| building.kind),
+            Some(kind)
+        );
+        for neighbour in clearance_positions([3, 3]).filter(|tile| *tile != [3, 3]) {
+            assert!(colony.building_at(neighbour).is_none());
         }
+        colony
+            .place_construction(BuildingKind::Barricade, [5, 3])
+            .expect("one empty column between buildings satisfies clearance");
     }
 }
 
 #[test]
-fn every_building_kind_claims_both_visible_support_plots() {
+fn every_building_kind_owns_only_its_anchor_tile() {
     for kind in [
         BuildingKind::CommandCentre,
         BuildingKind::Barracks,
@@ -143,27 +144,41 @@ fn every_building_kind_claims_both_visible_support_plots() {
             level: 1,
             damaged: false,
         });
-        for support in [[2, 3], [3, 2]] {
-            assert_eq!(
-                colony.building_at(support).map(|found| found.id.as_str()),
-                Some("footprint_probe"),
-                "{} left visible support plot {support:?} open",
+        assert_eq!(
+            colony.building_at([3, 3]).map(|found| found.id.as_str()),
+            Some("footprint_probe")
+        );
+        assert!(colony.validate_construction_site([3, 3]).is_err());
+        for neighbour in clearance_positions([3, 3]).filter(|tile| *tile != [3, 3]) {
+            assert!(
+                colony.building_at(neighbour).is_none(),
+                "{} incorrectly claimed clearance tile {neighbour:?}",
+                kind.name()
+            );
+            assert!(
+                colony.validate_construction_site(neighbour).is_err(),
+                "{} allowed construction beside it at {neighbour:?}",
                 kind.name()
             );
         }
-        assert_eq!(kind.footprint(), &[[0, 0], [-1, 0], [0, -1]]);
+        assert!(colony.validate_construction_site([5, 3]).is_ok());
+        assert_eq!(kind.footprint(), &[[0, 0]]);
     }
 }
 
 #[test]
-fn multi_plot_structures_must_fit_inside_the_colony_boundary() {
+fn construction_clearance_must_fit_inside_the_colony_boundary() {
     let mut colony = ColonyState::new();
-    assert!(colony
-        .place_construction(BuildingKind::Barricade, [1, 0])
-        .is_err());
-    assert!(colony
-        .place_construction(BuildingKind::Barricade, [0, 1])
-        .is_err());
+    for edge in [
+        [1, 0],
+        [0, 1],
+        [COLONY_WIDTH - 1, 1],
+        [1, COLONY_HEIGHT - 1],
+    ] {
+        assert!(colony
+            .place_construction(BuildingKind::Barricade, edge)
+            .is_err());
+    }
     assert!(colony
         .place_construction(BuildingKind::PowerPlant, [1, 1])
         .is_ok());
@@ -175,7 +190,7 @@ fn colony_build_area_extends_far_beyond_the_initial_settlement() {
     colony
         .place_construction(
             BuildingKind::Barricade,
-            [COLONY_WIDTH - 1, COLONY_HEIGHT - 1],
+            [COLONY_WIDTH - 2, COLONY_HEIGHT - 2],
         )
         .expect("the far colony frontier remains buildable");
 }

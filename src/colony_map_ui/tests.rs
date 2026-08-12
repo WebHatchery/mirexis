@@ -10,31 +10,33 @@ fn colony_ground_has_basin_plain_shelf_and_settlement_levels() {
 }
 
 #[test]
-fn building_support_offsets_project_to_both_visible_rear_diamonds() {
-    let camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
-    let view = ColonyView::new(Rect::new(18.0, 106.0, 826.0, 506.0), &camera);
-    let anchor = view.plot_center([3, 3]);
-    let northwest = view.plot_center([2, 3]);
-    let northeast = view.plot_center([3, 2]);
-
-    assert!(northwest.x < anchor.x && northwest.y < anchor.y);
-    assert!(northeast.x > anchor.x && northeast.y < anchor.y);
-}
-
-#[test]
-fn hovering_any_building_plot_highlights_its_complete_footprint() {
+fn clearance_plots_remain_unowned_but_cannot_be_planned() {
     let data = crate::data::GameData::load().unwrap();
-    let campaign = CampaignState::new(&data);
-    let anchor = SETTLEMENT_CENTER;
-    let northwest = [anchor[0] - 1, anchor[1]];
-    let northeast = [anchor[0], anchor[1] - 1];
+    let mut campaign = CampaignState::new(&data);
+    let anchor = [3, 3];
+    campaign
+        .colony
+        .place_construction(BuildingKind::Barricade, anchor)
+        .unwrap();
 
-    for hovered in [anchor, northwest, northeast] {
-        assert!(footprint_is_hovered(&campaign, Some(hovered), anchor));
-        assert!(footprint_is_hovered(&campaign, Some(hovered), northwest));
-        assert!(footprint_is_hovered(&campaign, Some(hovered), northeast));
-        assert!(!footprint_is_hovered(&campaign, Some(hovered), [0, 0]));
+    for neighbour in [
+        [2, 2],
+        [3, 2],
+        [4, 2],
+        [2, 3],
+        [4, 3],
+        [2, 4],
+        [3, 4],
+        [4, 4],
+    ] {
+        assert!(campaign.colony.project_at(neighbour).is_none());
+        assert!(campaign.colony.building_at(neighbour).is_none());
+        assert!(campaign
+            .colony
+            .validate_construction_site(neighbour)
+            .is_err());
     }
+    assert!(campaign.colony.validate_construction_site([5, 3]).is_ok());
 }
 
 #[test]

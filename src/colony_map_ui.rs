@@ -86,7 +86,7 @@ pub(crate) fn draw(
                     visuals,
                     view,
                     [x, y],
-                    footprint_is_hovered(campaign, hovered, [x, y]),
+                    hovered == Some([x, y]),
                 );
             }
         }
@@ -108,27 +108,6 @@ pub(crate) fn draw(
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
     camera_dragged
-}
-
-fn footprint_is_hovered(
-    campaign: &CampaignState,
-    hovered: Option<[i32; 2]>,
-    position: [i32; 2],
-) -> bool {
-    let Some(hovered) = hovered else { return false };
-    if let Some(owner) = campaign.colony.building_at(hovered) {
-        return campaign
-            .colony
-            .building_at(position)
-            .is_some_and(|building| building.id == owner.id);
-    }
-    if let Some(owner) = campaign.colony.project_at(hovered) {
-        return campaign
-            .colony
-            .project_at(position)
-            .is_some_and(|project| project.id == owner.id);
-    }
-    position == hovered
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {
@@ -405,7 +384,7 @@ fn draw_plot(
             Color::new(0.35, 0.78, 0.72, 0.22),
         );
         draw_project(center, project.kind);
-    } else if hovered {
+    } else if hovered && campaign.colony.validate_construction_site(position).is_ok() {
         draw_blueprint(center, campaign.colony.planned_construction);
     }
 }
@@ -613,6 +592,13 @@ fn draw_blueprint(center: Vec2, kind: BuildingKind) {
 fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending: Option<[i32; 2]>) {
     let Some(position) = hovered else { return };
     let building = campaign.colony.building_at(position);
+    let project = campaign.colony.project_at(position);
+    let site_unavailable = building.is_none()
+        && project.is_none()
+        && campaign
+            .colony
+            .validate_construction_site(position)
+            .is_err();
     let text = if let Some(building) = building {
         if building.damaged {
             format!(
@@ -634,20 +620,25 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending:
                 building.level
             )
         }
-    } else if let Some(project) = campaign.colony.project_at(position) {
+    } else if let Some(project) = project {
         format!(
             "{} // UNDER CONSTRUCTION // {} OPERATION",
             project.kind.name().to_uppercase(),
             project.operations_remaining
         )
     } else {
-        format!(
-            "OPEN PLOT // BUILD {} // {} MAT",
-            campaign.colony.planned_construction.name().to_uppercase(),
-            campaign.colony.planned_construction.material_cost()
-        )
+        match campaign.colony.validate_construction_site(position) {
+            Ok(()) => format!(
+                "OPEN PLOT // BUILD {} // {} MAT",
+                campaign.colony.planned_construction.name().to_uppercase(),
+                campaign.colony.planned_construction.material_cost()
+            ),
+            Err(error) => format!("CLEARANCE REQUIRED // {}", error.to_uppercase()),
+        }
     };
-    let text = if pending == Some(position) {
+    let text = if site_unavailable {
+        text
+    } else if pending == Some(position) {
         format!("TAP AGAIN TO CONFIRM // {text}")
     } else {
         format!("TAP TO ARM // {text}")
@@ -673,6 +664,16 @@ fn handle_plot_click(
         return;
     }
     let Some(position) = hovered else { return };
+    if campaign.colony.building_at(position).is_none()
+        && campaign.colony.project_at(position).is_none()
+        && campaign
+            .colony
+            .validate_construction_site(position)
+            .is_err()
+    {
+        camera.clear_pending_colony_plot();
+        return;
+    }
     if !camera.confirm_colony_plot(position) {
         return;
     }
