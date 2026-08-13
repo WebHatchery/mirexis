@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "assets": [
+    "assets/art/atlases/ascendant_sentinel.png",
+    "assets/art/atlases/ascendant_warden.png",
+    "assets/art/atlases/brood_sporecaster.png",
+    "assets/art/atlases/brood_stalker.png",
+    "assets/art/atlases/directorate_drone.png",
+    "assets/art/atlases/directorate_rifleman.png",
+    "assets/art/atlases/ilya_reed.png",
+    "assets/art/atlases/kira_voss.png",
+    "assets/art/atlases/mara_venn.png",
+    "assets/art/atlases/nadi_vale.png",
+    "assets/art/atlases/sol_cairn.png",
+    "assets/art/colony/buildings_atlas.png",
+    "assets/art/effects/effects_atlas.png",
+    "assets/art/equipment/equipment_atlas.png",
+    "assets/art/portraits/enemies.png",
+    "assets/art/portraits/recruits.png",
+    "assets/art/terrain/terrain_atlas.png"
+  ]
+}
