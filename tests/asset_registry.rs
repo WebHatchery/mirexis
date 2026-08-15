@@ -35,10 +35,16 @@ fn registry_matches_external_texture_manifest_assets() {
         .into_iter()
         .map(|entry| entry.path)
         .collect::<BTreeSet<_>>();
-    assert_eq!(registered, runtime, "registry and runtime texture paths differ");
+    assert_eq!(
+        registered, runtime,
+        "registry and runtime texture paths differ"
+    );
 
     for path in registered {
         let file = project_root.join(&path);
-        assert!(file.is_file(), "registered runtime asset is missing: {path}");
+        assert!(
+            file.is_file(),
+            "registered runtime asset is missing: {path}"
+        );
     }
 }
