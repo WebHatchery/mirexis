@@ -1,7 +1,7 @@
 # Playable Game Roadmap — Phase 1
 
-Status: planned  
-Created: 28 August 2026  
+Status: in progress
+Created: 28 August 2026
 Product target: a cohesive, enjoyable, and testable first hour
 
 > This is production Phase 1 of moving Mirexis from tech demo to playable game. It is
@@ -332,6 +332,8 @@ Severity order:
 Phase 1 requires at least five uncoached first-time sessions after Checkpoint D, including
 at least two touch-primary sessions. Small samples guide iteration; they are not evidence
 of market fit.
+
+Session evidence and unresolved findings are recorded in `PHASE_1_PLAYTEST_LOG.md`.
 
 ## 8. Definition of done
 
