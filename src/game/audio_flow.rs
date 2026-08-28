@@ -39,6 +39,7 @@ impl Game {
     pub(super) fn finish_action_audio(&mut self, action: &UiAction, before_events: usize) {
         if tactical_command(action) && self.session.tactical.event_log.len() == before_events {
             self.audio.play(SoundCue::Invalid);
+            self.campaign.first_hour.metrics.invalid_command();
         }
     }
 

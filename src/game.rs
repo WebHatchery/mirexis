@@ -10,6 +10,7 @@ mod destructive_flow;
 mod first_hour_flow;
 mod input;
 mod persistence_io;
+mod playtest_flow;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;
@@ -175,6 +176,7 @@ impl Game {
         if self.state == AppState::Colony {
             self.colony_explorer.update(dt, &self.campaign.colony);
         }
+        self.update_playtest_metrics(dt);
         self.update_motion(dt);
         self.notifications.update(dt);
         if self.capture_input() {

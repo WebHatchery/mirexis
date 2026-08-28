@@ -92,6 +92,7 @@ fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
             "Tap HELP in battle for the full field manual; tap SAVE at any time.",
         ],
     );
+    draw_metrics(progress);
     if button(Rect::new(240.0, 542.0, 210.0, 42.0), "RETURN", true, mouse) {
         actions.push(UiAction::ToggleFirstHourHelp);
     }
@@ -122,6 +123,65 @@ fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
         13.0,
         dark::TEXT_DIM,
     );
+}
+
+fn draw_metrics(progress: &FirstHourProgress) {
+    let metrics = &progress.metrics;
+    text("SESSION METRICS", 240.0, 390.0, 16.0, dark::ACCENT);
+    text(
+        &format!(
+            "Elapsed {}  ·  first move {}  ·  city interaction {}  ·  first attack {}",
+            duration(Some(metrics.elapsed_millis)),
+            duration(metrics.first_city_move_millis),
+            duration(metrics.first_city_interaction_millis),
+            duration(metrics.first_tactical_attack_millis),
+        ),
+        240.0,
+        420.0,
+        14.0,
+        dark::TEXT_DIM,
+    );
+    text(
+        &format!(
+            "Operation one {}  ·  Operation two {}",
+            operation(
+                metrics.operation_one_duration_millis,
+                metrics.operation_one_rounds
+            ),
+            operation(
+                metrics.operation_two_duration_millis,
+                metrics.operation_two_rounds
+            ),
+        ),
+        240.0,
+        448.0,
+        14.0,
+        dark::TEXT_DIM,
+    );
+    text(
+        &format!(
+            "Invalid commands {}  ·  field-guide opens {}  ·  observer records exact input method",
+            metrics.invalid_commands, metrics.guide_opens
+        ),
+        240.0,
+        476.0,
+        14.0,
+        dark::TEXT_DIM,
+    );
+}
+
+fn operation(millis: Option<u64>, rounds: Option<u32>) -> String {
+    match (millis, rounds) {
+        (Some(millis), Some(rounds)) => format!("{} / R{}", duration(Some(millis)), rounds),
+        _ => "pending".to_owned(),
+    }
+}
+
+fn duration(millis: Option<u64>) -> String {
+    let Some(total_seconds) = millis.map(|value| value / 1_000) else {
+        return "—".to_owned();
+    };
+    format!("{}:{:02}", total_seconds / 60, total_seconds % 60)
 }
 
 fn section(x: f32, y: f32, title: &str, lines: &[&str]) {

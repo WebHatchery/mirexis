@@ -27,10 +27,11 @@ Status: automated and internal verification complete; external playtests pending
 | Motion | Persistent **REDUCED MOTION** completes unit presentation immediately and suppresses hostile replay animation | Confirm the faster state changes remain comprehensible |
 | Audio | Persistent 0–100% volume and mute; critical events retain text, markers, meters, and debrief state | Listen for fatigue and overlap in observed sessions |
 | Overlay input safety | Help, settings, battle log, and hostile replay clear underlying release actions | Repeat on touch-primary browsers |
+| Playtest evidence | Campaign-persisted elapsed time, first-action milestones, operation durations/rounds, invalid commands, and field-guide opens are visible in the field guide | Observer still records exact input method and qualitative findings |
 
 ## Automated verification baseline
 
-- 235 Mirexis unit tests pass.
+- 239 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - Canonical title and colony captures were refreshed after the new controls.

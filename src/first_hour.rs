@@ -58,6 +58,8 @@ pub(crate) struct FirstHourProgress {
     pub investment_name: String,
     #[serde(default)]
     pub second_outcome_won: Option<bool>,
+    #[serde(default)]
+    pub metrics: crate::first_hour_metrics::FirstHourMetrics,
 }
 
 impl Default for FirstHourProgress {
@@ -70,6 +72,7 @@ impl Default for FirstHourProgress {
             first_outcome_won: None,
             investment_name: String::new(),
             second_outcome_won: None,
+            metrics: crate::first_hour_metrics::FirstHourMetrics::default(),
         }
     }
 }
@@ -131,12 +134,14 @@ impl FirstHourProgress {
     }
 
     pub(crate) fn acknowledge_colonist(&mut self, id: &str) {
+        self.metrics.city_interacted();
         if self.stage == FirstHourStage::MeetCoordinator && id == "mara_venn" {
             self.stage = FirstHourStage::PrepareFirstOperation;
         }
     }
 
     pub(crate) fn deployed(&mut self, operations_completed: u32) {
+        self.metrics.operation_started();
         if operations_completed == 0 {
             self.stage = FirstHourStage::FirstOperation;
             self.lesson = TacticalLesson::Select;
@@ -161,6 +166,7 @@ impl FirstHourProgress {
     }
 
     pub(crate) fn attacked(&mut self) {
+        self.metrics.tactical_attack();
         self.advance_lesson(TacticalLesson::Attack, TacticalLesson::EnemyPhase);
     }
 
@@ -176,7 +182,8 @@ impl FirstHourProgress {
         self.advance_lesson(TacticalLesson::Ability, TacticalLesson::ApplyLearning);
     }
 
-    pub(crate) fn operation_resolved(&mut self, operation_number: u32, won: bool) {
+    pub(crate) fn operation_resolved(&mut self, operation_number: u32, won: bool, rounds: u32) {
+        self.metrics.operation_resolved(operation_number, rounds);
         match operation_number {
             1 => {
                 self.first_outcome_won = Some(won);

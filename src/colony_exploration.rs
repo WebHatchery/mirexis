@@ -47,6 +47,10 @@ impl ColonyExplorer {
         *self = Self::default();
     }
 
+    pub(crate) fn has_left_start(&self) -> bool {
+        self.position.distance_squared(PLAYER_START) > 0.01
+    }
+
     pub(crate) fn update(&mut self, dt: f32, colony: &ColonyState) {
         let manual = self.keyboard_direction + self.touch_direction;
         let (direction, remaining) = if manual.length_squared() > 0.01 {

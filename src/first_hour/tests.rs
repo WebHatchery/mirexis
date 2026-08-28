@@ -29,15 +29,17 @@ fn tactical_lessons_follow_the_authored_order() {
 #[test]
 fn defeat_still_reaches_return_and_promise_beats() {
     let mut progress = FirstHourProgress::default();
-    progress.operation_resolved(1, false);
+    progress.operation_resolved(1, false, 5);
     assert_eq!(progress.stage, FirstHourStage::FirstReturn);
     progress.returned_to_colony();
     progress.invested("priority treatment");
-    progress.operation_resolved(2, false);
+    progress.operation_resolved(2, false, 6);
     assert_eq!(progress.stage, FirstHourStage::SecondReturn);
     progress.returned_to_colony();
     assert_eq!(progress.stage, FirstHourStage::Promise);
     assert_eq!(progress.second_outcome_won, Some(false));
+    assert_eq!(progress.metrics.operation_one_rounds, Some(5));
+    assert_eq!(progress.metrics.operation_two_rounds, Some(6));
 }
 
 #[test]

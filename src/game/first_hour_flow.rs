@@ -29,8 +29,11 @@ impl Game {
                 "Colony introduction autosaved"
             }
             UiAction::ToggleFirstHourHelp => {
+                if !self.campaign.first_hour.help_open {
+                    self.campaign.first_hour.metrics.opened_guide();
+                }
                 self.campaign.first_hour.help_open = !self.campaign.first_hour.help_open;
-                return true;
+                "Field-guide state and session metrics autosaved"
             }
             UiAction::SkipFirstHourTutorial => {
                 self.campaign.first_hour.guidance_enabled = false;
@@ -79,9 +82,11 @@ impl Game {
             .last_outcome
             .as_ref()
             .is_some_and(|outcome| outcome.result == crate::state::ObjectiveState::Victory);
-        self.campaign
-            .first_hour
-            .operation_resolved(self.campaign.operations_completed, won);
+        self.campaign.first_hour.operation_resolved(
+            self.campaign.operations_completed,
+            won,
+            self.session.tactical.round,
+        );
     }
 
     pub(super) fn ensure_first_hour_recovery_reserve(&mut self) {

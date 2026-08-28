@@ -126,10 +126,12 @@ pub fn migrate_save_value(
             .map(|character| character.id.clone())
             .unwrap_or_default();
     }
-    if detected_version.as_deref() != Some(data.config.version.as_str()) {
+    if version_predates_first_hour(detected_version.as_deref()) {
         save.campaign
             .first_hour
             .migrate_from_operations(save.campaign.operations_completed);
+    }
+    if detected_version.as_deref() != Some(data.config.version.as_str()) {
         if let Some(tactical) = &mut save.tactical {
             for unit in &mut tactical.units {
                 if unit.faction.is_none() {
@@ -169,6 +171,17 @@ pub fn migrate_save_value(
     }
     save.version = data.config.version.clone();
     Ok(save)
+}
+
+fn version_predates_first_hour(version: Option<&str>) -> bool {
+    let Some(version) = version else {
+        return true;
+    };
+    let mut parts = version
+        .split('.')
+        .filter_map(|part| part.parse::<u32>().ok());
+    let pair = (parts.next().unwrap_or(0), parts.next().unwrap_or(0));
+    pair < (1, 64)
 }
 
 fn migrate_legacy_tactical_world(save: &mut SaveData, config: &GameConfig) -> Result<(), String> {

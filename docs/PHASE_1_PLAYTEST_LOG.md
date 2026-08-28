@@ -1,6 +1,6 @@
 # Phase 1 Playtest Log
 
-Status: awaiting Checkpoint D build
+Status: instrumented build ready; awaiting observed sessions
 
 Human evidence is required before Phase 1 can be marked complete. Automated tests and
 deterministic captures verify rules and presentation, but they do not count as uncoached
@@ -28,6 +28,11 @@ Copy this section once per observed session.
 - Recalled characters, goal, rewards, spending, and choice benefit:
 - Assistance given, exact point, and exact wording:
 - Issues filed with severity:
+
+Open the FIRST-HOUR FIELD GUIDE at the end of each run and transcribe its persisted
+session metrics for elapsed time, milestone timings, operation duration/round counts,
+invalid commands, and guide opens. The observer must still record exact input method,
+qualitative comprehension, favourite moments, and friction.
 
 ## Required coverage
 
