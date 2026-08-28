@@ -18,7 +18,7 @@ Target: 45–75 minutes, ending after the second operation and its colony conseq
 
 ## Starting economy and recovery targets
 
-- Starting resources remain 80 materials, 12 food, 0 biomass, and the colony's derived power supply.
+- Starting resources remain 120 materials, 24 food, 12 biomass, and the colony's derived power supply.
 - The first deployment costs one food per deployed colonist; two- and three-colonist squads are both viable.
 - Operation Glassroot awards 30 materials, 4 biomass, and no power on victory.
 - A failed operation still advances the operation count, recovery, threat clock, and mission offers; it does not remove the save or require campaign restart.

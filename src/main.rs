@@ -33,6 +33,8 @@ mod enemy_intent_ui;
 mod equipment_actions;
 mod equipment_catalog;
 mod equipment_ui;
+mod first_hour;
+mod first_hour_ui;
 mod formation;
 mod game;
 mod gene_lab_ui;

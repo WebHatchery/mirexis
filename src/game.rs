@@ -5,6 +5,7 @@ mod capture_debrief;
 mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
+mod first_hour_flow;
 mod input;
 mod persistence_io;
 
@@ -186,7 +187,7 @@ impl Game {
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
-        let actions = match self.state {
+        let mut actions = match self.state {
             AppState::Title => ui::draw_title(
                 &self.data,
                 self.save_exists,
@@ -270,6 +271,7 @@ impl Game {
                 &virtual_ui,
             ),
         };
+        self.draw_first_hour(&virtual_ui, &mut actions);
         end_virtual_ui_frame();
         for action in actions {
             self.events.push(action);
@@ -282,6 +284,9 @@ impl Game {
     }
 
     fn apply_action(&mut self, action: UiAction) {
+        if self.apply_first_hour_action(&action) {
+            return;
+        }
         if !matches!(&action, UiAction::EndPhase) {
             self.end_phase_armed = false;
         }
@@ -327,6 +332,7 @@ impl Game {
                     .complete_research(&research_id, &mut self.campaign.colony)
                 {
                     Ok(name) => {
+                        self.campaign.first_hour.invested(name.clone());
                         self.notifications
                             .success(format!("Research complete: {}", name));
                         self.autosave_campaign_only("Research autosaved");
@@ -405,6 +411,9 @@ impl Game {
             }
             UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
                 Ok(food_cost) => {
+                    self.campaign
+                        .first_hour
+                        .deployed(self.campaign.operations_completed);
                     self.targeting = None;
                     self.show_tactical_help = false;
                     self.show_battle_log = false;
@@ -461,6 +470,7 @@ impl Game {
             UiAction::ReturnToColony => {
                 self.targeting = None;
                 self.state = AppState::Colony;
+                self.campaign.first_hour.returned_to_colony();
                 self.autosave_campaign_only("Colony entry autosaved");
             }
             UiAction::OpenRoster => self.state = AppState::Roster,
@@ -504,6 +514,7 @@ impl Game {
                 }
                 match self.campaign.colony.place_construction(kind, position) {
                     Ok(_) => {
+                        self.campaign.first_hour.invested(kind.name());
                         self.notifications
                             .success(format!("{} construction planned", kind.name()));
                         self.autosave_campaign_only("Construction plan autosaved");
@@ -528,6 +539,7 @@ impl Game {
                     .train_character(&character_id, &class_id, &self.data)
                 {
                     Ok(cost) => {
+                        self.campaign.first_hour.invested("squad training");
                         self.notifications
                             .success(format!("Training complete · {} materials", cost));
                         self.autosave_campaign_only("Training autosaved");
@@ -537,6 +549,7 @@ impl Game {
             }
             UiAction::TreatInjury => match self.campaign.treat_first_injury() {
                 Ok(name) => {
+                    self.campaign.first_hour.invested("priority treatment");
                     self.notifications
                         .success(format!("{} received priority treatment", name));
                     self.autosave_campaign_only("Treatment autosaved");
@@ -550,6 +563,7 @@ impl Game {
                     .craft_equipment(&character_id, &equipment_id, &self.data)
                 {
                     Ok(cost) => {
+                        self.campaign.first_hour.invested("field equipment");
                         self.notifications
                             .success(format!("Equipment issued · {} materials", cost));
                         self.autosave_campaign_only("Workshop change autosaved");
@@ -557,7 +571,16 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
-            UiAction::SelectTile(tile) => self.session.select_tile(tile),
+            UiAction::SelectTile(tile) => {
+                self.session.select_tile(tile);
+                if self
+                    .session
+                    .selected_unit()
+                    .is_some_and(|unit| unit.position == tile)
+                {
+                    self.campaign.first_hour.selected();
+                }
+            }
             UiAction::SelectNextReady => {
                 if crate::phase_readiness::select_next(&mut self.session).is_none() {
                     self.notifications.info("No colonist has actions remaining");
@@ -565,6 +588,7 @@ impl Game {
             }
             UiAction::MoveSelected(tile) => {
                 if self.session.move_selected_to(tile) {
+                    self.campaign.first_hour.moved();
                     self.notifications.info("Colonist repositioned");
                 } else {
                     self.notifications
@@ -572,10 +596,13 @@ impl Game {
                 }
             }
             UiAction::AttackSelected(target_id) => match self.session.attack_selected(&target_id) {
-                Ok(events) => self.notifications.info(format!(
-                    "Attack resolved — {} tactical events",
-                    events.len()
-                )),
+                Ok(events) => {
+                    self.campaign.first_hour.attacked();
+                    self.notifications.info(format!(
+                        "Attack resolved — {} tactical events",
+                        events.len()
+                    ));
+                }
                 Err(_) => self.notifications.warning("No valid firing solution"),
             },
             UiAction::AttackCover(position) => match self.session.attack_selected_cover(position) {
@@ -590,18 +617,24 @@ impl Game {
                     .warning("Cover is outside the firing solution"),
             },
             UiAction::InteractObjective => match self.session.interact_selected() {
-                Ok(_) => self.notifications.success("Mission objective secured"),
+                Ok(_) => {
+                    self.campaign.first_hour.touched_objective();
+                    self.notifications.success("Mission objective secured");
+                }
                 Err(_) => self
                     .notifications
                     .warning("A colonist must reach the objective"),
             },
             UiAction::ActivateMutation => match self.session.activate_selected_mutation() {
-                Ok(events) => self.notifications.success(
-                    events
-                        .first()
-                        .map(crate::ui_widgets::event_summary)
-                        .unwrap_or_else(|| "Mutation gift activated".to_owned()),
-                ),
+                Ok(events) => {
+                    self.campaign.first_hour.used_ability();
+                    self.notifications.success(
+                        events
+                            .first()
+                            .map(crate::ui_widgets::event_summary)
+                            .unwrap_or_else(|| "Mutation gift activated".to_owned()),
+                    );
+                }
                 Err(_) => self.notifications.warning("Mutation gift is unavailable"),
             },
             UiAction::SetOverwatch => match self.session.set_selected_overwatch() {
@@ -613,12 +646,7 @@ impl Game {
                     .warning("Selected colonist cannot enter overwatch"),
             },
             UiAction::ActivateClassAction => match self.session.activate_selected_class_action() {
-                Ok(events) => self.notifications.success(
-                    events
-                        .first()
-                        .map(crate::ui_widgets::event_summary)
-                        .unwrap_or_else(|| "Class action activated".to_owned()),
-                ),
+                Ok(events) => self.first_hour_ability_success(events, "Class action activated"),
                 Err(_) => self.notifications.warning("Class action is unavailable"),
             },
             UiAction::ArmClassAction => {
@@ -637,12 +665,7 @@ impl Game {
                     _ => Err(()),
                 };
                 match result {
-                    Ok(events) => self.notifications.success(
-                        events
-                            .first()
-                            .map(crate::ui_widgets::event_summary)
-                            .unwrap_or_else(|| "Class action activated".to_owned()),
-                    ),
+                    Ok(events) => self.first_hour_ability_success(events, "Class action activated"),
                     Err(()) => self
                         .notifications
                         .warning("Class-action target is no longer valid"),
@@ -674,12 +697,7 @@ impl Game {
                     _ => Err(()),
                 };
                 match result {
-                    Ok(events) => self.notifications.success(
-                        events
-                            .first()
-                            .map(crate::ui_widgets::event_summary)
-                            .unwrap_or_else(|| "Field equipment used".to_owned()),
-                    ),
+                    Ok(events) => self.first_hour_ability_success(events, "Field equipment used"),
                     Err(()) => self
                         .notifications
                         .warning("Equipment target is no longer valid"),
@@ -700,6 +718,7 @@ impl Game {
                 self.targeting = None;
                 let first_event = self.session.tactical.event_log.len();
                 self.session.end_player_phase(&self.data.config);
+                self.campaign.first_hour.ended_phase();
                 self.phase_replay
                     .start(&self.session.tactical.event_log[first_event..]);
                 self.notifications.info(format!(
@@ -718,6 +737,11 @@ impl Game {
                 self.show_tactical_help = false;
                 self.targeting = None;
             }
+            UiAction::AdvanceFirstHour
+            | UiAction::AcknowledgeColonist(_)
+            | UiAction::ToggleFirstHourHelp
+            | UiAction::SkipFirstHourTutorial
+            | UiAction::RestartFirstHourTutorial => unreachable!(),
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
             UiAction::DeleteSave => self.delete_save(),
@@ -743,6 +767,7 @@ impl Game {
                 &mission,
                 &self.data,
             );
+            self.record_first_hour_outcome();
             self.state = AppState::Debrief;
             self.autosave_current("Debrief autosaved");
         }

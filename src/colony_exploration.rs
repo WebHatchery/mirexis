@@ -171,6 +171,9 @@ impl ColonyExplorer {
             let center = view.plot_center(position) + vec2(0.0, 7.0 * view.zoom);
             let hit = Rect::new(center.x - 22.0, center.y - 35.0, 44.0, 48.0);
             let hovered = hit.contains(mouse);
+            let highlighted = campaign.first_hour.stage
+                == crate::first_hour::FirstHourStage::MeetCoordinator
+                && character.id == "mara_venn";
             draw_character(
                 character,
                 center,
@@ -178,6 +181,7 @@ impl ColonyExplorer {
                 false,
                 true,
                 hovered,
+                highlighted,
                 assets,
                 visuals,
                 view.zoom,
@@ -194,6 +198,7 @@ impl ColonyExplorer {
                     center,
                     matches!(self.facing, UnitFacing::SouthEast | UnitFacing::NorthEast),
                     self.is_moving(),
+                    false,
                     false,
                     false,
                     assets,
@@ -251,7 +256,7 @@ impl ColonyExplorer {
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        draw_wrapped(&character.biography, 84.0, 481.0, 660.0);
+        draw_wrapped(&dialogue_text(campaign, character), 84.0, 481.0, 660.0);
         if button(
             Rect::new(84.0, 520.0, 176.0, 30.0),
             npc_action_label(character),
@@ -259,6 +264,7 @@ impl ColonyExplorer {
             mouse,
         ) {
             actions.push(npc_action(character));
+            actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
             self.close_dialogue();
         }
         if button(
@@ -267,6 +273,7 @@ impl ColonyExplorer {
             true,
             mouse,
         ) {
+            actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
             self.close_dialogue();
         }
         true
@@ -312,6 +319,7 @@ fn draw_character(
     moving: bool,
     interactable: bool,
     hovered: bool,
+    highlighted: bool,
     assets: &AssetManager,
     visuals: &VisualCatalog,
     zoom: f32,
@@ -330,6 +338,15 @@ fn draw_character(
             center.y - 6.0,
             19.0 * zoom,
             Color::new(0.24, 0.78, 0.62, 0.22),
+        );
+    }
+    if highlighted {
+        draw_circle_lines(
+            center.x,
+            center.y - 6.0,
+            23.0 * zoom,
+            3.0,
+            Color::new(0.95, 0.78, 0.30, 0.96),
         );
     }
     visuals.draw_unit_pose(
@@ -375,7 +392,7 @@ fn draw_character(
             );
         }
     }
-    if hovered {
+    if hovered || highlighted {
         let width = measure_text(&character.name, None, 12, 1.0).width + 14.0;
         draw_rectangle(
             center.x - width / 2.0,
@@ -392,6 +409,30 @@ fn draw_character(
             Color::new(0.76, 1.0, 0.88, 1.0),
         );
     }
+}
+
+fn dialogue_text(campaign: &CampaignState, character: &CharacterRecord) -> String {
+    if character.id == "mara_venn" && campaign.operations_completed == 0 {
+        return "Kira. The west refuge is failing and the mire is moving around it. Ilya and Sol are ready. Tap OPERATIONS, read GLASSROOT, and choose who we risk.".to_owned();
+    }
+    if character.id == "mara_venn" && campaign.operations_completed == 1 {
+        return if campaign.first_hour.first_outcome_won == Some(true) {
+            "The refuge lights are back on. Good. Spend the recovery where it changes the next fight; the Directorate clock did not stop for us.".to_owned()
+        } else {
+            "We lost the refuge, not the colony. Treat the wounded or strengthen the next squad, then we move before the Directorate closes the road.".to_owned()
+        };
+    }
+    if character.id == "ilya_reed" && campaign.operations_completed == 1 {
+        return if campaign.first_hour.first_outcome_won == Some(true) {
+            "Everyone who returned is accounted for. Mara calls that readiness. I call it a chance to avoid spending people like spare parts.".to_owned()
+        } else {
+            "Failure is a condition, not a verdict. Tap REQUEST TREATMENT if someone is recovering; I can get a viable squad back into the field.".to_owned()
+        };
+    }
+    if campaign.operations_completed >= 2 && character.id == "sol_cairn" {
+        return "Two field routes are holding, which means the Directorate has started measuring them. The assault clock is our next broken machine.".to_owned();
+    }
+    character.biography.clone()
 }
 
 fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {

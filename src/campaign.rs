@@ -97,6 +97,8 @@ pub struct CampaignState {
     pub operations_completed: u32,
     #[serde(default)]
     pub relationships: Vec<RelationshipRecord>,
+    #[serde(default)]
+    pub first_hour: crate::first_hour::FirstHourProgress,
 }
 
 impl CampaignState {
@@ -119,6 +121,7 @@ impl CampaignState {
             strategy: StrategyState::new(data),
             operations_completed: 0,
             relationships: Vec::new(),
+            first_hour: crate::first_hour::FirstHourProgress::default(),
         }
     }
 

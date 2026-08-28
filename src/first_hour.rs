@@ -1,0 +1,223 @@
+//! Persistent first-session direction and contextual tactical teaching.
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum FirstHourStage {
+    Arrival,
+    MeetCoordinator,
+    PrepareFirstOperation,
+    FirstOperation,
+    FirstReturn,
+    MakeInvestment,
+    SecondOperation,
+    Promise,
+    Complete,
+}
+
+impl Default for FirstHourStage {
+    fn default() -> Self {
+        Self::Arrival
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum TacticalLesson {
+    Select,
+    MoveToCover,
+    Attack,
+    EnemyPhase,
+    Objective,
+    Ability,
+    ApplyLearning,
+}
+
+impl Default for TacticalLesson {
+    fn default() -> Self {
+        Self::Select
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct FirstHourProgress {
+    #[serde(default)]
+    pub stage: FirstHourStage,
+    #[serde(default)]
+    pub lesson: TacticalLesson,
+    #[serde(default = "enabled")]
+    pub guidance_enabled: bool,
+    #[serde(default)]
+    pub help_open: bool,
+    #[serde(default)]
+    pub first_outcome_won: Option<bool>,
+    #[serde(default)]
+    pub investment_name: String,
+    #[serde(default)]
+    pub second_outcome_won: Option<bool>,
+}
+
+impl Default for FirstHourProgress {
+    fn default() -> Self {
+        Self {
+            stage: FirstHourStage::Arrival,
+            lesson: TacticalLesson::Select,
+            guidance_enabled: true,
+            help_open: false,
+            first_outcome_won: None,
+            investment_name: String::new(),
+            second_outcome_won: None,
+        }
+    }
+}
+
+fn enabled() -> bool {
+    true
+}
+
+impl FirstHourProgress {
+    pub(crate) fn primary_goal(&self) -> &'static str {
+        match self.stage {
+            FirstHourStage::Arrival => "Tap BEGIN ARRIVAL to answer the refuge distress call.",
+            FirstHourStage::MeetCoordinator => "Tap Mara Venn's speech marker, then tap CONTINUE.",
+            FirstHourStage::PrepareFirstOperation => {
+                "Tap OPERATIONS, inspect GLASSROOT, then tap BRIEF SELECTED MISSION."
+            }
+            FirstHourStage::FirstOperation => lesson_prompt(self.lesson),
+            FirstHourStage::FirstReturn => {
+                "Tap RETURN TO COLONY, then speak with the highlighted colonist."
+            }
+            FirstHourStage::MakeInvestment => {
+                "Tap OPERATIONS and choose one affordable preparation investment."
+            }
+            FirstHourStage::SecondOperation => {
+                "Brief and deploy the next Isolation operation; apply what you learned."
+            }
+            FirstHourStage::Promise => "Read the colony consequence, then tap CONTINUE CAMPAIGN.",
+            FirstHourStage::Complete => {
+                "Protect the colony before the Directorate assault reaches Mirexis."
+            }
+        }
+    }
+
+    pub(crate) fn visible_goal(&self) -> &'static str {
+        if self.guidance_enabled {
+            return self.primary_goal();
+        }
+        match self.stage {
+            FirstHourStage::FirstOperation => {
+                "Secure the refuge and neutralise the remaining Brood."
+            }
+            _ => self.primary_goal(),
+        }
+    }
+
+    pub(crate) fn advance_arrival(&mut self) {
+        if self.stage == FirstHourStage::Arrival {
+            self.stage = FirstHourStage::MeetCoordinator;
+        } else if self.stage == FirstHourStage::Promise {
+            self.stage = FirstHourStage::Complete;
+            self.help_open = false;
+        }
+    }
+
+    pub(crate) fn acknowledge_colonist(&mut self, id: &str) {
+        if self.stage == FirstHourStage::MeetCoordinator && id == "mara_venn" {
+            self.stage = FirstHourStage::PrepareFirstOperation;
+        }
+    }
+
+    pub(crate) fn deployed(&mut self, operations_completed: u32) {
+        if operations_completed == 0 {
+            self.stage = FirstHourStage::FirstOperation;
+            self.lesson = TacticalLesson::Select;
+        } else if operations_completed == 1 {
+            self.stage = FirstHourStage::SecondOperation;
+            self.lesson = TacticalLesson::ApplyLearning;
+        }
+    }
+
+    pub(crate) fn selected(&mut self) {
+        self.advance_lesson(TacticalLesson::Select, TacticalLesson::MoveToCover);
+    }
+
+    pub(crate) fn moved(&mut self) {
+        self.advance_lesson(TacticalLesson::MoveToCover, TacticalLesson::Attack);
+    }
+
+    pub(crate) fn attacked(&mut self) {
+        self.advance_lesson(TacticalLesson::Attack, TacticalLesson::EnemyPhase);
+    }
+
+    pub(crate) fn ended_phase(&mut self) {
+        self.advance_lesson(TacticalLesson::EnemyPhase, TacticalLesson::Objective);
+    }
+
+    pub(crate) fn touched_objective(&mut self) {
+        self.advance_lesson(TacticalLesson::Objective, TacticalLesson::Ability);
+    }
+
+    pub(crate) fn used_ability(&mut self) {
+        self.advance_lesson(TacticalLesson::Ability, TacticalLesson::ApplyLearning);
+    }
+
+    pub(crate) fn operation_resolved(&mut self, operation_number: u32, won: bool) {
+        match operation_number {
+            1 => {
+                self.first_outcome_won = Some(won);
+                self.stage = FirstHourStage::FirstReturn;
+            }
+            2 => {
+                self.second_outcome_won = Some(won);
+                self.stage = FirstHourStage::Promise;
+            }
+            _ => {}
+        }
+    }
+
+    pub(crate) fn returned_to_colony(&mut self) {
+        if self.stage == FirstHourStage::FirstReturn {
+            self.stage = FirstHourStage::MakeInvestment;
+        }
+    }
+
+    pub(crate) fn invested(&mut self, name: impl Into<String>) {
+        if self.stage == FirstHourStage::MakeInvestment {
+            self.investment_name = name.into();
+            self.stage = FirstHourStage::SecondOperation;
+        }
+    }
+
+    pub(crate) fn restart(&mut self, operations_completed: u32) {
+        self.guidance_enabled = true;
+        self.help_open = false;
+        self.lesson = TacticalLesson::Select;
+        self.stage = match operations_completed {
+            0 => FirstHourStage::MeetCoordinator,
+            1 => FirstHourStage::MakeInvestment,
+            _ => FirstHourStage::Complete,
+        };
+    }
+
+    fn advance_lesson(&mut self, expected: TacticalLesson, next: TacticalLesson) {
+        if self.stage == FirstHourStage::FirstOperation && self.lesson == expected {
+            self.lesson = next;
+        }
+    }
+}
+
+fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
+    match lesson {
+        TacticalLesson::Select => "Tap a colonist to select them.",
+        TacticalLesson::MoveToCover => "Tap a green tile beside a cover edge to move.",
+        TacticalLesson::Attack => "Tap a hostile, review the forecast, then tap ATTACK.",
+        TacticalLesson::EnemyPhase => "Tap END PHASE twice to watch the hostile response.",
+        TacticalLesson::Objective => "Move onto the gold objective and tap SECURE OBJECTIVE.",
+        TacticalLesson::Ability => "Tap a visible CLASS, MUTATION, or GEAR action.",
+        TacticalLesson::ApplyLearning => "Complete the objective; tap HELP to revisit any rule.",
+    }
+}
+
+#[cfg(test)]
+mod tests;

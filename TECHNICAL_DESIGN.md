@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.63.0
+Save/content version: 1.64.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -651,6 +651,7 @@ Migration coverage:
 | 1.54.0 | No new fields; shot tracers and cover breakdown derive from validated attacks |
 | 1.55.0 | No new fields; threat envelopes derive from current hostile range and line of fire |
 | 1.56.0 | No new fields; danger reach derives from one validated move and remaining attack AP |
+| 1.64.0 | Persistent first-hour stage, tactical lesson, outcomes, investment, and guide settings; 1.63 saves default safely from campaign progress |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

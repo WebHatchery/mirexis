@@ -20,7 +20,10 @@ impl Game {
                 self.state = AppState::Title;
                 self.title_hover_preview = true;
             }
-            "colony" => self.state = AppState::Colony,
+            "colony" => {
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::Arrival;
+                self.state = AppState::Colony;
+            }
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),

@@ -24,6 +24,7 @@ impl Game {
 
         self.session = session;
         self.campaign = campaign;
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::Complete;
         self.active_mission = active_mission;
         self.notifications = NotificationManager::new();
         self.events = EventBus::new();
