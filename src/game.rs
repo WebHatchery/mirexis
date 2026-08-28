@@ -80,6 +80,7 @@ pub struct Game {
     tactical_camera: WorldCamera,
     colony_camera: WorldCamera,
     colony_explorer: crate::colony_exploration::ColonyExplorer,
+    colony_operations_open: bool,
 }
 
 impl Game {
@@ -153,6 +154,7 @@ impl Game {
             tactical_camera,
             colony_camera,
             colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
+            colony_operations_open: false,
         }
     }
 
@@ -202,6 +204,7 @@ impl Game {
                 &virtual_ui,
                 &mut self.colony_camera,
                 &mut self.colony_explorer,
+                &mut self.colony_operations_open,
             ),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -292,6 +295,7 @@ impl Game {
                     .materialize_selected(&self.data, &self.campaign.colony);
                 self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
                 self.colony_explorer.reset();
+                self.colony_operations_open = false;
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");

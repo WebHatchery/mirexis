@@ -30,7 +30,7 @@ pub(super) fn draw_build_controls(
     for (index, kind) in kinds.into_iter().enumerate() {
         let selected = campaign.colony.planned_construction == kind;
         if button(
-            Rect::new(20.0 + index as f32 * 170.0, 620.0, 164.0, 42.0),
+            Rect::new(20.0 + index as f32 * 170.0, 654.0, 164.0, 42.0),
             &format!(
                 "{}{} // {} MAT",
                 if selected { "> " } else { "" },
@@ -54,7 +54,7 @@ pub(super) fn draw_exploration_controls(
     explorer.set_touch_direction(Vec2::ZERO);
     if explorer.build_mode() {
         if button(
-            Rect::new(540.0, 620.0, 196.0, 42.0),
+            Rect::new(540.0, 654.0, 196.0, 42.0),
             "RETURN TO EXPLORE",
             true,
             mouse,
@@ -73,7 +73,7 @@ pub(super) fn draw_exploration_controls(
     .into_iter()
     .enumerate()
     {
-        let rect = Rect::new(20.0 + index as f32 * 46.0, 620.0, 42.0, 42.0);
+        let rect = Rect::new(20.0 + index as f32 * 46.0, 654.0, 42.0, 42.0);
         button(rect, label, true, mouse);
         if rect.contains(mouse) && is_mouse_button_down(MouseButton::Left) {
             movement += direction;
@@ -81,7 +81,7 @@ pub(super) fn draw_exploration_controls(
     }
     explorer.set_touch_direction(movement.normalize_or_zero());
     if button(
-        Rect::new(210.0, 620.0, 112.0, 42.0),
+        Rect::new(210.0, 654.0, 112.0, 42.0),
         "TALK",
         explorer.can_talk(campaign),
         mouse,
@@ -89,7 +89,7 @@ pub(super) fn draw_exploration_controls(
         explorer.interact(campaign);
     }
     if button(
-        Rect::new(332.0, 620.0, 150.0, 42.0),
+        Rect::new(332.0, 654.0, 150.0, 42.0),
         "BUILD MODE",
         true,
         mouse,

@@ -249,14 +249,18 @@ fn initial_camera_frames_the_centered_settlement_without_fitting_the_colony() {
 
 #[test]
 fn visible_camera_controls_stay_below_the_interactive_colony_viewport() {
-    let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
-    let viewport = Rect::new(
-        panel.x + 8.0,
-        panel.y + 32.0,
-        panel.w - 16.0,
-        panel.h - 102.0,
-    );
+    let panel = panel_bounds(false);
+    let viewport = viewport_bounds(panel);
     let origin = camera_controls_origin(panel);
     assert!(origin.y >= viewport.bottom());
     assert!(origin.y + 28.0 <= panel.bottom());
+}
+
+#[test]
+fn collapsed_operations_gives_the_settlement_the_full_screen_width() {
+    let collapsed = panel_bounds(false);
+    let open = panel_bounds(true);
+    assert_eq!(collapsed.right(), 1270.0);
+    assert_eq!(open.right(), 852.0);
+    assert!(viewport_bounds(collapsed).w > viewport_bounds(open).w + 400.0);
 }

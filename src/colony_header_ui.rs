@@ -13,7 +13,16 @@ fn title_bounds() -> Rect {
     Rect::new(1160.0, 22.0, 88.0, 28.0)
 }
 
-pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+fn operations_bounds() -> Rect {
+    Rect::new(1028.0, 22.0, 124.0, 28.0)
+}
+
+pub(crate) fn draw(
+    campaign: &CampaignState,
+    mouse: Vec2,
+    operations_open: &mut bool,
+    actions: &mut Vec<UiAction>,
+) {
     draw_surface(
         Rect::new(10.0, 10.0, LOGICAL_WIDTH - 20.0, 52.0),
         &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
@@ -28,16 +37,37 @@ pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
     );
     text(
         &campaign.strategy.phase_name,
-        250.0,
+        224.0,
         40.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
+    let resources = &campaign.colony.resources;
     text(
-        &format!("OPERATIONS COMPLETED  {}", campaign.operations_completed),
-        974.0,
+        &format!(
+            "MAT {}  //  POWER {}/{}  //  FOOD {}  //  BIOMASS {}  //  XENO {}",
+            resources.materials,
+            campaign.colony.power_supply(),
+            campaign.colony.power_demand(),
+            resources.food,
+            resources.biomass,
+            resources.alien_components
+        ),
+        448.0,
         40.0,
-        TextStyle::new(16.0, dark::TEXT_DIM).params(),
+        TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
+    if button(
+        operations_bounds(),
+        if *operations_open {
+            "CLOSE"
+        } else {
+            "OPERATIONS"
+        },
+        true,
+        mouse,
+    ) {
+        *operations_open = !*operations_open;
+    }
     if button(title_bounds(), "TITLE", true, mouse) {
         actions.push(UiAction::ReturnToTitle);
     }

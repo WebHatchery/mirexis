@@ -7,7 +7,7 @@ use crate::ui::UiAction;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
-use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
+use macroquad_toolkit::prelude::{draw_surface, SurfaceStyle};
 use macroquad_toolkit::ui::VirtualUi;
 
 pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
@@ -26,24 +26,17 @@ pub(crate) fn draw(
     camera: &mut WorldCamera,
     explorer: &mut crate::colony_exploration::ColonyExplorer,
     mouse: Vec2,
+    operations_open: bool,
     actions: &mut Vec<UiAction>,
 ) -> bool {
-    let panel = Rect::new(10.0, 74.0, 842.0, 608.0);
-    draw_surface_with_title(
+    let panel = panel_bounds(operations_open);
+    draw_surface(
         panel,
-        Some("MIREXIS SETTLEMENT // EXPANSION CAMERA"),
         &SurfaceStyle::new(Color::new(0.026, 0.047, 0.053, 0.98))
             .with_border(1.0, Color::new(0.20, 0.50, 0.48, 0.9))
-            .with_inner_border(6.0, 1.0, Color::new(0.12, 0.28, 0.27, 0.7))
-            .with_header(28.0, Color::new(0.06, 0.10, 0.11, 1.0)),
-        TextStyle::new(13.0, dark::TEXT),
+            .with_inner_border(6.0, 1.0, Color::new(0.12, 0.28, 0.27, 0.7)),
     );
-    let viewport = Rect::new(
-        panel.x + 8.0,
-        panel.y + 32.0,
-        panel.w - 16.0,
-        panel.h - 102.0,
-    );
+    let viewport = viewport_bounds(panel);
     let camera_control_clicked = crate::camera_controls::draw_zoom(
         camera,
         viewport,
@@ -148,7 +141,20 @@ pub(crate) fn draw(
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {
-    vec2(panel.right() - 104.0, panel.bottom() - 65.0)
+    vec2(panel.right() - 104.0, panel.bottom() - 56.0)
+}
+
+fn panel_bounds(operations_open: bool) -> Rect {
+    Rect::new(
+        10.0,
+        74.0,
+        if operations_open { 842.0 } else { 1260.0 },
+        636.0,
+    )
+}
+
+fn viewport_bounds(panel: Rect) -> Rect {
+    Rect::new(panel.x + 8.0, panel.y + 8.0, panel.w - 16.0, panel.h - 76.0)
 }
 
 fn draw_ending_manifestation(

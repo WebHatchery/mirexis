@@ -26,6 +26,7 @@ pub fn draw_colony(
     ui: &VirtualUi,
     camera: &mut crate::grid_ui::WorldCamera,
     explorer: &mut crate::colony_exploration::ColonyExplorer,
+    operations_open: &mut bool,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = crate::ui::pointer_position(ui);
@@ -44,16 +45,13 @@ pub fn draw_colony(
         camera,
         explorer,
         mouse,
+        *operations_open,
         &mut actions,
     );
-    crate::colony_header_ui::draw(campaign, mouse, &mut actions);
-    draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
-    draw_ui_text_ex(
-        "EXPLORE // TAP ANY GROUND POINT · HOLD MOVEMENT PAD · TAP COLONIST TO TALK",
-        28.0,
-        707.0,
-        TextStyle::new(10.0, dark::TEXT_DIM).params(),
-    );
+    crate::colony_header_ui::draw(campaign, mouse, operations_open, &mut actions);
+    if *operations_open {
+        draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
+    }
     crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
     actions
 }

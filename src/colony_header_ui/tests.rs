@@ -13,3 +13,11 @@ fn title_recovery_control_is_visible_inside_the_colony_header() {
         "title control overlaps campaign identity"
     );
 }
+
+#[test]
+fn operations_drawer_control_sits_beside_title_without_overlap() {
+    let operations = operations_bounds();
+    let title = title_bounds();
+    assert!(operations.right() <= title.x);
+    assert!(operations.y >= 10.0 && operations.bottom() <= 62.0);
+}
