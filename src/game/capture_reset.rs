@@ -38,6 +38,7 @@ impl Game {
         self.phase_replay = PhaseReplay::default();
         self.deployment_formation = FormationKind::default();
         self.end_phase_armed = false;
+        self.show_settings = false;
         self.title_hover_preview = false;
         self.tactical_camera = WorldCamera::tactical_start(self.session.tactical.selected_tile);
         self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);

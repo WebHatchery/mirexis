@@ -1,5 +1,6 @@
 //! Application state machine, persistence, and toolkit integration.
 
+mod audio_flow;
 mod capture_colony;
 mod capture_debrief;
 mod capture_reset;
@@ -82,12 +83,15 @@ pub struct Game {
     colony_camera: WorldCamera,
     colony_explorer: crate::colony_exploration::ColonyExplorer,
     colony_operations_open: bool,
+    audio: crate::audio::AudioSystem,
+    show_settings: bool,
 }
 
 impl Game {
     pub async fn new() -> Self {
         let data = GameData::load()
             .unwrap_or_else(|err| panic!("Mirexis embedded data failed to load: {}", err));
+        let audio = crate::audio::AudioSystem::new(&data.config.game_name).await;
         let mut assets = AssetManager::new();
         let placeholder = crate::visual_assets::diagnostic_placeholder_image(32);
         assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
@@ -112,6 +116,7 @@ impl Game {
         );
         let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
         let mut notifications = NotificationManager::new();
+        audio.report_failures(&mut notifications);
         notifications.info(format!(
             "Visual pipeline online; {} textures; {} sprite definitions",
             loaded_assets,
@@ -156,6 +161,8 @@ impl Game {
             colony_camera,
             colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
             colony_operations_open: false,
+            audio,
+            show_settings: false,
         }
     }
 
@@ -175,6 +182,7 @@ impl Game {
         for action in actions {
             self.apply_action(action);
         }
+        self.sync_audio();
         let impact = self.combat_feedback.sync(
             (self.state == AppState::Tactical).then_some(&self.session.tactical.event_log),
             &mut self.observed_event_count,
@@ -272,6 +280,7 @@ impl Game {
             ),
         };
         self.draw_first_hour(&virtual_ui, &mut actions);
+        self.draw_settings(&virtual_ui, &mut actions);
         end_virtual_ui_frame();
         for action in actions {
             self.events.push(action);
@@ -284,9 +293,14 @@ impl Game {
     }
 
     fn apply_action(&mut self, action: UiAction) {
+        if self.apply_audio_action(&action) {
+            return;
+        }
         if self.apply_first_hour_action(&action) {
             return;
         }
+        let audio_event_count = self.session.tactical.event_log.len();
+        let audio_action = action.clone();
         if !matches!(&action, UiAction::EndPhase) {
             self.end_phase_armed = false;
         }
@@ -742,10 +756,15 @@ impl Game {
             | UiAction::ToggleFirstHourHelp
             | UiAction::SkipFirstHourTutorial
             | UiAction::RestartFirstHourTutorial => unreachable!(),
+            UiAction::ToggleSettings
+            | UiAction::AudioVolumeDown
+            | UiAction::AudioVolumeUp
+            | UiAction::ToggleMute => unreachable!(),
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
             UiAction::DeleteSave => self.delete_save(),
         }
+        self.finish_action_audio(&audio_action, audio_event_count);
         self.enter_debrief_if_finished();
     }
 

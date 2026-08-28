@@ -17,6 +17,10 @@ fn operations_bounds() -> Rect {
     Rect::new(1028.0, 22.0, 124.0, 28.0)
 }
 
+fn settings_bounds() -> Rect {
+    Rect::new(924.0, 22.0, 96.0, 28.0)
+}
+
 pub(crate) fn draw(
     campaign: &CampaignState,
     mouse: Vec2,
@@ -56,6 +60,9 @@ pub(crate) fn draw(
         40.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
+    if button(settings_bounds(), "SETTINGS", true, mouse) {
+        actions.push(UiAction::ToggleSettings);
+    }
     if button(
         operations_bounds(),
         if *operations_open {

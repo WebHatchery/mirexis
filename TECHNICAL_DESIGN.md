@@ -722,8 +722,9 @@ Simulation tests never depend on frame timing or rendered pixels.
 | Phase 4 — Campaign Pressure | Attention, assaults, research, events, generated Isolation missions | `50e80ae` |
 
 These milestones record implementation breadth from the original technical roadmap.
-They do not mean the game has completed onboarding, balance, pacing, content, audio,
-accessibility, or player-experience validation.
+Production Phase 1 now adds campaign-owned first-hour onboarding and a procedural audio
+foundation. Balance, accessibility hardening, and player-experience validation remain in
+progress and are tracked by the playable-game roadmap rather than these old milestones.
 
 ## 15. Current Boundaries and Next Development
 
@@ -735,7 +736,8 @@ these explicit boundaries when continuing:
 - Prepaid single-shot overwatch now reacts to hostile movement in range and line of fire.
   Incapacitation now adds one of three bounded persistent tradeoff scars after battle.
   Elevation, in-battle injury statuses, additional reaction types, permanent death, and
-  animation/audio consumers are not yet implemented.
+  presentation animation consumers remain bounded and procedural event audio now covers
+  movement, attacks, damage, abilities, objectives, outcomes, and scene ambience.
 - The eighteen current map recipes support authored and safe mirrored layouts; nine
   early and Contact battlefields now carry faction hazards. Additional transforms,
   elevation, spawn recipes, and battlefield families remain future work.

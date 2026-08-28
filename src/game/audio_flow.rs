@@ -1,0 +1,71 @@
+//! Audio scene, response, and persistent settings integration.
+
+use super::{AppState, Game};
+use crate::audio::{AudioScene, SoundCue};
+use crate::ui::UiAction;
+use macroquad_toolkit::ui::VirtualUi;
+
+impl Game {
+    pub(super) fn apply_audio_action(&mut self, action: &UiAction) -> bool {
+        let game_name = self.data.config.game_name.clone();
+        match action {
+            UiAction::ToggleSettings => self.show_settings = !self.show_settings,
+            UiAction::AudioVolumeDown => self.audio.adjust_volume(-25, &game_name),
+            UiAction::AudioVolumeUp => self.audio.adjust_volume(25, &game_name),
+            UiAction::ToggleMute => self.audio.toggle_mute(&game_name),
+            _ => {
+                if !tactical_command(action) {
+                    self.audio.play(SoundCue::Focus);
+                }
+                return false;
+            }
+        }
+        true
+    }
+
+    pub(super) fn finish_action_audio(&mut self, action: &UiAction, before_events: usize) {
+        if tactical_command(action) && self.session.tactical.event_log.len() == before_events {
+            self.audio.play(SoundCue::Invalid);
+        }
+    }
+
+    pub(super) fn draw_settings(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
+        crate::settings_ui::draw_modal(
+            self.audio.settings,
+            self.show_settings,
+            crate::ui::pointer_position(ui),
+            actions,
+        );
+    }
+
+    pub(super) fn sync_audio(&mut self) {
+        let scene = match self.state {
+            AppState::Colony | AppState::Roster | AppState::GeneLab => AudioScene::City,
+            AppState::MissionBriefing | AppState::Tactical | AppState::Debrief => {
+                AudioScene::Tactical
+            }
+            AppState::Title => AudioScene::Silent,
+        };
+        self.audio.set_scene(scene);
+        if self.observed_event_count < self.session.tactical.event_log.len() {
+            self.audio
+                .play_events(&self.session.tactical.event_log[self.observed_event_count..]);
+        }
+    }
+}
+
+fn tactical_command(action: &UiAction) -> bool {
+    matches!(
+        action,
+        UiAction::MoveSelected(_)
+            | UiAction::AttackSelected(_)
+            | UiAction::AttackCover(_)
+            | UiAction::InteractObjective
+            | UiAction::ActivateMutation
+            | UiAction::ActivateClassAction
+            | UiAction::UseClassActionOn(_)
+            | UiAction::UseEquipmentOn(_)
+            | UiAction::SetOverwatch
+            | UiAction::EndPhase
+    )
+}

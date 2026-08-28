@@ -97,6 +97,7 @@ pub(crate) fn draw(
         clicked_npc = clicked_npc
             .or_else(|| explorer.draw_depth(sum, campaign, assets, visuals, view, mouse));
     }
+    crate::first_hour_consequences_ui::draw(campaign, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
     if let Some(npc_id) = clicked_npc.as_deref() {

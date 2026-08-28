@@ -43,6 +43,14 @@ pub(crate) fn draw(
     ) {
         actions.push(UiAction::Continue);
     }
+    if button(
+        Rect::new(334.0, 654.0, 244.0, 36.0),
+        "SETTINGS",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleSettings);
+    }
     if let Some(focus_continue) = controller_focus_continue {
         let focus = if focus_continue {
             Rect::new(330.0, 482.0, 252.0, 60.0)

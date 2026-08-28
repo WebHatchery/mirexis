@@ -630,8 +630,11 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if button(Rect::new(478.0, y, 78.0, 28.0), "LOG [B]", true, mouse) {
         actions.push(UiAction::ToggleBattleLog);
     }
+    if button(Rect::new(562.0, y, 96.0, 28.0), "SETTINGS", true, mouse) {
+        actions.push(UiAction::ToggleSettings);
+    }
     if button(
-        Rect::new(562.0, y, 136.0, 28.0),
+        Rect::new(664.0, y, 136.0, 28.0),
         "NEXT READY [TAB]",
         crate::phase_readiness::ready_count(ctx.session) > 0,
         mouse,
