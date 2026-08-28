@@ -36,6 +36,8 @@ pub(crate) enum AudioScene {
 pub(crate) struct AudioSettings {
     pub volume_percent: u8,
     pub muted: bool,
+    #[serde(default)]
+    pub reduced_motion: bool,
 }
 
 impl Default for AudioSettings {
@@ -43,6 +45,7 @@ impl Default for AudioSettings {
         Self {
             volume_percent: 75,
             muted: false,
+            reduced_motion: false,
         }
     }
 }
@@ -136,6 +139,11 @@ impl AudioSystem {
         self.persist(game_name);
         self.apply_volume();
         self.apply_ambience_volume();
+    }
+
+    pub(crate) fn toggle_reduced_motion(&mut self, game_name: &str) {
+        self.settings.reduced_motion = !self.settings.reduced_motion;
+        self.persist(game_name);
     }
 
     fn persist(&mut self, game_name: &str) {

@@ -29,4 +29,5 @@ fn volume_steps_are_bounded() {
     let settings = AudioSettings::default();
     assert_eq!(settings.volume_percent, 75);
     assert!(!settings.muted);
+    assert!(!settings.reduced_motion);
 }

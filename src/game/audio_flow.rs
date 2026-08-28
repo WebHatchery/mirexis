@@ -13,6 +13,7 @@ impl Game {
             UiAction::AudioVolumeDown => self.audio.adjust_volume(-25, &game_name),
             UiAction::AudioVolumeUp => self.audio.adjust_volume(25, &game_name),
             UiAction::ToggleMute => self.audio.toggle_mute(&game_name),
+            UiAction::ToggleReducedMotion => self.audio.toggle_reduced_motion(&game_name),
             _ => {
                 if !tactical_command(action) {
                     self.audio.play(SoundCue::Focus);
@@ -21,6 +22,18 @@ impl Game {
             }
         }
         true
+    }
+
+    pub(super) fn update_motion(&mut self, dt: f32) {
+        if self.audio.settings.reduced_motion {
+            self.session.tactical.update_presentation(1.0);
+            self.combat_feedback.update(1.0);
+            self.phase_replay.clear();
+        } else {
+            self.session.tactical.update_presentation(dt);
+            self.combat_feedback.update(dt);
+            self.phase_replay.update(dt);
+        }
     }
 
     pub(super) fn finish_action_audio(&mut self, action: &UiAction, before_events: usize) {

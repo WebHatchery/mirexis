@@ -57,6 +57,7 @@ pub enum UiAction {
     AudioVolumeDown,
     AudioVolumeUp,
     ToggleMute,
+    ToggleReducedMotion,
     Save,
     Load,
     DeleteSave,

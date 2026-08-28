@@ -334,6 +334,8 @@ at least two touch-primary sessions. Small samples guide iteration; they are not
 of market fit.
 
 Session evidence and unresolved findings are recorded in `PHASE_1_PLAYTEST_LOG.md`.
+Automated reliability, accessibility, resize, and recovery evidence is recorded in
+`PHASE_1_HARDENING.md`.
 
 ## 8. Definition of done
 

@@ -17,7 +17,7 @@ pub(crate) fn draw_modal(
     }
     actions.clear();
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.86));
-    let panel = Rect::new(390.0, 176.0, 500.0, 352.0);
+    let panel = Rect::new(390.0, 156.0, 500.0, 400.0);
     draw_surface(
         panel,
         &SurfaceStyle::new(Color::new(0.04, 0.07, 0.075, 0.99))
@@ -53,13 +53,25 @@ pub(crate) fn draw_modal(
     ) {
         actions.push(UiAction::ToggleMute);
     }
-    if button(Rect::new(634.0, 398.0, 184.0, 42.0), "RETURN", true, mouse) {
+    if button(
+        Rect::new(634.0, 398.0, 184.0, 42.0),
+        if settings.reduced_motion {
+            "REDUCED MOTION: ON"
+        } else {
+            "REDUCED MOTION: OFF"
+        },
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleReducedMotion);
+    }
+    if button(Rect::new(432.0, 458.0, 386.0, 42.0), "RETURN", true, mouse) {
         actions.push(UiAction::ToggleSettings);
     }
     text(
         "Procedural palette // no external audio attribution required",
         432.0,
-        486.0,
+        534.0,
         12.0,
         dark::TEXT_DIM,
     );

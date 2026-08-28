@@ -17,6 +17,7 @@ pub(crate) fn draw(
     ui: &VirtualUi,
     controller_focus_continue: Option<bool>,
     hover_preview: bool,
+    new_campaign_armed: bool,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = if hover_preview {
@@ -29,7 +30,11 @@ pub(crate) fn draw(
     draw_title_copy(data);
     if button(
         Rect::new(76.0, 486.0, 244.0, 52.0),
-        "NEW OPERATION",
+        if new_campaign_armed {
+            "CONFIRM NEW COLONY"
+        } else {
+            "NEW OPERATION"
+        },
         true,
         mouse,
     ) {

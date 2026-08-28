@@ -6,6 +6,7 @@ mod capture_debrief;
 mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
+mod destructive_flow;
 mod first_hour_flow;
 mod input;
 mod persistence_io;
@@ -79,6 +80,8 @@ pub struct Game {
     title_focus_continue: bool,
     title_focus_active: bool,
     title_hover_preview: bool,
+    new_campaign_armed: bool,
+    delete_save_armed: bool,
     tactical_camera: WorldCamera,
     colony_camera: WorldCamera,
     colony_explorer: crate::colony_exploration::ColonyExplorer,
@@ -157,6 +160,8 @@ impl Game {
             title_focus_continue: false,
             title_focus_active: false,
             title_hover_preview: false,
+            new_campaign_armed: false,
+            delete_save_armed: false,
             tactical_camera,
             colony_camera,
             colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
@@ -170,10 +175,8 @@ impl Game {
         if self.state == AppState::Colony {
             self.colony_explorer.update(dt, &self.campaign.colony);
         }
-        self.session.tactical.update_presentation(dt);
+        self.update_motion(dt);
         self.notifications.update(dt);
-        self.combat_feedback.update(dt);
-        self.phase_replay.update(dt);
         if self.capture_input() {
             return;
         }
@@ -204,6 +207,7 @@ impl Game {
                 &virtual_ui,
                 self.title_focus_active.then_some(self.title_focus_continue),
                 self.title_hover_preview,
+                self.new_campaign_armed,
             ),
             AppState::Colony => colony_ui::draw_colony(
                 &self.campaign,
@@ -249,6 +253,7 @@ impl Game {
                     mission: &self.active_mission,
                     session: &self.session,
                     save_exists: self.save_exists,
+                    delete_save_armed: self.delete_save_armed,
                     loaded_assets: self.assets.len(),
                     ui: &virtual_ui,
                     targeting: self.targeting.as_ref().map(|targeting| match targeting {
@@ -297,6 +302,9 @@ impl Game {
             return;
         }
         if self.apply_first_hour_action(&action) {
+            return;
+        }
+        if self.guard_destructive_action(&action) {
             return;
         }
         let audio_event_count = self.session.tactical.event_log.len();
@@ -752,19 +760,9 @@ impl Game {
                 self.show_tactical_help = false;
                 self.targeting = None;
             }
-            UiAction::AdvanceFirstHour
-            | UiAction::AcknowledgeColonist(_)
-            | UiAction::ToggleFirstHourHelp
-            | UiAction::SkipFirstHourTutorial
-            | UiAction::RestartFirstHourTutorial => unreachable!(),
-            UiAction::ChooseFirstHourInvestment(_) => unreachable!(),
-            UiAction::ToggleSettings
-            | UiAction::AudioVolumeDown
-            | UiAction::AudioVolumeUp
-            | UiAction::ToggleMute => unreachable!(),
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
-            UiAction::DeleteSave => self.delete_save(),
+            _ => unreachable!("prehandled application action reached the game state match"),
         }
         self.finish_action_audio(&audio_action, audio_event_count);
         self.enter_debrief_if_finished();

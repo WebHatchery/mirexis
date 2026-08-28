@@ -107,6 +107,7 @@ pub struct UiContext<'a> {
     pub mission: &'a MissionDef,
     pub session: &'a GameSession,
     pub save_exists: bool,
+    pub delete_save_armed: bool,
     pub loaded_assets: usize,
     pub ui: &'a VirtualUi,
     pub targeting: Option<TargetingView<'a>>,
@@ -122,6 +123,7 @@ pub fn draw_title(
     ui: &VirtualUi,
     controller_focus_continue: Option<bool>,
     hover_preview: bool,
+    new_campaign_armed: bool,
 ) -> Vec<UiAction> {
     crate::title_scene_ui::draw(
         data,
@@ -131,6 +133,7 @@ pub fn draw_title(
         ui,
         controller_focus_continue,
         hover_preview,
+        new_campaign_armed,
     )
 }
 
@@ -618,7 +621,11 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
     if button(
         Rect::new(274.0, y, 110.0, 28.0),
-        "DELETE SAVE",
+        if ctx.delete_save_armed {
+            "CONFIRM DELETE"
+        } else {
+            "DELETE SAVE"
+        },
         ctx.save_exists,
         mouse,
     ) {
