@@ -16,6 +16,7 @@ mod class_actions;
 mod class_training;
 mod colony;
 mod colony_decision_ui;
+mod colony_exploration;
 mod colony_header_ui;
 mod colony_map_ui;
 mod colony_ui;

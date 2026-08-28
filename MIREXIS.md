@@ -893,6 +893,10 @@ The colony functions as the player's strategic hub.
 
 It should remain intentionally lighter than a full colony simulator.
 
+The hub is a small 2.5D place the player can walk through rather than a static menu map.
+Colonists appear as inhabitants with tappable, proximity-based conversations and useful
+contextual actions. Construction remains a deliberate mode inside that explorable space.
+
 The player makes meaningful decisions about:
 
 - what to construct

@@ -79,6 +79,7 @@ pub struct Game {
     title_hover_preview: bool,
     tactical_camera: WorldCamera,
     colony_camera: WorldCamera,
+    colony_explorer: crate::colony_exploration::ColonyExplorer,
 }
 
 impl Game {
@@ -151,10 +152,14 @@ impl Game {
             title_hover_preview: false,
             tactical_camera,
             colony_camera,
+            colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
         }
     }
 
     pub fn update(&mut self, dt: f32) {
+        if self.state == AppState::Colony {
+            self.colony_explorer.update(dt, &self.campaign.colony);
+        }
         self.session.tactical.update_presentation(dt);
         self.notifications.update(dt);
         self.combat_feedback.update(dt);
@@ -196,6 +201,7 @@ impl Game {
                 &self.visuals,
                 &virtual_ui,
                 &mut self.colony_camera,
+                &mut self.colony_explorer,
             ),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -285,6 +291,7 @@ impl Game {
                     .strategy
                     .materialize_selected(&self.data, &self.campaign.colony);
                 self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
+                self.colony_explorer.reset();
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");

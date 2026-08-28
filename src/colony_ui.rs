@@ -25,6 +25,7 @@ pub fn draw_colony(
     visuals: &VisualCatalog,
     ui: &VirtualUi,
     camera: &mut crate::grid_ui::WorldCamera,
+    explorer: &mut crate::colony_exploration::ColonyExplorer,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
     let mouse = crate::ui::pointer_position(ui);
@@ -35,12 +36,20 @@ pub fn draw_colony(
         LOGICAL_HEIGHT,
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
-    let suppress_actions =
-        crate::colony_map_ui::draw(campaign, assets, visuals, ui, camera, mouse, &mut actions);
+    let suppress_actions = crate::colony_map_ui::draw(
+        campaign,
+        assets,
+        visuals,
+        ui,
+        camera,
+        explorer,
+        mouse,
+        &mut actions,
+    );
     crate::colony_header_ui::draw(campaign, mouse, &mut actions);
     draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
-        "PAD // D-PAD SELECT MISSION · A BRIEF · X ROSTER · B TITLE  //  TAP // TITLE · BUILD · RESEARCH · CHOOSE",
+        "EXPLORE // TAP GROUND TO WALK · TAP COLONIST TO APPROACH · TAP TALK NEARBY",
         28.0,
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),

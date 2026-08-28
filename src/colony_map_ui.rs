@@ -3,9 +3,7 @@
 use crate::campaign::CampaignState;
 use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH, SETTLEMENT_CENTER};
 use crate::grid_ui::WorldCamera;
-use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
-use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -15,8 +13,9 @@ use macroquad_toolkit::ui::VirtualUi;
 pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
 pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
 
+mod controls;
 mod terrain;
-mod view;
+pub(crate) mod view;
 use view::ColonyView;
 
 pub(crate) fn draw(
@@ -25,6 +24,7 @@ pub(crate) fn draw(
     visuals: &VisualCatalog,
     ui: &VirtualUi,
     camera: &mut WorldCamera,
+    explorer: &mut crate::colony_exploration::ColonyExplorer,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) -> bool {
@@ -72,6 +72,7 @@ pub(crate) fn draw(
     crate::ui::set_ui_clip(ui, Some(viewport));
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
+    explorer.update_approach(campaign);
     let hovered = hovered_plot(view, mouse);
     let planning_site = hovered.filter(|position| {
         campaign.colony.building_at(*position).is_none()
@@ -81,6 +82,7 @@ pub(crate) fn draw(
                 .validate_construction_site(*position)
                 .is_ok()
     });
+    let mut clicked_npc = None;
     for sum in 0..(COLONY_WIDTH + COLONY_HEIGHT - 1) {
         for y in 0..COLONY_HEIGHT {
             let x = sum - y;
@@ -99,18 +101,49 @@ pub(crate) fn draw(
                 );
             }
         }
+        clicked_npc = clicked_npc
+            .or_else(|| explorer.draw_depth(sum, campaign, assets, visuals, view, mouse));
     }
-    draw_inhabitants(campaign, assets, visuals, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
-    draw_hover_card(campaign, hovered, camera.pending_colony_plot());
-    handle_plot_click(campaign, camera, hovered, suppress_plot_click, actions);
-    draw_build_controls(campaign, mouse, actions);
+    if let Some(npc_id) = clicked_npc.as_deref() {
+        if let Some(position) = crate::colony_exploration::npc_position(campaign, npc_id) {
+            explorer.request_approach(
+                npc_id,
+                position,
+                &campaign.colony,
+                &crate::colony_exploration::npc_positions(campaign),
+            );
+        }
+        camera.guard_next_primary_release();
+    }
+    if explorer.build_mode() {
+        draw_hover_card(campaign, hovered, camera.pending_colony_plot());
+        handle_plot_click(campaign, camera, hovered, suppress_plot_click, actions);
+        controls::draw_build_controls(campaign, mouse, actions);
+    } else if !suppress_plot_click
+        && clicked_npc.is_none()
+        && !explorer.is_talking()
+        && is_mouse_button_released(MouseButton::Left)
+    {
+        if let Some(position) = hovered {
+            explorer.request_walk(position, &campaign.colony);
+        }
+    }
+    controls::draw_exploration_controls(campaign, explorer, mouse, actions);
+    explorer.draw_dialogue(campaign, mouse, actions);
     draw_text(
-        format!(
-            "DRAG MAP TO PAN // WHEEL OR -/+ ZOOM // {}%",
-            (camera.zoom * 100.0) as i32
-        ),
+        if explorer.build_mode() {
+            format!(
+                "BUILD MODE // TAP A PLOT TWICE TO CONFIRM // {}%",
+                (camera.zoom * 100.0) as i32
+            )
+        } else {
+            format!(
+                "TAP THE GROUND TO WALK // TAP A COLONIST TO TALK // {}%",
+                (camera.zoom * 100.0) as i32
+            )
+        },
         panel.x + 14.0,
         panel.bottom() - 76.0,
         11.0,
@@ -507,45 +540,6 @@ fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
     }
 }
 
-fn draw_inhabitants(
-    campaign: &CampaignState,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    view: ColonyView,
-) {
-    let stations = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12]];
-    for (index, character) in campaign.roster.iter().take(5).enumerate() {
-        let center = view.plot_center(stations[index]);
-        let side = if index % 2 == 0 { -1.0 } else { 1.0 };
-        let person = center + vec2(side * 8.0, 9.0);
-        draw_ellipse(
-            person.x,
-            person.y + 4.0,
-            6.0,
-            2.5,
-            0.0,
-            Color::new(0.0, 0.0, 0.0, 0.38),
-        );
-        visuals.draw_unit_pose(
-            assets,
-            &character.id,
-            &character.name,
-            if side < 0.0 {
-                UnitFacing::SouthEast
-            } else {
-                UnitFacing::SouthWest
-            },
-            if index % 3 == 0 {
-                UnitAnimationState::Move
-            } else {
-                UnitAnimationState::Idle
-            },
-            Rect::new(person.x - 17.0, person.y - 16.0, 34.0, 24.0),
-            Color::new(0.92, 0.98, 0.95, 0.96),
-        );
-    }
-}
-
 fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
     let points = [
         vec2(center.x, center.y - view.half_height),
@@ -718,40 +712,6 @@ fn handle_plot_click(
             campaign.colony.planned_construction,
             position,
         ));
-    }
-}
-
-fn draw_build_controls(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let mut kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
-    if campaign.strategy.contact_complete
-        && !campaign
-            .colony
-            .buildings
-            .iter()
-            .any(|b| b.kind == BuildingKind::GeneLab)
-        && !campaign
-            .colony
-            .construction_queue
-            .iter()
-            .any(|p| p.kind == BuildingKind::GeneLab)
-    {
-        kinds.push(BuildingKind::GeneLab);
-    }
-    for (index, kind) in kinds.into_iter().enumerate() {
-        let selected = campaign.colony.planned_construction == kind;
-        if button(
-            Rect::new(70.0 + index as f32 * 222.0, 620.0, 210.0, 42.0),
-            &format!(
-                "{}{} // {} MAT",
-                if selected { "> " } else { "" },
-                kind.name().to_uppercase(),
-                kind.material_cost()
-            ),
-            true,
-            mouse,
-        ) {
-            actions.push(UiAction::SelectConstruction(kind));
-        }
     }
 }
 

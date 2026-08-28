@@ -5,16 +5,16 @@ use crate::grid_ui::{CameraInsets, WorldCamera};
 use macroquad::prelude::{vec2, Rect, Vec2};
 
 #[derive(Clone, Copy)]
-pub(super) struct ColonyView {
-    pub(super) viewport: Rect,
+pub(crate) struct ColonyView {
+    pub(crate) viewport: Rect,
     origin: Vec2,
-    pub(super) half_width: f32,
-    pub(super) half_height: f32,
-    pub(super) zoom: f32,
+    pub(crate) half_width: f32,
+    pub(crate) half_height: f32,
+    pub(crate) zoom: f32,
 }
 
 impl ColonyView {
-    pub(super) fn new(viewport: Rect, camera: &WorldCamera) -> Self {
+    pub(crate) fn new(viewport: Rect, camera: &WorldCamera) -> Self {
         Self {
             viewport,
             origin: viewport.center() - camera.center * camera.zoom,
@@ -24,11 +24,21 @@ impl ColonyView {
         }
     }
 
-    pub(super) fn plot_center(self, position: [i32; 2]) -> Vec2 {
+    pub(crate) fn plot_center(self, position: [i32; 2]) -> Vec2 {
         let elevation = self.elevation(position) as f32;
         vec2(
             self.origin.x + (position[0] - position[1]) as f32 * self.half_width,
             self.origin.y + (position[0] + position[1]) as f32 * self.half_height
+                - elevation * self.elevation_step(),
+        )
+    }
+
+    pub(crate) fn world_center(self, position: Vec2) -> Vec2 {
+        let elevation =
+            self.elevation([position.x.round() as i32, position.y.round() as i32]) as f32;
+        vec2(
+            self.origin.x + (position.x - position.y) * self.half_width,
+            self.origin.y + (position.x + position.y) * self.half_height
                 - elevation * self.elevation_step(),
         )
     }

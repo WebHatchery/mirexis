@@ -336,6 +336,19 @@ first active recovery.
 buildings, the selected construction plan, construction reservations, and a monotonic
 building serial.
 
+The colony opens in exploration mode. `ColonyExplorer` owns transient avatar position,
+animated route progress, facing, NPC approach/conversation state, and the explicit switch
+to Build mode. Ground taps use deterministic four-direction breadth-first pathfinding and
+route around completed buildings and queued projects. Visible diagonal movement buttons
+provide the same complete touch path without a keyboard. Tapping an inhabitant routes to
+an adjacent open plot and opens their contextual conversation; TALK provides the same
+interaction once adjacent. Inhabitants and the avatar render inside the isometric depth
+pass so foreground plots and structures can occlude them.
+
+Construction and repair plot taps are available only in Build mode. This keeps ordinary
+exploration taps unambiguous while retaining the existing two-tap confirmation for
+material-spending actions.
+
 Initial facilities have stable coordinates:
 
 - Command Centre: mission access and a critical defense objective.
