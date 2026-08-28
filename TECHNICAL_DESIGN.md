@@ -1,16 +1,17 @@
 # Mirexis Technical Design
 
-Status: Phase 0 through Phase 5 campaign arc complete
-Current campaign slice: complete identity-branched campaign
+Status: systems-rich tech demo; playable-game refinement in progress
+Current production target: cohesive first-hour playable build
 Save/content version: 1.63.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
 ## 1. Purpose
 
-This is the implementation contract for the game design in `MIREXIS.md`. It now
-describes the working Phase One vertical slice rather than a future roadmap. Keep
-it accurate when schemas, ownership, simulation order, or save behavior changes.
+This is the implementation contract for the game design in `MIREXIS.md`. It describes
+the working systems prototype rather than claiming product readiness. Keep it accurate
+when schemas, ownership, simulation order, or save behavior changes. The active product
+roadmap lives in `docs/PLAYABLE_GAME_PHASE_1.md`.
 
 The implemented slice proves all roadmap systems together:
 
@@ -719,13 +720,14 @@ Simulation tests never depend on frame timing or rendered pixels.
 | Phase 3 — Colony Loop | Resources, facilities, placement, construction, defense map | `d8065ef` |
 | Phase 4 — Campaign Pressure | Attention, assaults, research, events, generated Isolation missions | `50e80ae` |
 
-All milestones in the original roadmap are complete and validated through the
-project-standard publisher.
+These milestones record implementation breadth from the original technical roadmap.
+They do not mean the game has completed onboarding, balance, pacing, content, audio,
+accessibility, or player-experience validation.
 
 ## 15. Current Boundaries and Next Development
 
-The roadmap is complete, but Mirexis is not content-complete. Preserve these explicit
-boundaries when continuing:
+The original systems roadmap is complete, but Mirexis remains a tech demo. Preserve
+these explicit boundaries when continuing:
 
 - Escort and additional multi-stage contracts remain beyond the six implemented objective
   types. Thin Shelter now provides a destructible defense-target contract.
@@ -758,5 +760,6 @@ boundaries when continuing:
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 
-The recommended next vertical slice is a tactical status legend on inspected units, naming
-active effects and their remaining phases instead of representing them with an amber dot alone.
+The next coordinated body of work is Phase 1 of the playable-game roadmap in
+`docs/PLAYABLE_GAME_PHASE_1.md`. Small isolated feature additions should not displace
+its first-hour flow, onboarding, pacing, combat-feel, and validation priorities.

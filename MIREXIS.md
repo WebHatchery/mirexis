@@ -1,6 +1,11 @@
 # MIREXIS  
 ## Game Design Document
 
+**Document role:** This is the creative and mechanical vision for the finished game.
+It deliberately contains aspirational systems and content. For the implemented state,
+use `TECHNICAL_DESIGN.md`; for the active production plan, use
+`docs/PLAYABLE_GAME_PHASE_1.md`.
+
 ## 1. High Concept
 
 **Mirexis** is a turn-based grid tactics game set on a remote human colony trapped between three vastly more powerful factions.
@@ -1435,9 +1440,9 @@ It is:
 
 ---
 
-# 32. Current Core Feature Set
+# 32. Core Feature Set
 
-The current design is built around five interconnected systems:
+The design is built around five interconnected systems:
 
 1. **Turn-based grid combat**
 2. **Named recruitable characters**
@@ -1449,45 +1454,25 @@ Everything added to Mirexis should strengthen at least one of these systems or c
 
 ---
 
-# 33. Immediate Design Work
+# 33. Current Design Priorities
 
-The next systems that require detailed design are:
+The prototype now implements a broad version of the core feature set. The immediate
+design problem is no longer proving that each system can exist; it is making those
+systems form a legible, paced, emotionally engaging game.
 
-### Class Framework
-Define the base classes, advanced classes, hybridisation rules, and class progression.
+Current priorities are:
 
-### Mutation Framework
-Create a larger mutation library and determine mutation evolution rules.
+1. Teach the city, squad, and combat loops through play rather than dense explanation.
+2. Shape a deliberate first-hour sequence with clear goals, escalating decisions, and
+   a satisfying stopping point.
+3. Establish balance targets for mission length, threat, recovery, resources, and
+   progression before adding more content.
+4. Give city exploration recurring purpose through conversations, preparation, visible
+   consequences, and character life between operations.
+5. Improve combat feel with clearer feedback, stronger audiovisual response, faster
+   hostile turns, and fewer low-value clicks.
+6. Deepen a small set of recruits, enemies, missions, and events to release quality
+   before widening the campaign further.
 
-### Tactical Rules
-Define:
-
-- movement
-- attack ranges
-- cover
-- elevation
-- turn economy
-- accuracy
-- critical hits
-- armour
-- status effects
-
-### Squad Structure
-Determine:
-
-- deployment size
-- reserve characters
-- experience distribution
-- character death rules
-
-### Colony Progression
-Define:
-
-- building slots or free placement
-- construction costs
-- resource generation
-- attack frequency
-- damage and rebuilding
-
-### Campaign Structure
-Determine how missions, faction pressure, story events, and colony attacks are generated and connected.
+The actionable scope and acceptance criteria are maintained in
+`docs/PLAYABLE_GAME_PHASE_1.md`.
