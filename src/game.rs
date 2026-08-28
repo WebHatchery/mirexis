@@ -484,6 +484,7 @@ impl Game {
             UiAction::ReturnToColony => {
                 self.targeting = None;
                 self.state = AppState::Colony;
+                self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();
                 self.autosave_campaign_only("Colony entry autosaved");
             }
@@ -756,6 +757,7 @@ impl Game {
             | UiAction::ToggleFirstHourHelp
             | UiAction::SkipFirstHourTutorial
             | UiAction::RestartFirstHourTutorial => unreachable!(),
+            UiAction::ChooseFirstHourInvestment(_) => unreachable!(),
             UiAction::ToggleSettings
             | UiAction::AudioVolumeDown
             | UiAction::AudioVolumeUp

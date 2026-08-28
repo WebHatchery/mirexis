@@ -52,6 +52,7 @@ pub enum UiAction {
     ToggleFirstHourHelp,
     SkipFirstHourTutorial,
     RestartFirstHourTutorial,
+    ChooseFirstHourInvestment(String),
     ToggleSettings,
     AudioVolumeDown,
     AudioVolumeUp,

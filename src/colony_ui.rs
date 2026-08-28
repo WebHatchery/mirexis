@@ -95,6 +95,10 @@ fn draw_operations(
         192.0,
         TextStyle::new(15.0, dark::TEXT).params(),
     );
+    if campaign.first_hour.stage == crate::first_hour::FirstHourStage::MakeInvestment {
+        crate::first_hour_investment_ui::draw(campaign, mouse, actions);
+        return;
+    }
     let attention = campaign
         .strategy
         .factions

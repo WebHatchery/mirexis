@@ -161,6 +161,8 @@ impl CampaignState {
             })
             .take(SQUAD_LIMIT)
             .collect::<Vec<_>>();
+        self.first_hour
+            .apply_second_operation_bonus(self.operations_completed, &mut deployment);
         crate::relationships::apply_deployment_bonuses(&mut deployment, &self.relationships);
         deployment.extend(
             data.roster

@@ -23,7 +23,9 @@ Target: 45–75 minutes, ending after the second operation and its colony conseq
 - Operation Glassroot awards 30 materials, 4 biomass, and no power on victory.
 - A failed operation still advances the operation count, recovery, threat clock, and mission offers; it does not remove the save or require campaign restart.
 - Priority treatment remains available as a visible city action and must never consume the final resources needed to deploy a viable squad.
-- The first investment surface foregrounds no more than three currently affordable choices and explains every locked option.
+- The first investment surface foregrounds three equally priced choices: Bastion Mesh
+  (+1 squad armour), Survey Uplink (+8 squad accuracy), or Rapid Injectors (+1 squad
+  movement) for the second operation. Emergency stores guarantee the 24-material cost.
 
 ## Authored speakers
 

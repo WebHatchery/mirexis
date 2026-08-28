@@ -40,6 +40,31 @@ impl Game {
                     .restart(self.campaign.operations_completed);
                 "First-hour guide restarted"
             }
+            UiAction::ChooseFirstHourInvestment(investment_id) => {
+                if self.campaign.first_hour.stage
+                    != crate::first_hour::FirstHourStage::MakeInvestment
+                {
+                    self.notifications
+                        .warning("The preparation window is closed");
+                    return true;
+                }
+                let cost = crate::first_hour_investment_ui::INVESTMENT_COST;
+                if self.campaign.colony.resources.materials < cost {
+                    self.notifications
+                        .warning("Recover 24 materials before choosing a preparation");
+                    return true;
+                }
+                let label = crate::first_hour_investment_ui::label(investment_id);
+                if label == "Unknown preparation" {
+                    self.notifications.warning("Unknown first-hour preparation");
+                    return true;
+                }
+                self.campaign.colony.resources.materials -= cost;
+                self.campaign.first_hour.invested(investment_id.clone());
+                self.notifications
+                    .success(format!("{label} prepared for the second operation"));
+                "First-hour investment autosaved"
+            }
             _ => return false,
         };
         self.autosave_campaign_only(save_message);
@@ -54,6 +79,18 @@ impl Game {
         self.campaign
             .first_hour
             .operation_resolved(self.campaign.operations_completed, won);
+    }
+
+    pub(super) fn ensure_first_hour_recovery_reserve(&mut self) {
+        if self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::FirstReturn
+            && self.campaign.colony.resources.materials
+                < crate::first_hour_investment_ui::INVESTMENT_COST
+        {
+            self.campaign.colony.resources.materials =
+                crate::first_hour_investment_ui::INVESTMENT_COST;
+            self.notifications
+                .info("Emergency stores restored 24 materials for one viable preparation");
+        }
     }
 
     pub(super) fn first_hour_ability_success(

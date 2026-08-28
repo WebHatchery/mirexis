@@ -34,8 +34,27 @@ fn defeat_still_reaches_return_and_promise_beats() {
     progress.returned_to_colony();
     progress.invested("priority treatment");
     progress.operation_resolved(2, false);
+    assert_eq!(progress.stage, FirstHourStage::SecondReturn);
+    progress.returned_to_colony();
     assert_eq!(progress.stage, FirstHourStage::Promise);
     assert_eq!(progress.second_outcome_won, Some(false));
+}
+
+#[test]
+fn first_investment_changes_only_the_second_deployment() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = crate::campaign::CampaignState::new(&data);
+    let mission = campaign
+        .strategy
+        .materialize_selected(&data, &campaign.colony);
+    let mut units = campaign.deployment_roster(&data, &mission);
+    let base = units[0].accuracy;
+    let mut progress = FirstHourProgress::default();
+    progress.investment_name = "survey_uplink".to_owned();
+    progress.apply_second_operation_bonus(0, &mut units);
+    assert_eq!(units[0].accuracy, base);
+    progress.apply_second_operation_bonus(1, &mut units);
+    assert_eq!(units[0].accuracy, base + 8);
 }
 
 #[test]

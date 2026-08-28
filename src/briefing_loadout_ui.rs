@@ -17,9 +17,13 @@ pub(crate) fn draw(
     let Some(character) = campaign.selected_character() else {
         return;
     };
-    let Some(unit) = campaign.derived_character_unit(&character.id, data) else {
+    let Some(mut unit) = campaign.derived_character_unit(&character.id, data) else {
         return;
     };
+    campaign.first_hour.apply_second_operation_bonus(
+        campaign.operations_completed,
+        std::slice::from_mut(&mut unit),
+    );
     let class_name = data
         .classes
         .iter()
@@ -74,7 +78,16 @@ pub(crate) fn draw(
             "WEAPON {} DMG · R{} · {} AP",
             unit.weapon_damage, unit.weapon_range, unit.weapon_ap_cost
         ),
-        format!("SCARS // {}", scars),
+        if campaign.first_hour.investment_name.is_empty() {
+            format!("SCARS // {}", scars)
+        } else {
+            format!(
+                "PREP // {} // {}",
+                crate::first_hour_investment_ui::label(&campaign.first_hour.investment_name)
+                    .to_uppercase(),
+                crate::first_hour_investment_ui::effect(&campaign.first_hour.investment_name)
+            )
+        },
     ]
     .iter()
     .enumerate()

@@ -12,6 +12,7 @@ pub(crate) enum FirstHourStage {
     FirstReturn,
     MakeInvestment,
     SecondOperation,
+    SecondReturn,
     Promise,
     Complete,
 }
@@ -94,6 +95,9 @@ impl FirstHourProgress {
             FirstHourStage::SecondOperation => {
                 "Brief and deploy the next Isolation operation; apply what you learned."
             }
+            FirstHourStage::SecondReturn => {
+                "Tap RETURN TO COLONY to see what the two operations changed."
+            }
             FirstHourStage::Promise => "Read the colony consequence, then tap CONTINUE CAMPAIGN.",
             FirstHourStage::Complete => {
                 "Protect the colony before the Directorate assault reaches Mirexis."
@@ -170,7 +174,7 @@ impl FirstHourProgress {
             }
             2 => {
                 self.second_outcome_won = Some(won);
-                self.stage = FirstHourStage::Promise;
+                self.stage = FirstHourStage::SecondReturn;
             }
             _ => {}
         }
@@ -179,6 +183,8 @@ impl FirstHourProgress {
     pub(crate) fn returned_to_colony(&mut self) {
         if self.stage == FirstHourStage::FirstReturn {
             self.stage = FirstHourStage::MakeInvestment;
+        } else if self.stage == FirstHourStage::SecondReturn {
+            self.stage = FirstHourStage::Promise;
         }
     }
 
@@ -186,6 +192,27 @@ impl FirstHourProgress {
         if self.stage == FirstHourStage::MakeInvestment {
             self.investment_name = name.into();
             self.stage = FirstHourStage::SecondOperation;
+        }
+    }
+
+    pub(crate) fn apply_second_operation_bonus(
+        &self,
+        operations_completed: u32,
+        units: &mut [crate::data::UnitDef],
+    ) {
+        if operations_completed != 1 {
+            return;
+        }
+        for unit in units
+            .iter_mut()
+            .filter(|unit| unit.team == crate::data::Team::Colony)
+        {
+            match self.investment_name.as_str() {
+                "bastion_mesh" => unit.armour += 1,
+                "survey_uplink" => unit.accuracy += 8,
+                "rapid_injectors" => unit.move_range = unit.move_range.saturating_add(1),
+                _ => {}
+            }
         }
     }
 
