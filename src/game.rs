@@ -88,10 +88,11 @@ impl Game {
         let mut assets = AssetManager::new();
         let placeholder = crate::visual_assets::diagnostic_placeholder_image(32);
         assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
-        assets
-            .load_asset_pack("assets.zip")
-            .await
-            .unwrap_or_else(|error| panic!("Mirexis runtime asset pack failed to load: {error}"));
+        if let Err(error) = assets.load_asset_pack("assets.zip").await {
+            println!(
+                "Mirexis runtime asset pack unavailable ({error}); loading loose assets for native development."
+            );
+        }
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
         let visuals = VisualCatalog::load();
         let missing_visuals = visuals.validate_loaded(&assets);

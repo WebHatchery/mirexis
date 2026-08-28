@@ -5,7 +5,7 @@
   "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "auto",
   "about": [
-    "A turn-based grid tactics game about named colonists, strange mutations, and one settlement caught between three overwhelming powers.",
+    "Lead a band of mutated colonists through turn-based grid battles. Build the settlement, manage faction pressure, and survive attacks from three powerful rivals.",
     "Phase One: Isolation connects deterministic tactical missions to persistent recruits, colony construction, faction pressure, research, character events, and telegraphed colony attacks."
   ],
   "controls": [
