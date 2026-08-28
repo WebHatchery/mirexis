@@ -82,9 +82,11 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
         let statuses = unit
             .statuses
             .iter()
-            .map(|status| format!("{:?}", status.kind).to_uppercase())
+            .map(|status| {
+                format!("{:?} {} PH", status.kind, status.remaining_phases).to_uppercase()
+            })
             .collect::<Vec<_>>()
-            .join("/");
+            .join(" / ");
         format!("{} · {}", statuses, class)
     }
 }
@@ -158,3 +160,6 @@ pub(crate) fn button_with_state(
     );
     hovered && is_mouse_button_released(MouseButton::Left)
 }
+
+#[cfg(test)]
+mod tests;

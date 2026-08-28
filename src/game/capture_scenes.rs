@@ -79,6 +79,20 @@ impl Game {
                 self.reset_capture_session(AppState::Tactical);
                 self.show_tactical_help = true;
             }
+            "first_hour_guide" => {
+                self.state = AppState::Colony;
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::SecondOperation;
+                self.campaign.first_hour.help_open = true;
+                let metrics = &mut self.campaign.first_hour.metrics;
+                metrics.elapsed_millis = 2_846_000;
+                metrics.first_city_move_millis = Some(18_000);
+                metrics.first_city_interaction_millis = Some(46_000);
+                metrics.first_tactical_attack_millis = Some(612_000);
+                metrics.operation_one_duration_millis = Some(934_000);
+                metrics.operation_one_rounds = Some(5);
+                metrics.invalid_commands = 3;
+                metrics.guide_opens = 2;
+            }
             "battle_log" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.session.end_player_phase(&self.data.config);

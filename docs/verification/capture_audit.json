@@ -1,13 +1,13 @@
 {
-  "generated": "2026-08-12",
+  "generated": "2026-08-29",
   "capture_root": "docs/verification",
   "target_dimensions": [
     1280,
     720
   ],
-  "manifest_scenes": 85,
-  "files_audited": 85,
-  "unique_sha256": 85,
+  "manifest_scenes": 86,
+  "files_audited": 86,
+  "unique_sha256": 86,
   "missing_files": 0,
   "extra_files": 0,
   "wrong_dimensions": 0,

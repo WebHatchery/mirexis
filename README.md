@@ -42,6 +42,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 | [docs/PHASE_1_BEAT_SHEET.md](docs/PHASE_1_BEAT_SHEET.md) | Authored first-hour sequence, economy, speakers, and deferred systems |
 | [docs/PHASE_1_HARDENING.md](docs/PHASE_1_HARDENING.md) | Automated reliability, accessibility, resize, and recovery evidence |
 | [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md) | Required human session evidence and issue triage |
+| [docs/PHASE_1_ACCEPTANCE_MATRIX.md](docs/PHASE_1_ACCEPTANCE_MATRIX.md) | Requirement-by-requirement implementation evidence and remaining human gates |
 | [docs/AUDIO_SOURCES.md](docs/AUDIO_SOURCES.md) | Audio palette provenance and future attribution requirements |
 | [docs/UI_GRAPHICS_VISUAL_SPEC.md](docs/UI_GRAPHICS_VISUAL_SPEC.md) | Visual language and UI acceptance principles |
 | [art_sources/README.md](art_sources/README.md) | Source-art and atlas preparation notes |

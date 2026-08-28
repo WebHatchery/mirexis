@@ -335,7 +335,8 @@ of market fit.
 
 Session evidence and unresolved findings are recorded in `PHASE_1_PLAYTEST_LOG.md`.
 Automated reliability, accessibility, resize, and recovery evidence is recorded in
-`PHASE_1_HARDENING.md`.
+`PHASE_1_HARDENING.md`. The requirement-by-requirement implementation and acceptance
+audit is recorded in `PHASE_1_ACCEPTANCE_MATRIX.md`.
 
 ## 8. Definition of done
 
