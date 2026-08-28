@@ -30,7 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 1 | title | `ui_title.png` | 441092 | `53fb8d28a0f09958be6af54c788d75e9950aca4d25005946f2a8197bfd312f2d` |
 | 2 | title_controller | `ui_title_controller.png` | 480500 | `bd9f65b06ab08a86b57d18e5b013ea61a58565618ec1e787dea482e281eea04c` |
 | 3 | title_hover | `ui_title_hover.png` | 480446 | `6271e46c99c208b88a3e881de2e66d7b7ba6ad5301df2fcdf65a12353cf622a3` |
-| 4 | colony | `ui_colony.png` | 819664 | `ccc944d062e126518596ba136c44f47544cda76c29efdf5dca2913ed42b62d4c` |
+| 4 | colony | `ui_colony.png` | 818315 | `ea7b53d500d6bb39ef7fd3bcd28d01307f9c27ae6a0a4c2ab1464a679d5d1992` |
 | 5 | contact | `ui_contact.png` | 393944 | `49062d6925b6f79d448894a6e2c6d774aab321e28825a92f6d923dce89eb3911` |
 | 6 | contact_gear | `ui_contact_gear.png` | 249571 | `f80b5bc361f12ed23eb369f1dce1cfd30628c2830ccedc53b1f8663ecb22bd55` |
 | 7 | contact_event | `ui_contact_event.png` | 877143 | `b8b4d4330b7052d90ab716c774cd79dbec5634e435557ec5d0f594f2a3359c80` |

@@ -4,7 +4,7 @@ use crate::first_hour::{FirstHourProgress, FirstHourStage};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
-use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
+use macroquad_toolkit::prelude::{dark, draw_surface, draw_text_block, SurfaceStyle, TextStyle};
 
 pub(crate) fn draw(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if progress.help_open {
@@ -16,7 +16,7 @@ pub(crate) fn draw(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<
 }
 
 fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(20.0, 76.0, 520.0, 72.0);
+    let panel = Rect::new(20.0, 76.0, 520.0, 96.0);
     draw_surface(
         panel,
         &SurfaceStyle::new(Color::new(0.025, 0.065, 0.07, 0.97))
@@ -24,11 +24,14 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
             .with_left_accent(5.0, Color::new(0.34, 0.86, 0.68, 1.0)),
     );
     text("PRIMARY GOAL", 38.0, 98.0, 12.0, dark::ACCENT);
-    text(
+    draw_text_block(
         progress.visible_goal(),
         38.0,
-        124.0,
+        108.0,
+        276.0,
+        58.0,
         15.0,
+        2.0,
         dark::TEXT_BRIGHT,
     );
     if button(Rect::new(426.0, 84.0, 98.0, 24.0), "HELP", true, mouse) {
