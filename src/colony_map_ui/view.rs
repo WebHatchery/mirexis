@@ -43,6 +43,13 @@ impl ColonyView {
         )
     }
 
+    pub(crate) fn world_position(self, screen: Vec2, elevation_plot: [i32; 2]) -> Vec2 {
+        let horizontal = (screen.x - self.origin.x) / self.half_width;
+        let elevation = self.elevation(elevation_plot) as f32 * self.elevation_step();
+        let vertical = (screen.y - self.origin.y + elevation) / self.half_height;
+        vec2((horizontal + vertical) * 0.5, (vertical - horizontal) * 0.5)
+    }
+
     pub(super) fn elevation(self, position: [i32; 2]) -> i8 {
         let distance = (position[0] - 10).abs() + (position[1] - 10).abs();
         if distance <= 4 {

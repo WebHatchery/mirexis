@@ -5,7 +5,7 @@ use crate::colony::BuildingKind;
 use crate::colony_exploration::ColonyExplorer;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
-use macroquad::prelude::{Rect, Vec2};
+use macroquad::prelude::{is_mouse_button_down, vec2, MouseButton, Rect, Vec2};
 
 pub(super) fn draw_build_controls(
     campaign: &CampaignState,
@@ -51,6 +51,7 @@ pub(super) fn draw_exploration_controls(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
+    explorer.set_touch_direction(Vec2::ZERO);
     if explorer.build_mode() {
         if button(
             Rect::new(540.0, 620.0, 196.0, 42.0),
@@ -62,24 +63,23 @@ pub(super) fn draw_exploration_controls(
         }
         return;
     }
-    for (index, (label, delta)) in [
-        ("NW", [-1, 0]),
-        ("NE", [0, -1]),
-        ("SW", [0, 1]),
-        ("SE", [1, 0]),
+    let mut movement = Vec2::ZERO;
+    for (index, (label, direction)) in [
+        ("NW", vec2(-1.0, 0.0)),
+        ("NE", vec2(0.0, -1.0)),
+        ("SW", vec2(0.0, 1.0)),
+        ("SE", vec2(1.0, 0.0)),
     ]
     .into_iter()
     .enumerate()
     {
-        if button(
-            Rect::new(20.0 + index as f32 * 46.0, 620.0, 42.0, 42.0),
-            label,
-            true,
-            mouse,
-        ) {
-            explorer.request_step(delta, &campaign.colony);
+        let rect = Rect::new(20.0 + index as f32 * 46.0, 620.0, 42.0, 42.0);
+        button(rect, label, true, mouse);
+        if rect.contains(mouse) && is_mouse_button_down(MouseButton::Left) {
+            movement += direction;
         }
     }
+    explorer.set_touch_direction(movement.normalize_or_zero());
     if button(
         Rect::new(210.0, 620.0, 112.0, 42.0),
         "TALK",

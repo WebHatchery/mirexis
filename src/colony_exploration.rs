@@ -9,19 +9,18 @@ use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
-use std::collections::{HashMap, VecDeque};
-
-const PLAYER_START: [i32; 2] = [9, 10];
-const WALK_SECONDS_PER_PLOT: f32 = 0.18;
+const PLAYER_START: Vec2 = Vec2::new(9.0, 10.0);
+const WALK_SPEED: f32 = 3.6;
+const PLAYER_RADIUS: f32 = 0.22;
+const INTERACTION_DISTANCE: f32 = 1.15;
 const NPC_STATIONS: [[i32; 2]; 5] = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12]];
 
 #[derive(Debug, Clone)]
 pub(crate) struct ColonyExplorer {
-    position: [i32; 2],
-    visual_position: Vec2,
-    route: VecDeque<[i32; 2]>,
-    step_progress: f32,
-    step_from: [i32; 2],
+    position: Vec2,
+    destination: Option<Vec2>,
+    keyboard_direction: Vec2,
+    touch_direction: Vec2,
     facing: UnitFacing,
     approached_npc: Option<String>,
     talking_to: Option<String>,
@@ -32,10 +31,9 @@ impl Default for ColonyExplorer {
     fn default() -> Self {
         Self {
             position: PLAYER_START,
-            visual_position: vec2(PLAYER_START[0] as f32, PLAYER_START[1] as f32),
-            route: VecDeque::new(),
-            step_progress: 0.0,
-            step_from: PLAYER_START,
+            destination: None,
+            keyboard_direction: Vec2::ZERO,
+            touch_direction: Vec2::ZERO,
             facing: UnitFacing::SouthEast,
             approached_npc: None,
             talking_to: None,
@@ -50,82 +48,88 @@ impl ColonyExplorer {
     }
 
     pub(crate) fn update(&mut self, dt: f32, colony: &ColonyState) {
-        if self.route.is_empty() {
-            self.step_progress = 0.0;
-            self.visual_position = grid_vec(self.position);
+        let manual = self.keyboard_direction + self.touch_direction;
+        let (direction, remaining) = if manual.length_squared() > 0.01 {
+            self.destination = None;
+            self.approached_npc = None;
+            self.close_dialogue();
+            (manual.normalize(), f32::INFINITY)
+        } else if let Some(destination) = self.destination {
+            let offset = destination - self.position;
+            if offset.length() <= 0.025 {
+                self.destination = None;
+                return;
+            }
+            (offset.normalize(), offset.length())
+        } else {
             return;
-        }
-        let next = self.route[0];
-        if blocked(colony, next) {
-            self.route.clear();
-            return;
-        }
-        self.step_progress = (self.step_progress + dt / WALK_SECONDS_PER_PLOT).min(1.0);
-        self.visual_position = grid_vec(self.step_from).lerp(grid_vec(next), self.step_progress);
-        if self.step_progress >= 1.0 {
-            self.position = next;
-            self.step_from = next;
-            self.route.pop_front();
-            self.step_progress = 0.0;
+        };
+        self.set_facing(direction);
+        let distance = (WALK_SPEED * dt).min(remaining);
+        let movement = direction * distance;
+        let before = self.position;
+        self.move_with_collision(movement, colony);
+        if self.position.distance_squared(before) < 0.000_001 {
+            self.destination = None;
+            self.approached_npc = None;
+        } else if remaining <= distance + 0.001 {
+            self.destination = None;
         }
     }
 
-    pub(crate) fn request_step(&mut self, delta: [i32; 2], colony: &ColonyState) {
-        self.close_dialogue();
-        self.approached_npc = None;
-        let destination = [self.position[0] + delta[0], self.position[1] + delta[1]];
-        if in_bounds(destination) && !blocked(colony, destination) {
-            self.begin_route(VecDeque::from([destination]));
-            self.set_facing(delta);
-        }
+    pub(crate) fn set_keyboard_direction(&mut self, direction: Vec2) {
+        self.keyboard_direction = direction;
     }
 
-    pub(crate) fn request_walk(&mut self, destination: [i32; 2], colony: &ColonyState) {
+    pub(crate) fn set_touch_direction(&mut self, direction: Vec2) {
+        self.touch_direction = direction;
+    }
+
+    pub(crate) fn request_walk(&mut self, destination: Vec2, colony: &ColonyState) {
         self.close_dialogue();
         self.approached_npc = None;
-        if let Some(route) = pathfind(self.position, destination, colony, &[]) {
-            self.begin_route(route);
+        if can_occupy(colony, destination) {
+            self.destination = Some(destination);
         }
     }
 
     pub(crate) fn request_approach(
         &mut self,
         npc_id: &str,
-        npc_position: [i32; 2],
+        npc_position: Vec2,
         colony: &ColonyState,
-        occupied_npc_positions: &[[i32; 2]],
     ) {
         self.close_dialogue();
-        let destination = neighbours(npc_position)
-            .into_iter()
-            .filter(|position| in_bounds(*position) && !blocked(colony, *position))
-            .filter_map(|position| {
-                pathfind(self.position, position, colony, occupied_npc_positions)
-                    .map(|route| (route.len(), position, route))
-            })
-            .min_by_key(|(length, position, _)| (*length, position[1], position[0]));
-        if let Some((_, _, route)) = destination {
+        let away = (self.position - npc_position).normalize_or_zero();
+        let direction = if away.length_squared() > 0.01 {
+            away
+        } else {
+            vec2(-1.0, 0.0)
+        };
+        let destination = npc_position + direction * (INTERACTION_DISTANCE * 0.72);
+        if can_occupy(colony, destination) {
             self.approached_npc = Some(npc_id.to_owned());
-            self.begin_route(route);
+            self.destination = Some(destination);
         }
     }
 
     pub(crate) fn interact(&mut self, campaign: &CampaignState) {
         if let Some(character) = nearest_npc(campaign, self.position) {
-            self.route.clear();
+            self.destination = None;
             self.approached_npc = None;
             self.talking_to = Some(character.id.clone());
         }
     }
 
     pub(crate) fn update_approach(&mut self, campaign: &CampaignState) {
-        if !self.route.is_empty() {
+        if self.destination.is_some() {
             return;
         }
         let ready = self.approached_npc.as_deref().is_some_and(|id| {
             npc(campaign, id).is_some_and(|character| {
-                npc_position(campaign, &character.id)
-                    .is_some_and(|position| adjacent(self.position, position))
+                npc_position(campaign, &character.id).is_some_and(|position| {
+                    self.position.distance(position) <= INTERACTION_DISTANCE
+                })
             })
         });
         if ready {
@@ -136,7 +140,7 @@ impl ColonyExplorer {
     pub(crate) fn set_build_mode(&mut self, enabled: bool) {
         self.build_mode = enabled;
         if enabled {
-            self.route.clear();
+            self.destination = None;
             self.close_dialogue();
         }
     }
@@ -182,14 +186,14 @@ impl ColonyExplorer {
                 clicked = Some(character.id.clone());
             }
         }
-        if self.visual_position.x.floor() as i32 + self.visual_position.y.floor() as i32 == depth {
+        if (self.position.x + self.position.y).round() as i32 == depth {
             if let Some(player) = campaign.roster.first() {
-                let center = view.world_center(self.visual_position) + vec2(0.0, 7.0 * view.zoom);
+                let center = view.world_center(self.position) + vec2(0.0, 7.0 * view.zoom);
                 draw_character(
                     player,
                     center,
                     matches!(self.facing, UnitFacing::SouthEast | UnitFacing::NorthEast),
-                    !self.route.is_empty(),
+                    self.is_moving(),
                     false,
                     false,
                     assets,
@@ -276,21 +280,28 @@ impl ColonyExplorer {
         nearest_npc(campaign, self.position).is_some()
     }
 
-    fn begin_route(&mut self, route: VecDeque<[i32; 2]>) {
-        self.route = route;
-        self.step_from = self.position;
-        self.step_progress = 0.0;
-        if let Some(next) = self.route.front() {
-            self.set_facing([next[0] - self.position[0], next[1] - self.position[1]]);
-        }
+    fn is_moving(&self) -> bool {
+        self.destination.is_some()
+            || (self.keyboard_direction + self.touch_direction).length_squared() > 0.01
     }
 
-    fn set_facing(&mut self, delta: [i32; 2]) {
-        self.facing = match delta {
-            [1, 0] | [0, 1] => UnitFacing::SouthEast,
-            [-1, 0] | [0, -1] => UnitFacing::NorthWest,
-            _ => self.facing,
+    fn set_facing(&mut self, direction: Vec2) {
+        self.facing = if direction.x + direction.y >= 0.0 {
+            UnitFacing::SouthEast
+        } else {
+            UnitFacing::NorthWest
         };
+    }
+
+    fn move_with_collision(&mut self, movement: Vec2, colony: &ColonyState) {
+        let horizontal = self.position + vec2(movement.x, 0.0);
+        if can_occupy(colony, horizontal) {
+            self.position = horizontal;
+        }
+        let vertical = self.position + vec2(0.0, movement.y);
+        if can_occupy(colony, vertical) {
+            self.position = vertical;
+        }
     }
 }
 
@@ -437,21 +448,13 @@ fn npc_action(character: &CharacterRecord) -> UiAction {
     }
 }
 
-pub(crate) fn npc_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
+pub(crate) fn npc_position(campaign: &CampaignState, id: &str) -> Option<Vec2> {
     campaign
         .roster
         .iter()
         .position(|character| character.id == id)
         .and_then(|index| (index > 0 && index < NPC_STATIONS.len()).then_some(NPC_STATIONS[index]))
-}
-
-pub(crate) fn npc_positions(campaign: &CampaignState) -> Vec<[i32; 2]> {
-    campaign
-        .roster
-        .iter()
-        .skip(1)
-        .filter_map(|character| npc_position(campaign, &character.id))
-        .collect()
+        .map(grid_vec)
 }
 
 fn npc<'a>(campaign: &'a CampaignState, id: &str) -> Option<&'a CharacterRecord> {
@@ -462,73 +465,39 @@ fn npc<'a>(campaign: &'a CampaignState, id: &str) -> Option<&'a CharacterRecord>
         .find(|character| character.id == id)
 }
 
-fn nearest_npc(campaign: &CampaignState, position: [i32; 2]) -> Option<&CharacterRecord> {
+fn nearest_npc(campaign: &CampaignState, position: Vec2) -> Option<&CharacterRecord> {
     campaign.roster.iter().skip(1).find(|character| {
         npc_position(campaign, &character.id)
-            .is_some_and(|npc_position| adjacent(position, npc_position))
+            .is_some_and(|npc_position| position.distance(npc_position) <= INTERACTION_DISTANCE)
     })
 }
 
-fn pathfind(
-    start: [i32; 2],
-    goal: [i32; 2],
-    colony: &ColonyState,
-    occupied_npcs: &[[i32; 2]],
-) -> Option<VecDeque<[i32; 2]>> {
-    if !in_bounds(goal) || blocked(colony, goal) || occupied_npcs.contains(&goal) {
-        return None;
+fn can_occupy(colony: &ColonyState, position: Vec2) -> bool {
+    if position.x < PLAYER_RADIUS
+        || position.y < PLAYER_RADIUS
+        || position.x > (COLONY_WIDTH - 1) as f32 - PLAYER_RADIUS
+        || position.y > (COLONY_HEIGHT - 1) as f32 - PLAYER_RADIUS
+    {
+        return false;
     }
-    let mut frontier = VecDeque::from([start]);
-    let mut came_from = HashMap::from([(start, start)]);
-    while let Some(current) = frontier.pop_front() {
-        if current == goal {
-            break;
-        }
-        for next in neighbours(current) {
-            if in_bounds(next)
-                && !blocked(colony, next)
-                && !occupied_npcs.contains(&next)
-                && !came_from.contains_key(&next)
-            {
-                came_from.insert(next, current);
-                frontier.push_back(next);
-            }
-        }
-    }
-    if !came_from.contains_key(&goal) {
-        return None;
-    }
-    let mut reversed = vec![goal];
-    let mut current = goal;
-    while current != start {
-        current = came_from[&current];
-        if current != start {
-            reversed.push(current);
-        }
-    }
-    reversed.reverse();
-    Some(reversed.into())
-}
-
-fn neighbours(position: [i32; 2]) -> [[i32; 2]; 4] {
-    [
-        [position[0] + 1, position[1]],
-        [position[0] - 1, position[1]],
-        [position[0], position[1] + 1],
-        [position[0], position[1] - 1],
-    ]
-}
-
-fn adjacent(a: [i32; 2], b: [i32; 2]) -> bool {
-    (a[0] - b[0]).abs() + (a[1] - b[1]).abs() == 1
-}
-
-fn in_bounds(position: [i32; 2]) -> bool {
-    (0..COLONY_WIDTH).contains(&position[0]) && (0..COLONY_HEIGHT).contains(&position[1])
-}
-
-fn blocked(colony: &ColonyState, position: [i32; 2]) -> bool {
-    colony.building_at(position).is_some() || colony.project_at(position).is_some()
+    let collides = |anchor: [i32; 2]| {
+        let center = grid_vec(anchor);
+        (position.x - center.x).abs() < 0.50 + PLAYER_RADIUS
+            && (position.y - center.y).abs() < 0.50 + PLAYER_RADIUS
+    };
+    let clear_of_npcs = NPC_STATIONS
+        .iter()
+        .skip(1)
+        .all(|station| position.distance(grid_vec(*station)) >= 0.52);
+    clear_of_npcs
+        && !colony
+            .buildings
+            .iter()
+            .any(|building| collides(building.position))
+        && !colony
+            .construction_queue
+            .iter()
+            .any(|project| collides(project.position))
 }
 
 fn grid_vec(position: [i32; 2]) -> Vec2 {

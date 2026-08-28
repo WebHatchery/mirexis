@@ -3,7 +3,7 @@
 use super::{AppState, Game};
 use crate::data::Team;
 use crate::ui::{self, UiAction};
-use macroquad::prelude::{is_key_pressed, KeyCode};
+use macroquad::prelude::{is_key_down, is_key_pressed, vec2, KeyCode};
 use macroquad_toolkit::prelude::InputState;
 
 impl Game {
@@ -52,30 +52,24 @@ impl Game {
                 if pad.secondary {
                     self.events.push(UiAction::OpenRoster);
                 }
-                if pad.up || pad.left || pad.previous {
+                if pad.previous {
                     self.cycle_selected_mission(-1);
-                } else if pad.down || pad.right || pad.next {
+                } else if pad.next {
                     self.cycle_selected_mission(1);
                 }
                 if !self.colony_explorer.build_mode() {
-                    let step = if is_key_pressed(KeyCode::W) || is_key_pressed(KeyCode::Up) {
-                        Some([0, -1])
-                    } else if is_key_pressed(KeyCode::S) || is_key_pressed(KeyCode::Down) {
-                        Some([0, 1])
-                    } else if is_key_pressed(KeyCode::A) || is_key_pressed(KeyCode::Left) {
-                        Some([-1, 0])
-                    } else if is_key_pressed(KeyCode::D) || is_key_pressed(KeyCode::Right) {
-                        Some([1, 0])
-                    } else {
-                        None
-                    };
-                    if let Some(delta) = step {
-                        self.colony_explorer
-                            .request_step(delta, &self.campaign.colony);
-                    }
+                    let screen_x = i32::from(is_key_down(KeyCode::D) || pad.right) as f32
+                        - i32::from(is_key_down(KeyCode::A) || pad.left) as f32;
+                    let screen_y = i32::from(is_key_down(KeyCode::S) || pad.down) as f32
+                        - i32::from(is_key_down(KeyCode::W) || pad.up) as f32;
+                    let direction = vec2(screen_x + screen_y, screen_y - screen_x);
+                    self.colony_explorer
+                        .set_keyboard_direction(direction.normalize_or_zero());
                     if is_key_pressed(KeyCode::E) {
                         self.colony_explorer.interact(&self.campaign);
                     }
+                } else {
+                    self.colony_explorer.set_keyboard_direction(vec2(0.0, 0.0));
                 }
             }
             AppState::Roster | AppState::GeneLab => {

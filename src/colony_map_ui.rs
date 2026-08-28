@@ -108,12 +108,7 @@ pub(crate) fn draw(
     crate::ui::set_ui_clip(ui, None);
     if let Some(npc_id) = clicked_npc.as_deref() {
         if let Some(position) = crate::colony_exploration::npc_position(campaign, npc_id) {
-            explorer.request_approach(
-                npc_id,
-                position,
-                &campaign.colony,
-                &crate::colony_exploration::npc_positions(campaign),
-            );
+            explorer.request_approach(npc_id, position, &campaign.colony);
         }
         camera.guard_next_primary_release();
     }
@@ -127,7 +122,7 @@ pub(crate) fn draw(
         && is_mouse_button_released(MouseButton::Left)
     {
         if let Some(position) = hovered {
-            explorer.request_walk(position, &campaign.colony);
+            explorer.request_walk(view.world_position(mouse, position), &campaign.colony);
         }
     }
     controls::draw_exploration_controls(campaign, explorer, mouse, actions);
@@ -140,7 +135,7 @@ pub(crate) fn draw(
             )
         } else {
             format!(
-                "TAP THE GROUND TO WALK // TAP A COLONIST TO TALK // {}%",
+                "TAP ANY GROUND POINT // HOLD THE PAD TO MOVE // {}%",
                 (camera.zoom * 100.0) as i32
             )
         },

@@ -167,11 +167,12 @@ Capture all application scenes with:
 
 ## Controls
 
-- Mouse/touch in the colony: tap terrain to walk, tap a colonist to approach and talk,
-  use the visible movement pad, or enter Build mode to construct and repair facilities
+- Mouse/touch in the colony: tap any exact terrain point to walk there, hold the visible
+  movement pad for free movement, tap a colonist to approach and talk, or enter Build mode
+  to construct and repair facilities
 - Mouse in tactical missions: select colonists, move, attack, complete objectives, or
   activate mutation and class actions
-- W / A / S / D: supplement the colony's visible movement pad
+- Hold W / A / S / D: supplement the colony's visible movement pad
 - E: talk to an adjacent colony NPC
 - Arrow keys: move the tactical cursor
 - Enter: confirm title/briefing/debrief or end the colony tactical phase

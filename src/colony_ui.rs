@@ -49,7 +49,7 @@ pub fn draw_colony(
     crate::colony_header_ui::draw(campaign, mouse, &mut actions);
     draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
     draw_ui_text_ex(
-        "EXPLORE // TAP GROUND TO WALK · TAP COLONIST TO APPROACH · TAP TALK NEARBY",
+        "EXPLORE // TAP ANY GROUND POINT · HOLD MOVEMENT PAD · TAP COLONIST TO TALK",
         28.0,
         707.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
