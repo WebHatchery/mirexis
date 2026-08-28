@@ -127,6 +127,9 @@ pub fn migrate_save_value(
             .unwrap_or_default();
     }
     if detected_version.as_deref() != Some(data.config.version.as_str()) {
+        save.campaign
+            .first_hour
+            .migrate_from_operations(save.campaign.operations_completed);
         if let Some(tactical) = &mut save.tactical {
             for unit in &mut tactical.units {
                 if unit.faction.is_none() {

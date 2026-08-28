@@ -20,3 +20,22 @@ fn previous_save_without_first_hour_fields_gains_safe_guidance() {
     assert_eq!(migrated.campaign.first_hour, FirstHourProgress::default());
     assert_eq!(migrated.campaign.first_hour.stage, FirstHourStage::Arrival);
 }
+
+#[test]
+fn established_previous_campaign_does_not_restart_the_arrival_guide() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.operations_completed = 5;
+    let save = SaveData::campaign_only("1.63.0", &campaign);
+    let mut value = serde_json::to_value(save).unwrap();
+    value
+        .get_mut("campaign")
+        .and_then(serde_json::Value::as_object_mut)
+        .unwrap()
+        .remove("first_hour");
+
+    let migrated = migrate_save_value(Some("1.63.0".to_owned()), value, &data).unwrap();
+
+    assert_eq!(migrated.campaign.first_hour.stage, FirstHourStage::Complete);
+    assert!(!migrated.campaign.first_hour.guidance_enabled);
+}

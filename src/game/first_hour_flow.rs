@@ -6,7 +6,10 @@ use macroquad_toolkit::ui::VirtualUi;
 
 impl Game {
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
-        if self.state != AppState::Title {
+        if self.state != AppState::Title
+            && !(self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
+                && self.state != AppState::Colony)
+        {
             crate::first_hour_ui::draw(
                 &self.campaign.first_hour,
                 ui::pointer_position(ui),

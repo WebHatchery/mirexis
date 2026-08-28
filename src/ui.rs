@@ -180,6 +180,14 @@ pub fn draw_mission_briefing(
         7.0,
         dark::TEXT_DIM,
     );
+    if campaign.operations_completed == 0 {
+        draw_ui_text_ex(
+            "MARA VENN // Get the refuge lights back. Bring my people home.",
+            200.0,
+            314.0,
+            TextStyle::new(13.0, dark::ACCENT).params(),
+        );
+    }
     draw_mission_vignette(data, mission, assets, visuals);
     if mission.operation_modifier != crate::data::OperationModifier::None {
         draw_ui_text_ex(

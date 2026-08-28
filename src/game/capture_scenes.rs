@@ -136,7 +136,10 @@ impl Game {
             "relationships" => self.capture_relationships(AppState::Roster),
             "trauma" => self.capture_trauma(),
             "bonded_briefing" => self.capture_relationships(AppState::MissionBriefing),
-            "briefing" => self.state = AppState::MissionBriefing,
+            "briefing" => {
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstBriefing;
+                self.state = AppState::MissionBriefing;
+            }
             "threat_briefing" => {
                 self.capture_template_operation(
                     "sporefield_extraction",

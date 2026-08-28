@@ -30,7 +30,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 234 Mirexis unit tests pass.
+- 235 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - Canonical title and colony captures were refreshed after the new controls.

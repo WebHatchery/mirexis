@@ -88,13 +88,15 @@ pub(super) fn draw_exploration_controls(
     ) {
         explorer.interact(campaign);
     }
-    if button(
-        Rect::new(332.0, 654.0, 150.0, 42.0),
-        "BUILD MODE",
-        true,
-        mouse,
-    ) {
-        explorer.set_build_mode(true);
-        actions.clear();
+    if campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete {
+        if button(
+            Rect::new(332.0, 654.0, 150.0, 42.0),
+            "BUILD MODE",
+            true,
+            mouse,
+        ) {
+            explorer.set_build_mode(true);
+            actions.clear();
+        }
     }
 }

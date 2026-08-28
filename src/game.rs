@@ -328,6 +328,9 @@ impl Game {
                 self.autosave_campaign_only("New colony autosaved");
             }
             UiAction::OpenMissionBriefing => {
+                self.campaign
+                    .first_hour
+                    .opened_briefing(self.campaign.operations_completed);
                 self.active_mission = self
                     .campaign
                     .strategy

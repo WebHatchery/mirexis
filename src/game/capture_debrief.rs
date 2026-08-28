@@ -14,6 +14,7 @@ impl Game {
             }
         }
         self.last_outcome = self.session.mission_outcome(&self.active_mission);
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstReturn;
         self.state = AppState::Debrief;
     }
 
@@ -27,6 +28,7 @@ impl Game {
             }
         }
         self.last_outcome = self.session.mission_outcome(&self.active_mission);
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstReturn;
         self.state = AppState::Debrief;
     }
 }

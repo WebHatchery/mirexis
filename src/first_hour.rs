@@ -8,6 +8,7 @@ pub(crate) enum FirstHourStage {
     Arrival,
     MeetCoordinator,
     PrepareFirstOperation,
+    FirstBriefing,
     FirstOperation,
     FirstReturn,
     MakeInvestment,
@@ -85,6 +86,9 @@ impl FirstHourProgress {
             FirstHourStage::PrepareFirstOperation => {
                 "Tap OPERATIONS, inspect GLASSROOT, then tap BRIEF SELECTED MISSION."
             }
+            FirstHourStage::FirstBriefing => {
+                "Tap colonists to choose up to three, then tap DEPLOY SQUAD."
+            }
             FirstHourStage::FirstOperation => lesson_prompt(self.lesson),
             FirstHourStage::FirstReturn => {
                 "Tap RETURN TO COLONY, then speak with the highlighted colonist."
@@ -139,6 +143,12 @@ impl FirstHourProgress {
         } else if operations_completed == 1 {
             self.stage = FirstHourStage::SecondOperation;
             self.lesson = TacticalLesson::ApplyLearning;
+        }
+    }
+
+    pub(crate) fn opened_briefing(&mut self, operations_completed: u32) {
+        if operations_completed == 0 && self.stage == FirstHourStage::PrepareFirstOperation {
+            self.stage = FirstHourStage::FirstBriefing;
         }
     }
 
@@ -225,6 +235,17 @@ impl FirstHourProgress {
             1 => FirstHourStage::MakeInvestment,
             _ => FirstHourStage::Complete,
         };
+    }
+
+    pub(crate) fn migrate_from_operations(&mut self, operations_completed: u32) {
+        self.stage = match operations_completed {
+            0 => FirstHourStage::Arrival,
+            1 => FirstHourStage::MakeInvestment,
+            _ => FirstHourStage::Complete,
+        };
+        if self.stage == FirstHourStage::Complete {
+            self.guidance_enabled = false;
+        }
     }
 
     fn advance_lesson(&mut self, expected: TacticalLesson, next: TacticalLesson) {

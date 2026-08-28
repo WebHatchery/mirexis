@@ -69,6 +69,19 @@ pub fn draw_debrief(
             dark::ACCENT,
         );
     }
+    if campaign.operations_completed <= 2 {
+        draw_text(
+            if won {
+                "ILYA REED // Account for everyone before Mara spends the recovery."
+            } else {
+                "ILYA REED // Failure is a condition. We treat it, then move."
+            },
+            200.0,
+            214.0,
+            14.0,
+            dark::ACCENT,
+        );
+    }
     let injuries = if outcome.colonists_incapacitated.is_empty() {
         "No squad incapacitations".to_owned()
     } else {
