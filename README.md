@@ -5,14 +5,15 @@ colony caught between the Directorate, the Brood, and the Ascendants.
 
 ## Project status
 
-Mirexis is a systems-rich tech demo. It proves the city, mission briefing, tactical
-combat, debrief, progression, campaign-state, and save loops, including three late-game
-identity branches. That breadth is an implementation foundation, not yet a claim that
-the game is balanced, paced, taught, polished, or content-complete.
+Mirexis now has a Phase 1 first-hour candidate: an authored arrival, contextual city and
+tactical teaching, two-operation progression, a meaningful preparation choice, visible
+colony consequences, procedural audio, persistent settings, and recovery hardening. The
+complete campaign foundation still extends through three late-game identity branches.
 
-The next production target is a cohesive and enjoyable first hour. See
-[docs/PLAYABLE_GAME_PHASE_1.md](docs/PLAYABLE_GAME_PHASE_1.md) for its scope, order of
-work, and exit criteria.
+Phase 1 implementation and automated verification are complete, but the phase is not yet
+accepted: five uncoached first-time playtests, including two touch-primary sessions, still
+have to satisfy its exit criteria. See [docs/PLAYABLE_GAME_PHASE_1.md](docs/PLAYABLE_GAME_PHASE_1.md)
+and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 
 ## What works now
 
@@ -27,6 +28,8 @@ work, and exit criteria.
 - A complete prototype campaign-state path through Isolation, Contact, Adaptation,
   Escalation, and three Mirexis identity endings.
 - Touch-visible controls for required actions, supplemented by mouse and keyboard.
+- Persistent volume, mute, and reduced-motion settings with procedural event audio and ambience.
+- Campaign-owned first-hour guidance with visible help, restart, skip, save migration, and defeat-forward recovery.
 - Deterministic capture scenes and tests for simulation, content, saves, and migrations.
 
 ## Documentation
@@ -36,6 +39,10 @@ work, and exit criteria.
 | [MIREXIS.md](MIREXIS.md) | Creative vision and game design direction |
 | [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) | Current architecture, ownership, and implementation contracts |
 | [docs/PLAYABLE_GAME_PHASE_1.md](docs/PLAYABLE_GAME_PHASE_1.md) | Active roadmap from tech demo to playable first-hour build |
+| [docs/PHASE_1_BEAT_SHEET.md](docs/PHASE_1_BEAT_SHEET.md) | Authored first-hour sequence, economy, speakers, and deferred systems |
+| [docs/PHASE_1_HARDENING.md](docs/PHASE_1_HARDENING.md) | Automated reliability, accessibility, resize, and recovery evidence |
+| [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md) | Required human session evidence and issue triage |
+| [docs/AUDIO_SOURCES.md](docs/AUDIO_SOURCES.md) | Audio palette provenance and future attribution requirements |
 | [docs/UI_GRAPHICS_VISUAL_SPEC.md](docs/UI_GRAPHICS_VISUAL_SPEC.md) | Visual language and UI acceptance principles |
 | [art_sources/README.md](art_sources/README.md) | Source-art and atlas preparation notes |
 | [AGENTS.md](AGENTS.md) | Project workflow and validation rules |

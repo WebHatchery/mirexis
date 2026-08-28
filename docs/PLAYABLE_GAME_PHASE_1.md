@@ -1,6 +1,6 @@
 # Playable Game Roadmap — Phase 1
 
-Status: in progress
+Status: implementation complete; human playtest acceptance pending
 Created: 28 August 2026
 Product target: a cohesive, enjoyable, and testable first hour
 
