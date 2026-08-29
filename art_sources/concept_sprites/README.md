@@ -1,7 +1,7 @@
 # Mirexis Concept Sprite Pass
 
-This folder contains a one-hour concept-art pass for expanding Mirexis's
-roster, colony dressing, tactical effects, equipment, and terrain language.
+This folder contains an expanded concept-art pass for Mirexis's roster,
+colony life, tactical effects, equipment, and terrain language.
 These are source/concept assets only; they are intentionally outside
 `assets/` and are not registered in the runtime texture manifests.
 
@@ -12,6 +12,8 @@ These are source/concept assets only; they are intentionally outside
 | `mirexis_units_v01_key.png` | 3 x 2 | Six new colony and faction unit silhouettes | Magenta keyed |
 | `mirexis_recruits_v01_key.png` | 4 x 2 | Eight human recruit/civilian silhouettes | Magenta keyed |
 | `mirexis_salvage_engineer_states_v01_key.png` | 4 x 2 | Eight pose/state cues for one salvage engineer | Magenta keyed |
+| `mirexis_elites_v01_key.png` | 3 x 2 | Six elite and commander-scale hostile silhouettes | Magenta keyed |
+| `mirexis_colony_support_v01_key.png` | 4 x 2 | Eight adult colony support-role silhouettes | Magenta keyed |
 | `mirexis_colony_props_v01_grid.png` | 4 x 2 | Colony structures, defenses, beacon, and faction intrusions | Transparent; normalized grid |
 | `mirexis_hazards_v01_grid.png` | 4 x 2 | Mire, Brood, Directorate, Ascendant, overwatch, and recovery effects | Transparent; normalized grid |
 | `mirexis_equipment_v01.png` | 4 x 3 | Weapons, tools, armor, drones, and faction devices | Transparent |
