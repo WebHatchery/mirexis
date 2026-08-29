@@ -4,7 +4,7 @@ This folder contains an expanded concept-art pass for Mirexis's roster,
 colony life, tactical effects, equipment, and terrain language.
 These are source/concept assets only; they are intentionally outside
 `assets/` and are not registered in the runtime texture manifests.
-The pack contains seventeen sheets covering 164 sprite concepts and variants.
+The pack contains eighteen sheets covering 172 sprite concepts and variants.
 
 ## Sheets
 
@@ -27,9 +27,10 @@ The pack contains seventeen sheets covering 164 sprite concepts and variants.
 | `mirexis_salvage_pickups_v01.png` | 4 x 3 | Twelve resource, loot, and salvage pickup sprites | Transparent |
 | `mirexis_colony_interiors_v01.png` | 4 x 3 | Twelve lived-in colony interior and daily-life props | Transparent |
 | `mirexis_passage_wreckage_v01.png` | 4 x 3 | Twelve tactical passage, door, bridge, and wreckage sprites | Transparent |
+| `mirexis_operative_actions_v01_grid.png` | 4 x 2 | Eight human operative action and recovery pose references | Transparent; normalized grid |
 
 The unsuffixed 4 x 2 renders are retained as original masters. This includes
-the machinery and fauna renders alongside props and hazards. Their `_grid`
+the machinery, fauna, and operative-action renders alongside props and hazards. Their `_grid`
 siblings are minimal resamples to exactly `1776 x 888` so every cell is
 mathematically divisible at `444 x 444`.
 
