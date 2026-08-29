@@ -26,6 +26,7 @@ pub(crate) fn draw(
         crate::ui::pointer_position(ui)
     };
     draw_background();
+    crate::world_art::draw_title_dressing(assets, visuals);
     draw_character_tableau(data, assets, visuals);
     draw_title_copy(data);
     if button(

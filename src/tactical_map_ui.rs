@@ -506,6 +506,36 @@ fn terrain_art_index(
 
 fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {
     let rect = view.tile_rect(position);
+    let blocked = ctx.session.tactical.blocked.contains(&position);
+    let occupied = ctx
+        .session
+        .tactical
+        .units
+        .iter()
+        .any(|unit| unit.position == position);
+    let cluttered = ctx
+        .session
+        .tactical
+        .hazards
+        .iter()
+        .any(|hazard| hazard.position == position)
+        || ctx
+            .session
+            .tactical
+            .destructible_cover
+            .iter()
+            .any(|cover| cover.position == position)
+        || is_objective(ctx, position);
+    crate::world_art::draw_tactical_dressing(
+        ctx.assets,
+        ctx.visuals,
+        view,
+        position,
+        blocked,
+        occupied,
+        cluttered,
+        &ctx.mission.hostile_faction,
+    );
     if let Some(hazard) = ctx
         .session
         .tactical
@@ -616,6 +646,13 @@ fn is_objective(ctx: &UiContext<'_>, position: TilePos) -> bool {
 
 fn draw_objective(ctx: &UiContext<'_>, rect: Rect, defended_asset: bool) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.48);
+    ctx.visuals.draw_atlas_cell(
+        ctx.assets,
+        ctx.visuals.concept_atlas("objectives"),
+        objective_art_cell(ctx.mission.objective_kind, defended_asset),
+        Rect::new(center.x - 30.0, center.y - 42.0, 60.0, 60.0),
+        Color::new(1.0, 1.0, 1.0, 0.88),
+    );
     for radius in [rect.w * 0.18, rect.w * 0.26] {
         draw_ellipse_ring(
             center,
@@ -641,13 +678,20 @@ fn draw_objective(ctx: &UiContext<'_>, rect: Rect, defended_asset: bool) {
         2.0,
         Color::new(1.0, 0.82, 0.34, 0.78),
     );
-    ctx.visuals.draw_atlas_cell(
-        ctx.assets,
-        &ctx.visuals.effects,
-        7,
-        Rect::new(center.x - 24.0, center.y - 44.0, 48.0, 56.0),
-        Color::new(1.0, 1.0, 1.0, 0.86),
-    );
+}
+
+fn objective_art_cell(kind: ObjectiveKind, defended_asset: bool) -> usize {
+    if defended_asset {
+        return 3;
+    }
+    match kind {
+        ObjectiveKind::SecureAndClear => 2,
+        ObjectiveKind::Extraction => 0,
+        ObjectiveKind::SignalTrace => 6,
+        ObjectiveKind::DefendAsset => 3,
+        ObjectiveKind::Holdout => 1,
+        ObjectiveKind::EliminateAll => 10,
+    }
 }
 
 fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {

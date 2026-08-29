@@ -381,6 +381,14 @@ fn draw_plot(
         hovered || planning_clearance,
         occupied,
     );
+    crate::world_art::draw_colony_dressing(
+        assets,
+        visuals,
+        view,
+        position,
+        occupied,
+        planning_clearance,
+    );
     draw_diamond_outline(
         view,
         center,

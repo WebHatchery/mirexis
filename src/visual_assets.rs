@@ -12,6 +12,8 @@ const DEFINITIONS_JSON: &str =
 
 #[derive(Debug, Clone, Deserialize)]
 pub(crate) struct AtlasDefinition {
+    #[serde(default)]
+    pub id: String,
     pub texture: String,
     pub columns: usize,
     pub rows: usize,
@@ -51,6 +53,8 @@ pub(crate) struct VisualCatalog {
     pub colony: AtlasDefinition,
     pub equipment: AtlasDefinition,
     pub effects: AtlasDefinition,
+    #[serde(default)]
+    pub concepts: Vec<AtlasDefinition>,
 }
 
 impl VisualCatalog {
@@ -117,6 +121,13 @@ impl VisualCatalog {
         self.faction_channel(faction).effect_cell
     }
 
+    pub(crate) fn concept_atlas(&self, id: &str) -> &AtlasDefinition {
+        self.concepts
+            .iter()
+            .find(|atlas| atlas.id == id)
+            .unwrap_or_else(|| panic!("Mirexis concept atlas is undefined: {id}"))
+    }
+
     pub(crate) fn validate_loaded(&self, assets: &AssetManager) -> Vec<String> {
         let mut missing = Vec::new();
         for definition in &self.units {
@@ -134,6 +145,11 @@ impl VisualCatalog {
         ] {
             if !assets.has_texture(key) && !missing.contains(key) {
                 missing.push(key.clone());
+            }
+        }
+        for atlas in &self.concepts {
+            if !assets.has_texture(&atlas.texture) && !missing.contains(&atlas.texture) {
+                missing.push(atlas.texture.clone());
             }
         }
         missing
@@ -156,8 +172,9 @@ impl VisualCatalog {
             )
         };
         format!(
-            "{} unit definitions // {} // {} // {} // {}",
+            "{} unit definitions // {} concept atlases // {} // {} // {} // {}",
             self.units.len(),
+            self.concepts.len(),
             describe(&self.terrain),
             describe(&self.colony),
             describe(&self.equipment),

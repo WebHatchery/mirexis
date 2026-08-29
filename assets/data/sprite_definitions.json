@@ -23,5 +23,25 @@
   "terrain": { "texture": "terrain_atlas", "columns": 4, "rows": 3 },
   "colony": { "texture": "colony_buildings", "columns": 4, "rows": 4 },
   "equipment": { "texture": "equipment_atlas", "columns": 4, "rows": 3 },
-  "effects": { "texture": "effects_atlas", "columns": 4, "rows": 2 }
+  "effects": { "texture": "effects_atlas", "columns": 4, "rows": 2 },
+  "concepts": [
+    { "id": "units", "texture": "concept_units", "columns": 3, "rows": 2 },
+    { "id": "recruits", "texture": "concept_recruits", "columns": 4, "rows": 2 },
+    { "id": "salvage_engineer_states", "texture": "concept_salvage_engineer_states", "columns": 4, "rows": 2 },
+    { "id": "elites", "texture": "concept_elites", "columns": 3, "rows": 2 },
+    { "id": "colony_support", "texture": "concept_colony_support", "columns": 4, "rows": 2 },
+    { "id": "brood_fauna", "texture": "concept_brood_fauna", "columns": 4, "rows": 2 },
+    { "id": "colony_machinery", "texture": "concept_colony_machinery", "columns": 4, "rows": 2 },
+    { "id": "colony_props", "texture": "concept_colony_props", "columns": 4, "rows": 2 },
+    { "id": "hazards", "texture": "concept_hazards", "columns": 4, "rows": 2 },
+    { "id": "equipment", "texture": "concept_equipment", "columns": 4, "rows": 3 },
+    { "id": "terrain_dressing", "texture": "concept_terrain_dressing", "columns": 4, "rows": 3 },
+    { "id": "objectives", "texture": "concept_objectives", "columns": 4, "rows": 3 },
+    { "id": "flora", "texture": "concept_flora", "columns": 4, "rows": 3 },
+    { "id": "emplacements", "texture": "concept_emplacements", "columns": 4, "rows": 3 },
+    { "id": "salvage_pickups", "texture": "concept_salvage_pickups", "columns": 4, "rows": 3 },
+    { "id": "colony_interiors", "texture": "concept_colony_interiors", "columns": 4, "rows": 3 },
+    { "id": "passage_wreckage", "texture": "concept_passage_wreckage", "columns": 4, "rows": 3 },
+    { "id": "operative_actions", "texture": "concept_operative_actions", "columns": 4, "rows": 2 }
+  ]
 }

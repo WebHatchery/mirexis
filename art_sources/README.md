@@ -10,6 +10,18 @@ This directory is intentionally outside `assets/`. It preserves ImageGen outputs
 4. Register only deployable files in `assets/data/texture_manifest.json` and their grids in `assets/data/sprite_definitions.json`.
 5. Run `cargo test visual_assets::tests` to decode every registered atlas and verify exact grid divisibility plus non-empty alpha coverage in every cell.
 
+## Promoted concept atlases
+
+The concept-sprite pass is now available at runtime under
+`assets/art/concepts/`. All eighteen concept families are registered and
+validated as RGBA atlases. The title tableau uses passage wreckage, flora, and
+an Ascendant emplacement; tactical maps use flora, Brood fauna, terrain
+dressing, faction emplacements, passage wreckage, and objective markers; and
+the colony map uses colony props, flora, and machinery as deterministic
+frontier dressing. Unit-facing concept sheets, equipment, salvage, interiors,
+hazards, and operative actions are loaded and catalogued for later gameplay
+data wiring without replacing the existing directional unit atlases.
+
 ## Equipment atlas
 
 - Source: `equipment_atlas_chroma.png`

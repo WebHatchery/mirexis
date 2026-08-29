@@ -76,6 +76,7 @@ mod ui_action;
 mod ui_debrief;
 mod ui_widgets;
 mod visual_assets;
+mod world_art;
 
 use game::Game;
 

@@ -20,6 +20,16 @@ fn production_catalog_has_every_required_asset_family() {
     assert_eq!(catalog.colony.columns * catalog.colony.rows, 16);
     assert_eq!(catalog.equipment.columns * catalog.equipment.rows, 12);
     assert_eq!(catalog.effects.columns * catalog.effects.rows, 8);
+    assert_eq!(catalog.concepts.len(), 18);
+    assert_eq!(
+        catalog
+            .concepts
+            .iter()
+            .map(|atlas| atlas.id.as_str())
+            .collect::<BTreeSet<_>>()
+            .len(),
+        catalog.concepts.len()
+    );
     let data = crate::data::GameData::load().expect("embedded game data loads");
     for equipment in &data.equipment {
         assert!(
@@ -150,6 +160,9 @@ fn every_declared_atlas_decodes_and_has_art_in_every_cell() {
         &catalog.equipment,
         &catalog.effects,
     ] {
+        grids.insert(atlas.texture.clone(), (atlas.columns, atlas.rows));
+    }
+    for atlas in &catalog.concepts {
         grids.insert(atlas.texture.clone(), (atlas.columns, atlas.rows));
     }
 

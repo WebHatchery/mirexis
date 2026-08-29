@@ -17,6 +17,24 @@
     "assets/art/equipment/equipment_atlas.png",
     "assets/art/portraits/enemies.png",
     "assets/art/portraits/recruits.png",
-    "assets/art/terrain/terrain_atlas.png"
+    "assets/art/terrain/terrain_atlas.png",
+    "assets/art/concepts/concept_units.png",
+    "assets/art/concepts/concept_recruits.png",
+    "assets/art/concepts/concept_salvage_engineer_states.png",
+    "assets/art/concepts/concept_elites.png",
+    "assets/art/concepts/concept_colony_support.png",
+    "assets/art/concepts/concept_brood_fauna.png",
+    "assets/art/concepts/concept_colony_machinery.png",
+    "assets/art/concepts/concept_colony_props.png",
+    "assets/art/concepts/concept_hazards.png",
+    "assets/art/concepts/concept_equipment.png",
+    "assets/art/concepts/concept_terrain_dressing.png",
+    "assets/art/concepts/concept_objectives.png",
+    "assets/art/concepts/concept_flora.png",
+    "assets/art/concepts/concept_emplacements.png",
+    "assets/art/concepts/concept_salvage_pickups.png",
+    "assets/art/concepts/concept_colony_interiors.png",
+    "assets/art/concepts/concept_passage_wreckage.png",
+    "assets/art/concepts/concept_operative_actions.png"
   ]
 }
