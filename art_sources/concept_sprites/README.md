@@ -4,6 +4,7 @@ This folder contains an expanded concept-art pass for Mirexis's roster,
 colony life, tactical effects, equipment, and terrain language.
 These are source/concept assets only; they are intentionally outside
 `assets/` and are not registered in the runtime texture manifests.
+The pack contains thirteen sheets covering 116 sprite concepts and variants.
 
 ## Sheets
 
@@ -14,14 +15,18 @@ These are source/concept assets only; they are intentionally outside
 | `mirexis_salvage_engineer_states_v01_key.png` | 4 x 2 | Eight pose/state cues for one salvage engineer | Magenta keyed |
 | `mirexis_elites_v01_key.png` | 3 x 2 | Six elite and commander-scale hostile silhouettes | Magenta keyed |
 | `mirexis_colony_support_v01_key.png` | 4 x 2 | Eight adult colony support-role silhouettes | Magenta keyed |
+| `mirexis_brood_fauna_v01_grid.png` | 4 x 2 | Eight small hostile Brood fauna and larval creatures | Transparent; normalized grid |
+| `mirexis_colony_machinery_v01_grid.png` | 4 x 2 | Eight deployable colony machines, vehicles, and drones | Transparent; normalized grid |
 | `mirexis_colony_props_v01_grid.png` | 4 x 2 | Colony structures, defenses, beacon, and faction intrusions | Transparent; normalized grid |
 | `mirexis_hazards_v01_grid.png` | 4 x 2 | Mire, Brood, Directorate, Ascendant, overwatch, and recovery effects | Transparent; normalized grid |
 | `mirexis_equipment_v01.png` | 4 x 3 | Weapons, tools, armor, drones, and faction devices | Transparent |
 | `mirexis_terrain_dressing_v01.png` | 4 x 3 | Terrain, cover, contamination, relic, and objective tiles | Transparent |
+| `mirexis_objectives_v01.png` | 4 x 3 | Twelve tactical objective and mission-marker sprites | Transparent |
+| `mirexis_flora_v01.png` | 4 x 3 | Twelve alien flora and contamination-dressing sprites | Transparent |
 
-The two unsuffixed 4 x 2 renders (`mirexis_colony_props_v01.png` and
-`mirexis_hazards_v01.png`) are retained as original masters. Their `_grid`
-siblings are a minimal resample to exactly `1776 x 888` so every cell is
+The unsuffixed 4 x 2 renders are retained as original masters. This includes
+the machinery and fauna renders alongside props and hazards. Their `_grid`
+siblings are minimal resamples to exactly `1776 x 888` so every cell is
 mathematically divisible at `444 x 444`.
 
 ## Art direction
