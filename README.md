@@ -39,6 +39,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 | [MIREXIS.md](MIREXIS.md) | Creative vision and game design direction |
 | [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) | Current architecture, ownership, and implementation contracts |
 | [docs/PLAYABLE_GAME_PHASE_1.md](docs/PLAYABLE_GAME_PHASE_1.md) | Active roadmap from tech demo to playable first-hour build |
+| [docs/FUTURE_CONTENT_AND_STORY.md](docs/FUTURE_CONTENT_AND_STORY.md) | Post-Phase-1 plans for story, peoples, classes, skills, buildings, and upgrades |
 | [docs/PHASE_1_BEAT_SHEET.md](docs/PHASE_1_BEAT_SHEET.md) | Authored first-hour sequence, economy, speakers, and deferred systems |
 | [docs/PHASE_1_HARDENING.md](docs/PHASE_1_HARDENING.md) | Automated reliability, accessibility, resize, and recovery evidence |
 | [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md) | Required human session evidence and issue triage |

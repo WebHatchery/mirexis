@@ -4,7 +4,8 @@
 **Document role:** This is the creative and mechanical vision for the finished game.
 It deliberately contains aspirational systems and content. For the implemented state,
 use `TECHNICAL_DESIGN.md`; for the active production plan, use
-`docs/PLAYABLE_GAME_PHASE_1.md`.
+`docs/PLAYABLE_GAME_PHASE_1.md`. Post-Phase-1 plans for story, peoples, classes, skills,
+buildings, and upgrades live in `docs/FUTURE_CONTENT_AND_STORY.md`.
 
 ## 1. High Concept
 

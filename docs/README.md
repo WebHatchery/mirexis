@@ -11,6 +11,8 @@ implementation, active planning, and generated evidence do not contradict one an
 - [`../TECHNICAL_DESIGN.md`](../TECHNICAL_DESIGN.md) — implemented architecture and
   technical contracts.
 - [`PLAYABLE_GAME_PHASE_1.md`](PLAYABLE_GAME_PHASE_1.md) — current production roadmap.
+- [`FUTURE_CONTENT_AND_STORY.md`](FUTURE_CONTENT_AND_STORY.md) — post-Phase-1 content
+  and narrative direction; concepts are not implementation commitments.
 - [`UI_GRAPHICS_VISUAL_SPEC.md`](UI_GRAPHICS_VISUAL_SPEC.md) — visual language and UI
   principles.
 
