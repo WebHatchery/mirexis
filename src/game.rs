@@ -12,6 +12,7 @@ mod debrief_flow;
 mod destructive_flow;
 mod facility_upgrade_flow;
 mod first_hour_flow;
+mod formation_flow;
 mod input;
 mod persistence_io;
 mod playtest_flow;
@@ -341,6 +342,7 @@ impl Game {
                 self.campaign
                     .first_hour
                     .opened_briefing(self.campaign.operations_completed);
+                self.normalize_deployment_formation();
                 self.active_mission = self
                     .campaign
                     .strategy
@@ -473,6 +475,7 @@ impl Game {
                     self.targeting = None;
                     self.show_tactical_help = false;
                     self.show_battle_log = false;
+                    self.normalize_deployment_formation();
                     let mut roster = self
                         .campaign
                         .deployment_roster(&self.data, &self.active_mission);
@@ -495,13 +498,7 @@ impl Game {
                 }
                 Err(err) => self.notifications.warning(err),
             },
-            UiAction::CycleFormation => {
-                self.deployment_formation = self.deployment_formation.next();
-                self.notifications.info(format!(
-                    "Deployment formation: {}",
-                    self.deployment_formation.label()
-                ));
-            }
+            UiAction::CycleFormation => self.cycle_deployment_formation(),
             UiAction::ToggleDeployment(character_id) => {
                 let _ = self.campaign.select_character(&character_id);
                 match self.campaign.toggle_deployment(&character_id) {

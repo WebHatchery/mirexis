@@ -32,3 +32,23 @@ fn formations_are_distinct_and_fall_back_around_unsafe_entry_cells() {
     assert_ne!(shapes[0], shapes[1]);
     assert_ne!(shapes[1], shapes[2]);
 }
+
+#[test]
+fn doctrine_yard_adds_a_rally_formation_without_changing_the_base_cycle() {
+    assert_eq!(
+        FormationKind::Column.next_with_doctrine_yard(false),
+        FormationKind::Wedge
+    );
+    assert_eq!(
+        FormationKind::Column.next_with_doctrine_yard(true),
+        FormationKind::Rally
+    );
+    assert_eq!(
+        FormationKind::Rally.next_with_doctrine_yard(true),
+        FormationKind::Wedge
+    );
+    assert_eq!(
+        FormationKind::Rally.without_doctrine_yard(),
+        FormationKind::Wedge
+    );
+}

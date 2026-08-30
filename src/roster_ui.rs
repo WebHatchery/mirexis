@@ -1,7 +1,7 @@
 //! Colony roster, training, and equipment presentation.
 
 use crate::campaign::{equipment_cost, CampaignState};
-use crate::colony::BuildingKind;
+use crate::colony::{BuildingKind, SIMULATION_HALL_UPGRADE};
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::ui_widgets::{button, button_with_state};
@@ -356,12 +356,20 @@ fn draw_selected_character(
     let mut inspected_technique = None;
     draw_ui_text_ex(
         &format!(
-            "TECHNIQUES // {} SLOT{} · OPERATION XP UNLOCKS NEW TECHNIQUES",
+            "TECHNIQUES // {} SLOT{} · OPERATION XP UNLOCKS NEW TECHNIQUES{}",
             active_class.map_or(0, |class| class.technique_slots),
             if active_class.is_some_and(|class| class.technique_slots == 1) {
                 ""
             } else {
                 "S"
+            },
+            if campaign
+                .colony
+                .has_active_upgrade(BuildingKind::Barracks, SIMULATION_HALL_UPGRADE)
+            {
+                " · SIMULATION HALL -10 XP TRIALS"
+            } else {
+                ""
             }
         ),
         344.0,
@@ -370,6 +378,8 @@ fn draw_selected_character(
     );
     if let Some(class) = active_class {
         for (index, technique) in class.techniques.iter().enumerate() {
+            let required_experience =
+                campaign.skill_experience_required(technique.experience_required);
             let rect = Rect::new(344.0 + index as f32 * 434.0, 486.0, 426.0, 28.0);
             if rect.contains(mouse) {
                 inspected_technique = Some(technique);
@@ -385,17 +395,14 @@ fn draw_selected_character(
                 active || equipped_count < class.technique_slots as usize
             } else {
                 campaign.colony.has_facility(BuildingKind::Barracks)
-                    && character.experience >= technique.experience_required
+                    && character.experience >= required_experience
             };
             let label = if active {
                 format!("EQUIPPED: {}", technique.name)
             } else if learned {
                 format!("EQUIP: {}", technique.name)
             } else {
-                format!(
-                    "LEARN: {} · {} XP",
-                    technique.name, technique.experience_required
-                )
+                format!("LEARN: {} · {} XP", technique.name, required_experience)
             };
             if button(rect, "", enabled, mouse) {
                 actions.push(if learned {
@@ -449,7 +456,7 @@ fn draw_selected_character(
                 "{} // {} // REQUIRES {} XP",
                 technique.name.to_uppercase(),
                 technique.description,
-                technique.experience_required
+                campaign.skill_experience_required(technique.experience_required)
             ),
             344.0,
             516.0,

@@ -1,6 +1,7 @@
 //! Campaign-side technique learning and active loadout rules.
 
 use crate::campaign::{CampaignState, CharacterRecord};
+use crate::colony::{BuildingKind, SIMULATION_HALL_UPGRADE};
 use crate::data::{ClassDef, GameData};
 
 impl CampaignState {
@@ -11,13 +12,14 @@ impl CampaignState {
         data: &GameData,
     ) -> Result<String, String> {
         let (class, technique) = technique_for_character(self, character_id, skill_id, data)?;
+        let required_experience = self.skill_experience_required(technique.experience_required);
         let character = self
             .roster
             .iter_mut()
             .find(|character| character.id == character_id)
             .ok_or_else(|| format!("Unknown character: {}", character_id))?;
-        if character.experience < technique.experience_required {
-            return Err(format!("REQUIRES {} XP", technique.experience_required));
+        if character.experience < required_experience {
+            return Err(format!("REQUIRES {} XP", required_experience));
         }
         if character.learned_skills.contains(&technique.id) {
             return Err("Technique already learned".to_owned());
@@ -65,6 +67,18 @@ impl CampaignState {
         character.active_skills.push(technique.id);
         Ok(true)
     }
+
+    pub fn skill_experience_required(&self, base_requirement: u32) -> u32 {
+        let trial_discount = if self
+            .colony
+            .has_active_upgrade(BuildingKind::Barracks, SIMULATION_HALL_UPGRADE)
+        {
+            10
+        } else {
+            0
+        };
+        base_requirement.saturating_sub(trial_discount).max(1)
+    }
 }
 
 pub(crate) fn learn_after_operation(
@@ -93,7 +107,8 @@ pub(crate) fn learn_after_operation(
             .techniques
             .iter()
             .filter(|technique| {
-                character.experience >= technique.experience_required
+                character.experience
+                    >= campaign.skill_experience_required(technique.experience_required)
                     && !character.learned_skills.contains(&technique.id)
             })
             .map(|technique| technique.id.clone())

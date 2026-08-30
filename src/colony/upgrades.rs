@@ -12,6 +12,8 @@ pub const STABILISATION_WING_UPGRADE: &str = "stabilisation_wing";
 pub const EVOLUTION_CHAMBER_UPGRADE: &str = "evolution_chamber";
 pub const SIGNAL_CARTOGRAPHY_UPGRADE: &str = "signal_cartography";
 pub const COUNTERINTELLIGENCE_CELL_UPGRADE: &str = "counterintelligence_cell";
+pub const SIMULATION_HALL_UPGRADE: &str = "simulation_hall";
+pub const DOCTRINE_YARD_UPGRADE: &str = "doctrine_yard";
 
 impl BuildingKind {
     pub fn upgrade_options(self) -> &'static [FacilityUpgradeOption] {
@@ -75,6 +77,18 @@ impl BuildingKind {
                     id: COUNTERINTELLIGENCE_CELL_UPGRADE,
                     name: "Counterintelligence Cell",
                     description: "Cuts mission pressure and keeps hostile attention in check.",
+                },
+            ],
+            Self::Barracks => &[
+                FacilityUpgradeOption {
+                    id: SIMULATION_HALL_UPGRADE,
+                    name: "Simulation Hall",
+                    description: "Makes retraining cheaper and lowers technique trial thresholds.",
+                },
+                FacilityUpgradeOption {
+                    id: DOCTRINE_YARD_UPGRADE,
+                    name: "Doctrine Yard",
+                    description: "Unlocks Rally formation and training barricades in defence.",
                 },
             ],
             _ => &[],

@@ -59,6 +59,40 @@ fn powered_watchtower_adds_strong_cover_until_the_grid_fails() {
 }
 
 #[test]
+fn doctrine_yard_adds_training_barricades_only_while_online() {
+    let mut colony = ColonyState::new();
+    let barracks_id = colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Barracks)
+        .unwrap()
+        .id
+        .clone();
+    colony
+        .queue_facility_upgrade(&barracks_id, DOCTRINE_YARD_UPGRADE)
+        .unwrap();
+    colony.advance_operation();
+
+    let rally_tile = TilePos::new(8, 9);
+    let map = colony.defense_map();
+    assert!(map.cover_tiles.contains(&TilePos::new(7, 10)));
+    assert!(map.cover_tiles.contains(&TilePos::new(9, 10)));
+    assert!(map.blocked_tiles.contains(&TilePos::new(7, 10)));
+    assert!(map.blocked_tiles.contains(&TilePos::new(9, 10)));
+    assert!(map.blocked_tiles.contains(&rally_tile));
+
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == barracks_id)
+        .unwrap()
+        .damaged = true;
+    let offline_map = colony.defense_map();
+    assert!(!offline_map.cover_tiles.contains(&TilePos::new(7, 10)));
+    assert!(!offline_map.cover_tiles.contains(&TilePos::new(9, 10)));
+}
+
+#[test]
 fn failed_defense_damage_disables_a_facility_until_repaired() {
     let mut colony = ColonyState::new();
     let name = colony.damage_for_failed_defense(1).unwrap();

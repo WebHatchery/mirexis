@@ -2,7 +2,7 @@ use super::*;
 use crate::colony::{
     BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, COUNTERINTELLIGENCE_CELL_UPGRADE,
     DRONE_BAY_UPGRADE, EVOLUTION_CHAMBER_UPGRADE, PRECISION_BENCH_UPGRADE,
-    SIGNAL_CARTOGRAPHY_UPGRADE, STABILISATION_WING_UPGRADE,
+    SIGNAL_CARTOGRAPHY_UPGRADE, SIMULATION_HALL_UPGRADE, STABILISATION_WING_UPGRADE,
 };
 
 fn campaign_with_online_gene_lab(data: &GameData) -> CampaignState {
@@ -301,4 +301,37 @@ fn counterintelligence_cell_reduces_mission_attention_pressure() {
         .unwrap()
         .attention;
     assert_eq!(attention_after, attention_before + 6);
+}
+
+#[test]
+fn simulation_hall_reduces_retraining_cost_while_online() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let barracks_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Barracks)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&barracks_id, SIMULATION_HALL_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+    let class = data
+        .classes
+        .iter()
+        .find(|class| class.id == "scout")
+        .unwrap();
+    let normal_cost = {
+        let baseline = CampaignState::new(&data);
+        baseline.training_cost("kira_voss", class).unwrap()
+    };
+
+    assert_eq!(
+        campaign.training_cost("kira_voss", class),
+        Some(normal_cost - 20)
+    );
 }

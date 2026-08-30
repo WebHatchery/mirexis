@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.103.0
+Save/content version: 1.104.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -428,7 +428,10 @@ material-spending actions.
 Initial facilities have stable coordinates:
 
 - Command Centre: mission access and a critical defense objective.
-- Barracks: aptitude-priced class training.
+- Barracks: aptitude-priced class training. Its level-2 branch choice costs 55 materials
+  and completes after one operation: Simulation Hall reduces retraining costs by 20 and
+  technique-trial thresholds by 10 XP, while Doctrine Yard unlocks Rally formation and
+  two training barricades in colony defence.
 - Infirmary: injury treatment.
 - Workshop: equipment crafting.
 - Hydroponics: three food after each resolved operation while powered. Its level-2 branch
@@ -459,8 +462,8 @@ later facilities display `NO POWER` and stop satisfying their gameplay gates.
 The Gene Lab adds three demand, intentionally requiring recovered power or another
 Power Plant before its evolution chamber operates.
 
-Facility upgrades are queued strategic projects rather than instant toggles. The Power Plant,
-Hydroponics, Workshop, and Gene Lab present their mutually exclusive level-2 branches in a
+Facility upgrades are queued strategic projects rather than instant toggles. The Command Centre,
+Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab present their mutually exclusive level-2 branches in a
 touch-visible colony operations panel; completion raises the building level and records the
 stable branch ID.
 Hot Core's attention cost is applied while the plant is operational, during mission-outcome
@@ -471,6 +474,10 @@ powered. Drone Bay discounts facility repairs while its Workshop remains online.
 Signal Cartography reveals a third mission route while the Command Centre is operational and
 powered. Counterintelligence Cell reduces the normal mission attention increase by two while
 the Command Centre is operational and powered.
+Simulation Hall reduces class retraining costs by 20 and technique-trial experience thresholds
+by 10 while the Barracks is operational and powered. Doctrine Yard adds a Rally deployment
+formation and two destructible training barricades to colony-defence maps while the Barracks is
+operational and powered.
 Stabilisation Wing suppresses mutation-evolution complications while the Gene Lab is operational
 and powered. Evolution Chamber reduces each mutation-evolution biomass cost by four, with a
 minimum cost of one, while the Gene Lab is operational and powered.
@@ -846,6 +853,7 @@ Migration coverage:
 | 1.101.0 | Pre-finale identity-building preparation actions, faction-pressure relief, and contact reflections |
 | 1.102.0 | Gene Lab level-two Stabilisation Wing and Evolution Chamber branches with operational evolution effects |
 | 1.103.0 | Command Centre level-two Signal Cartography and Counterintelligence Cell branches with route and pressure effects |
+| 1.104.0 | Barracks level-two Simulation Hall and Doctrine Yard branches with training and defence-preparation effects |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -937,7 +945,7 @@ these explicit boundaries when continuing:
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
-  the Command Centre, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
+  the Command Centre, Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
   population, free placement for every building, and the remaining facility branches remain future

@@ -1,7 +1,7 @@
 //! Barracks training costs, mastery gates, and class switching.
 
 use crate::campaign::CampaignState;
-use crate::colony::BuildingKind;
+use crate::colony::{BuildingKind, SIMULATION_HALL_UPGRADE};
 use crate::data::{ClassDef, GameData};
 
 impl CampaignState {
@@ -44,10 +44,20 @@ impl CampaignState {
             .copied()
             .unwrap_or(1);
         let base_cost: u32 = if class.advanced { 160 } else { 100 };
+        let simulation_discount = if self
+            .colony
+            .has_active_upgrade(BuildingKind::Barracks, SIMULATION_HALL_UPGRADE)
+        {
+            20
+        } else {
+            0
+        };
+        let minimum_cost = if class.advanced { 110 } else { 60 };
         Some(
             base_cost
                 .saturating_sub(u32::from(aptitude.saturating_sub(1)) * 10)
-                .max(if class.advanced { 110 } else { 60 }),
+                .max(minimum_cost)
+                .saturating_sub(simulation_discount),
         )
     }
 

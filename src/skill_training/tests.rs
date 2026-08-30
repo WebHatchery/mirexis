@@ -91,3 +91,28 @@ fn a_technique_cannot_be_learned_before_its_xp_threshold() {
         .unwrap_err();
     assert_eq!(error, "REQUIRES 20 XP");
 }
+
+#[test]
+fn simulation_hall_opens_technique_trials_before_their_normal_threshold() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let barracks_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == crate::colony::BuildingKind::Barracks)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&barracks_id, crate::colony::SIMULATION_HALL_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+    campaign.roster[0].experience = 10;
+
+    assert_eq!(campaign.skill_experience_required(20), 10);
+    campaign
+        .learn_skill("kira_voss", "slipstep", &data)
+        .unwrap();
+}

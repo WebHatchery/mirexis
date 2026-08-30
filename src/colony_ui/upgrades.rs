@@ -8,8 +8,9 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
 const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
-const UPGRADEABLE_FACILITIES: [BuildingKind; 5] = [
+const UPGRADEABLE_FACILITIES: [BuildingKind; 6] = [
     BuildingKind::CommandCentre,
+    BuildingKind::Barracks,
     BuildingKind::PowerPlant,
     BuildingKind::Hydroponics,
     BuildingKind::Workshop,
@@ -84,7 +85,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         else {
             continue;
         };
-        let y = 130.0 + index as f32 * 98.0;
+        let y = 130.0 + index as f32 * 74.0;
         draw_text_ex(
             kind.name().to_uppercase(),
             886.0,
@@ -112,18 +113,18 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             && !queued
             && campaign.colony.resources.materials >= kind.upgrade_cost();
         for (option_index, option) in kind.upgrade_options().iter().enumerate() {
-            let card_y = y + 25.0 + option_index as f32 * 38.0;
+            let card_y = y + 18.0 + option_index as f32 * 28.0;
             draw_rectangle(
                 886.0,
                 card_y,
                 360.0,
-                34.0,
+                26.0,
                 Color::new(0.025, 0.055, 0.060, 1.0),
             );
             draw_text_ex(
                 option.name,
                 902.0,
-                card_y + 12.0,
+                card_y + 10.0,
                 TextParams {
                     font_size: 12,
                     color: dark::TEXT_BRIGHT,
@@ -133,15 +134,15 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             draw_text_ex(
                 option.description,
                 902.0,
-                card_y + 25.0,
+                card_y + 20.0,
                 TextParams {
-                    font_size: 9,
+                    font_size: 8,
                     color: dark::TEXT_DIM,
                     ..Default::default()
                 },
             );
             if button(
-                Rect::new(1094.0, card_y + 5.0, 136.0, 22.0),
+                Rect::new(1094.0, card_y + 3.0, 136.0, 18.0),
                 &format!("QUEUE // {} MAT", kind.upgrade_cost()),
                 can_queue,
                 mouse,
