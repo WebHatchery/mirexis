@@ -171,14 +171,10 @@ impl Game {
                 self.reset_capture_session(AppState::Tactical);
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::MoveToCover;
-                self.session
-                    .tactical
-                    .cover_edges
-                    .push(crate::data::CoverEdgeDef {
-                        position: [6, 18],
-                        direction: crate::data::EdgeDirection::North,
-                        strength: 25,
-                    });
+                super::first_hour_flow::prepare_first_hour_tactical_session(
+                    &mut self.session,
+                    &self.active_mission,
+                );
             }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(

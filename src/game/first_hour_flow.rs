@@ -1,9 +1,18 @@
 //! Application integration for serialized first-hour guidance.
 
 use super::{AppState, Game};
+use crate::data::{MissionDef, Team};
+use crate::state::GameSession;
 use crate::ui::{self, UiAction};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::ui::VirtualUi;
+
+const FIRST_HOUR_COVER_POSITION: [i32; 2] = [6, 18];
+const FIRST_HOUR_ATTACK_POSITION: [i32; 2] = [12, 18];
+
+fn first_hour_attack_position() -> TilePos {
+    TilePos::new(FIRST_HOUR_ATTACK_POSITION[0], FIRST_HOUR_ATTACK_POSITION[1])
+}
 
 impl Game {
     pub(super) fn create_first_hour_session(
@@ -12,21 +21,8 @@ impl Game {
     ) -> crate::state::GameSession {
         let mut session =
             crate::state::GameSession::new(&self.data.config, &self.active_mission, roster);
-        if self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::FirstOperation
-            && !session
-                .tactical
-                .cover_edges
-                .iter()
-                .any(|edge| edge.position == [6, 18])
-        {
-            session
-                .tactical
-                .cover_edges
-                .push(crate::data::CoverEdgeDef {
-                    position: [6, 18],
-                    direction: crate::data::EdgeDirection::North,
-                    strength: 25,
-                });
+        if self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::FirstOperation {
+            prepare_first_hour_tactical_session(&mut session, &self.active_mission);
         }
         session
     }
@@ -147,3 +143,62 @@ impl Game {
         );
     }
 }
+
+pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mission: &MissionDef) {
+    if !session
+        .tactical
+        .cover_edges
+        .iter()
+        .any(|edge| edge.position == FIRST_HOUR_COVER_POSITION)
+    {
+        session
+            .tactical
+            .cover_edges
+            .push(crate::data::CoverEdgeDef {
+                position: FIRST_HOUR_COVER_POSITION,
+                direction: crate::data::EdgeDirection::North,
+                strength: 25,
+            });
+    }
+
+    let Some(hostile_id) = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| {
+            unit.team == Team::Hostile && unit.faction.as_deref() == Some(&mission.hostile_faction)
+        })
+        .map(|unit| unit.id.clone())
+    else {
+        return;
+    };
+    if session
+        .tactical
+        .units
+        .iter()
+        .any(|unit| unit.id != hostile_id && unit.position == first_hour_attack_position())
+        || session
+            .tactical
+            .blocked
+            .contains(&first_hour_attack_position())
+        || session
+            .tactical
+            .hazards
+            .iter()
+            .any(|hazard| hazard.position == first_hour_attack_position())
+        || session.tactical.objective_tile == first_hour_attack_position()
+    {
+        return;
+    }
+    if let Some(hostile) = session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == hostile_id)
+    {
+        hostile.position = first_hour_attack_position();
+    }
+}
+
+#[cfg(test)]
+mod tests;
