@@ -113,7 +113,7 @@ pub struct UiContext<'a> {
     pub session: &'a GameSession,
     pub save_exists: bool,
     pub delete_save_armed: bool,
-    pub loaded_assets: usize,
+    pub first_hour: &'a crate::first_hour::FirstHourProgress,
     pub ui: &'a VirtualUi,
     pub targeting: Option<TargetingView<'a>>,
     pub show_help: bool,
@@ -324,6 +324,7 @@ pub fn draw_tactical(
     draw_header(&ctx);
     draw_sidebar(&ctx, mouse, &mut actions);
     draw_footer(&ctx, mouse, &mut actions);
+    crate::first_hour_tactical_ui::draw_command_focus(&ctx);
     if ctx.show_help {
         actions.clear();
         crate::help_ui::draw(mouse, &mut actions);
@@ -678,7 +679,7 @@ fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             } else {
                 "Isolation"
             },
-            ctx.loaded_assets
+            ctx.assets.len()
         ),
         710.0,
         y + 20.0,

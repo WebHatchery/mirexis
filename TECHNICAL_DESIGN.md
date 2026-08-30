@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.108.0
+Save/content version: 1.109.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -118,6 +118,7 @@ Important transition payloads:
 | `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `colony_story/identity.rs` | Path-specific identity-building establishment, preparation, failure, repair, and power-state field notes | Rendering or building mutation |
+| `first_hour_tactical_ui.rs` | Guidance-aware tactical lesson targets and command-rail emphasis | Simulation rules |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |
@@ -877,6 +878,7 @@ Migration coverage:
 | 1.106.0 | Optional Research Annex construction and powered doctrine-cost reduction |
 | 1.107.0 | Optional Salvage Yard recovery choices with research insight and standard equipment prototypes |
 | 1.108.0 | First-hour coordinator destination trace and capture-state coverage |
+| 1.109.0 | First-operation tactical focus targets, command-rail emphasis, and guided capture evidence |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -914,7 +916,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `first_hour_tactical`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`, `readiness_markers`, `vitality_markers`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -928,8 +930,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (361 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic 86-scene capture with visual inspection
+- `cargo test` (363 Mirexis unit tests plus asset-registry and source-size gates)
+- deterministic 87-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 

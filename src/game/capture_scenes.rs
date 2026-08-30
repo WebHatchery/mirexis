@@ -167,6 +167,19 @@ impl Game {
                 self.state = AppState::MissionBriefing;
             }
             "gameplay" => self.reset_capture_session(AppState::Tactical),
+            "first_hour_tactical" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+                self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::MoveToCover;
+                self.session
+                    .tactical
+                    .cover_edges
+                    .push(crate::data::CoverEdgeDef {
+                        position: [6, 18],
+                        direction: crate::data::EdgeDirection::North,
+                        strength: 25,
+                    });
+            }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",

@@ -166,6 +166,7 @@ pub(crate) fn draw(
     draw_foreground(ctx, view, hovered);
     ctx.feedback
         .draw(ctx.session, view, ctx.assets, ctx.visuals);
+    crate::first_hour_tactical_ui::draw_map_focus(ctx, view, grid_rect, input_enabled);
     crate::ui::set_ui_clip(ctx.ui, None);
     crate::action_preview_ui::draw(ctx.session, preview_tile, panel, ctx.assets, ctx.visuals);
     if ctx.targeting.is_some() {

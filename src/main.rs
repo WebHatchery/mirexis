@@ -40,6 +40,7 @@ mod first_hour;
 mod first_hour_consequences_ui;
 mod first_hour_investment_ui;
 mod first_hour_metrics;
+mod first_hour_tactical_ui;
 mod first_hour_ui;
 mod formation;
 mod game;

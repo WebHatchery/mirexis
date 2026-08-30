@@ -252,7 +252,7 @@ impl Game {
                     session: &self.session,
                     save_exists: self.save_exists,
                     delete_save_armed: self.delete_save_armed,
-                    loaded_assets: self.assets.len(),
+                    first_hour: &self.campaign.first_hour,
                     ui: &virtual_ui,
                     targeting: self.targeting.as_ref().map(|targeting| match targeting {
                         TacticalTargeting::Equipment {
