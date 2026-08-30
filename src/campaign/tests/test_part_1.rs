@@ -454,6 +454,10 @@ fn identity_conversations_archive_the_current_path_beat() {
     campaign.acknowledge_colonist("mara_venn");
 
     assert!(campaign.colony_story.has_heard("post_ending_redoubt_mara"));
+
+    campaign.acknowledge_colonist("ilya_reed");
+
+    assert!(campaign.colony_story.has_heard("finale_redoubt_ilya"));
 }
 
 #[test]

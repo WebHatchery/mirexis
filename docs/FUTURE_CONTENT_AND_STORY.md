@@ -427,6 +427,8 @@ Goal: deepen the existing people and city without new tactical systems.
   Escalation response, highest faction pressure, and resolved protective events.
 - Implemented: each identity path unlocks a third, character-specific post-ending scene after its
   final reflection is acknowledged.
+- Implemented: path-specific finale field notes now pay off every starting colonist and the
+  recruited route outsider, while Kira's player-avatar culmination appears in the ending register.
 
 Exit test: players recall three colonists, can describe one changing relationship, and
 notice the colony responding to an operation without opening a ledger.
@@ -494,7 +496,8 @@ Goal: make the implemented five-phase foundation narratively complete.
   aftermath field note keyed to the selected protocol and campaign completion flags.
 - Implemented: add recurring evidence across Adaptation and Escalation through multiple active
   colony voices instead of a finale-only lore dump.
-- Pay off all five starting arcs and the route-exclusive outsider.
+- Implemented: pay off all five starting arcs and the recruited route-exclusive outsider through
+  path-specific finale field notes and the ending register.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and

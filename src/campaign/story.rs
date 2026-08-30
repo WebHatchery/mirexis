@@ -10,6 +10,14 @@ impl CampaignState {
             &self.colony_story,
         )
         .or_else(|| {
+            crate::colony_story::finale_beat(
+                &self.strategy.mirexis_path_id,
+                character_id,
+                self.strategy.campaign_complete,
+                &self.colony_story,
+            )
+        })
+        .or_else(|| {
             crate::colony_story::contact_route_beat(
                 &self.strategy.contact_protocol_id,
                 character_id,

@@ -318,6 +318,14 @@ impl ColonyExplorer {
             &campaign.colony_story,
         )
         .or_else(|| {
+            colony_story::finale_beat(
+                &campaign.strategy.mirexis_path_id,
+                &character.id,
+                campaign.strategy.campaign_complete,
+                &campaign.colony_story,
+            )
+        })
+        .or_else(|| {
             colony_story::contact_route_beat(
                 &campaign.strategy.contact_protocol_id,
                 &character.id,

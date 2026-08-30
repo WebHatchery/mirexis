@@ -47,6 +47,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   through distinct colonist voices before Adaptation begins.
 - Completed ending dossiers add an authored identity-contact voice that reflects the named
   survivor's readiness or recovery.
+- Completed campaigns expose path-specific finale field notes for every starting colonist and
+  the recruited route outsider, with Kira's navigator voice preserved in the ending register.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

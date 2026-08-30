@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.93.0
+Save/content version: 1.94.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -653,6 +653,11 @@ not add another save schema.
 The completed-campaign dossier adds an authored voice line from the identity contact for each
 path. Its wording reflects whether that person is ready or recovering, so the ending acknowledges
 the lived condition of the named survivor without storing another derived field.
+After campaign completion, colony dialogue exposes a path-specific finale field note for every
+starting colonist and whichever route outsider was recruited. The identity contact retains its
+dedicated ending and post-ending sequence; the other colonists use the same persistent story
+ledger for their closing notes. Kira's player-avatar culmination is presented as a navigator line
+in the ending register rather than as a walk-up NPC conversation.
 After that final reflection is acknowledged, the continuing colony sandbox exposes one more
 path-specific scene from the same contact: an open gate, room to disagree, or a route with a return
 current. The scene is selected from the existing story ledger and remains presentation-only.
@@ -798,6 +803,7 @@ Migration coverage:
 | 1.91.0 | Unchosen route outsiders appear as Waystation guests with field notes and recruitment handoff |
 | 1.92.0 | Expanded Adaptation and Escalation field notes across active colony voices |
 | 1.93.0 | Finale dossier engine relationship, faction-pressure, and witnessed-mercy register |
+| 1.94.0 | Path-specific finale field notes for starting colonists and recruited outsiders |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

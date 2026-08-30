@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn each_colony_npc_has_three_progression_beats() {
+fn each_colony_npc_has_progression_and_finale_beats() {
     for character_id in [
         "mara_venn",
         "ilya_reed",
@@ -18,6 +18,30 @@ fn each_colony_npc_has_three_progression_beats() {
         assert!(!arrival.text.is_empty());
         assert!(!first.text.is_empty());
         assert!(!second.text.is_empty());
+    }
+
+    for path_id in ["human_redoubt", "living_commonwealth", "open_threshold"] {
+        for character_id in [
+            "kira_voss",
+            "mara_venn",
+            "ilya_reed",
+            "sol_cairn",
+            "nadi_vale",
+            "veya_orn",
+            "sedge",
+        ] {
+            let story = ColonyStoryState::default();
+            let finale = finale_beat(path_id, character_id, true, &story).unwrap();
+            assert!(finale.id.starts_with("finale_"));
+            assert!(!finale.text.is_empty());
+
+            let mut archived = story;
+            archived.acknowledge(finale.id);
+            assert!(finale_beat(path_id, character_id, true, &archived).is_none());
+            assert!(
+                finale_beat(path_id, character_id, false, &ColonyStoryState::default()).is_none()
+            );
+        }
     }
 }
 

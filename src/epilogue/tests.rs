@@ -52,9 +52,10 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(lines[2].contains("+") && !lines[2].contains("NO TRUSTED"));
     assert!(lines[3].contains("CARRIED"));
     assert!(lines[4].contains("EVOLUTION"));
-    assert!(lines[6].contains("ENGINE // HUMAN BOUNDARY / ARMOURED"));
-    assert!(lines[6].contains("DIRECTORATE 29"));
-    assert!(lines[6].contains("MERCY 1"));
+    assert!(lines[6].contains("NAVIGATOR // Kira Voss"));
+    assert!(lines[7].contains("ENGINE // HUMAN BOUNDARY / ARMOURED"));
+    assert!(lines[7].contains("DIRECTORATE 29"));
+    assert!(lines[7].contains("MERCY 1"));
     assert!(dossier.debrief_line().contains("COLONY LEGACY"));
     assert!(dossier
         .debrief_line()
@@ -114,9 +115,10 @@ fn epilogue_adds_an_authored_voice_for_each_identity_path() {
         let ready = derive(&campaign).unwrap().lines();
         assert!(ready[5].contains(character_name));
         assert!(ready[5].contains(ready_line));
-        assert!(ready[6].contains(engine_relationship));
-        assert!(ready[6].contains(engine_response));
-        assert!(ready[6].contains("MERCY 1"));
+        assert!(ready[6].contains("NAVIGATOR // Kira Voss"));
+        assert!(ready[7].contains(engine_relationship));
+        assert!(ready[7].contains(engine_response));
+        assert!(ready[7].contains("MERCY 1"));
 
         campaign
             .roster

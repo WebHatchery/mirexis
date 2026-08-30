@@ -13,6 +13,7 @@ pub(crate) struct EpilogueDossier {
     scars: String,
     evolutions: String,
     character_voice: String,
+    navigator_voice: String,
     engine_relationship: &'static str,
     engine_response: &'static str,
     faction_pressure: String,
@@ -20,7 +21,7 @@ pub(crate) struct EpilogueDossier {
 }
 
 impl EpilogueDossier {
-    pub(crate) fn lines(&self) -> [String; 7] {
+    pub(crate) fn lines(&self) -> [String; 8] {
         [
             format!(
                 "CIVIC // {} // {}",
@@ -35,6 +36,7 @@ impl EpilogueDossier {
             format!("SCARS // {}", self.scars),
             format!("EVOLUTION // {}", self.evolutions),
             format!("VOICE // {}", self.character_voice),
+            format!("NAVIGATOR // {}", self.navigator_voice),
             format!(
                 "ENGINE // {} / {} // {} // MERCY {}",
                 self.engine_relationship,
@@ -152,6 +154,7 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         format!("{} COLONISTS // {}", evolved.len(), evolved.join(", "))
     };
     let character_voice = character_voice(campaign);
+    let navigator_voice = navigator_voice(campaign);
     let engine_relationship = engine_relationship(&campaign.strategy.mirexis_path_id);
     let engine_response = engine_response(&campaign.strategy.escalation_response_id);
     let faction_pressure = faction_pressure(campaign);
@@ -171,11 +174,22 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         scars,
         evolutions,
         character_voice,
+        navigator_voice,
         engine_relationship,
         engine_response,
         faction_pressure,
         mercy_count,
     })
+}
+
+fn navigator_voice(campaign: &CampaignState) -> String {
+    let line = match campaign.strategy.mirexis_path_id.as_str() {
+        "human_redoubt" => "THE SIGNAL FALLS QUIET BEHIND THE WALL.",
+        "living_commonwealth" => "THE MANY VOICES KEEP THEIR OWN NAMES.",
+        "open_threshold" => "EVERY ROUTE CARRIES A WAY HOME.",
+        _ => "THE MAP REMAINS OPEN TO THE COLONY.",
+    };
+    format!("{} // {}", character_name(campaign, "kira_voss"), line)
 }
 
 fn engine_relationship(path_id: &str) -> &'static str {

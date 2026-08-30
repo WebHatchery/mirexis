@@ -233,6 +233,126 @@ pub(crate) fn current_beat(
     }
 }
 
+pub(crate) fn finale_beat(
+    path_id: &str,
+    character_id: &str,
+    campaign_complete: bool,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    if !campaign_complete {
+        return None;
+    }
+    let (id, title, text) = match (path_id, character_id) {
+        ("human_redoubt", "kira_voss") => (
+            "finale_redoubt_kira",
+            "A MAP WITH AN EDGE",
+            "Kira's maps stop at the Arsenal wall, not because the signal ends, but because the people behind it have chosen what may enter. She is learning to hear a boundary as an answer.",
+        ),
+        ("human_redoubt", "mara_venn") => (
+            "finale_redoubt_mara",
+            "A SHARED SHIELD",
+            "Mara gives the Arsenal a shared drill instead of a single shield. The wall can protect the colony only when the people behind it can name what it is for.",
+        ),
+        ("human_redoubt", "ilya_reed") => (
+            "finale_redoubt_ilya",
+            "NO BODY IS A RESOURCE",
+            "Ilya writes the Arsenal's first medical rule beside the armour racks: no body is a resource. Recovery becomes part of defence, not the price of admission.",
+        ),
+        ("human_redoubt", "sol_cairn") => (
+            "finale_redoubt_sol",
+            "POWER WITH WITNESSES",
+            "Sol leaves the Arsenal's circuits open to inspection. A wall that cannot explain its power will eventually ask the people inside it to become obedient.",
+        ),
+        ("human_redoubt", "nadi_vale") => (
+            "finale_redoubt_nadi",
+            "A LIVING CHANNEL",
+            "Nadi keeps one channel from the Garden open beneath the Arsenal. The colony can hold its ground without pretending the living signal is an enemy.",
+        ),
+        ("human_redoubt", "veya_orn") => (
+            "finale_redoubt_veya",
+            "THE CIPHER HAS WITNESSES",
+            "Veya hangs the broken cipher outside the Arsenal's command room. It remains useful only when witnesses can refuse the order it would once have carried.",
+        ),
+        ("human_redoubt", "sedge") => (
+            "finale_redoubt_sedge",
+            "A HOME IN THE MARGINS",
+            "Sedge marks the routes around the Arsenal in family names, not military coordinates. The wall protects a home when it remembers where home came from.",
+        ),
+        ("living_commonwealth", "kira_voss") => (
+            "finale_commonwealth_kira",
+            "A MAP FOR MANY VOICES",
+            "Kira stops searching for one voice in the Garden's chorus. Her map becomes a way for different answers to share a page without becoming one command.",
+        ),
+        ("living_commonwealth", "mara_venn") => (
+            "finale_commonwealth_mara",
+            "STRENGTH LEAVES ROOM",
+            "Mara lets the Garden grow around the armour instead of asking the armour to lead. Strength is still protection when it leaves room for another body to choose its shape.",
+        ),
+        ("living_commonwealth", "ilya_reed") => (
+            "finale_commonwealth_ilya",
+            "CONSENT BESIDE THE ROOTS",
+            "Ilya posts consent beside the Garden's living beds. The colony may accept a treatment that changes it, but no cure begins by hiding the question.",
+        ),
+        ("living_commonwealth", "sol_cairn") => (
+            "finale_commonwealth_sol",
+            "A READABLE LIVING CIRCUIT",
+            "Sol builds labels into the Garden's roots so every living circuit has a readable return path. Stewardship begins where complete control gives way to care.",
+        ),
+        ("living_commonwealth", "nadi_vale") => (
+            "finale_commonwealth_nadi",
+            "THE FIRST COMMONWEALTH",
+            "Nadi answers the Garden without speaking for every voice inside it. The first commonwealth is not one body; it is an agreement to keep making room.",
+        ),
+        ("living_commonwealth", "veya_orn") => (
+            "finale_commonwealth_veya",
+            "A PERSON BEFORE A DESIGNATION",
+            "Veya teaches the Garden's gates to recognise a person before a designation. The old command can still find a route, but it no longer decides who belongs.",
+        ),
+        ("living_commonwealth", "sedge") => (
+            "finale_commonwealth_sedge",
+            "A CITIZEN'S HISTORY",
+            "Sedge brings the marsh route into the Garden as a family record. Adaptation is no longer a specimen or a secret; it is a citizen's history.",
+        ),
+        ("open_threshold", "kira_voss") => (
+            "finale_threshold_kira",
+            "EVERY ROUTE HAS A HOME",
+            "Kira gives every Threshold route a name and a way home. The signal can call beyond Mirexis now, but it no longer gets to call only her.",
+        ),
+        ("open_threshold", "mara_venn") => (
+            "finale_threshold_mara",
+            "THE GUARD AT THE OPEN DOOR",
+            "Mara trains the Threshold's return crews to protect the crossing and the person who comes back changed. An open door needs a guard who knows when not to close it.",
+        ),
+        ("open_threshold", "ilya_reed") => (
+            "finale_threshold_ilya",
+            "HELP MUST ARRIVE AS AN OFFER",
+            "Ilya sends a consent ledger through the Threshold with every medical team. Even beyond Mirexis, help must arrive as an offer before it becomes an intervention.",
+        ),
+        ("open_threshold", "sol_cairn") => (
+            "finale_threshold_sol",
+            "A PUBLIC HAND ON THE SWITCH",
+            "Sol leaves the Threshold's controls legible to the people who use them. The network may be older than the colony, but its future still needs a public hand on the switch.",
+        ),
+        ("open_threshold", "nadi_vale") => (
+            "finale_threshold_nadi",
+            "THE RIGHT TO ANSWER NO",
+            "Nadi listens through the Threshold and hears distance without mistaking it for absence. The signal is allowed to travel while the person receiving it keeps the right to answer no.",
+        ),
+        ("open_threshold", "veya_orn") => (
+            "finale_threshold_veya",
+            "A KEY THAT COMES HOME",
+            "Veya turns the cipher into a return protocol instead of a targeting key. Every route is safer when the person who opens it can also close it.",
+        ),
+        ("open_threshold", "sedge") => (
+            "finale_threshold_sedge",
+            "THE ROUTE BELONGS TO ITS TRAVELLERS",
+            "Sedge carries the first Threshold map back to the reeds and leaves the margins blank for the families who follow. A route belongs to its travellers, not the first colony to copy it.",
+        ),
+        _ => return None,
+    };
+    (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
+}
+
 pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
     let (id, title, text) = match character_id {
         "kira_voss" => (
