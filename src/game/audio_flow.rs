@@ -9,7 +9,12 @@ impl Game {
     pub(super) fn apply_audio_action(&mut self, action: &UiAction) -> bool {
         let game_name = self.data.config.game_name.clone();
         match action {
-            UiAction::ToggleSettings => self.show_settings = !self.show_settings,
+            UiAction::ToggleSettings => {
+                self.show_settings = !self.show_settings;
+                if self.show_settings {
+                    self.clear_colony_explorer_motion();
+                }
+            }
             UiAction::AudioVolumeDown => self.audio.adjust_volume(-25, &game_name),
             UiAction::AudioVolumeUp => self.audio.adjust_volume(25, &game_name),
             UiAction::ToggleMute => self.audio.toggle_mute(&game_name),

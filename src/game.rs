@@ -167,7 +167,7 @@ impl Game {
     }
 
     pub fn update(&mut self, dt: f32) {
-        if self.state == AppState::Colony && !self.campaign.first_hour.help_open {
+        if self.colony_explorer_can_update() {
             self.colony_explorer.update(dt, &self.campaign.colony);
         }
         self.update_playtest_metrics(dt);

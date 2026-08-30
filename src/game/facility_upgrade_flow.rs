@@ -15,6 +15,7 @@ impl Game {
                 });
                 if can_open {
                     self.facility_upgrade_open = true;
+                    self.clear_colony_explorer_motion();
                 } else {
                     self.notifications
                         .warning("No facility can accept an upgrade right now");
@@ -29,6 +30,7 @@ impl Game {
                 {
                     Ok(message) => {
                         self.facility_upgrade_open = false;
+                        self.clear_colony_explorer_motion();
                         self.notifications.success(message);
                         self.autosave_campaign_only("Facility upgrade autosaved");
                     }
@@ -38,6 +40,7 @@ impl Game {
             }
             UiAction::CloseFacilityUpgrade => {
                 self.facility_upgrade_open = false;
+                self.clear_colony_explorer_motion();
                 true
             }
             _ => false,

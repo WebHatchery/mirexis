@@ -1,0 +1,51 @@
+use super::*;
+
+#[test]
+fn colony_explorer_updates_only_when_colony_has_no_blocking_overlay() {
+    assert!(colony_explorer_can_update(
+        AppState::Colony,
+        false,
+        false,
+        false,
+        false
+    ));
+    assert!(!colony_explorer_can_update(
+        AppState::Colony,
+        true,
+        false,
+        false,
+        false
+    ));
+    assert!(!colony_explorer_can_update(
+        AppState::Colony,
+        false,
+        true,
+        false,
+        false
+    ));
+    assert!(!colony_explorer_can_update(
+        AppState::Colony,
+        false,
+        false,
+        true,
+        false
+    ));
+    assert!(!colony_explorer_can_update(
+        AppState::Colony,
+        false,
+        false,
+        false,
+        true
+    ));
+}
+
+#[test]
+fn colony_explorer_does_not_update_outside_the_colony() {
+    assert!(!colony_explorer_can_update(
+        AppState::Title,
+        false,
+        false,
+        false,
+        false
+    ));
+}

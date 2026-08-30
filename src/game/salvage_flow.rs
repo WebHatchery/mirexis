@@ -13,6 +13,7 @@ impl Game {
                     .has_facility(crate::colony::BuildingKind::SalvageYard)
                 {
                     self.salvage_open = true;
+                    self.clear_colony_explorer_motion();
                 } else {
                     self.notifications.warning("The Salvage Yard is offline");
                 }
@@ -22,6 +23,7 @@ impl Game {
                 match self.campaign.process_salvage(*choice) {
                     Ok(summary) => {
                         self.salvage_open = false;
+                        self.clear_colony_explorer_motion();
                         self.notifications.success(summary);
                         self.autosave_campaign_only("Salvage decision autosaved");
                     }
@@ -31,6 +33,7 @@ impl Game {
             }
             UiAction::CloseSalvage => {
                 self.salvage_open = false;
+                self.clear_colony_explorer_motion();
                 true
             }
             _ => false,

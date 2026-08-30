@@ -84,19 +84,20 @@ impl Game {
                     self.campaign.first_hour.metrics.opened_guide();
                 }
                 self.campaign.first_hour.help_open = !self.campaign.first_hour.help_open;
-                self.colony_explorer
-                    .set_keyboard_direction(macroquad::prelude::Vec2::ZERO);
+                self.clear_colony_explorer_motion();
                 "Field-guide state and session metrics autosaved"
             }
             UiAction::SkipFirstHourTutorial => {
                 self.campaign.first_hour.guidance_enabled = false;
                 self.campaign.first_hour.help_open = false;
+                self.clear_colony_explorer_motion();
                 "Tutorial prompts skipped; campaign goals preserved"
             }
             UiAction::RestartFirstHourTutorial => {
                 self.campaign
                     .first_hour
                     .restart(self.campaign.operations_completed);
+                self.clear_colony_explorer_motion();
                 "First-hour guide restarted"
             }
             UiAction::ChooseFirstHourInvestment(investment_id) => {

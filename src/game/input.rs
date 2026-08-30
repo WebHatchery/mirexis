@@ -37,6 +37,20 @@ impl Game {
         if self.campaign.first_hour.help_open {
             return false;
         }
+        if self.state == AppState::Colony {
+            let modal_open = self.facility_upgrade_open || self.salvage_open;
+            if let Some(action) = colony_modal_input(
+                self.facility_upgrade_open,
+                self.salvage_open,
+                input.escape_pressed,
+                pad.cancel,
+            ) {
+                self.events.push(action);
+            }
+            if modal_open {
+                return false;
+            }
+        }
         match self.state {
             AppState::Title => {
                 if input.left_pressed {
@@ -323,6 +337,24 @@ fn first_hour_help_overlay_input(
 ) -> Option<UiAction> {
     if help_open && (escape_pressed || cancel_pressed) {
         Some(UiAction::ToggleFirstHourHelp)
+    } else {
+        None
+    }
+}
+
+fn colony_modal_input(
+    facility_upgrade_open: bool,
+    salvage_open: bool,
+    escape_pressed: bool,
+    cancel_pressed: bool,
+) -> Option<UiAction> {
+    if !(escape_pressed || cancel_pressed) {
+        return None;
+    }
+    if facility_upgrade_open {
+        Some(UiAction::CloseFacilityUpgrade)
+    } else if salvage_open {
+        Some(UiAction::CloseSalvage)
     } else {
         None
     }
