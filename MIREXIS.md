@@ -1051,12 +1051,24 @@ Examples:
 
 ## Research Facility
 
-Allows investigation of:
+The implemented Research Annex is a powered physical archive that reduces the material cost
+of each doctrine project while it remains operational. It allows investigation of:
 
 - enemy technology
 - mutations
 - alien ruins
 - captured equipment
+
+---
+
+## Salvage Yard
+
+The implemented Salvage Yard is a powered recovery workshop. Each victorious operation leaves
+one recoverable object, and the colony can sort one object per operation into:
+
+- materials for construction and craft
+- insight that reduces the next doctrine's material cost
+- a free standard equipment prototype, chosen later through the Workshop
 
 ---
 

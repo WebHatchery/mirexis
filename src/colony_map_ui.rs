@@ -503,6 +503,9 @@ fn draw_plot(
             BuildingKind::ResearchAnnex => {
                 building_art::draw_research_annex(center, view.zoom, powered, building.damaged)
             }
+            BuildingKind::SalvageYard => {
+                building_art::draw_salvage_yard(center, view.zoom, powered, building.damaged)
+            }
             _ => {}
         }
         identity_art::draw_ambient(building.kind, center, view.zoom, powered, building.damaged);
@@ -541,6 +544,7 @@ fn building_index(kind: BuildingKind) -> usize {
         BuildingKind::PowerPlant => 6,
         BuildingKind::GeneLab => 7,
         BuildingKind::ResearchAnnex => 7,
+        BuildingKind::SalvageYard => 3,
         BuildingKind::Waystation => 7,
         BuildingKind::Commons => 1,
         BuildingKind::RelayMast => 6,

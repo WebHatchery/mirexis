@@ -10,6 +10,7 @@ mod mission;
 mod outsider;
 mod relay;
 mod research;
+mod salvage;
 mod story;
 
 #[allow(unused_imports)]
@@ -17,6 +18,7 @@ pub(super) use derivation::derive_unit;
 pub(super) use derivation::derive_unit_with_evolution_options;
 pub(crate) use outsider::OutsiderChoice;
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
+pub(crate) use salvage::{SalvageChoice, SALVAGE_MATERIALS_REWARD, SALVAGE_RESEARCH_INSIGHT};
 
 use crate::colony::{
     BuildingKind, ColonyState, COUNTERINTELLIGENCE_CELL_UPGRADE, HOT_CORE_UPGRADE,
@@ -160,6 +162,14 @@ pub struct CampaignState {
     pub identity_preparations_completed: u32,
     #[serde(default)]
     pub identity_preparation_operation: Option<u32>,
+    #[serde(default)]
+    pub salvage_cache_count: u32,
+    #[serde(default)]
+    pub salvage_yard_operation: Option<u32>,
+    #[serde(default)]
+    pub research_insight: i32,
+    #[serde(default)]
+    pub salvage_prototypes: u32,
 }
 
 impl CampaignState {
@@ -197,6 +207,10 @@ impl CampaignState {
             identity_stewardship_operation: None,
             identity_preparations_completed: 0,
             identity_preparation_operation: None,
+            salvage_cache_count: 0,
+            salvage_yard_operation: None,
+            research_insight: 0,
+            salvage_prototypes: 0,
         }
     }
 
@@ -418,6 +432,9 @@ impl CampaignState {
         self.colony.resources.materials += outcome.materials_awarded;
         self.colony.resources.biomass += outcome.biomass_awarded;
         self.colony.resources.power += outcome.power_awarded;
+        if outcome.result == ObjectiveState::Victory {
+            self.salvage_cache_count = self.salvage_cache_count.saturating_add(1);
+        }
         if mission.map_recipe == "colony_defense" && outcome.result == ObjectiveState::Failed {
             self.colony.damage_for_failed_defense(mission.seed);
         }
@@ -582,7 +599,11 @@ impl CampaignState {
             ));
         }
         let base_cost = equipment_cost(&equipment.slot);
-        let cost = if self
+        let prototype_available =
+            self.salvage_prototypes > 0 && equipment.required_protocol.is_empty();
+        let cost = if prototype_available {
+            0
+        } else if self
             .colony
             .has_active_upgrade(BuildingKind::Workshop, PRECISION_BENCH_UPGRADE)
             && matches!(equipment.slot.as_str(), "primary" | "armour")
@@ -602,7 +623,7 @@ impl CampaignState {
                 character.name, equipment.name
             ));
         }
-        if self.colony.resources.materials < cost as i32 {
+        if !prototype_available && self.colony.resources.materials < cost as i32 {
             return Err(format!("Crafting requires {} materials", cost));
         }
         character.equipment_ids.retain(|id| {
@@ -611,7 +632,11 @@ impl CampaignState {
                 .find(|item| &item.id == id)
                 .is_none_or(|item| item.slot != equipment.slot)
         });
-        self.colony.resources.materials -= cost as i32;
+        if prototype_available {
+            self.salvage_prototypes = self.salvage_prototypes.saturating_sub(1);
+        } else {
+            self.colony.resources.materials -= cost as i32;
+        }
         character.equipment_ids.push(equipment.id.clone());
         self.refresh_contact_completion(data);
         Ok(cost)

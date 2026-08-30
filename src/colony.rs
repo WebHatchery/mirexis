@@ -20,6 +20,7 @@ pub enum BuildingKind {
     Barracks,
     Infirmary,
     ResearchAnnex,
+    SalvageYard,
     Workshop,
     #[default]
     Barricade,
@@ -42,6 +43,7 @@ impl BuildingKind {
             Self::Barracks => "Barracks",
             Self::Infirmary => "Infirmary",
             Self::ResearchAnnex => "Research Annex",
+            Self::SalvageYard => "Salvage Yard",
             Self::Workshop => "Workshop",
             Self::Barricade => "Barricade",
             Self::Hydroponics => "Hydroponics",
@@ -67,13 +69,18 @@ impl BuildingKind {
             Self::RelayMast => 45,
             Self::Watchtower => 35,
             Self::ResearchAnnex => 60,
+            Self::SalvageYard => 55,
             _ => 0,
         }
     }
 
     pub fn power_demand(self) -> i32 {
         match self {
-            Self::CommandCentre | Self::Barracks | Self::Infirmary | Self::ResearchAnnex => 1,
+            Self::CommandCentre
+            | Self::Barracks
+            | Self::Infirmary
+            | Self::ResearchAnnex
+            | Self::SalvageYard => 1,
             Self::Workshop | Self::Hydroponics => 2,
             Self::GeneLab => 3,
             Self::Waystation => 1,
@@ -305,6 +312,7 @@ impl ColonyState {
                 | BuildingKind::PowerPlant
                 | BuildingKind::GeneLab
                 | BuildingKind::ResearchAnnex
+                | BuildingKind::SalvageYard
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast
@@ -326,6 +334,7 @@ impl ColonyState {
             kind,
             BuildingKind::GeneLab
                 | BuildingKind::ResearchAnnex
+                | BuildingKind::SalvageYard
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast

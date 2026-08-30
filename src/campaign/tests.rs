@@ -15,5 +15,6 @@ mod identity;
 mod recruitment;
 mod relay;
 mod research;
+mod salvage;
 
 mod test_part_1;

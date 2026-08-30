@@ -52,6 +52,22 @@ pub(super) fn draw_hover_card(
                 "RESEARCH ANNEX // ONLINE // {} DOCTRINES // -5 RESEARCH MAT",
                 doctrines
             )
+        } else if building.kind == BuildingKind::SalvageYard {
+            if campaign.salvage_available() {
+                format!(
+                    "SALVAGE YARD // {} OBJECT{} // TAP TO SORT",
+                    campaign.salvage_cache_count,
+                    if campaign.salvage_cache_count == 1 {
+                        ""
+                    } else {
+                        "S"
+                    }
+                )
+            } else if campaign.salvage_yard_operation == Some(campaign.operations_completed) {
+                "SALVAGE YARD // SORTED THIS OPERATION".to_owned()
+            } else {
+                "SALVAGE YARD // ONLINE // WAITING FOR RECOVERY".to_owned()
+            }
         } else if building.kind == BuildingKind::Commons {
             let food_cost = campaign.commons_meal_food_cost();
             if campaign.commons_meal_available() {
@@ -220,6 +236,11 @@ pub(super) fn handle_plot_click(
             && campaign.relay_scan_available()
         {
             actions.push(UiAction::RunRelayScan);
+        } else if building.kind == BuildingKind::SalvageYard
+            && campaign.colony.building_is_powered(&building.id)
+            && campaign.salvage_available()
+        {
+            actions.push(UiAction::OpenSalvage);
         } else if building.kind.is_identity() && campaign.identity_preparation_available() {
             actions.push(UiAction::PrepareIdentityBuilding);
         } else if building.kind.is_identity() && campaign.identity_stewardship_available() {

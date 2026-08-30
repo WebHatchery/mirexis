@@ -13,6 +13,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         explorer,
         operations_open,
         facility_upgrade_open,
+        salvage_open,
     } = context;
     let mut actions = Vec::new();
     let mouse = crate::ui::pointer_position(ui);
@@ -44,6 +45,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             visuals,
             mouse,
             facility_upgrade_open,
+            salvage_open,
             &mut actions,
         );
     }

@@ -49,6 +49,7 @@ impl ColonyState {
                     BuildingKind::CommandCentre
                     | BuildingKind::Infirmary
                     | BuildingKind::ResearchAnnex
+                    | BuildingKind::SalvageYard
                     | BuildingKind::Hydroponics
                     | BuildingKind::PowerPlant
                     | BuildingKind::GeneLab

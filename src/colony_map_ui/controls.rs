@@ -18,6 +18,7 @@ pub(super) fn draw_build_controls(
     kinds.push(BuildingKind::RelayMast);
     kinds.push(BuildingKind::Watchtower);
     kinds.push(BuildingKind::ResearchAnnex);
+    kinds.push(BuildingKind::SalvageYard);
     if campaign.strategy.contact_complete
         && !campaign
             .colony
@@ -48,13 +49,13 @@ pub(super) fn draw_build_controls(
     }
     for (index, kind) in kinds.into_iter().enumerate() {
         let selected = campaign.colony.planned_construction == kind;
-        let column = index % 4;
-        let row = index / 4;
+        let column = index % 5;
+        let row = index / 5;
         if button(
             Rect::new(
-                20.0 + column as f32 * 170.0,
+                20.0 + column as f32 * 162.0,
                 606.0 + row as f32 * 48.0,
-                164.0,
+                158.0,
                 42.0,
             ),
             &format!(
@@ -81,7 +82,7 @@ pub(super) fn draw_exploration_controls(
     explorer.set_touch_direction(Vec2::ZERO);
     if explorer.build_mode() {
         if button(
-            Rect::new(540.0, 654.0, 196.0, 42.0),
+            Rect::new(668.0, 654.0, 158.0, 42.0),
             "RETURN TO EXPLORE",
             true,
             mouse,

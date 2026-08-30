@@ -42,6 +42,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   online, or Evolution Chamber reduces mutation evolution biomass costs.
 - Optional Research Annex: a powered physical evidence archive reduces doctrine research by
   five materials and becomes a visible colony-defence objective.
+- Optional Salvage Yard: each successful operation leaves one recoverable object; sort it once
+  per operation into materials, a one-use doctrine insight, or a free standard equipment prototype.
 - Phase Five path choices establish one physical identity building: Redoubt Arsenal, Choir
   Garden, or Threshold Spire, each changing colony defence and preparation.
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,

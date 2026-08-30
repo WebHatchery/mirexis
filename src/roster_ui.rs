@@ -497,10 +497,12 @@ fn draw_selected_character(
         let cost = equipment_cost(&item.slot);
         let equipped = character.equipment_ids.contains(&item.id);
         let unlocked = campaign.equipment_is_unlocked(item);
+        let prototype_available =
+            campaign.salvage_prototypes > 0 && item.required_protocol.is_empty();
         let enabled = campaign.colony.has_facility(BuildingKind::Workshop)
             && unlocked
             && !equipped
-            && campaign.colony.resources.materials >= cost as i32;
+            && (prototype_available || campaign.colony.resources.materials >= cost as i32);
         let column = index % 3;
         let row = index / 3;
         let rect = Rect::new(
@@ -513,6 +515,8 @@ fn draw_selected_character(
             format!("LOCKED: {}", item.name)
         } else if equipped {
             format!("EQUIPPED: {}", item.name)
+        } else if prototype_available {
+            format!("PROTOTYPE: {}", item.name)
         } else {
             format!("CRAFT: {} · {} MAT", item.name, cost)
         };

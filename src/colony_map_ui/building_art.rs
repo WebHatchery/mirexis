@@ -348,3 +348,51 @@ pub(super) fn draw_research_annex(center: Vec2, zoom: f32, powered: bool, damage
         accent,
     );
 }
+
+pub(super) fn draw_salvage_yard(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(1.0, 0.66, 0.28, 0.94)
+    } else {
+        Color::new(0.56, 0.44, 0.30, 0.82)
+    };
+    draw_rectangle(
+        center.x - 25.0 * zoom,
+        center.y - 45.0 * zoom,
+        50.0 * zoom,
+        7.0 * zoom,
+        accent,
+    );
+    for offset in [-18.0, 0.0, 18.0] {
+        draw_line(
+            center.x + offset * zoom,
+            center.y - 38.0 * zoom,
+            center.x + offset * zoom,
+            center.y - 18.0 * zoom,
+            3.0 * zoom,
+            accent,
+        );
+    }
+    draw_line(
+        center.x - 25.0 * zoom,
+        center.y - 18.0 * zoom,
+        center.x + 25.0 * zoom,
+        center.y - 18.0 * zoom,
+        3.0 * zoom,
+        accent,
+    );
+    for offset in [-12.0, 0.0, 12.0] {
+        draw_circle(
+            center.x + offset * zoom,
+            center.y - 50.0 * zoom,
+            2.5 * zoom,
+            Color::new(
+                accent.r,
+                accent.g,
+                accent.b,
+                if powered { 0.9 } else { 0.28 },
+            ),
+        );
+    }
+}

@@ -13,6 +13,7 @@ mod commons;
 mod context;
 mod recruitment;
 mod relay;
+mod salvage;
 mod scene;
 mod upgrades;
 pub(crate) use context::ColonyDrawContext;
@@ -26,6 +27,7 @@ fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -
     draw_text_ex(text, x, y, params)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn draw_operations(
     campaign: &CampaignState,
     data: &GameData,
@@ -33,11 +35,17 @@ pub(super) fn draw_operations(
     visuals: &VisualCatalog,
     mouse: Vec2,
     facility_upgrade_open: &mut bool,
+    salvage_open: &mut bool,
     actions: &mut Vec<UiAction>,
 ) {
     if *facility_upgrade_open {
         actions.clear();
         upgrades::draw_modal(campaign, mouse, actions);
+        return;
+    }
+    if *salvage_open {
+        actions.clear();
+        salvage::draw_modal(campaign, mouse, actions);
         return;
     }
     let panel = Rect::new(862.0, 74.0, 408.0, 608.0);
@@ -259,6 +267,7 @@ pub(super) fn draw_operations(
         actions.push(UiAction::TreatInjury);
     }
     upgrades::draw_launcher(campaign, mouse, actions);
+    salvage::draw_launcher(campaign, mouse, actions);
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
     let choosing_escalation = campaign.strategy.escalation_operation_completed

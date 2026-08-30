@@ -14,4 +14,5 @@ pub(crate) struct ColonyDrawContext<'a> {
     pub(crate) explorer: &'a mut crate::colony_exploration::ColonyExplorer,
     pub(crate) operations_open: &'a mut bool,
     pub(crate) facility_upgrade_open: &'a mut bool,
+    pub(crate) salvage_open: &'a mut bool,
 }

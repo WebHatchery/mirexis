@@ -16,6 +16,7 @@ mod formation_flow;
 mod input;
 mod persistence_io;
 mod playtest_flow;
+mod salvage_flow;
 mod skill_flow;
 mod types;
 
@@ -75,6 +76,7 @@ pub struct Game {
     colony_explorer: crate::colony_exploration::ColonyExplorer,
     colony_operations_open: bool,
     facility_upgrade_open: bool,
+    salvage_open: bool,
     audio: crate::audio::AudioSystem,
     show_settings: bool,
 }
@@ -156,6 +158,7 @@ impl Game {
             colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
             colony_operations_open: false,
             facility_upgrade_open: false,
+            salvage_open: false,
             audio,
             show_settings: false,
         }
@@ -212,6 +215,7 @@ impl Game {
                 explorer: &mut self.colony_explorer,
                 operations_open: &mut self.colony_operations_open,
                 facility_upgrade_open: &mut self.facility_upgrade_open,
+                salvage_open: &mut self.salvage_open,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -322,6 +326,9 @@ impl Game {
         if self.apply_facility_upgrade_action(&action) {
             return;
         }
+        if self.apply_salvage_action(&action) {
+            return;
+        }
         match action {
             UiAction::StartMission => {
                 self.targeting = None;
@@ -334,6 +341,7 @@ impl Game {
                 self.colony_explorer.reset();
                 self.colony_operations_open = false;
                 self.facility_upgrade_open = false;
+                self.salvage_open = false;
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
@@ -515,11 +523,13 @@ impl Game {
                 self.show_tactical_help = false;
                 self.show_battle_log = false;
                 self.facility_upgrade_open = false;
+                self.salvage_open = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
                 self.targeting = None;
                 self.facility_upgrade_open = false;
+                self.salvage_open = false;
                 self.state = AppState::Colony;
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();
@@ -630,8 +640,11 @@ impl Game {
                 {
                     Ok(cost) => {
                         self.campaign.first_hour.invested("field equipment");
-                        self.notifications
-                            .success(format!("Equipment issued · {} materials", cost));
+                        self.notifications.success(if cost == 0 {
+                            "Equipment issued · salvage prototype consumed".to_owned()
+                        } else {
+                            format!("Equipment issued · {} materials", cost)
+                        });
                         self.autosave_campaign_only("Workshop change autosaved");
                     }
                     Err(err) => self.notifications.warning(err),

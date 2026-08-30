@@ -210,3 +210,23 @@ fn version_105_save_preserves_research_annex_construction() {
         BuildingKind::ResearchAnnex
     );
 }
+
+#[test]
+fn version_106_save_preserves_salvage_yard_state() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.salvage_cache_count = 2;
+    campaign.salvage_yard_operation = Some(4);
+    campaign.research_insight = 12;
+    campaign.salvage_prototypes = 1;
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let legacy = serde_json::to_value(session.to_save("1.106.0", &campaign)).unwrap();
+
+    let migrated = migrate_save_value(Some("1.106.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(migrated.campaign.salvage_cache_count, 2);
+    assert_eq!(migrated.campaign.salvage_yard_operation, Some(4));
+    assert_eq!(migrated.campaign.research_insight, 12);
+    assert_eq!(migrated.campaign.salvage_prototypes, 1);
+}

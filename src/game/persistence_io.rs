@@ -102,6 +102,7 @@ impl Game {
                 self.colony_explorer.reset();
                 self.colony_operations_open = false;
                 self.facility_upgrade_open = false;
+                self.salvage_open = false;
                 self.last_outcome = None;
                 self.notifications.success("Tactical state restored");
             }

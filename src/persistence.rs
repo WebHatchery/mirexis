@@ -433,6 +433,18 @@ fn add_campaign_runtime_defaults(value: &mut Value) -> Result<(), String> {
     campaign
         .entry("identity_preparation_operation".to_owned())
         .or_insert_with(|| serde_json::Value::Null);
+    campaign
+        .entry("salvage_cache_count".to_owned())
+        .or_insert_with(|| serde_json::json!(0));
+    campaign
+        .entry("salvage_yard_operation".to_owned())
+        .or_insert_with(|| serde_json::Value::Null);
+    campaign
+        .entry("research_insight".to_owned())
+        .or_insert_with(|| serde_json::json!(0));
+    campaign
+        .entry("salvage_prototypes".to_owned())
+        .or_insert_with(|| serde_json::json!(0));
     if let Some(roster) = campaign.get_mut("roster").and_then(Value::as_array_mut) {
         for character in roster {
             let Some(character) = character.as_object_mut() else {

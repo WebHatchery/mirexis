@@ -356,9 +356,11 @@ Build these in priority order:
    matching outsiders remain visible as guests before recruitment, while future route variants
    can extend it to Severed Brood and Echo-Bound visitors without framing every outsider as a
    prisoner.
-5. **Salvage Yard.** Converts specific recovered objects into a disclosed choice between
-   materials, research insight, or a prototype. The Workshop remains responsible for
-   finished equipment.
+5. **Salvage Yard.** Implemented as an optional 55-material, one-power recovery workshop and
+   critical defence objective. Each victorious operation stores one recovered object; the
+   yard sorts one object per operation into 24 materials, a 12-material next-doctrine insight,
+   or a free standard equipment prototype. The Workshop remains responsible for finished
+   equipment and consumes the prototype when the player chooses the item to craft.
 6. **Memorial Archive.** Records scars, retired colonists, lost objectives, and campaign
    legacies. It becomes essential only when those systems have enough content to honour.
 
@@ -506,6 +508,8 @@ Goal: make building and upgrade choices visible in city life and defence.
   mutation complications safer and direct treatment cheaper while the Infirmary is online.
 - Implemented: build a Research Annex as a physical evidence archive whose powered operation
   reduces doctrine research costs without introducing a second research currency.
+- Implemented: build a Salvage Yard that turns victorious-operation recovery into a disclosed
+  materials, research-insight, or standard-equipment-prototype choice.
 - Implemented: establish one physical identity building for the chosen Mirexis path, with
   path-specific map cover, objective priority, power, and biomass consequences.
 - Implemented: move the associated colony voice to each identity building, add a persistent

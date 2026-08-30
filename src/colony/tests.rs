@@ -42,6 +42,33 @@ fn research_annex_is_unique_online_and_a_defense_objective() {
 }
 
 #[test]
+fn salvage_yard_is_unique_online_and_a_defense_objective() {
+    let mut colony = ColonyState::new();
+    let id = colony
+        .place_construction(BuildingKind::SalvageYard, [1, 1])
+        .unwrap();
+    assert_eq!(colony.resources.materials, 65);
+    colony.advance_operation();
+
+    assert!(colony.has_facility(BuildingKind::SalvageYard));
+    assert!(colony
+        .place_construction(BuildingKind::SalvageYard, [1, 5])
+        .is_err());
+    assert!(colony
+        .defense_map()
+        .critical_objectives
+        .contains(&TilePos::new(3, 2)));
+
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == id)
+        .unwrap()
+        .damaged = true;
+    assert!(!colony.has_facility(BuildingKind::SalvageYard));
+}
+
+#[test]
 fn physical_placement_generates_the_colony_defense_map() {
     let mut colony = ColonyState::new();
     colony
