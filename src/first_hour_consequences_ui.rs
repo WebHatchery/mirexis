@@ -9,7 +9,7 @@ pub(crate) fn draw(campaign: &CampaignState, view: ColonyView) {
         draw_refuge_signal(campaign, view);
     }
     if campaign.operations_completed >= 2 {
-        draw_outer_barricade(view);
+        draw_outer_barricade(campaign, view);
     }
 }
 
@@ -42,22 +42,66 @@ fn draw_refuge_signal(campaign: &CampaignState, view: ColonyView) {
     );
 }
 
-fn draw_outer_barricade(view: ColonyView) {
+fn draw_outer_barricade(campaign: &CampaignState, view: ColonyView) {
     let center = view.plot_center([8, 12]);
-    let accent = Color::new(0.92, 0.72, 0.28, 0.96);
+    let breached = outer_route_is_breached(campaign.first_hour.second_outcome_won);
+    let accent = outer_route_accent(campaign.first_hour.second_outcome_won);
     for offset in [-26.0, 0.0, 26.0] {
         draw_rectangle(center.x + offset - 10.0, center.y - 8.0, 20.0, 10.0, accent);
         draw_circle(center.x + offset, center.y - 13.0, 4.0, darken(accent));
     }
-    draw_line(
-        center.x - 42.0,
-        center.y + 4.0,
-        center.x + 42.0,
-        center.y + 4.0,
-        4.0,
+    if breached {
+        draw_line(
+            center.x - 42.0,
+            center.y + 4.0,
+            center.x - 13.0,
+            center.y + 4.0,
+            4.0,
+            accent,
+        );
+        draw_line(
+            center.x + 13.0,
+            center.y + 4.0,
+            center.x + 42.0,
+            center.y + 4.0,
+            4.0,
+            accent,
+        );
+    } else {
+        draw_line(
+            center.x - 42.0,
+            center.y + 4.0,
+            center.x + 42.0,
+            center.y + 4.0,
+            4.0,
+            accent,
+        );
+    }
+    label(
+        center + vec2(-58.0, 26.0),
+        outer_route_label(campaign.first_hour.second_outcome_won),
         accent,
     );
-    label(center + vec2(-58.0, 26.0), "OUTER ROUTES HARDENED", accent);
+}
+
+fn outer_route_is_breached(second_outcome_won: Option<bool>) -> bool {
+    second_outcome_won == Some(false)
+}
+
+fn outer_route_accent(second_outcome_won: Option<bool>) -> Color {
+    if outer_route_is_breached(second_outcome_won) {
+        Color::new(0.96, 0.48, 0.24, 0.92)
+    } else {
+        Color::new(0.92, 0.72, 0.28, 0.96)
+    }
+}
+
+fn outer_route_label(second_outcome_won: Option<bool>) -> &'static str {
+    match second_outcome_won {
+        Some(true) => "OUTER ROUTES HARDENED",
+        Some(false) => "OUTER ROUTE BREACHED",
+        None => "OUTER ROUTE UNRESOLVED",
+    }
 }
 
 fn label(origin: Vec2, value: &str, accent: Color) {
@@ -76,3 +120,6 @@ fn label(origin: Vec2, value: &str, accent: Color) {
 fn darken(color: Color) -> Color {
     Color::new(color.r * 0.28, color.g * 0.28, color.b * 0.28, color.a)
 }
+
+#[cfg(test)]
+mod tests;

@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.119.0, validated and committed with this matrix
+Audit baseline: save/content 1.120.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -17,12 +17,12 @@ developer are not substitutes for that evidence.
 | D02 | Five first-time players complete without external instructions | Five empty required rows in `PHASE_1_PLAYTEST_LOG.md` | HUMAN PENDING |
 | D03 | At least two end-to-end runs use visible touch/click controls only | Touch-primary rows 2 and 4 await observed runs | HUMAN PENDING |
 | D04 | Operation one teaches the core loop and operation two demonstrates transfer | Ordered `TacticalLesson` transitions, a cover-tile-gated first move, reachable opening firing lane and objective route, guided forecast confirmation, contextual tactical focus, a persisted `SecondOperationTactical` focus, colony-side handoff focus, usable ability recovery, and unscripted second-operation play; player transfer must still be observed | IMPLEMENTED / HUMAN PENDING |
-| D05 | City supplies direction, preparation, character connection, and visible consequences | `first_hour_ui.rs`, `first_hour_investment_ui.rs`, colony conversations, `first_hour_consequences_ui.rs`, and colony/debrief captures | VERIFIED |
+| D05 | City supplies direction, preparation, character connection, and visible consequences | `first_hour_ui.rs`, `first_hour_investment_ui.rs`, colony conversations, outcome-sensitive `first_hour_consequences_ui.rs`, and colony/debrief captures | VERIFIED |
 | D06 | First investment has a clear observable effect | Three 24-material preparations and `first_investment_changes_only_the_second_deployment` | VERIFIED |
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests, and the recorded WebGL operator pass | VERIFIED |
 | D08 | Audio/settings exist and critical information remains visual | `audio.rs`, audio tests, settings UI, event prose/markers, and browser persistence pass; fatigue remains an observation target | VERIFIED / HUMAN PENDING |
 | D09 | No severity 1 or 2 first-hour issue remains | No implementation-known severity 1/2 issue; five-session issue discovery and triage have not occurred | HUMAN PENDING |
-| D10 | Documentation and verification captures match the build | 91-scene manifest, acceptance matrix test, `capture_audit.json`, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, and `ui_first_hour_tactical.png` | VERIFIED |
+| D10 | Documentation and verification captures match the build | 92-scene manifest, acceptance matrix test, `capture_audit.json`, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_promise.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, and `ui_first_hour_tactical.png` | VERIFIED |
 | D11 | Parameterless publisher passes and changes use project commit conventions | Recorded in `PHASE_1_HARDENING.md`; rerun and commit required after each audit fix | VERIFIED AT LAST CHECKPOINT |
 
 ## Workstream audit
@@ -52,7 +52,7 @@ the right understood context remains part of H01–H04 below.
 | Environmental and HUD primary goal | Goal banner plus highlighted world/control targets | VERIFIED |
 | Readable colonists and facilities without permanent labels | Speech markers, proximity dialogue, building art/state | VERIFIED |
 | Outcome-sensitive post-operation conversation | Ilya debrief line and first-return conversation state | VERIFIED |
-| Physical/visual consequence after each operation | Refuge and outer-route consequence drawing | VERIFIED |
+| Physical/visual consequence after each operation | Outcome-sensitive refuge and outer-route consequence drawing | VERIFIED |
 | Travel supports atmosphere without delay | Direct tap-to-walk, short Mara route, destination trace, visible OPERATIONS shortcut | IMPLEMENTED / HUMAN PENDING |
 | Timely choices foregrounded | Three dedicated preparations; advanced systems deferred | VERIFIED |
 
@@ -125,7 +125,7 @@ Clipping, stacking, fatigue, and muted comprehension require listening sessions.
 | Text, contrast, colour redundancy, and motion/readability | Graphics acceptance matrix and reduced-motion setting | VERIFIED / HUMAN PENDING |
 | Overlay/focus/resize input safety | Modal input clearing and map-release tests | VERIFIED |
 | Explicit save migrations | Schema table and immediate-previous-version fixture | VERIFIED |
-| Canonical captures replaced rather than duplicated | Flat 91-scene capture inventory and audit | VERIFIED |
+| Canonical captures replaced rather than duplicated | Flat 92-scene capture inventory and audit | VERIFIED |
 
 ## Delivery-checkpoint audit
 

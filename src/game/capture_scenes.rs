@@ -100,6 +100,14 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstReturn;
                 self.campaign.first_hour.first_outcome_won = Some(false);
             }
+            "first_hour_promise" => {
+                self.state = AppState::Colony;
+                self.colony_explorer.reset();
+                self.campaign.operations_completed = 2;
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::Promise;
+                self.campaign.first_hour.first_outcome_won = Some(true);
+                self.campaign.first_hour.second_outcome_won = Some(false);
+            }
             "first_hour_operations" => {
                 self.state = AppState::Colony;
                 self.campaign.operations_completed = 1;
