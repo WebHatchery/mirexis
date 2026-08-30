@@ -3,6 +3,7 @@
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 use crate::colony_exploration::ColonyExplorer;
+use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{is_mouse_button_down, vec2, MouseButton, Rect, Vec2};
@@ -71,6 +72,7 @@ pub(super) fn draw_build_controls(
 
 pub(super) fn draw_exploration_controls(
     campaign: &CampaignState,
+    data: &GameData,
     explorer: &mut ColonyExplorer,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
@@ -107,10 +109,10 @@ pub(super) fn draw_exploration_controls(
     if button(
         Rect::new(210.0, 654.0, 112.0, 42.0),
         "TALK",
-        explorer.can_talk(campaign),
+        explorer.can_talk(campaign, data),
         mouse,
     ) {
-        explorer.interact(campaign);
+        explorer.interact(campaign, data);
     }
     if campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
         && button(

@@ -75,7 +75,7 @@ pub struct CharacterRecord {
 }
 
 impl CharacterRecord {
-    fn from_def(def: &CharacterDef) -> Self {
+    pub(crate) fn from_def(def: &CharacterDef) -> Self {
         let starter_skill = format!("{}_fundamentals", def.initial_class);
         Self {
             id: def.id.clone(),

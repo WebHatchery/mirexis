@@ -4,6 +4,7 @@ use crate::campaign::{Availability, CampaignState, CharacterRecord};
 use crate::colony::{BuildingKind, ColonyState, COLONY_HEIGHT, COLONY_WIDTH};
 use crate::colony_map_ui::view::ColonyView;
 use crate::colony_story;
+use crate::data::GameData;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
@@ -126,27 +127,26 @@ impl ColonyExplorer {
         }
     }
 
-    pub(crate) fn interact(&mut self, campaign: &CampaignState) {
-        if let Some(character) = nearest_npc(campaign, self.position) {
+    pub(crate) fn interact(&mut self, campaign: &CampaignState, data: &GameData) {
+        if let Some(character_id) = nearest_npc(campaign, data, self.position) {
             self.destination = None;
             self.approached_npc = None;
-            self.talking_to = Some(character.id.clone());
+            self.talking_to = Some(character_id);
         }
     }
 
-    pub(crate) fn update_approach(&mut self, campaign: &CampaignState) {
+    pub(crate) fn update_approach(&mut self, campaign: &CampaignState, data: &GameData) {
         if self.destination.is_some() {
             return;
         }
         let ready = self.approached_npc.as_deref().is_some_and(|id| {
-            npc(campaign, id).is_some_and(|character| {
-                npc_position(campaign, &character.id).is_some_and(|position| {
+            npc(campaign, data, id).is_some()
+                && npc_position(campaign, id).is_some_and(|position| {
                     self.position.distance(position) <= INTERACTION_DISTANCE
                 })
-            })
         });
         if ready {
-            self.interact(campaign);
+            self.interact(campaign, data);
         }
     }
 
@@ -166,15 +166,15 @@ impl ColonyExplorer {
         self.talking_to = None;
     }
 
-    pub(crate) fn draw_depth(
-        &self,
-        depth: i32,
-        campaign: &CampaignState,
-        assets: &AssetManager,
-        visuals: &VisualCatalog,
-        view: ColonyView,
-        mouse: Vec2,
-    ) -> Option<String> {
+    pub(crate) fn draw_depth(&self, depth: i32, context: ColonyDepthContext<'_>) -> Option<String> {
+        let ColonyDepthContext {
+            campaign,
+            data,
+            assets,
+            visuals,
+            view,
+            mouse,
+        } = context;
         let mut clicked = None;
         for (index, character) in campaign
             .roster
@@ -206,8 +206,34 @@ impl ColonyExplorer {
                 visuals,
                 zoom: view.zoom,
             });
-            if hovered && is_mouse_button_released(MouseButton::Left) {
+            if clicked.is_none() && hovered && is_mouse_button_released(MouseButton::Left) {
                 clicked = Some(character.id.clone());
+            }
+        }
+        if let Some(definition) = campaign.available_outsider(data) {
+            let guest_index = NPC_STATIONS.len() - 1;
+            let position =
+                npc_grid_position(campaign, &definition.id).unwrap_or(NPC_STATIONS[guest_index]);
+            if position[0] + position[1] == depth {
+                let guest = CharacterRecord::from_def(definition);
+                let center = view.plot_center(position) + vec2(0.0, 7.0 * view.zoom);
+                let hit = Rect::new(center.x - 22.0, center.y - 35.0, 44.0, 48.0);
+                let hovered = hit.contains(mouse);
+                draw_character(CharacterDrawContext {
+                    character: &guest,
+                    center,
+                    facing_right: true,
+                    moving: false,
+                    interactable: true,
+                    hovered,
+                    highlighted: false,
+                    assets,
+                    visuals,
+                    zoom: view.zoom,
+                });
+                if clicked.is_none() && hovered && is_mouse_button_released(MouseButton::Left) {
+                    clicked = Some(guest.id);
+                }
             }
         }
         if (self.position.x + self.position.y).round() as i32 == depth {
@@ -243,12 +269,18 @@ impl ColonyExplorer {
     pub(crate) fn draw_dialogue(
         &mut self,
         campaign: &CampaignState,
+        data: &GameData,
         mouse: Vec2,
         actions: &mut Vec<UiAction>,
     ) -> bool {
-        let Some(character) = self.talking_to.as_deref().and_then(|id| npc(campaign, id)) else {
+        let Some(npc) = self
+            .talking_to
+            .as_deref()
+            .and_then(|id| npc(campaign, data, id))
+        else {
             return false;
         };
+        let character = &npc.character;
         let panel = Rect::new(66.0, 400.0, 722.0, 170.0);
         draw_rectangle(
             panel.x,
@@ -273,7 +305,7 @@ impl ColonyExplorer {
             Color::new(0.76, 1.0, 0.88, 1.0),
         );
         draw_text(
-            npc_status(character),
+            npc_status(character, npc.guest),
             84.0,
             448.0,
             12.0,
@@ -337,15 +369,17 @@ impl ColonyExplorer {
             },
         );
         draw_wrapped(text, 84.0, 491.0, 660.0);
-        if button(
-            Rect::new(84.0, 532.0, 176.0, 30.0),
-            npc_action_label(character),
-            true,
-            mouse,
-        ) {
-            actions.push(npc_action(character));
-            actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
-            self.close_dialogue();
+        if let Some(action) = npc_action(character, npc.guest) {
+            if button(
+                Rect::new(84.0, 532.0, 176.0, 30.0),
+                npc_action_label(character, npc.guest),
+                true,
+                mouse,
+            ) {
+                actions.push(action);
+                actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
+                self.close_dialogue();
+            }
         }
         if button(
             Rect::new(632.0, 532.0, 136.0, 30.0),
@@ -363,8 +397,8 @@ impl ColonyExplorer {
         self.talking_to.is_some()
     }
 
-    pub(crate) fn can_talk(&self, campaign: &CampaignState) -> bool {
-        nearest_npc(campaign, self.position).is_some()
+    pub(crate) fn can_talk(&self, campaign: &CampaignState, data: &GameData) -> bool {
+        nearest_npc(campaign, data, self.position).is_some()
     }
 
     fn is_moving(&self) -> bool {
@@ -390,6 +424,15 @@ impl ColonyExplorer {
             self.position = vertical;
         }
     }
+}
+
+pub(crate) struct ColonyDepthContext<'a> {
+    pub(crate) campaign: &'a CampaignState,
+    pub(crate) data: &'a GameData,
+    pub(crate) assets: &'a AssetManager,
+    pub(crate) visuals: &'a VisualCatalog,
+    pub(crate) view: ColonyView,
+    pub(crate) mouse: Vec2,
 }
 
 struct CharacterDrawContext<'a> {
@@ -525,7 +568,7 @@ fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {
     draw_text(&line, x, baseline, 14.0, Color::new(0.72, 0.84, 0.80, 1.0));
 }
 
-fn npc_status(character: &CharacterRecord) -> String {
+fn npc_status(character: &CharacterRecord, guest: bool) -> String {
     let duty = match character.id.as_str() {
         "mara_venn" => "SECURITY LEAD",
         "ilya_reed" => "COLONY CLINICIAN",
@@ -535,17 +578,24 @@ fn npc_status(character: &CharacterRecord) -> String {
         "sedge" => "MIREBORN COURIER",
         _ => "COLONIST",
     };
-    format!(
-        "{} // {}",
-        duty,
-        match character.availability {
-            Availability::Ready => "ON DUTY",
-            Availability::Recovering => "RECOVERING",
-        }
-    )
+    if guest {
+        format!("{duty} // WAYSTATION GUEST // NOT ON ROSTER")
+    } else {
+        format!(
+            "{} // {}",
+            duty,
+            match character.availability {
+                Availability::Ready => "ON DUTY",
+                Availability::Recovering => "RECOVERING",
+            }
+        )
+    }
 }
 
-fn npc_action_label(character: &CharacterRecord) -> &'static str {
+fn npc_action_label(character: &CharacterRecord, guest: bool) -> &'static str {
+    if guest {
+        return "RECRUIT CONTACT";
+    }
     match character.id.as_str() {
         "ilya_reed" => "REQUEST TREATMENT",
         "nadi_vale" | "sedge" => "ENTER GENE LAB",
@@ -553,11 +603,14 @@ fn npc_action_label(character: &CharacterRecord) -> &'static str {
     }
 }
 
-fn npc_action(character: &CharacterRecord) -> UiAction {
+fn npc_action(character: &CharacterRecord, guest: bool) -> Option<UiAction> {
+    if guest {
+        return Some(UiAction::RecruitOutsider);
+    }
     match character.id.as_str() {
-        "ilya_reed" => UiAction::TreatInjury,
-        "nadi_vale" | "sedge" => UiAction::OpenGeneLab,
-        _ => UiAction::OpenRoster,
+        "ilya_reed" => Some(UiAction::TreatInjury),
+        "nadi_vale" | "sedge" => Some(UiAction::OpenGeneLab),
+        _ => Some(UiAction::OpenRoster),
     }
 }
 
@@ -578,17 +631,18 @@ fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
             }
         }
     }
-    if id == "veya_orn" {
+    let rostered = campaign.roster.iter().any(|character| character.id == id);
+    if id == "veya_orn" || (id == "sedge" && !rostered) {
         if let Some(waystation) = campaign
             .colony
             .buildings
             .iter()
-            .find(|building| building.kind == crate::colony::BuildingKind::Waystation)
+            .find(|building| building.kind == BuildingKind::Waystation)
         {
             return Some(waystation.position);
         }
     }
-    if id == "sedge" {
+    if id == "sedge" && rostered {
         if let Some(gene_lab) = campaign
             .colony
             .buildings
@@ -605,19 +659,41 @@ fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
         .and_then(|index| (index > 0 && index < NPC_STATIONS.len()).then_some(NPC_STATIONS[index]))
 }
 
-fn npc<'a>(campaign: &'a CampaignState, id: &str) -> Option<&'a CharacterRecord> {
-    campaign
+struct NpcView {
+    character: CharacterRecord,
+    guest: bool,
+}
+
+fn npc(campaign: &CampaignState, data: &GameData, id: &str) -> Option<NpcView> {
+    if let Some(character) = campaign
         .roster
         .iter()
         .skip(1)
         .find(|character| character.id == id)
+    {
+        return Some(NpcView {
+            character: character.clone(),
+            guest: false,
+        });
+    }
+    let definition = campaign.available_outsider(data)?;
+    (definition.id == id).then(|| NpcView {
+        character: CharacterRecord::from_def(definition),
+        guest: true,
+    })
 }
 
-fn nearest_npc(campaign: &CampaignState, position: Vec2) -> Option<&CharacterRecord> {
-    campaign.roster.iter().skip(1).find(|character| {
+fn nearest_npc(campaign: &CampaignState, data: &GameData, position: Vec2) -> Option<String> {
+    if let Some(character) = campaign.roster.iter().skip(1).find(|character| {
         npc_position(campaign, &character.id)
             .is_some_and(|npc_position| position.distance(npc_position) <= INTERACTION_DISTANCE)
-    })
+    }) {
+        return Some(character.id.clone());
+    }
+    let definition = campaign.available_outsider(data)?;
+    npc_position(campaign, &definition.id)
+        .is_some_and(|npc_position| position.distance(npc_position) <= INTERACTION_DISTANCE)
+        .then(|| definition.id.clone())
 }
 
 fn can_occupy(colony: &ColonyState, position: Vec2) -> bool {

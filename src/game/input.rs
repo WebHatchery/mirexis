@@ -66,7 +66,7 @@ impl Game {
                     self.colony_explorer
                         .set_keyboard_direction(direction.normalize_or_zero());
                     if is_key_pressed(KeyCode::E) {
-                        self.colony_explorer.interact(&self.campaign);
+                        self.colony_explorer.interact(&self.campaign, &self.data);
                     }
                 } else {
                     self.colony_explorer.set_keyboard_direction(vec2(0.0, 0.0));

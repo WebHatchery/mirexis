@@ -84,7 +84,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     crate::ui::set_ui_clip(ui, Some(viewport));
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
-    explorer.update_approach(campaign);
+    explorer.update_approach(campaign, data);
     let hovered = hovered_plot(view, mouse);
     let planning_site = hovered.filter(|position| {
         campaign.colony.building_at(*position).is_none()
@@ -113,8 +113,19 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
                 );
             }
         }
-        clicked_npc = clicked_npc
-            .or_else(|| explorer.draw_depth(sum, campaign, assets, visuals, view, mouse));
+        clicked_npc = clicked_npc.or_else(|| {
+            explorer.draw_depth(
+                sum,
+                crate::colony_exploration::ColonyDepthContext {
+                    campaign,
+                    data,
+                    assets,
+                    visuals,
+                    view,
+                    mouse,
+                },
+            )
+        });
     }
     crate::first_hour_consequences_ui::draw(campaign, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
@@ -145,8 +156,8 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             explorer.request_walk(view.world_position(mouse, position), &campaign.colony);
         }
     }
-    controls::draw_exploration_controls(campaign, explorer, mouse, actions);
-    explorer.draw_dialogue(campaign, mouse, actions);
+    controls::draw_exploration_controls(campaign, data, explorer, mouse, actions);
+    explorer.draw_dialogue(campaign, data, mouse, actions);
     let instruction_y = if explorer.build_mode() {
         panel.y + 42.0
     } else {

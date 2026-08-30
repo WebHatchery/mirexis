@@ -21,6 +21,11 @@ and aftermath thread
 through the starting colonists. The remaining origins and equivalent faction routes stay
 future work.
 
+An unchosen matching outsider now remains present as a Waystation guest. The guest is
+visible on the colony map, can be approached through touch-first walking, and presents the
+authored arrival note plus the normal recruitment handoff without becoming a roster member
+until recruitment succeeds.
+
 The Commons is also now a working home-space slice: a powered settlement can host one
 shared meal per operation, spend food, and turn the active squad's table into persistent
 relationship progress.
@@ -332,9 +337,10 @@ Build these in priority order:
    hosts debates over dangerous discoveries. It should organise branching research, not
    add a second unrelated research currency.
 4. **Waystation.** Implemented for Directorate Requisition and Mireborn Adaptation as
-   adaptable quarters, quarantine, and cultural space for Veya Orn and Sedge. Future route
-   variants can extend it to Severed Brood and Echo-Bound visitors without framing every
-   outsider as a prisoner.
+   adaptable quarters, quarantine, and cultural space for Veya Orn and Sedge. Unchosen
+   matching outsiders remain visible as guests before recruitment, while future route variants
+   can extend it to Severed Brood and Echo-Bound visitors without framing every outsider as a
+   prisoner.
 5. **Salvage Yard.** Converts specific recovered objects into a disclosed choice between
    materials, research insight, or a prototype. The Workshop remains responsible for
    finished equipment.
@@ -443,7 +449,8 @@ Goal: make Contact change who can belong to the colony.
   Brood attention, relationship progression, disagreements, and a closing route legacy.
 - Implemented: add Sedge during Adaptation through the Waystation, with a biomass cost,
   bespoke art, a combined tactical action, Brood attention reaction, and ending voice.
-- Let unchosen outsiders remain present in non-roster roles.
+- Implemented: keep the matching unchosen outsider present at the Waystation as a non-roster
+  guest with an authored arrival note and recruitment handoff.
 
 Exit test: the outsider is remembered as a person, their origin changes play, and their
 presence provokes at least two disagreements that do not reduce to approval points.

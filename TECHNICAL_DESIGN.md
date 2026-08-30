@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.90.0
+Save/content version: 1.91.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -297,6 +297,11 @@ legacy fields remain readable for old saves; additional outsider state is keyed 
 ID so a campaign that recruits both Veya and Sedge cannot merge their disagreements, costs,
 or closing choices. Sedge's arc spends food, materials, or biomass, changes Brood attention,
 strengthens a named relationship, and records a route legacy on the courier.
+
+The current route-matching outsider also appears at the operational Waystation before
+recruitment as a temporary guest record. The guest can be approached through the same
+touch-first colony walk, reads the authored arrival field note, and exposes the normal
+recruitment action without entering the persistent roster until that action succeeds.
 
 Contact route field notes are keyed by the selected protocol and three authoritative campaign
 flags: before trace completion, after the trace but before Contact completion, and after Contact
@@ -780,6 +785,7 @@ Migration coverage:
 | 1.88.0 | Three-stage witness, contradiction, and aftermath colony notes for every Contact protocol |
 | 1.89.0 | Independent route-specific outsider arcs for Sedge with Brood attention, resource choices, and persisted legacies |
 | 1.90.0 | Adaptation route access to the Waystation so Sedge is reachable on every Contact protocol |
+| 1.91.0 | Unchosen route outsiders appear as Waystation guests with field notes and recruitment handoff |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -831,7 +837,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (319 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (321 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

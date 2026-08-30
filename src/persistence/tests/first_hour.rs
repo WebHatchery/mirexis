@@ -16,7 +16,7 @@ fn previous_save_without_first_hour_fields_gains_safe_guidance() {
 
     let migrated = migrate_save_value(Some("1.63.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.90.0");
+    assert_eq!(migrated.version, "1.91.0");
     assert_eq!(migrated.campaign.first_hour, FirstHourProgress::default());
     assert_eq!(migrated.campaign.first_hour.stage, FirstHourStage::Arrival);
 }
@@ -35,7 +35,7 @@ fn previous_save_without_colony_story_fields_gains_an_empty_ledger() {
 
     let migrated = migrate_save_value(Some("1.65.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.90.0");
+    assert_eq!(migrated.version, "1.91.0");
     assert_eq!(
         migrated.campaign.colony_story,
         crate::colony_story::ColonyStoryState::default()
@@ -61,7 +61,7 @@ fn version_164_keeps_exact_onboarding_progress_and_defaults_metrics() {
 
     let migrated = migrate_save_value(Some("1.64.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.90.0");
+    assert_eq!(migrated.version, "1.91.0");
     assert_eq!(
         migrated.campaign.first_hour.stage,
         FirstHourStage::SecondReturn

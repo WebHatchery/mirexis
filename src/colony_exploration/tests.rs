@@ -24,7 +24,7 @@ fn approaching_an_npc_ends_on_an_adjacent_open_plot() {
     explorer.request_approach(&npc.id, station, &campaign.colony);
     for _ in 0..60 {
         explorer.update(0.05, &campaign.colony);
-        explorer.update_approach(&campaign);
+        explorer.update_approach(&campaign, &data);
     }
     assert!(explorer.position.distance(station) <= INTERACTION_DISTANCE);
     assert!(explorer.is_talking());
@@ -97,4 +97,75 @@ fn adapted_recruit_stands_at_the_gene_lab_when_it_exists() {
         });
     campaign.recruit_outsider(&data).unwrap();
     assert_eq!(npc_position(&campaign, "sedge"), Some(grid_vec([16, 10])));
+}
+
+#[test]
+fn unchosen_directorate_outsider_stands_at_the_waystation_as_a_guest() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "directorate_requisition".to_owned();
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_guest_exploration".to_owned(),
+            kind: BuildingKind::Waystation,
+            position: [2, 10],
+            level: 1,
+            damaged: false,
+        });
+
+    assert!(!campaign
+        .roster
+        .iter()
+        .any(|character| character.id == "veya_orn"));
+    assert_eq!(npc_position(&campaign, "veya_orn"), Some(grid_vec([2, 10])));
+    let guest = npc(&campaign, &data, "veya_orn").unwrap();
+    assert!(guest.guest);
+    assert_eq!(guest.character.name, "Veya Orn");
+    assert_eq!(
+        npc_action_label(&guest.character, guest.guest),
+        "RECRUIT CONTACT"
+    );
+    assert_eq!(
+        npc_action(&guest.character, guest.guest),
+        Some(UiAction::RecruitOutsider)
+    );
+
+    let mut explorer = ColonyExplorer::default();
+    let station = npc_position(&campaign, "veya_orn").unwrap();
+    explorer.request_approach("veya_orn", station, &campaign.colony);
+    for _ in 0..60 {
+        explorer.update(0.05, &campaign.colony);
+        explorer.update_approach(&campaign, &data);
+    }
+    assert!(explorer.is_talking());
+}
+
+#[test]
+fn unchosen_mireborn_outsider_uses_the_waystation_before_recruitment() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "brood_adaptation".to_owned();
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_mireborn_guest".to_owned(),
+            kind: BuildingKind::Waystation,
+            position: [3, 9],
+            level: 1,
+            damaged: false,
+        });
+
+    assert_eq!(
+        campaign
+            .available_outsider(&data)
+            .map(|definition| definition.id.as_str()),
+        Some("sedge")
+    );
+    assert_eq!(npc_position(&campaign, "sedge"), Some(grid_vec([3, 9])));
+    assert!(npc(&campaign, &data, "sedge").is_some_and(|guest| guest.guest));
 }

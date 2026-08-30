@@ -54,6 +54,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Veya Orn's Directorate Exile and Sedge's Mireborn Adapted origin.
 - The Waystation recruits Veya through Directorate Requisition or Sedge once Adaptation
   opens a route, and gives each outsider an origin-specific equipment action.
+- An unchosen route contact remains visible as a Waystation guest, with a field note and
+  a touch-safe recruitment handoff that leaves the contact outside the roster until chosen.
 - Adaptation can recruit Sedge through the Waystation for biomass; their origin-specific
   MAP HAZARD action braces the courier while disrupting a hostile, and their three-beat
   arc records Brood attention, relationships, disagreements, and route legacies.
