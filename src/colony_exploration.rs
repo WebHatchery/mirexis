@@ -318,6 +318,7 @@ impl ColonyExplorer {
             campaign.strategy.post_campaign_operations_completed,
             campaign.identity_stewardship_completed,
             &campaign.colony_story,
+            campaign.identity_building_story_state(),
         )
         .or_else(|| {
             colony_story::finale_beat(

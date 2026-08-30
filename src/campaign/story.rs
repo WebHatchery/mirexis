@@ -1,6 +1,22 @@
 use super::CampaignState;
+use crate::colony::BuildingKind;
+use crate::colony_story::IdentityBuildingState;
 
 impl CampaignState {
+    pub(crate) fn identity_building_story_state(&self) -> Option<IdentityBuildingState> {
+        let kind = BuildingKind::identity_for_path(&self.strategy.mirexis_path_id)?;
+        let (building_id, damaged) = self
+            .colony
+            .buildings
+            .iter()
+            .find(|building| building.kind == kind)
+            .map(|building| (building.id.clone(), building.damaged))?;
+        Some(IdentityBuildingState {
+            damaged,
+            powered: self.colony.building_is_powered(&building_id),
+        })
+    }
+
     pub fn acknowledge_colonist(&mut self, character_id: &str) {
         self.first_hour.acknowledge_colonist(character_id);
         let beat = crate::colony_story::identity_arc_beat(
@@ -10,6 +26,7 @@ impl CampaignState {
             self.strategy.post_campaign_operations_completed,
             self.identity_stewardship_completed,
             &self.colony_story,
+            self.identity_building_story_state(),
         )
         .or_else(|| {
             crate::colony_story::finale_beat(

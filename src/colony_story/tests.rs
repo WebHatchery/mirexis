@@ -1,3 +1,4 @@
+use super::identity::identity_beat;
 use super::*;
 
 #[test]
@@ -196,6 +197,115 @@ fn each_identity_building_has_one_path_specific_colony_voice() {
 }
 
 #[test]
+fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
+    for (path_id, character_id, damage_id, repair_id, power_failure_id, power_restored_id) in [
+        (
+            "human_redoubt",
+            "mara_venn",
+            "civic_redoubt_damage",
+            "civic_redoubt_repair",
+            "civic_redoubt_power_failure",
+            "civic_redoubt_power_restored",
+        ),
+        (
+            "living_commonwealth",
+            "nadi_vale",
+            "civic_commonwealth_damage",
+            "civic_commonwealth_repair",
+            "civic_commonwealth_power_failure",
+            "civic_commonwealth_power_restored",
+        ),
+        (
+            "open_threshold",
+            "sol_cairn",
+            "civic_threshold_damage",
+            "civic_threshold_repair",
+            "civic_threshold_power_failure",
+            "civic_threshold_power_restored",
+        ),
+    ] {
+        let mut story = ColonyStoryState::default();
+        let identity = identity_arc_beat(path_id, character_id, false, 0, 0, &story, None)
+            .expect("identity establishment note");
+        story.acknowledge(identity.id);
+
+        let damaged = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            0,
+            &story,
+            Some(IdentityBuildingState {
+                damaged: true,
+                powered: true,
+            }),
+        )
+        .expect("damaged identity note");
+        assert_eq!(damaged.id, damage_id);
+        story.acknowledge(damaged.id);
+        let repaired = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            0,
+            &story,
+            Some(IdentityBuildingState {
+                damaged: false,
+                powered: true,
+            }),
+        )
+        .expect("repair identity note");
+        assert_eq!(repaired.id, repair_id);
+        story.acknowledge(repaired.id);
+        assert!(identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            0,
+            &story,
+            Some(IdentityBuildingState {
+                damaged: false,
+                powered: true,
+            }),
+        )
+        .is_none());
+
+        let power_failure = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            0,
+            &story,
+            Some(IdentityBuildingState {
+                damaged: false,
+                powered: false,
+            }),
+        )
+        .expect("power failure identity note");
+        assert_eq!(power_failure.id, power_failure_id);
+        story.acknowledge(power_failure.id);
+        let power_restored = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            0,
+            &story,
+            Some(IdentityBuildingState {
+                damaged: false,
+                powered: true,
+            }),
+        )
+        .expect("power restoration identity note");
+        assert_eq!(power_restored.id, power_restored_id);
+    }
+}
+
+#[test]
 fn post_ending_identity_scene_unlocks_after_the_final_reflection() {
     for (path_id, character_id, post_id, operation_id) in [
         (
@@ -218,23 +328,24 @@ fn post_ending_identity_scene_unlocks_after_the_final_reflection() {
         ),
     ] {
         let story = ColonyStoryState::default();
-        let ending = identity_arc_beat(path_id, character_id, true, 0, 0, &story).unwrap();
+        let ending = identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).unwrap();
         assert!(ending.id.ends_with("_ending"));
 
         let mut story = story;
         story.acknowledge(ending.id);
-        let post = identity_arc_beat(path_id, character_id, true, 0, 0, &story).unwrap();
+        let post = identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).unwrap();
         assert_eq!(post.id, post_id);
         assert!(!post.title.is_empty());
         assert!(!post.text.is_empty());
         story.acknowledge(post.id);
-        assert!(identity_arc_beat(path_id, character_id, true, 0, 0, &story).is_none());
-        let stewardship = identity_arc_beat(path_id, character_id, true, 0, 1, &story).unwrap();
+        assert!(identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).is_none());
+        let stewardship =
+            identity_arc_beat(path_id, character_id, true, 0, 1, &story, None).unwrap();
         assert!(stewardship.id.starts_with("stewardship_"));
         story.acknowledge(stewardship.id);
-        assert!(identity_arc_beat(path_id, character_id, true, 0, 1, &story).is_none());
-        let operation = identity_arc_beat(path_id, character_id, true, 1, 1, &story).unwrap();
+        assert!(identity_arc_beat(path_id, character_id, true, 0, 1, &story, None).is_none());
+        let operation = identity_arc_beat(path_id, character_id, true, 1, 1, &story, None).unwrap();
         assert_eq!(operation.id, operation_id);
-        assert!(identity_arc_beat(path_id, "ilya_reed", true, 1, 1, &story).is_none());
+        assert!(identity_arc_beat(path_id, "ilya_reed", true, 1, 1, &story, None).is_none());
     }
 }

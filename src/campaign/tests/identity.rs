@@ -1,5 +1,5 @@
 use super::*;
-use crate::colony::BuildingKind;
+use crate::colony::{BuildingKind, BuildingState};
 
 fn campaign_with_identity(data: &GameData, path_id: &str) -> CampaignState {
     let mut campaign = CampaignState::new(data);
@@ -104,4 +104,53 @@ fn damaged_identity_buildings_cannot_be_stewarded() {
 
     assert!(!campaign.identity_stewardship_available());
     assert!(campaign.run_identity_stewardship().is_err());
+}
+
+#[test]
+fn identity_failure_notes_follow_live_damage_and_power_states() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.mirexis_path_id = "human_redoubt".to_owned();
+    campaign
+        .colony
+        .ensure_identity_building("human_redoubt")
+        .unwrap();
+    campaign.colony.buildings.insert(
+        6,
+        BuildingState {
+            id: "waystation_power_test".to_owned(),
+            kind: BuildingKind::Waystation,
+            position: [16, 10],
+            level: 1,
+            damaged: false,
+        },
+    );
+
+    campaign.acknowledge_colonist("mara_venn");
+    campaign
+        .colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.kind == BuildingKind::RedoubtArsenal)
+        .unwrap()
+        .damaged = true;
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign.colony_story.has_heard("civic_redoubt_damage"));
+
+    campaign.colony.resources.materials = 100;
+    campaign.colony.repair_building("redoubt_arsenal").unwrap();
+    campaign.colony.resources.power = 5;
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign.colony_story.has_heard("civic_redoubt_repair"));
+
+    campaign.colony.resources.power = 0;
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign
+        .colony_story
+        .has_heard("civic_redoubt_power_failure"));
+    campaign.colony.resources.power = 5;
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign
+        .colony_story
+        .has_heard("civic_redoubt_power_restored"));
 }
