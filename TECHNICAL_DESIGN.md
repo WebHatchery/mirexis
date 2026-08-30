@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.150.0
+Save/content version: 1.151.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -926,6 +926,7 @@ Migration coverage:
 | 1.148.0 | Colony Operations and contextual conversations share the same treatment-availability predicate, so treatment controls require an injury, biomass, and a powered infirmary; no new save fields |
 | 1.149.0 | Operations research controls share the effective discounted material-cost check with research execution and disable unaffordable projects; no new save fields |
 | 1.150.0 | Character-event carrier choices disable when the active event's food cost exceeds colony stores; no new save fields |
+| 1.151.0 | Mission briefing squad rows disable impossible reserve and stand-down toggles at the squad limit and minimum squad size; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

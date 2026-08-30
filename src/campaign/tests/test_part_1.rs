@@ -263,9 +263,16 @@ fn squad_selection_enforces_reserves_and_a_three_colonist_limit() {
             .count(),
         SQUAD_LIMIT
     );
+    assert!(!campaign.can_toggle_deployment("sol_cairn"));
+    assert!(campaign.can_toggle_deployment("kira_voss"));
     assert!(campaign.toggle_deployment("sol_cairn").is_err());
     assert!(!campaign.toggle_deployment("kira_voss").unwrap());
+    assert!(campaign.can_toggle_deployment("sol_cairn"));
+    campaign.roster[0].availability = Availability::Recovering;
+    assert!(!campaign.can_toggle_deployment("kira_voss"));
+    campaign.roster[0].availability = Availability::Ready;
     assert!(campaign.toggle_deployment("sol_cairn").unwrap());
+    assert!(!campaign.can_toggle_deployment("kira_voss"));
     assert_eq!(campaign.selected_squad_count(), SQUAD_LIMIT);
     assert!(campaign
         .deployment_roster(&data, &data.mission)

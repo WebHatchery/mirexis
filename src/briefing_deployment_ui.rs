@@ -63,7 +63,7 @@ pub(crate) fn draw(
         if button_with_state(
             row,
             &label,
-            character.availability == Availability::Ready,
+            campaign.can_toggle_deployment(&character.id),
             character.deployment_selected,
             mouse,
         ) {

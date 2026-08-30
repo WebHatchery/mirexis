@@ -422,6 +422,24 @@ impl CampaignState {
         Ok(character.deployment_selected)
     }
 
+    pub fn can_toggle_deployment(&self, character_id: &str) -> bool {
+        let Some(character) = self
+            .roster
+            .iter()
+            .find(|character| character.id == character_id)
+        else {
+            return false;
+        };
+        if character.availability != Availability::Ready {
+            return false;
+        }
+        if character.deployment_selected {
+            self.selected_squad_count() > 1
+        } else {
+            self.selected_squad_count() < SQUAD_LIMIT
+        }
+    }
+
     pub fn apply_mission_outcome(
         &mut self,
         outcome: &MissionOutcome,
