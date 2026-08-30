@@ -284,6 +284,7 @@ impl Game {
                 self.last_outcome
                     .as_ref()
                     .expect("debrief requires an outcome"),
+                &self.session.deployed_colonist_ids(),
                 &self.campaign,
                 &self.assets,
                 &self.visuals,

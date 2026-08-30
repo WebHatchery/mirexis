@@ -2,7 +2,7 @@
 
 use crate::campaign::CampaignState;
 use crate::data::MissionDef;
-use crate::state::{MissionOutcome, ObjectiveState};
+use crate::state::{CharacterConsequence, MissionOutcome, ObjectiveState};
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
@@ -22,9 +22,31 @@ fn experience_summary(outcome: &MissionOutcome) -> String {
     )
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SquadStatus {
+    Returned,
+    Scar,
+    Reserve,
+}
+
+fn squad_status(
+    character_id: &str,
+    deployed_ids: &[String],
+    incapacitated: &[CharacterConsequence],
+) -> SquadStatus {
+    if incapacitated.iter().any(|entry| entry.id == character_id) {
+        SquadStatus::Scar
+    } else if deployed_ids.iter().any(|id| id == character_id) {
+        SquadStatus::Returned
+    } else {
+        SquadStatus::Reserve
+    }
+}
+
 pub fn draw_debrief(
     mission: &MissionDef,
     outcome: &MissionOutcome,
+    deployed_ids: &[String],
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -141,7 +163,7 @@ pub fn draw_debrief(
         draw_text(line, 200.0, 258.0 + index as f32 * 23.0, 17.0, dark::TEXT);
     }
     draw_field_record(mission, outcome, assets, visuals, won);
-    draw_squad_tableau(campaign, outcome, assets, visuals, won);
+    draw_squad_tableau(campaign, outcome, deployed_ids, assets, visuals, won);
     if button(
         Rect::new(860.0, 574.0, 220.0, 48.0),
         "RETURN TO COLONY",
@@ -267,22 +289,24 @@ fn draw_field_record(
 fn draw_squad_tableau(
     campaign: &CampaignState,
     outcome: &MissionOutcome,
+    deployed_ids: &[String],
     assets: &AssetManager,
     visuals: &VisualCatalog,
     won: bool,
 ) {
     draw_text(
-        "SQUAD STATE // RETURNED / SCARRED / RECOVERING",
+        "SQUAD STATE // RETURNED / SCARRED / RESERVE",
         200.0,
         438.0,
         15.0,
         dark::ACCENT,
     );
     for (index, character) in campaign.roster.iter().take(5).enumerate() {
-        let incapacitated = outcome
-            .colonists_incapacitated
-            .iter()
-            .any(|entry| entry.name == character.name);
+        let status = squad_status(
+            &character.id,
+            deployed_ids,
+            &outcome.colonists_incapacitated,
+        );
         let rect = Rect::new(200.0 + index as f32 * 158.0, 458.0, 132.0, 108.0);
         crate::portrait_ui::draw_character_portrait(
             assets,
@@ -290,12 +314,11 @@ fn draw_squad_tableau(
             Rect::new(rect.x, rect.y, 74.0, 84.0),
             &character.id,
             &character.name,
-            if incapacitated {
-                dark::NEGATIVE
-            } else if won {
-                dark::POSITIVE
-            } else {
-                dark::WARNING
+            match status {
+                SquadStatus::Scar => dark::NEGATIVE,
+                SquadStatus::Returned if won => dark::POSITIVE,
+                SquadStatus::Returned => dark::WARNING,
+                SquadStatus::Reserve => dark::TEXT_DIM,
             },
         );
         draw_text(
@@ -306,14 +329,19 @@ fn draw_squad_tableau(
             dark::TEXT,
         );
         draw_text(
-            if incapacitated { "SCAR" } else { "RETURNED" },
+            match status {
+                SquadStatus::Scar => "SCAR",
+                SquadStatus::Returned => "RETURNED",
+                SquadStatus::Reserve => "RESERVE",
+            },
             rect.x + 80.0,
             rect.y + 30.0,
             11.0,
-            if incapacitated {
-                dark::NEGATIVE
-            } else {
-                dark::POSITIVE
+            match status {
+                SquadStatus::Scar => dark::NEGATIVE,
+                SquadStatus::Returned if won => dark::POSITIVE,
+                SquadStatus::Returned => dark::WARNING,
+                SquadStatus::Reserve => dark::TEXT_DIM,
             },
         );
     }

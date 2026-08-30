@@ -72,6 +72,15 @@ impl GameSession {
         self.unit(self.tactical.selected_unit.as_deref()?)
     }
 
+    pub fn deployed_colonist_ids(&self) -> Vec<String> {
+        self.tactical
+            .units
+            .iter()
+            .filter(|unit| unit.team == Team::Colony)
+            .map(|unit| unit.id.clone())
+            .collect()
+    }
+
     pub fn unit(&self, id: &str) -> Option<&UnitState> {
         self.tactical.units.iter().find(|unit| unit.id == id)
     }

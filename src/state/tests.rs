@@ -516,3 +516,14 @@ fn victorious_mission_outcome_carries_debrief_consequences() {
     assert_eq!(outcome.biomass_awarded, data.mission.biomass_reward);
     assert_eq!(outcome.power_awarded, data.mission.power_reward);
 }
+
+#[test]
+fn tactical_session_exposes_only_colonist_deployment_ids() {
+    let data = crate::data::GameData::load().unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let deployed_ids = session.deployed_colonist_ids();
+
+    assert_eq!(deployed_ids.len(), 5);
+    assert!(deployed_ids.iter().any(|id| id == "kira_voss"));
+    assert!(!deployed_ids.iter().any(|id| id == "brood_stalker_a"));
+}
