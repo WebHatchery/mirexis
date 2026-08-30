@@ -47,6 +47,19 @@ impl CampaignState {
                 self.strategy.contact_complete,
             )
         })
+        .or_else(|| {
+            self.colony
+                .facility_upgrades
+                .iter()
+                .rev()
+                .find_map(|upgrade| {
+                    crate::colony_story::facility_upgrade_beat(
+                        &upgrade.upgrade_id,
+                        character_id,
+                        &self.colony_story,
+                    )
+                })
+        })
         .or_else(|| crate::colony_story::phase_beat(&self.strategy.phase_id, character_id))
         .or_else(|| {
             self.last_operation_had_commons_meal()

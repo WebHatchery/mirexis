@@ -400,6 +400,33 @@ pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
     Some(ColonyBeat { id, title, text })
 }
 
+pub(crate) fn facility_upgrade_beat(
+    upgrade_id: &str,
+    character_id: &str,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    let (expected_character, id, title, text) = match upgrade_id {
+        "trauma_ward" => (
+            "ilya_reed",
+            "facility_trauma_ward_ilya",
+            "THE SCAR IS NOT THE SENTENCE",
+            "The Trauma Ward does not erase what the field did to a body. It gives the person who carries the scar a better chance to decide what comes next, and gives the colony one less excuse to call damage destiny.",
+        ),
+        "adaptation_clinic" => (
+            "ilya_reed",
+            "facility_adaptation_clinic_ilya",
+            "THE CLINIC LEARNS TO ASK",
+            "The Adaptation Clinic makes treatment safer, but safety is not permission. I will keep the mutation in the room as evidence, not an owner, and ask the person what kind of recovery they will accept.",
+        ),
+        _ => return None,
+    };
+    (expected_character == character_id && !story.has_heard(id)).then_some(ColonyBeat {
+        id,
+        title,
+        text,
+    })
+}
+
 pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBeat> {
     let (id, title, text) = match (phase_id, character_id) {
         ("contact", "kira_voss") => (

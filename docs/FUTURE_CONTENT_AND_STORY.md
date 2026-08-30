@@ -64,6 +64,9 @@ formation and training barricades to colony defence while the barracks remains o
 The Infirmary now offers Trauma Ward, which shortens recovery, softens persistent scar
 tradeoffs, and protects one adjacent stabilization position in colony defence, or Adaptation
 Clinic, which makes mutation-delayed healing safer and lowers direct treatment to three biomass.
+After either branch completes, Ilya can be approached in the colony for a one-time,
+save-backed field note that names the medical choice rather than leaving it as an anonymous
+stat modifier.
 
 ## 2. Expansion rules
 

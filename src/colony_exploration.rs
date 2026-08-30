@@ -339,6 +339,20 @@ impl ColonyExplorer {
                 campaign.strategy.contact_complete,
             )
         })
+        .or_else(|| {
+            campaign
+                .colony
+                .facility_upgrades
+                .iter()
+                .rev()
+                .find_map(|upgrade| {
+                    colony_story::facility_upgrade_beat(
+                        &upgrade.upgrade_id,
+                        &character.id,
+                        &campaign.colony_story,
+                    )
+                })
+        })
         .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
         .or_else(|| {
             campaign

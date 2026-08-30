@@ -421,3 +421,27 @@ fn adaptation_clinic_makes_mutation_recovery_and_treatment_safer() {
     assert_eq!(treated, "Ilya Reed");
     assert_eq!(campaign.colony.resources.biomass, 0);
 }
+
+#[test]
+fn completed_infirmary_branch_unlocks_ilyas_matching_field_note() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let infirmary_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&infirmary_id, ADAPTATION_CLINIC_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    campaign.acknowledge_colonist("ilya_reed");
+    assert!(campaign
+        .colony_story
+        .has_heard("facility_adaptation_clinic_ilya"));
+}

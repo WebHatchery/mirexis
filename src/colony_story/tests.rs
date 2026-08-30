@@ -100,6 +100,33 @@ fn commons_meal_unlocks_an_authored_note_for_each_colony_voice() {
 }
 
 #[test]
+fn infirmary_branches_give_ilya_distinct_archived_field_notes() {
+    for (upgrade_id, beat_id, title) in [
+        (
+            "trauma_ward",
+            "facility_trauma_ward_ilya",
+            "THE SCAR IS NOT THE SENTENCE",
+        ),
+        (
+            "adaptation_clinic",
+            "facility_adaptation_clinic_ilya",
+            "THE CLINIC LEARNS TO ASK",
+        ),
+    ] {
+        let story = ColonyStoryState::default();
+        let beat = facility_upgrade_beat(upgrade_id, "ilya_reed", &story).unwrap();
+        assert_eq!(beat.id, beat_id);
+        assert_eq!(beat.title, title);
+        assert!(!beat.text.is_empty());
+        assert!(facility_upgrade_beat(upgrade_id, "mara_venn", &story).is_none());
+
+        let mut archived = story;
+        archived.acknowledge(beat.id);
+        assert!(facility_upgrade_beat(upgrade_id, "ilya_reed", &archived).is_none());
+    }
+}
+
+#[test]
 fn unknown_colony_voice_has_no_commons_meal_note() {
     assert!(commons_meal_beat("unknown_colonist").is_none());
 }
