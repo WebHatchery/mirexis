@@ -343,8 +343,9 @@ institutions, not superweapons.
 - **Threshold Spire** *(implemented)*: phase routes, shield fields, Echo-Bound visitors, and remote
   exploration. Its risk is power dependence and attention from beyond Mirexis.
 
-The late-game city art, defence map, and epilogue now acknowledge the chosen project. NPC
-placement, ambient effects, and bespoke identity-building scenes remain follow-up work.
+The late-game city art, defence map, epilogue, associated NPC placement, ambient effects, and
+one persistent identity-building field note now acknowledge the chosen project. Multi-scene
+identity arcs and bespoke building interactions remain follow-up work.
 
 ### 8.4 Defence structures
 
@@ -443,7 +444,10 @@ Goal: make building and upgrade choices visible in city life and defence.
   fabrication costs or Drone Bay reducing facility repair costs while the Workshop is online.
 - Implemented: establish one physical identity building for the chosen Mirexis path, with
   path-specific map cover, objective priority, power, and biomass consequences.
-- Connect power failure, damage, repair, and NPC scenes to every new facility.
+- Implemented: move the associated colony voice to each identity building, add a persistent
+  path-specific field note, and expose powered/offline/damaged inspection copy and ambient cues.
+- Expand the identity field notes into multi-scene civic arcs and connect future facilities to
+  power failure, damage, repair, and NPC scenes.
 
 Exit test: screenshots of two campaigns communicate different civic choices, and those
 differences alter both preparation and a colony assault.

@@ -1,7 +1,7 @@
 //! Touch-first colony walking, inhabitants, and contextual conversations.
 
 use crate::campaign::{Availability, CampaignState, CharacterRecord};
-use crate::colony::{ColonyState, COLONY_HEIGHT, COLONY_WIDTH};
+use crate::colony::{BuildingKind, ColonyState, COLONY_HEIGHT, COLONY_WIDTH};
 use crate::colony_map_ui::view::ColonyView;
 use crate::colony_story;
 use crate::tactical::{UnitAnimationState, UnitFacing};
@@ -265,10 +265,13 @@ impl ColonyExplorer {
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        let beat = campaign
-            .last_operation_had_commons_meal()
-            .then(|| colony_story::commons_meal_beat(&character.id))
-            .flatten()
+        let beat = colony_story::identity_beat(&campaign.strategy.mirexis_path_id, &character.id)
+            .or_else(|| {
+                campaign
+                    .last_operation_had_commons_meal()
+                    .then(|| colony_story::commons_meal_beat(&character.id))
+                    .flatten()
+            })
             .or_else(|| {
                 colony_story::current_beat(
                     &character.id,
@@ -534,6 +537,18 @@ pub(crate) fn npc_position(campaign: &CampaignState, id: &str) -> Option<Vec2> {
 }
 
 fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
+    if colony_story::identity_npc(&campaign.strategy.mirexis_path_id) == Some(id) {
+        if let Some(kind) = BuildingKind::identity_for_path(&campaign.strategy.mirexis_path_id) {
+            if let Some(identity_building) = campaign
+                .colony
+                .buildings
+                .iter()
+                .find(|building| building.kind == kind)
+            {
+                return Some(identity_building.position);
+            }
+        }
+    }
     if id == "veya_orn" {
         if let Some(waystation) = campaign
             .colony

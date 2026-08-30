@@ -21,7 +21,9 @@ pub(super) fn draw_hover_card(
             .validate_construction_site(position)
             .is_err();
     let text = if let Some(building) = building {
-        if building.damaged {
+        if building.kind.is_identity() {
+            identity_building_copy(campaign, building)
+        } else if building.damaged {
             format!(
                 "{} // DAMAGED // REPAIR {} MAT",
                 building.kind.name().to_uppercase(),
@@ -108,6 +110,46 @@ pub(super) fn draw_hover_card(
         Color::new(0.025, 0.075, 0.078, 0.94),
     );
     draw_text(&text, 84.0, 585.0, 14.0, Color::new(0.70, 0.92, 0.84, 1.0));
+}
+
+fn identity_building_copy(
+    campaign: &CampaignState,
+    building: &crate::colony::BuildingState,
+) -> String {
+    let power = campaign.colony.building_is_powered(&building.id);
+    match (building.kind, building.damaged, power) {
+        (BuildingKind::RedoubtArsenal, true, _) => {
+            "REDOUBT ARSENAL // DAMAGED // REPAIR 35 MAT // PHYSICAL COVER HOLDS".to_owned()
+        }
+        (BuildingKind::RedoubtArsenal, false, true) => {
+            "REDOUBT ARSENAL // ONLINE // RESILIENT COVER // PRIORITY OBJECTIVE".to_owned()
+        }
+        (BuildingKind::RedoubtArsenal, false, false) => {
+            "REDOUBT ARSENAL // OFFLINE // PHYSICAL COVER // PRIORITY OBJECTIVE".to_owned()
+        }
+        (BuildingKind::ChoirGarden, true, _) => {
+            "CHOIR GARDEN // DAMAGED // REPAIR 35 MAT // BIOMASS CYCLE PAUSED".to_owned()
+        }
+        (BuildingKind::ChoirGarden, false, true) => {
+            "CHOIR GARDEN // ONLINE // +1 BIOMASS / OPERATION // LIVING COVER".to_owned()
+        }
+        (BuildingKind::ChoirGarden, false, false) => {
+            "CHOIR GARDEN // OFFLINE // BIOMASS PAUSED // LIVING COVER OFFLINE".to_owned()
+        }
+        (BuildingKind::ThresholdSpire, true, _) => {
+            "THRESHOLD SPIRE // DAMAGED // REPAIR 35 MAT // SHIELD OFFLINE".to_owned()
+        }
+        (BuildingKind::ThresholdSpire, false, true) => {
+            "THRESHOLD SPIRE // ONLINE // SHIELD COVER // PRIORITY OBJECTIVE".to_owned()
+        }
+        (BuildingKind::ThresholdSpire, false, false) => {
+            "THRESHOLD SPIRE // OFFLINE // NEEDS 2 POWER // SHIELD OFFLINE".to_owned()
+        }
+        _ => format!(
+            "{} // IDENTITY PROJECT",
+            building.kind.name().to_uppercase()
+        ),
+    }
 }
 
 pub(super) fn handle_plot_click(

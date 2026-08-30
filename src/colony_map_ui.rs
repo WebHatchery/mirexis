@@ -15,6 +15,7 @@ pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
 
 mod building_art;
 mod controls;
+mod identity_art;
 mod interaction;
 mod terrain;
 pub(crate) mod view;
@@ -480,6 +481,7 @@ fn draw_plot(
             }
             _ => {}
         }
+        identity_art::draw_ambient(building.kind, center, view.zoom, powered, building.damaged);
         draw_building_state(center, building.damaged, powered);
     } else if let Some(project) = project.filter(|project| project.position == position) {
         visuals.draw_atlas_cell(

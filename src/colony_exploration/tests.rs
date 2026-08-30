@@ -39,3 +39,32 @@ fn construction_plots_are_not_walkable() {
     assert!(!can_occupy(&colony, vec2(3.0, 3.0)));
     assert!(can_occupy(&colony, vec2(3.8, 3.0)));
 }
+
+#[test]
+fn identity_contact_stands_at_the_chosen_identity_building() {
+    let data = crate::data::GameData::load().unwrap();
+    for (path_id, character_id, kind) in [
+        ("human_redoubt", "mara_venn", BuildingKind::RedoubtArsenal),
+        (
+            "living_commonwealth",
+            "nadi_vale",
+            BuildingKind::ChoirGarden,
+        ),
+        ("open_threshold", "sol_cairn", BuildingKind::ThresholdSpire),
+    ] {
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.mirexis_path_id = path_id.to_owned();
+        campaign.colony.ensure_identity_building(path_id).unwrap();
+        let building_position = campaign
+            .colony
+            .buildings
+            .iter()
+            .find(|building| building.kind == kind)
+            .map(|building| building.position)
+            .unwrap();
+        assert_eq!(
+            npc_position(&campaign, character_id),
+            Some(grid_vec(building_position))
+        );
+    }
+}

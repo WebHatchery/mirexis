@@ -245,5 +245,39 @@ pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
     Some(ColonyBeat { id, title, text })
 }
 
+pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
+    match path_id {
+        "human_redoubt" => Some("mara_venn"),
+        "living_commonwealth" => Some("nadi_vale"),
+        "open_threshold" => Some("sol_cairn"),
+        _ => None,
+    }
+}
+
+pub(crate) fn identity_beat(path_id: &str, character_id: &str) -> Option<ColonyBeat> {
+    if identity_npc(path_id) != Some(character_id) {
+        return None;
+    }
+    let (id, title, text) = match path_id {
+        "human_redoubt" => (
+            "identity_redoubt_arsenal",
+            "A WALL WITH A NAME",
+            "The Arsenal is not a monument to fear. It is a promise that the people behind this wall get to decide what kind of emergency comes next.",
+        ),
+        "living_commonwealth" => (
+            "identity_choir_garden",
+            "THE GARDEN LISTENS",
+            "The Choir Garden has started answering before we ask. I want the colony to learn its language without letting the first loud voice call that consent.",
+        ),
+        "open_threshold" => (
+            "identity_threshold_spire",
+            "A DOOR NEEDS A GRID",
+            "The Threshold Spire is a door only while we can keep its current alive. If the lights fail, we do not lose a building—we lose the question we built it to ask.",
+        ),
+        _ => return None,
+    };
+    Some(ColonyBeat { id, title, text })
+}
+
 #[cfg(test)]
 mod tests;

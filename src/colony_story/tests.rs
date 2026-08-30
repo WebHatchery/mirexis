@@ -76,3 +76,23 @@ fn commons_meal_unlocks_an_authored_note_for_each_colony_voice() {
 fn unknown_colony_voice_has_no_commons_meal_note() {
     assert!(commons_meal_beat("unknown_colonist").is_none());
 }
+
+#[test]
+fn each_identity_building_has_one_path_specific_colony_voice() {
+    for (path_id, character_id, beat_id) in [
+        ("human_redoubt", "mara_venn", "identity_redoubt_arsenal"),
+        ("living_commonwealth", "nadi_vale", "identity_choir_garden"),
+        ("open_threshold", "sol_cairn", "identity_threshold_spire"),
+    ] {
+        assert_eq!(identity_npc(path_id), Some(character_id));
+        let beat = identity_beat(path_id, character_id).unwrap();
+        assert_eq!(beat.id, beat_id);
+        assert!(!beat.title.is_empty());
+        assert!(!beat.text.is_empty());
+        assert!(
+            identity_beat(path_id, "ilya_reed").is_none_or(|candidate| candidate.id != beat_id)
+        );
+    }
+    assert!(identity_npc("unknown_path").is_none());
+    assert!(identity_beat("unknown_path", "mara_venn").is_none());
+}

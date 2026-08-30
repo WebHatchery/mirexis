@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.79.0
+Save/content version: 1.80.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -441,7 +441,9 @@ Redoubt Arsenal, Choir Garden, or Threshold Spire. Redoubt Arsenal contributes p
 and becomes the preferred defence objective; Choir Garden adds powered biomass cycling and living
 cover; Threshold Spire requires two power and projects strong shield cover only while online.
 The path transaction is also the building transaction, so migrated saves with an existing path
-are repaired into the same physical identity project.
+are repaired into the same physical identity project. The associated colony voice relocates to
+that building and receives one persistent path-specific field note; static ambient signals and
+inspection copy make the power and damage consequences visible in the city.
 
 Deployment commits one food per ready squad member plus positive mutation upkeep.
 Powered Hydroponics returns three food after an operation, sustaining the standard
@@ -733,6 +735,7 @@ Migration coverage:
 | 1.77.0 | Queued Hydroponics level-two branches, Community Kitchen meal efficiency, Culture Beds biomass yield, and upgrade-panel expansion |
 | 1.78.0 | Queued Workshop level-two branches, Precision Bench fabrication savings, Drone Bay repair savings, and three-facility upgrade layout |
 | 1.79.0 | Physical Mirexis identity buildings, path-specific defence consequences, Choir Garden biomass cycling, and identity-save migration |
+| 1.80.0 | Identity-building NPC placement, persistent path-specific field notes, ambient signals, and inspection copy |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -784,7 +787,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (300 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (302 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -825,9 +828,10 @@ these explicit boundaries when continuing:
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact-gated Waystation, a Commons, and a Relay Mast;
   the Power Plant, Hydroponics, and Workshop now have queued level-two branch choices, and
-  each Phase Five path establishes its corresponding physical identity building, while
-  population, free placement for every building, and the remaining facility branches
-  remain future work.
+  each Phase Five path establishes its corresponding physical identity building, relocates its
+  associated colony voice, and exposes a persistent field note and ambient identity signal, while
+  population, free placement for every building, and the remaining facility branches remain future
+  work.
 - Pair relationships now grow from shared victories and character events, and trusted
   deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,
   romances, bespoke relationship scenes, permanent death, and broader armour/tool
