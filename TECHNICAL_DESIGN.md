@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.130.0
+Save/content version: 1.131.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -761,10 +761,11 @@ Platform storage is entirely owned by macroquad-toolkit:
 - `slot_exists` and `delete_slot` support title/management UI.
 - `AutoSaveManager::force` coordinates event autosaves.
 
-`SaveData` contains a version, persistent `CampaignState`, and optional
-`TacticalState`. Colony saves omit tactical state; deployment and manual tactical
-saves include it. Textures, UI layout, derived deployment stats, path caches, and
-derived defense maps are never serialized.
+`SaveData` contains a version, persistent `CampaignState`, optional materialized active
+mission context, and optional `TacticalState`. Colony saves omit tactical state and
+active mission context; deployment, debrief, and manual tactical saves include both. Textures,
+UI layout, derived deployment stats, path caches, and derived defense maps are never
+serialized.
 
 Autosaves occur at new-colony creation, colony entry, mission selection, construction,
 training, treatment, crafting, repair, research, character-event resolution, deployment, and
@@ -905,6 +906,7 @@ Migration coverage:
 | 1.128.0 | Recruited colonists remain inside the visible briefing, roster, and Gene Lab lists; no new save fields |
 | 1.129.0 | Settings modal consumes underlying keyboard and controller commands while preserving its close path; no new save fields |
 | 1.130.0 | Finished tactical saves reopen the debrief with reconstructed rewards and casualty context; no new save fields |
+| 1.131.0 | Tactical saves preserve the materialized mission context so a restored debrief names the completed contract and rewards; adds optional active-mission save context |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -957,7 +959,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (398 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (400 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 95-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

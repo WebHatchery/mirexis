@@ -342,7 +342,7 @@ impl Game {
             .expect("Adaptation capture can construct the Gene Lab");
         self.campaign
             .colony
-            .place_construction(crate::colony::BuildingKind::PowerPlant, [1, 2])
+            .place_construction(crate::colony::BuildingKind::PowerPlant, [1, 4])
             .expect("Adaptation capture can power the Gene Lab");
         self.campaign.colony.advance_operation();
         self.campaign.selected_character_id = "kira_voss".to_owned();

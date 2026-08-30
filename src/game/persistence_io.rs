@@ -9,9 +9,11 @@ use macroquad_toolkit::persistence::{
 
 impl Game {
     pub(super) fn autosave_current(&mut self, success_message: &str) {
-        let save = self
-            .session
-            .to_save(&self.data.config.version, &self.campaign);
+        let save = self.session.to_save_with_mission(
+            &self.data.config.version,
+            &self.campaign,
+            &self.active_mission,
+        );
         let game_name = self.data.config.game_name.clone();
         let slot = self.data.config.save_slot.clone();
         let version = self.data.config.version.clone();
@@ -45,9 +47,11 @@ impl Game {
     }
 
     pub(super) fn save_game(&mut self) {
-        let save = self
-            .session
-            .to_save(&self.data.config.version, &self.campaign);
+        let save = self.session.to_save_with_mission(
+            &self.data.config.version,
+            &self.campaign,
+            &self.active_mission,
+        );
         match save_to_slot_with_version(
             &self.data.config.game_name,
             &self.data.config.save_slot,
@@ -72,12 +76,19 @@ impl Game {
         match loaded {
             Ok(save) => {
                 self.targeting = None::<TacticalTargeting>;
-                self.campaign = save.campaign;
-                self.active_mission = self
-                    .campaign
-                    .strategy
-                    .materialize_selected(&self.data, &self.campaign.colony);
-                if let Some(tactical) = save.tactical {
+                let SaveData {
+                    campaign,
+                    active_mission,
+                    tactical,
+                    ..
+                } = save;
+                self.campaign = campaign;
+                self.active_mission = active_mission.unwrap_or_else(|| {
+                    self.campaign
+                        .strategy
+                        .materialize_selected(&self.data, &self.campaign.colony)
+                });
+                if let Some(tactical) = tactical {
                     self.session = GameSession::from_tactical(tactical);
                     self.state = resume_state(&self.session);
                 } else {

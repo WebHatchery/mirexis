@@ -20,7 +20,7 @@ fn previous_save_without_first_hour_fields_gains_safe_guidance() {
 
     let migrated = migrate_save_value(Some("1.63.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.130.0");
+    assert_eq!(migrated.version, "1.131.0");
     assert_eq!(migrated.campaign.first_hour, FirstHourProgress::default());
     assert_eq!(migrated.campaign.first_hour.stage, FirstHourStage::Arrival);
     assert_eq!(
@@ -46,7 +46,7 @@ fn previous_save_without_colony_story_fields_gains_an_empty_ledger() {
 
     let migrated = migrate_save_value(Some("1.65.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.130.0");
+    assert_eq!(migrated.version, "1.131.0");
     assert_eq!(
         migrated.campaign.colony_story,
         crate::colony_story::ColonyStoryState::default()
@@ -72,7 +72,7 @@ fn version_164_keeps_exact_onboarding_progress_and_defaults_metrics() {
 
     let migrated = migrate_save_value(Some("1.64.0".to_owned()), value, &data).unwrap();
 
-    assert_eq!(migrated.version, "1.130.0");
+    assert_eq!(migrated.version, "1.131.0");
     assert_eq!(
         migrated.campaign.first_hour.stage,
         FirstHourStage::SecondReturn
@@ -150,4 +150,52 @@ fn version_117_campaign_only_save_keeps_second_operation_preparation() {
         migrated.campaign.first_hour.stage,
         FirstHourStage::SecondOperation
     );
+}
+
+#[test]
+fn version_130_tactical_save_without_mission_context_remains_loadable() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mission = campaign
+        .strategy
+        .materialize_selected(&data, &campaign.colony);
+    let session = GameSession::new(
+        &data.config,
+        &mission,
+        &campaign.deployment_roster(&data, &mission),
+    );
+    let mut value = serde_json::to_value(session.to_save("1.130.0", &campaign)).unwrap();
+    value
+        .as_object_mut()
+        .expect("save serializes as an object")
+        .remove("active_mission");
+
+    let migrated = migrate_save_value(Some("1.130.0".to_owned()), value, &data).unwrap();
+
+    assert!(migrated.active_mission.is_none());
+}
+
+#[test]
+fn current_tactical_save_keeps_its_materialized_mission_context() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mission = campaign
+        .strategy
+        .materialize_selected(&data, &campaign.colony);
+    let session = GameSession::new(
+        &data.config,
+        &mission,
+        &campaign.deployment_roster(&data, &mission),
+    );
+    let save = session.to_save_with_mission(&data.config.version, &campaign, &mission);
+    let value = serde_json::to_value(save).unwrap();
+
+    let migrated = migrate_save_value(Some(data.config.version.clone()), value, &data).unwrap();
+    let restored = migrated
+        .active_mission
+        .expect("current tactical saves keep their mission context");
+
+    assert_eq!(restored.id, mission.id);
+    assert_eq!(restored.name, mission.name);
+    assert_eq!(restored.materials_reward, mission.materials_reward);
 }

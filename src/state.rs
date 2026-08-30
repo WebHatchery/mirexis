@@ -20,6 +20,8 @@ mod pathfinding;
 pub struct SaveData {
     pub version: String,
     pub campaign: CampaignState,
+    #[serde(default)]
+    pub active_mission: Option<MissionDef>,
     pub tactical: Option<TacticalState>,
 }
 
@@ -28,6 +30,7 @@ impl SaveData {
         Self {
             version: version.to_owned(),
             campaign: campaign.clone(),
+            active_mission: None,
             tactical: None,
         }
     }
@@ -64,8 +67,20 @@ impl GameSession {
         SaveData {
             version: version.to_owned(),
             campaign: campaign.clone(),
+            active_mission: None,
             tactical: Some(self.tactical.clone()),
         }
+    }
+
+    pub fn to_save_with_mission(
+        &self,
+        version: &str,
+        campaign: &CampaignState,
+        mission: &MissionDef,
+    ) -> SaveData {
+        let mut save = self.to_save(version, campaign);
+        save.active_mission = Some(mission.clone());
+        save
     }
 
     pub fn selected_unit(&self) -> Option<&UnitState> {
