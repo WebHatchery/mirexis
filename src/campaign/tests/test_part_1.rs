@@ -437,6 +437,22 @@ fn colony_conversations_remember_each_heard_story_beat() {
 }
 
 #[test]
+fn identity_conversations_archive_the_current_path_beat() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.mirexis_path_id = "human_redoubt".to_owned();
+    campaign.strategy.campaign_complete = true;
+    campaign
+        .colony
+        .ensure_identity_building("human_redoubt")
+        .unwrap();
+
+    campaign.acknowledge_colonist("mara_venn");
+
+    assert!(campaign.colony_story.has_heard("identity_redoubt_ending"));
+}
+
+#[test]
 fn successful_operations_apply_all_recovered_resources() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);

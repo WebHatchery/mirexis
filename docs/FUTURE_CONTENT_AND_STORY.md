@@ -398,6 +398,8 @@ Goal: deepen the existing people and city without new tactical systems.
   evolution, people, and the chosen civic institution.
 - Implemented: each identity contact now has an establishment note and a completed-path
   reflection after the final Mirexis operation.
+- Implemented: acknowledging either identity note archives it in the campaign story ledger,
+  including the completed-path reflection.
 - Expand the dossier into authored character-specific epilogue variations and additional
   post-ending scenes.
 

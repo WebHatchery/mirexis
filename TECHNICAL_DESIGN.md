@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.82.0
+Save/content version: 1.83.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -742,6 +742,7 @@ Migration coverage:
 | 1.80.0 | Identity-building NPC placement, persistent path-specific field notes, ambient signals, and inspection copy |
 | 1.81.0 | Derived ending dossiers acknowledging the chosen civic institution, people, bonds, scars, and evolutions |
 | 1.82.0 | Completed-path identity contact reflections that extend each civic institution into a two-beat arc |
+| 1.83.0 | Persisted acknowledgement of identity establishment and completed-finale field notes |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -793,7 +794,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (304 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (305 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
