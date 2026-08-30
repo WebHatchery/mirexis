@@ -2,7 +2,7 @@
 
 use super::{CampaignState, CharacterLegacy, CharacterRecord};
 use crate::colony::BuildingKind;
-use crate::data::GameData;
+use crate::data::{CharacterDef, GameData};
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct OutsiderChoice {
@@ -18,6 +18,14 @@ pub(crate) struct OutsiderChoice {
     pub(crate) legacy_name: &'static str,
     pub(crate) legacy_stat: &'static str,
     pub(crate) legacy_amount: i32,
+}
+
+fn recruitment_resource(definition: &CharacterDef) -> &str {
+    if definition.recruitment_resource.is_empty() {
+        "materials"
+    } else {
+        &definition.recruitment_resource
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -140,57 +148,80 @@ pub(crate) fn outsider_beat(stage: u8) -> Option<OutsiderBeat> {
 }
 
 impl CampaignState {
+    pub fn available_outsider<'a>(&self, data: &'a GameData) -> Option<&'a CharacterDef> {
+        if !self.colony.has_facility(BuildingKind::Waystation) {
+            return None;
+        }
+        data.characters.iter().find(|definition| {
+            !definition.recruitment_protocol.is_empty()
+                && self.recruitment_route_matches(definition)
+                && !self
+                    .roster
+                    .iter()
+                    .any(|character| character.id == definition.id)
+        })
+    }
+
     pub fn outsider_recruit_available(&self, data: &GameData) -> bool {
-        let Some(definition) = data
-            .characters
-            .iter()
-            .find(|definition| !definition.recruitment_protocol.is_empty())
-        else {
-            return false;
-        };
-        self.colony.has_facility(BuildingKind::Waystation)
-            && self.strategy.contact_protocol_id == definition.recruitment_protocol
-            && !self
-                .roster
-                .iter()
-                .any(|character| character.id == definition.id)
+        self.available_outsider(data).is_some()
     }
 
     pub fn recruit_outsider(&mut self, data: &GameData) -> Result<String, String> {
-        let definition = data
-            .characters
-            .iter()
-            .find(|definition| !definition.recruitment_protocol.is_empty())
+        let definition = self
+            .available_outsider(data)
             .cloned()
             .ok_or_else(|| "No route-exclusive outsider is authored".to_owned())?;
-        if self
-            .roster
-            .iter()
-            .any(|character| character.id == definition.id)
-        {
+        let resource = recruitment_resource(&definition);
+        if self.recruitment_resource_amount(resource) < definition.recruitment_cost {
             return Err(format!(
-                "{} is already in the colony roster",
-                definition.name
+                "Recruitment requires {} {}",
+                definition.recruitment_cost, resource
             ));
         }
-        if self.strategy.contact_protocol_id != definition.recruitment_protocol {
-            return Err("This Waystation is tuned to another Contact route".to_owned());
+        self.spend_recruitment_resource(resource, definition.recruitment_cost);
+        if definition.id == "sedge" {
+            if let Some(brood) = self
+                .strategy
+                .factions
+                .iter_mut()
+                .find(|faction| faction.id == "brood")
+            {
+                brood.attention = (brood.attention + 1).min(100);
+            }
         }
-        if !self.colony.has_facility(BuildingKind::Waystation) {
-            return Err("An operational Waystation is required".to_owned());
-        }
-        if self.colony.resources.materials < definition.recruitment_cost {
-            return Err(format!(
-                "Recruitment requires {} materials",
-                definition.recruitment_cost
-            ));
-        }
-        self.colony.resources.materials -= definition.recruitment_cost;
         let mut character = CharacterRecord::from_def(&definition);
         character.deployment_selected = false;
         let name = character.name.clone();
         self.roster.push(character);
         Ok(name)
+    }
+
+    pub(crate) fn recruitment_resource_amount(&self, resource: &str) -> i32 {
+        match resource {
+            "materials" => self.colony.resources.materials,
+            "power" => self.colony.resources.power,
+            "food" => self.colony.resources.food,
+            "biomass" => self.colony.resources.biomass,
+            _ => 0,
+        }
+    }
+
+    fn spend_recruitment_resource(&mut self, resource: &str, amount: i32) {
+        match resource {
+            "materials" => self.colony.resources.materials -= amount,
+            "power" => self.colony.resources.power -= amount,
+            "food" => self.colony.resources.food -= amount,
+            "biomass" => self.colony.resources.biomass -= amount,
+            _ => {}
+        }
+    }
+
+    fn recruitment_route_matches(&self, definition: &CharacterDef) -> bool {
+        if definition.recruitment_phase.is_empty() {
+            self.strategy.contact_protocol_id == definition.recruitment_protocol
+        } else {
+            self.strategy.phase_id == definition.recruitment_phase && self.strategy.contact_complete
+        }
     }
 
     pub fn outsider_arc_available(&self) -> bool {

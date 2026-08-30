@@ -25,6 +25,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
     );
     let suppress_actions = crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
         campaign,
+        data,
         assets,
         visuals,
         ui,

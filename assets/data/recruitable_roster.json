@@ -14,5 +14,21 @@
     "weapon_range": 6,
     "weapon_damage": 4,
     "weapon_ap_cost": 2
+  },
+  {
+    "id": "sedge",
+    "name": "Sedge",
+    "role": "Mireborn Courier",
+    "mutation": "Neural Bloom",
+    "team": "colony",
+    "faction": null,
+    "position": [8, 18],
+    "max_health": 9,
+    "move_range": 5,
+    "armour": 0,
+    "accuracy": 72,
+    "weapon_range": 5,
+    "weapon_damage": 3,
+    "weapon_ap_cost": 2
   }
 ]

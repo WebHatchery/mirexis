@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.86.0
+Save/content version: 1.87.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -278,10 +278,15 @@ unit spawn. Campaign saves preserve the seed; tactical saves preserve realized g
 class, class history, learned and active skills, mutation ID, injuries, availability,
 equipment IDs, and deployment selection. `UnitState` is disposable battle state.
 
-Briefing exposes all four current recruits as deploy or reserve rows. At least one and
+Briefing exposes all current starting and route-specific recruits as deploy or reserve rows. At least one and
 at most three ready colonists may be selected; injuries disable their row. Selection is
 autosaved, survives operations, and is applied before faction hostiles join the tactical
 roster, so reserve choice affects class, mutation, and equipment access in the mission.
+
+Route-specific character definitions carry a recruitment protocol, optional campaign phase,
+resource, and cost. The Waystation resolves the first matching definition rather than
+hard-coding a recruit: Veya uses Contact materials, while Sedge uses Adaptation biomass and
+raises Brood attention when the colony shelters their pre-recorded mutation.
 
 The colony roster screen persists a selected colonist and exposes every base class with
 aptitude-priced material costs. Workshop choices cover starter equipment plus three
@@ -756,6 +761,7 @@ Migration coverage:
 | 1.84.0 | Phase-specific Contact, Adaptation, and Escalation colony field notes with persisted acknowledgement |
 | 1.85.0 | Authored identity-contact epilogue voices with readiness-aware ending variations |
 | 1.86.0 | Third-beat post-ending identity scenes unlocked by final-reflection acknowledgement |
+| 1.87.0 | Mireborn Adapted Sedge recruitment, biomass route cost, Waystation presence, and MAP HAZARD equipment action |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -807,7 +813,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (309 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (314 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

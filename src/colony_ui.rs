@@ -11,6 +11,7 @@ use macroquad_toolkit::prelude::*;
 
 mod commons;
 mod context;
+mod recruitment;
 mod relay;
 mod scene;
 mod upgrades;
@@ -565,32 +566,15 @@ pub(super) fn draw_operations(
             }
         }
     }
-    if campaign.outsider_recruit_available(data)
-        && !choosing_contact
-        && !choosing_escalation
-        && !choosing_mirexis
-        && campaign.strategy.available_event().is_none()
-    {
-        let cost = data
-            .characters
-            .iter()
-            .find(|character| !character.recruitment_protocol.is_empty())
-            .map_or(0, |character| character.recruitment_cost);
-        draw_ui_text_ex(
-            "WAYSTATION // DIRECTORATE EXILE AWAITING A DECISION",
-            878.0,
-            600.0,
-            TextStyle::new(12.0, dark::WARNING).params(),
-        );
-        if colony_button(
-            Rect::new(878.0, 606.0, 362.0, 36.0),
-            &format!("RECRUIT VEYA ORN // {} MAT", cost),
-            campaign.colony.resources.materials >= cost,
-            mouse,
-        ) {
-            actions.push(UiAction::RecruitOutsider);
-        }
-    }
+    recruitment::draw(
+        campaign,
+        data,
+        mouse,
+        choosing_contact,
+        choosing_escalation,
+        choosing_mirexis,
+        actions,
+    );
     draw_ui_text_ex(
         &format!(
             "Plan: {} // {} materials // one operation // {} structures mapped",

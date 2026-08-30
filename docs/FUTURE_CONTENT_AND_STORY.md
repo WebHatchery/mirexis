@@ -11,9 +11,11 @@ classes, colony construction, mutation evolution, and three ending paths. Future
 should deepen those systems into a memorable campaign rather than merely increasing
 their counts.
 
-The first Contact-era content slice now also proves a route-exclusive outsider loop:
+The first route-exclusive outsider slice now covers both ends of the early campaign:
 Directorate Requisition can build a Waystation, recruit Veya Orn, and carry her origin,
-equipment action, relationships, disagreements, and closing choice through saves. The
+equipment action, relationships, disagreements, and closing choice through saves, while
+Adaptation can recruit Sedge, a Mireborn courier, for biomass. Sedge brings a distinct
+MAP HAZARD action, Gene Lab presence, Brood attention consequence, and ending voice. The
 remaining origins and equivalent faction routes stay future work.
 
 The Commons is also now a working home-space slice: a powered settlement can host one
@@ -158,14 +160,14 @@ fixed intelligence, morality, or class aptitude modifier.
 |---|---|---|---|---|
 | Colony Founder | New game | What does an ordinary person owe a home that may no longer be ordinary? | Flexible class history and the richest network of colony relationships | Already represented by the starting roster; deepen before widening. |
 | Directorate Exile | Contact | Can someone trained to treat colonies as assets learn to belong to one? | Smartlink, drone, suppression, and command interactions with a visible attention cost | Veya Orn is implemented through the Waystation; expand the route before adding another human rig. |
-| Mireborn Adapted | Adaptation | Is deliberate adaptation inheritance, coercion, or a new culture? | A shaped mutation gift paired with a meaningful complication or upkeep | Uses the human rig but needs strong mutation visuals and bespoke reactions. |
+| Mireborn Adapted | Adaptation | Is deliberate adaptation inheritance, coercion, or a new culture? | Sedge's MAP HAZARD action braces the courier while disrupting a hostile; recruitment costs biomass and raises Brood attention | Implemented with bespoke full-body/portrait art, Gene Lab presence, story beats, and ending acknowledgement. |
 | Severed Brood | Contact or late Adaptation | Does individuality begin when the chorus is lost, or when another person listens? | Spore-field interaction, biomass recovery, and symbiotic equipment behaviour | Highest art and animation cost; add as one authored recruit before considering a generic pool. |
 | Echo-Bound | Contact or late Adaptation | Is a body carrying an Ascendant echo one person, two people, or a tool being mistaken for both? | Rift navigation, power-fed abilities, and lattice interaction | Begin with a human host or colony-built shell before a wholly new rig. |
 
 ### 5.2 First recruit concepts
 
-Veya Orn is the first implemented origin; the remaining names are working names for a
-later naming pass.
+Veya Orn and Sedge are the two implemented route-specific origins; the remaining names
+are working names for a later naming pass.
 
 - **Veya Orn — Directorate Exile / Soldier.** A former Directorate range officer who
   reaches the colony through Directorate Requisition. Her Waystation arc asks whether a
@@ -175,6 +177,9 @@ later naming pass.
 - **Sedge — Mireborn Adapted / Scout.** A courier from an unregistered outlying family
   whose body changed long before the official first mutation. Their existence proves the
   colony's timeline is wrong and makes secrecy inside the settlement a concrete issue.
+  Adaptation recruits Sedge through the Waystation for 8 biomass. Their MAP HAZARD action
+  gives them Guarded protection while Disrupting a hostile, and their colony beats follow
+  the route-map from the Gene Lab to the ending record.
 - **Ninth-Voice-Apart — Severed Brood / Biotech Specialist.** A small command organism
   cut from a destroyed chorus. It can speak only by borrowing remembered phrases until
   repeated personal choices develop a voice of its own.
@@ -431,7 +436,8 @@ Goal: make Contact change who can belong to the colony.
   arc, persistent origin, and the Exile Cipher action.
 - Give the remaining routes equivalent tactical opportunities, colony costs, and
   three-beat arcs.
-- Add the Mireborn recruit during Adaptation so every campaign meets that culture.
+- Implemented: add Sedge during Adaptation through the Waystation, with a biomass cost,
+  bespoke art, a combined tactical action, Brood attention reaction, and ending voice.
 - Let unchosen outsiders remain present in non-roster roles.
 
 Exit test: the outsider is remembered as a person, their origin changes play, and their

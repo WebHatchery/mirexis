@@ -54,8 +54,25 @@
     "equipment": ["service_pistol", "directorate_cipher"],
     "recruitment_protocol": "directorate_requisition",
     "recruitment_cost": 30,
+    "recruitment_resource": "materials",
     "origin": "Directorate Exile",
     "origin_description": "Stolen range telemetry makes Veya unusually accurate when the squad must cross open ground.",
     "origin_accuracy_bonus": 4
+  },
+  {
+    "id": "sedge",
+    "name": "Sedge",
+    "biography": "A courier from an unregistered Mireborn family whose body learned the marsh before the colony learned its name.",
+    "aptitudes": { "mobility": 5, "biology": 4, "psionics": 3, "engineering": 2 },
+    "initial_class": "scout",
+    "mutation": "neural_bloom",
+    "equipment": ["service_pistol", "mireborn_sense"],
+    "recruitment_protocol": "mireborn_adaptation",
+    "recruitment_cost": 8,
+    "recruitment_resource": "biomass",
+    "recruitment_phase": "adaptation",
+    "origin": "Mireborn Adapted",
+    "origin_description": "A living route-map makes Sedge faster through danger, but the colony must decide whether an old adaptation is inheritance or consent.",
+    "origin_move_bonus": 1
   }
 ]

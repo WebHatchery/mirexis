@@ -8,6 +8,7 @@ fn each_colony_npc_has_three_progression_beats() {
         "sol_cairn",
         "nadi_vale",
         "veya_orn",
+        "sedge",
     ] {
         let arrival = current_beat(character_id, 0, None, None).unwrap();
         let first = current_beat(character_id, 1, Some(true), None).unwrap();
@@ -64,6 +65,7 @@ fn commons_meal_unlocks_an_authored_note_for_each_colony_voice() {
         "sol_cairn",
         "nadi_vale",
         "veya_orn",
+        "sedge",
     ] {
         let beat = commons_meal_beat(character_id).unwrap();
         assert!(beat.id.starts_with("commons_meal_"));
@@ -82,6 +84,7 @@ fn phase_beats_give_each_middle_campaign_phase_a_specific_voice() {
     for (phase_id, character_id, beat_id) in [
         ("contact", "kira_voss", "phase_contact_kira"),
         ("adaptation", "nadi_vale", "phase_adaptation_nadi"),
+        ("adaptation", "sedge", "phase_adaptation_sedge"),
         ("escalation", "mara_venn", "phase_escalation_mara"),
     ] {
         let beat = phase_beat(phase_id, character_id).unwrap();

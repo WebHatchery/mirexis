@@ -7,7 +7,7 @@ fn complete_content_registry_is_valid() {
     assert_eq!(data.config.game_name, "mirexis");
     assert!(data.roster.iter().any(|unit| unit.team == Team::Colony));
     assert!(data.roster.iter().any(|unit| unit.team == Team::Hostile));
-    assert_eq!(data.recruitable_roster.len(), 1);
+    assert_eq!(data.recruitable_roster.len(), 2);
     assert!(data.mission.round_limit > 0);
     assert!(data.mission.terrain_costs.iter().all(|tile| tile.cost > 0));
     assert!(data.roster.iter().all(|unit| unit.weapon_ap_cost > 0));
@@ -25,7 +25,7 @@ fn complete_content_registry_is_valid() {
         .map(|unit| unit.role.as_str())
         .collect::<std::collections::HashSet<_>>();
     assert!(hostile_roles.len() >= 2);
-    assert_eq!(data.characters.len(), 6);
+    assert_eq!(data.characters.len(), 7);
     assert!(data.classes.len() >= 7);
     assert_eq!(
         data.classes.iter().filter(|class| class.advanced).count(),

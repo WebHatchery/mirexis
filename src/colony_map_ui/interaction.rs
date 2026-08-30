@@ -2,6 +2,7 @@
 
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
+use crate::data::GameData;
 use crate::grid_ui::WorldCamera;
 use crate::ui::UiAction;
 use macroquad::prelude::*;
@@ -154,6 +155,7 @@ fn identity_building_copy(
 
 pub(super) fn handle_plot_click(
     campaign: &CampaignState,
+    data: &GameData,
     camera: &mut WorldCamera,
     hovered: Option<[i32; 2]>,
     suppress_click: bool,
@@ -185,10 +187,7 @@ pub(super) fn handle_plot_click(
             actions.push(UiAction::OpenGeneLab);
         } else if building.kind == BuildingKind::Waystation
             && campaign.colony.building_is_powered(&building.id)
-            && !campaign
-                .roster
-                .iter()
-                .any(|character| character.id == "veya_orn")
+            && campaign.outsider_recruit_available(data)
         {
             actions.push(UiAction::RecruitOutsider);
         } else if building.kind == BuildingKind::Commons

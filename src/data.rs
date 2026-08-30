@@ -198,6 +198,10 @@ pub struct CharacterDef {
     #[serde(default)]
     pub recruitment_cost: i32,
     #[serde(default)]
+    pub recruitment_resource: String,
+    #[serde(default)]
+    pub recruitment_phase: String,
+    #[serde(default)]
     pub origin: String,
     #[serde(default)]
     pub origin_description: String,

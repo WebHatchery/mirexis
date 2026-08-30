@@ -179,6 +179,31 @@ pub(crate) fn current_beat(
             title: "THE ANSWER IS NOT READY",
             text: "The signal is stronger, but the answer is not ready. We need the colony to listen together before one frightened voice decides what Mirexis means.",
         }),
+        ("sedge", 0, _) => Some(ColonyBeat {
+            id: "sedge_arrival",
+            title: "THE COURIER IN THE REEDS",
+            text: "Sedge came from a family the colony's records never named. Their body learned the marsh before our instruments learned to call it a mutation; the Waystation is the first place they have been asked to stay.",
+        }),
+        ("sedge", 1, Some(true)) => Some(ColonyBeat {
+            id: "sedge_first_victory",
+            title: "A ROUTE THAT BREATHES",
+            text: "Sedge returned with the route still alive in their head. They call it inheritance; the Gene Lab calls it evidence. The colony has to learn the difference between studying a gift and claiming it.",
+        }),
+        ("sedge", 1, Some(false)) => Some(ColonyBeat {
+            id: "sedge_first_defeat",
+            title: "THE MARSH REMEMBERS",
+            text: "The failed route followed Sedge home. They did not ask us to call the adaptation a cure, only to stop pretending the danger began when the colony noticed it.",
+        }),
+        ("sedge", 1, _) => Some(ColonyBeat {
+            id: "sedge_first_aftermath",
+            title: "A BODY WITHOUT A FILE",
+            text: "Sedge's route-map survived the operation, but the colony's records still have no honest category for them. We can make room before we make a label.",
+        }),
+        ("sedge", _, _) => Some(ColonyBeat {
+            id: "sedge_second_aftermath",
+            title: "THE TIMELINE MOVES",
+            text: "Sedge's family changed before the official first mutation, which means our history is missing a living chapter. The courier keeps bringing back routes; now the colony must decide who gets to write them down.",
+        }),
         ("veya_orn", 0, _) => Some(ColonyBeat {
             id: "veya_arrival",
             title: "THE PERSON BEHIND THE CIPHER",
@@ -240,34 +265,41 @@ pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
             "WITNESSES AT THE TABLE",
             "Veya expected an interrogation and got a meal with too many witnesses to rewrite afterward. The colony is learning that belonging can be recorded without becoming surveillance.",
         ),
+        "sedge" => (
+            "commons_meal_sedge",
+            "A PLACE IN THE RECORD",
+            "Sedge brought reed-salt to the Commons and watched everyone decide whether it was food or evidence. By the second bowl, the colony had made the simpler choice: it was something their family knew how to share.",
+        ),
         _ => return None,
     };
     Some(ColonyBeat { id, title, text })
 }
 
 pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBeat> {
-    let (expected_character, id, title, text) = match phase_id {
-        "contact" => (
-            "kira_voss",
+    let (id, title, text) = match (phase_id, character_id) {
+        ("contact", "kira_voss") => (
             "phase_contact_kira",
             "THE ANSWER UNDER THE SIGNAL",
             "The Black Channel answered from below the colony, and the Living Chorus answered from within it. The signal is not a faction's property anymore; it is a question we have to carry together.",
         ),
-        "adaptation" => (
-            "nadi_vale",
+        ("adaptation", "nadi_vale") => (
             "phase_adaptation_nadi",
             "THE BODY MAPS THE ROOM",
             "The Gene Lab keeps asking what a body can become, but the answer cannot belong to the instrument alone. Neural Bloom gives us new senses only if the person inside them remains the author.",
         ),
-        "escalation" => (
-            "mara_venn",
+        ("adaptation", "sedge") => (
+            "phase_adaptation_sedge",
+            "THE OLD MAP IN THE LAB",
+            "Sedge knows the Gene Lab's corridors by the pressure in the roots. Their family changed before our records began, and the first ethical question is simple: do we ask what they know before we ask what we can take?",
+        ),
+        ("escalation", "mara_venn") => (
             "phase_escalation_mara",
             "THEY CAN SEE THE LIGHTS",
             "Three powers are converging on the same patch of dark, and now they can see our lights. The colony cannot survive as an invisible camp; it needs a defence that the people behind it can name and direct.",
         ),
         _ => return None,
     };
-    (expected_character == character_id).then_some(ColonyBeat { id, title, text })
+    Some(ColonyBeat { id, title, text })
 }
 
 pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {

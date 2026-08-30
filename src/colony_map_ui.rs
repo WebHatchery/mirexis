@@ -2,6 +2,7 @@
 
 use crate::campaign::CampaignState;
 use crate::colony::{BuildingKind, COLONY_HEIGHT, COLONY_WIDTH, SETTLEMENT_CENTER};
+use crate::data::GameData;
 use crate::grid_ui::WorldCamera;
 use crate::ui::UiAction;
 use crate::visual_assets::VisualCatalog;
@@ -23,6 +24,7 @@ use view::ColonyView;
 
 pub(crate) struct ColonyMapContext<'a> {
     pub(crate) campaign: &'a CampaignState,
+    pub(crate) data: &'a GameData,
     pub(crate) assets: &'a AssetManager,
     pub(crate) visuals: &'a VisualCatalog,
     pub(crate) ui: &'a VirtualUi,
@@ -36,6 +38,7 @@ pub(crate) struct ColonyMapContext<'a> {
 pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     let ColonyMapContext {
         campaign,
+        data,
         assets,
         visuals,
         ui,
@@ -124,7 +127,14 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     }
     if explorer.build_mode() {
         interaction::draw_hover_card(campaign, hovered, camera.pending_colony_plot());
-        interaction::handle_plot_click(campaign, camera, hovered, suppress_plot_click, actions);
+        interaction::handle_plot_click(
+            campaign,
+            data,
+            camera,
+            hovered,
+            suppress_plot_click,
+            actions,
+        );
         controls::draw_build_controls(campaign, mouse, actions);
     } else if !suppress_plot_click
         && clicked_npc.is_none()

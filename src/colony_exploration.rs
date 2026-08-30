@@ -14,7 +14,15 @@ const PLAYER_START: Vec2 = Vec2::new(9.0, 10.0);
 const WALK_SPEED: f32 = 3.6;
 const PLAYER_RADIUS: f32 = 0.22;
 const INTERACTION_DISTANCE: f32 = 1.15;
-const NPC_STATIONS: [[i32; 2]; 6] = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12], [15, 6]];
+const NPC_STATIONS: [[i32; 2]; 7] = [
+    [8, 10],
+    [7, 9],
+    [10, 8],
+    [13, 9],
+    [11, 12],
+    [15, 6],
+    [17, 6],
+];
 
 #[derive(Debug, Clone)]
 pub(crate) struct ColonyExplorer {
@@ -168,7 +176,13 @@ impl ColonyExplorer {
         mouse: Vec2,
     ) -> Option<String> {
         let mut clicked = None;
-        for (index, character) in campaign.roster.iter().enumerate().skip(1).take(5) {
+        for (index, character) in campaign
+            .roster
+            .iter()
+            .enumerate()
+            .skip(1)
+            .take(NPC_STATIONS.len() - 1)
+        {
             let position =
                 npc_grid_position(campaign, &character.id).unwrap_or(NPC_STATIONS[index]);
             if position[0] + position[1] != depth {
@@ -563,6 +577,16 @@ fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
             .find(|building| building.kind == crate::colony::BuildingKind::Waystation)
         {
             return Some(waystation.position);
+        }
+    }
+    if id == "sedge" {
+        if let Some(gene_lab) = campaign
+            .colony
+            .buildings
+            .iter()
+            .find(|building| building.kind == BuildingKind::GeneLab)
+        {
+            return Some(gene_lab.position);
         }
     }
     campaign

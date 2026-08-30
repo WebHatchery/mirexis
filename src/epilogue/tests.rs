@@ -91,3 +91,28 @@ fn epilogue_adds_an_authored_voice_for_each_identity_path() {
         assert_ne!(ready[5], recovering[5]);
     }
 }
+
+#[test]
+fn epilogue_names_the_mireborn_timeline_when_sedge_survives() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.campaign_complete = true;
+    campaign.strategy.mirexis_path_id = "open_threshold".to_owned();
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_epilogue_sedge".to_owned(),
+            kind: crate::colony::BuildingKind::Waystation,
+            position: [2, 11],
+            level: 1,
+            damaged: false,
+        });
+    campaign.recruit_outsider(&data).unwrap();
+
+    let voice = derive(&campaign).unwrap().lines()[5].clone();
+    assert!(voice.contains("SEDGE"));
+    assert!(voice.contains("OLD BODY WAS HERE FIRST"));
+}

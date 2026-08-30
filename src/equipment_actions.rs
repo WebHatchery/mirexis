@@ -12,6 +12,7 @@ pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
         "field_toolkit" => Some("FIELD FORTIFY"),
         "survey_harness" => Some("MARK HOSTILE"),
         "directorate_cipher" => Some("BREAK TARGETING NET"),
+        "mireborn_sense" => Some("MAP HAZARD"),
         _ => None,
     }
 }
@@ -102,6 +103,12 @@ pub(crate) fn validate(
                 && !target.has_status(StatusKind::Hindered)
                 && distance <= 6
         }
+        "mireborn_sense" => {
+            target.team == Team::Hostile
+                && !target.has_status(StatusKind::Disrupted)
+                && !unit.has_status(StatusKind::Guarded)
+                && distance <= 6
+        }
         _ => false,
     };
     valid_target
@@ -168,6 +175,22 @@ pub(crate) fn execute(
             if overcharged { 3 } else { 2 },
             &mut events,
         ),
+        "mireborn_sense" => {
+            crate::class_actions::apply_status(
+                session,
+                unit_id,
+                StatusKind::Guarded,
+                if overcharged { 3 } else { 2 },
+                &mut events,
+            );
+            crate::class_actions::apply_status(
+                session,
+                target_id,
+                StatusKind::Disrupted,
+                if overcharged { 3 } else { 2 },
+                &mut events,
+            );
+        }
         _ => unreachable!("validated equipment has an action"),
     }
     session.check_outcome(&mut events);

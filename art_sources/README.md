@@ -49,3 +49,16 @@ The remaining `*_key.png` masters correspond one-to-one with the recruit, enemy,
 - Source grid: 3 x 2; runtime strip: 6 x 1
 - Original retained by Codex: `C:/Users/Kalai/.codex/generated_images/019ff033-397f-7481-9f75-f925247ab357/exec-888a273d-6974-4ef8-b521-236946ad0d9b.png`
 - Prompt summary: six large head-and-shoulders HUD portraits on flat magenta in this exact order: Brood stalker, Brood sporecaster, Directorate rifleman, Directorate suppression drone, Ascendant sentinel, Ascendant rift warden. Consistent upper-left three-quarter light, tight portrait crop, faction-readable silhouettes, no labels, borders, scenery, or full-body poses.
+
+## Sedge recruit art
+
+- Original full-body cutout retained by Codex: `C:/Users/Kalai/.codex/generated_images/01a0514c-6fb7-74e1-9133-0afa7fc99abc/exec-2d8d8fe0-e789-4193-8527-d2bf02bee69c.png`
+- Original portrait retained by Codex: `C:/Users/Kalai/.codex/generated_images/01a0514c-6fb7-74e1-9133-0afa7fc99abc/exec-98c6a5d7-9275-4975-abed-4ce595253882.png`
+- Runtime unit atlas: `assets/art/atlases/sedge.png`
+- Runtime portrait: `assets/art/portraits/sedge.png`
+- ImageGen mode: `stylized-concept`
+- Runtime unit grid: 6 x 4; the full-body cutout is scaled into subtly varied courier poses so
+  every directional cell remains visibly distinct to the atlas validation gate.
+- Prompt summary: a Mireborn courier in a dark marsh-layered hood and utility rig, with subtle
+  cyan bioluminescent vein lines, living fiber details, braided hair, and a compact carbine;
+  transparent-safe full-body and bust portrait assets with no text, borders, or scenery.

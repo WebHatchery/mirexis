@@ -68,3 +68,33 @@ fn identity_contact_stands_at_the_chosen_identity_building() {
         );
     }
 }
+
+#[test]
+fn adapted_recruit_stands_at_the_gene_lab_when_it_exists() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_sedge_exploration".to_owned(),
+            kind: BuildingKind::Waystation,
+            position: [2, 11],
+            level: 1,
+            damaged: false,
+        });
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "gene_lab_sedge_exploration".to_owned(),
+            kind: BuildingKind::GeneLab,
+            position: [16, 10],
+            level: 1,
+            damaged: false,
+        });
+    campaign.recruit_outsider(&data).unwrap();
+    assert_eq!(npc_position(&campaign, "sedge"), Some(grid_vec([16, 10])));
+}

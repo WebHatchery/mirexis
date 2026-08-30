@@ -182,7 +182,16 @@ fn character_voice(campaign: &CampaignState) -> String {
                 recovering_line
             }
         });
-    format!("{} // {}", character_name(campaign, character_id), line)
+    let voice = format!("{} // {}", character_name(campaign, character_id), line);
+    if campaign
+        .roster
+        .iter()
+        .any(|character| character.id == "sedge")
+    {
+        format!("{} // SEDGE: THE OLD BODY WAS HERE FIRST.", voice)
+    } else {
+        voice
+    }
 }
 
 fn character_name(campaign: &CampaignState, character_id: &str) -> String {

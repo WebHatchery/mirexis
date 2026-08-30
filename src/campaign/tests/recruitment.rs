@@ -14,6 +14,20 @@ fn directorate_waystation_campaign(data: &GameData) -> CampaignState {
     campaign
 }
 
+fn adaptation_waystation_campaign(data: &GameData) -> CampaignState {
+    let mut campaign = CampaignState::new(data);
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign.colony.buildings.push(BuildingState {
+        id: "adaptation_waystation_test".to_owned(),
+        kind: BuildingKind::Waystation,
+        position: [2, 11],
+        level: 1,
+        damaged: false,
+    });
+    campaign
+}
+
 #[test]
 fn route_exclusive_outsider_requires_the_matching_operational_waystation() {
     let data = GameData::load().unwrap();
@@ -107,4 +121,58 @@ fn outsider_arc_persists_two_disagreements_and_a_third_closing_beat() {
     assert_eq!(restored.outsider_disagreements, 2);
     assert_eq!(restored.outsider_final_choice, "stay_on_line");
     assert_eq!(restored.roster.len(), 6);
+}
+
+#[test]
+fn adaptation_recruitment_uses_biomass_and_adds_the_mireborn_route_map() {
+    let data = GameData::load().unwrap();
+    let mut campaign = adaptation_waystation_campaign(&data);
+    let biomass_before = campaign.colony.resources.biomass;
+    let brood_attention_before = campaign
+        .strategy
+        .factions
+        .iter()
+        .find(|faction| faction.id == "brood")
+        .unwrap()
+        .attention;
+
+    assert_eq!(campaign.available_outsider(&data).unwrap().id, "sedge");
+    assert_eq!(campaign.recruit_outsider(&data).unwrap(), "Sedge");
+    let sedge = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "sedge")
+        .unwrap();
+    assert!(!sedge.deployment_selected);
+    assert_eq!(sedge.origin, "Mireborn Adapted");
+    assert_eq!(campaign.colony.resources.biomass, biomass_before - 8);
+    assert_eq!(
+        campaign
+            .strategy
+            .factions
+            .iter()
+            .find(|faction| faction.id == "brood")
+            .unwrap()
+            .attention,
+        brood_attention_before + 1
+    );
+    assert!(sedge.equipment_ids.iter().any(|id| id == "mireborn_sense"));
+    assert!(
+        campaign
+            .derived_character_unit("sedge", &data)
+            .unwrap()
+            .move_range
+            >= 6
+    );
+}
+
+#[test]
+fn adaptation_recruitment_waits_for_the_phase_to_be_complete() {
+    let data = GameData::load().unwrap();
+    let mut campaign = adaptation_waystation_campaign(&data);
+    campaign.strategy.contact_complete = false;
+    assert!(!campaign.outsider_recruit_available(&data));
+    campaign.strategy.phase_id = "contact".to_owned();
+    campaign.strategy.contact_complete = true;
+    assert!(!campaign.outsider_recruit_available(&data));
 }

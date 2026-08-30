@@ -49,9 +49,11 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Chorus Warden hazard conversion.
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
   origins, experience, injury, and recovery, including Veya Orn's Directorate Exile
-  recruitment arc.
+  recruitment arc and Sedge's Mireborn Adapted origin.
 - The Contact-era Waystation recruits Veya through Directorate Requisition and gives her
   the origin-specific BREAK TARGETING NET equipment action.
+- Adaptation can recruit Sedge through the Waystation for biomass; their origin-specific
+  MAP HAZARD action braces the courier while disrupting a hostile.
 - XP-gated techniques for all seven base classes with one-slot loadouts,
   self/unit/tile targeting, deterministic effects, and save-safe phase use tracking.
 - Authored and generated operations against three mechanically distinct factions.

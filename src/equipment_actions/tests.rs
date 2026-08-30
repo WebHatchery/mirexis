@@ -100,3 +100,44 @@ fn exile_cipher_scrambles_a_hostile_movement_envelope() {
         .unwrap()
         .has_status(StatusKind::Hindered));
 }
+
+#[test]
+fn mireborn_sense_braces_sedge_and_disrupts_a_hostile() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_sedge_test".to_owned(),
+            kind: crate::colony::BuildingKind::Waystation,
+            position: [2, 10],
+            level: 1,
+            damaged: false,
+        });
+    campaign.recruit_outsider(&data).unwrap();
+    let mut roster = data.roster.clone();
+    roster.push(campaign.derived_character_unit("sedge", &data).unwrap());
+    let mut session = GameSession::new(&data.config, &data.mission, &roster);
+    let sedge = session.unit("sedge").unwrap().position;
+    let hostile = session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "brood_stalker_a")
+        .unwrap();
+    hostile.position = TilePos::new(sedge.x + 2, sedge.y);
+
+    assert!(validate(&session, "sedge", "mireborn_sense", "brood_stalker_a").is_ok());
+    execute(&mut session, "sedge", "mireborn_sense", "brood_stalker_a");
+    assert!(session
+        .unit("sedge")
+        .unwrap()
+        .has_status(StatusKind::Guarded));
+    assert!(session
+        .unit("brood_stalker_a")
+        .unwrap()
+        .has_status(StatusKind::Disrupted));
+}
