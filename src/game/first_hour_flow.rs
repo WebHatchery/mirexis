@@ -1,6 +1,6 @@
 //! Application integration for serialized first-hour guidance.
 
-use super::{AppState, Game};
+use super::{AppState, Game, TacticalTargeting};
 use crate::data::{MissionDef, Team};
 use crate::state::{Command, GameSession};
 use crate::ui::{self, UiAction};
@@ -57,7 +57,11 @@ impl Game {
     }
 
     pub(super) fn select_next_ready_for_first_hour(&mut self) -> bool {
-        advance_first_hour_selection(&mut self.session, &mut self.campaign.first_hour)
+        advance_first_hour_selection(
+            &mut self.session,
+            &mut self.campaign.first_hour,
+            &mut self.targeting,
+        )
     }
 
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
@@ -186,7 +190,9 @@ impl Game {
 pub(super) fn advance_first_hour_selection(
     session: &mut GameSession,
     progress: &mut crate::first_hour::FirstHourProgress,
+    targeting: &mut Option<TacticalTargeting>,
 ) -> bool {
+    *targeting = None;
     let selected = crate::phase_readiness::select_next(session).is_some();
     if selected {
         progress.selected();

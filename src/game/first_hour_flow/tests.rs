@@ -95,8 +95,17 @@ fn next_ready_selection_advances_the_first_hour_select_lesson() {
         lesson: crate::first_hour::TacticalLesson::Select,
         ..crate::first_hour::FirstHourProgress::default()
     };
+    let mut targeting = Some(TacticalTargeting::Equipment {
+        unit_id: "kira_voss".to_owned(),
+        equipment_id: "field_medkit".to_owned(),
+    });
 
-    assert!(advance_first_hour_selection(&mut session, &mut progress));
+    assert!(advance_first_hour_selection(
+        &mut session,
+        &mut progress,
+        &mut targeting
+    ));
+    assert!(targeting.is_none());
     assert_eq!(
         progress.lesson,
         crate::first_hour::TacticalLesson::MoveToCover

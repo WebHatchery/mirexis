@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.142.0
+Save/content version: 1.143.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -918,6 +918,7 @@ Migration coverage:
 | 1.140.0 | Battle-history filters reset when a new colony or tactical operation begins, preventing stale empty views across session boundaries; no new save fields |
 | 1.141.0 | Restarting the first-hour guide preserves the current campaign stage and only resets the active tactical lesson; no new save fields |
 | 1.142.0 | NEXT READY and controller unit selection advance the first-hour selection lesson like a direct colonist tap; no new save fields |
+| 1.143.0 | NEXT READY clears stale tactical targeting before changing unit focus; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
