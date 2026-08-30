@@ -32,3 +32,28 @@ fn feedback_tracks_only_damage_healing_and_status_events_for_a_bounded_time() {
     feedback.update(1.6);
     assert!(feedback.callouts.is_empty());
 }
+
+#[test]
+fn feedback_marks_missed_attacks_at_the_target_with_an_attacker_fallback() {
+    let mut feedback = CombatFeedback::default();
+    feedback.record_for(
+        &[BattleEvent::AttackRolled {
+            attacker_id: "brood_stalker_a".to_owned(),
+            target_id: "kira_voss".to_owned(),
+            roll: 96,
+            hit_chance: 72,
+        }],
+        0.8,
+    );
+
+    assert_eq!(feedback.callouts.len(), 1);
+    assert_eq!(feedback.callouts[0].unit_id, "kira_voss");
+    assert_eq!(
+        feedback.callouts[0].fallback_unit_id.as_deref(),
+        Some("brood_stalker_a")
+    );
+    assert_eq!(feedback.callouts[0].label, "MISS");
+    assert_eq!(feedback.callouts[0].tone, FeedbackTone::Miss);
+    feedback.update(0.81);
+    assert!(feedback.callouts.is_empty());
+}

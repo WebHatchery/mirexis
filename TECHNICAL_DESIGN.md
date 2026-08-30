@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.111.0
+Save/content version: 1.112.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -71,7 +71,7 @@ Important transition payloads:
 | `action_preview.rs` | Read-only validated movement/attack consequence and rejection projection | State mutation or drawing |
 | `action_preview_ui.rs` | Command banner, movement route, valid-shot tracer, and rejection styling | Command execution |
 | `battle_log_ui.rs` | Command-blocking recent ordered-event history panel | Simulation mutation |
-| `combat_feedback.rs` | Bounded transient damage, healing, and status callouts | Simulation mutation or persistence |
+| `combat_feedback.rs` | Bounded transient damage, healing, miss, and status callouts | Simulation mutation or persistence |
 | `briefing_intel_ui.rs` | Materialized contract, hostile, ability, and hazard briefing summary | Mission generation |
 | `briefing_loadout_ui.rs` | Selected colonist derived combat/loadout summary in briefing | Campaign mutation |
 | `briefing_deployment_ui.rs` | Squad rows, formation selector, and deploy/stand-down controls | Session creation |
@@ -881,6 +881,7 @@ Migration coverage:
 | 1.109.0 | First-operation tactical focus targets, command-rail emphasis, and guided capture evidence |
 | 1.110.0 | First-operation cover lesson requires an adjacent cover edge and gains reachable teaching geometry |
 | 1.111.0 | First-operation cover lesson enters the cover-edge tile used by deterministic forecasts |
+| 1.112.0 | Tactical miss callouts make failed attacks visible, including defended-asset fallback anchoring |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

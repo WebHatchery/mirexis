@@ -11,12 +11,14 @@ use macroquad_toolkit::prelude::TextStyle;
 enum FeedbackTone {
     Damage,
     Healing,
+    Miss,
     Status,
 }
 
 #[derive(Debug, Clone)]
 struct CombatCallout {
     unit_id: String,
+    fallback_unit_id: Option<String>,
     label: String,
     tone: FeedbackTone,
     remaining: f32,
@@ -86,7 +88,17 @@ impl CombatFeedback {
                 hit_chance,
             } = event
             {
-                pending_attack = Some((attacker_id, target_id, *roll <= 10 && roll <= hit_chance));
+                let hit = roll <= hit_chance;
+                pending_attack = Some((attacker_id, target_id, hit && *roll <= 10));
+                if !hit {
+                    self.callouts.push(CombatCallout {
+                        unit_id: target_id.clone(),
+                        fallback_unit_id: Some(attacker_id.clone()),
+                        label: "MISS".to_owned(),
+                        tone: FeedbackTone::Miss,
+                        remaining: lifetime,
+                    });
+                }
                 continue;
             }
             if let BattleEvent::DamageApplied { target_id, .. } = event {
@@ -120,6 +132,7 @@ impl CombatFeedback {
             };
             self.callouts.push(CombatCallout {
                 unit_id: unit_id.clone(),
+                fallback_unit_id: None,
                 label,
                 tone,
                 remaining: lifetime,
@@ -141,7 +154,12 @@ impl CombatFeedback {
             draw_impact(session, view, impact, assets, visuals);
         }
         for (index, callout) in self.callouts.iter().enumerate() {
-            let Some(unit) = session.unit(&callout.unit_id) else {
+            let Some(unit) = session.unit(&callout.unit_id).or_else(|| {
+                callout
+                    .fallback_unit_id
+                    .as_deref()
+                    .and_then(|unit_id| session.unit(unit_id))
+            }) else {
                 continue;
             };
             let same_unit_before = self.callouts[..index]
@@ -152,12 +170,13 @@ impl CombatFeedback {
             let color = match callout.tone {
                 FeedbackTone::Damage => Color::new(1.0, 0.32, 0.22, 1.0),
                 FeedbackTone::Healing => Color::new(0.32, 1.0, 0.58, 1.0),
+                FeedbackTone::Miss => Color::new(0.38, 0.76, 1.0, 1.0),
                 FeedbackTone::Status => Color::new(0.98, 0.78, 0.24, 1.0),
             };
-            let size = if callout.tone == FeedbackTone::Status {
-                12.0
-            } else {
-                20.0
+            let size = match callout.tone {
+                FeedbackTone::Status => 12.0,
+                FeedbackTone::Miss => 18.0,
+                _ => 20.0,
             };
             let dimensions = measure_text(&callout.label, None, size as u16, 1.0);
             let y = rect.y - 4.0 - same_unit_before as f32 * 15.0;

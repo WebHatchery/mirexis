@@ -130,7 +130,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | help | Help | Dense small-text modal | `ui_help.png` | PASS |
 | first_hour_guide | First-hour guide and playtest metrics | No canonical evidence for the observer-facing session readout | `ui_first_hour_guide.png` | PASS |
 | battle_log | Battle log | Plain chronological text | `ui_battle_log.png` | PASS |
-| combat_feedback | Tactical/feedback | Minimal impact/recoil/critical treatment | `ui_combat_feedback.png` | PASS |
+| combat_feedback | Tactical/feedback | Impact/recoil/critical and miss treatment | `ui_combat_feedback.png` | PASS |
 | phase_replay | Tactical/replay | Weak replay staging | `ui_phase_replay.png` | PASS |
 | end_phase_guard | Tactical/warning | Warning hierarchy is small | `ui_end_phase_guard.png` | PASS |
 | readiness_markers | Tactical/unit state | Tiny state markers | `ui_readiness_markers.png` | PASS |

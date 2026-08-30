@@ -324,6 +324,12 @@ impl Game {
                     amount: 3,
                     remaining: 6,
                 },
+                BattleEvent::AttackRolled {
+                    attacker_id: "mara_venn".to_owned(),
+                    target_id: "kira_voss".to_owned(),
+                    roll: 96,
+                    hit_chance: 62,
+                },
                 BattleEvent::UnitHealed {
                     unit_id: "mara_venn".to_owned(),
                     amount: 2,
