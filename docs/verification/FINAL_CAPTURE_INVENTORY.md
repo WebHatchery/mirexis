@@ -121,5 +121,5 @@ Manifest: `scripts/capture_ui.ps1`
 | 87 | weapon_profile | `ui_weapon_profile.png` | 590465 | `c5e6dd50e15942449ebc53432628c432974601dbb16d25b049f6f953bd9002d2` |
 | 88 | class_target | `ui_class_target.png` | 545325 | `3c2c5ffa5d23f38e9232227e6487d012ccba5312c8d70f46b79ccd961c3b5fe7` |
 | 89 | breach | `ui_breach.png` | 686023 | `c7342bce74a9e6ec5fc09d70b0502404ed33d9fb15ee63b6a9e8f29958850e37` |
-| 90 | debrief | `ui_debrief.png` | 191580 | `d6ee367247a56dec453b3de76914f3f15ecb6673bb7987583fdcba8687b84f4a` |
-| 91 | trauma_debrief | `ui_trauma_debrief.png` | 203134 | `8f79c52fc2bcc5fd150d3fb074f674849e25bb84ddfb1cf33d30c5756585751c` |
+| 90 | debrief | `ui_debrief.png` | 186927 | `31d2beba965407adc896fa64cacfd792f5b4c0e206738c32243f7b86f27e6208` |
+| 91 | trauma_debrief | `ui_trauma_debrief.png` | 193961 | `4bcb09898745e774fd247108d8d033cafbb97e7e5211f2ccb74a9f2f2b01aafb` |
