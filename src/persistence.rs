@@ -99,6 +99,11 @@ pub fn migrate_save_value(
     {
         save.campaign.strategy.regenerate_missions(data);
     }
+    if detected_version.as_deref() == Some("1.95.0")
+        && !save.campaign.strategy.mirexis_path_id.is_empty()
+    {
+        save.campaign.strategy.regenerate_missions(data);
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {

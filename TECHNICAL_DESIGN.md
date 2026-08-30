@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.95.0
+Save/content version: 1.96.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -640,6 +640,10 @@ repeatable path-specific epilogue operation: old Directorate fire in the Redoubt
 chorus in the Commonwealth, or a stranded traveller at the Threshold. Generic post-campaign
 operations remain available so a completed save is still playable. The `post_campaign` mission
 flag is path-gated, excluded before completion, and defaults false for older content and saves.
+The same path lock supplies a tactical engine effect to the finale and epilogue operation:
+Redoubt colonists gain armour, Commonwealth colonists recover additional health between phases,
+and Threshold colonists gain movement range. These are presented as engine effects rather than
+faction pressure and do not inflate the operation danger rating.
 Those views also derive a
 colony legacy dossier from the chosen institution, ready and recovering people, trusted bonds,
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
@@ -809,6 +813,7 @@ Migration coverage:
 | 1.93.0 | Finale dossier engine relationship, faction-pressure, and witnessed-mercy register |
 | 1.94.0 | Path-specific finale field notes for starting colonists and recruited outsiders |
 | 1.95.0 | Repeatable path-specific post-campaign epilogue operations |
+| 1.96.0 | Path-specific engine effects in finale and epilogue tactical operations |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -922,7 +927,8 @@ these explicit boundaries when continuing:
   that branch completes Escalation and enters Phase Five, where one identity path changes
   an existing colony economy and opens a dedicated operation against one of the three
   powers. Winning it reveals a path-specific truth and persists one of three campaign
-  endings while leaving optional post-campaign operations available.
+  endings, with a matching repeatable epilogue route and tactical engine effect available
+  afterward.
 - Saved content references need explicit validation before definitions can be removed
   or renamed safely.
 

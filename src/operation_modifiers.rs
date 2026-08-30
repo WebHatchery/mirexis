@@ -21,6 +21,15 @@ pub(crate) fn apply(modifier: OperationModifier, unit: &mut UnitState) {
         OperationModifier::EscalationCrossfire if unit.team == Team::Colony => {
             unit.accuracy -= 5;
         }
+        OperationModifier::MirexisRedoubt if unit.team == Team::Colony => {
+            unit.armour += 2;
+        }
+        OperationModifier::MirexisCommonwealth if unit.team == Team::Colony => {
+            unit.round_regeneration += 1;
+        }
+        OperationModifier::MirexisThreshold if unit.team == Team::Colony => {
+            unit.move_range = unit.move_range.saturating_add(1);
+        }
         _ => {}
     }
 }

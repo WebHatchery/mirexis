@@ -501,6 +501,9 @@ Goal: make the implemented five-phase foundation narratively complete.
   path-specific finale field notes and the ending register.
 - Implemented: add one repeatable, path-gated post-campaign operation for each engine future,
   using dedicated map variants and established objective verbs as an epilogue sandbox.
+- Implemented: carry each engine relationship into those finale and epilogue battles as a
+  distinct tactical effect—armour, regeneration, or movement guidance—without treating it as
+  another faction-pressure penalty.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and

@@ -190,7 +190,12 @@ pub fn draw_mission_briefing(
     if mission.operation_modifier != crate::data::OperationModifier::None {
         draw_ui_text_ex(
             &format!(
-                "PRESSURE MODIFIER // {} // {}",
+                "{} // {} // {}",
+                if mission.operation_modifier.is_engine_effect() {
+                    "ENGINE EFFECT"
+                } else {
+                    "PRESSURE MODIFIER"
+                },
                 mission.operation_modifier.label(),
                 mission.operation_modifier.description()
             ),

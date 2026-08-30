@@ -92,6 +92,25 @@ fn operation_pressure_modifiers_change_their_intended_team() {
         session.unit(&hostile.id).unwrap().move_range,
         hostile.move_range + 1
     );
+
+    mission.operation_modifier = OperationModifier::MirexisRedoubt;
+    let session = GameSession::new(&data.config, &mission, &data.roster);
+    assert_eq!(session.unit(&colony.id).unwrap().armour, colony.armour + 2);
+    assert_eq!(session.unit(&hostile.id).unwrap().armour, hostile.armour);
+
+    mission.operation_modifier = OperationModifier::MirexisCommonwealth;
+    let session = GameSession::new(&data.config, &mission, &data.roster);
+    assert_eq!(
+        session.unit(&colony.id).unwrap().round_regeneration,
+        colony.round_regeneration + 1
+    );
+
+    mission.operation_modifier = OperationModifier::MirexisThreshold;
+    let session = GameSession::new(&data.config, &mission, &data.roster);
+    assert_eq!(
+        session.unit(&colony.id).unwrap().move_range,
+        colony.move_range + 1
+    );
 }
 
 #[test]

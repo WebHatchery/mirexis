@@ -27,6 +27,19 @@ fn three_power_crossfire_rates_above_isolation_recovery() {
         for_instance(&strategy.mission_offers[0], &data).level,
         DangerLevel::Extreme
     );
+
+    for modifier in [
+        OperationModifier::MirexisRedoubt,
+        OperationModifier::MirexisCommonwealth,
+        OperationModifier::MirexisThreshold,
+    ] {
+        let mut engine_effect = routine.clone();
+        engine_effect.operation_modifier = modifier;
+        assert_eq!(
+            for_instance(&engine_effect, &data).score,
+            for_instance(&routine, &data).score
+        );
+    }
 }
 
 #[test]

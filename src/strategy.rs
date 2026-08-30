@@ -626,17 +626,18 @@ impl StrategyState {
             .iter()
             .find(|faction| faction.id == template.faction)
             .map_or(0, |faction| faction.attention);
-        let operation_modifier = if template.required_phase == "escalation" {
-            OperationModifier::EscalationCrossfire
-        } else if attention < 20 {
-            OperationModifier::None
-        } else {
-            match template.faction.as_str() {
+        let operation_modifier = match template.required_mirexis_path.as_str() {
+            "human_redoubt" => OperationModifier::MirexisRedoubt,
+            "living_commonwealth" => OperationModifier::MirexisCommonwealth,
+            "open_threshold" => OperationModifier::MirexisThreshold,
+            _ if template.required_phase == "escalation" => OperationModifier::EscalationCrossfire,
+            _ if attention < 20 => OperationModifier::None,
+            _ => match template.faction.as_str() {
                 "directorate" => OperationModifier::DirectorateFireControl,
                 "brood" => OperationModifier::BroodFrenzy,
                 "ascendants" => OperationModifier::AscendantInterference,
                 _ => OperationModifier::None,
-            }
+            },
         };
         MissionInstance {
             id: format!("{}_{}", template.id, seed & 0xffff),

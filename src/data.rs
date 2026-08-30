@@ -4,7 +4,9 @@ use macroquad_toolkit::assets::TextureConfig;
 use serde::{Deserialize, Serialize};
 
 mod loader;
+mod operation;
 mod techniques;
+pub use operation::OperationModifier;
 pub use techniques::{TechniqueDef, TechniqueTarget};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,41 +51,6 @@ pub struct MissionDef {
     pub hazards: Vec<HazardDef>,
     #[serde(default)]
     pub cover_edges: Vec<CoverEdgeDef>,
-}
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum OperationModifier {
-    #[default]
-    None,
-    DirectorateFireControl,
-    BroodFrenzy,
-    AscendantInterference,
-    EscalationCrossfire,
-}
-
-impl OperationModifier {
-    pub fn label(self) -> &'static str {
-        match self {
-            Self::None => "NO ESCALATION",
-            Self::DirectorateFireControl => "DIRECTORATE FIRE-CONTROL",
-            Self::BroodFrenzy => "BROOD FRENZY",
-            Self::AscendantInterference => "ASCENDANT INTERFERENCE",
-            Self::EscalationCrossfire => "THREE-POWER CROSSFIRE",
-        }
-    }
-
-    pub fn description(self) -> &'static str {
-        match self {
-            Self::None => "No faction-pressure modifier is active.",
-            Self::DirectorateFireControl => "Hostile attacks gain 10 accuracy.",
-            Self::BroodFrenzy => "Hostile units gain 1 movement.",
-            Self::AscendantInterference => "Colonist attacks lose 10 accuracy.",
-            Self::EscalationCrossfire => {
-                "Hostiles gain 5 accuracy and 1 movement; colonists lose 5 accuracy."
-            }
-        }
-    }
 }
 
 fn default_cover_integrity() -> i32 {

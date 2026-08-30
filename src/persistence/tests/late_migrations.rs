@@ -1,5 +1,7 @@
 use super::*;
 
+mod engine_effects;
+
 #[test]
 fn gene_lab_save_gains_maras_unevolved_paths() {
     let data = GameData::load().unwrap();

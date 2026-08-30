@@ -106,7 +106,10 @@ fn rate(
         _ => 0,
     };
     let modifier_pressure = match modifier {
-        OperationModifier::None => 0,
+        OperationModifier::None
+        | OperationModifier::MirexisRedoubt
+        | OperationModifier::MirexisCommonwealth
+        | OperationModifier::MirexisThreshold => 0,
         OperationModifier::EscalationCrossfire => 4,
         _ => 2,
     };
