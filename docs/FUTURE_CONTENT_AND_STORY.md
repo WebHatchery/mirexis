@@ -511,8 +511,9 @@ Goal: make the implemented five-phase foundation narratively complete.
 - Implemented: add one post-campaign stewardship action per identity building, with a saved
   per-operation marker, disclosed resource cost, linked faction-pressure reduction, and a
   path-specific contact reflection.
-- Stage each finale around a relationship with the refuge engine, not simply defeating a
-  faction boss.
+- Implemented: stage each finale around a relationship with the refuge engine through distinct
+  objective contracts—the Redoubt defends the Arsenal core, the Commonwealth secures and
+  holds its answering chorus, and the Threshold binds and clears the open route.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and
   witnessed-mercy flags.
 

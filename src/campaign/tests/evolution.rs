@@ -334,13 +334,14 @@ fn mirexis_paths_change_defense_supply_and_recovery() {
 #[test]
 fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
     let data = GameData::load().unwrap();
-    for (path_id, template_id, post_template_id, ending_title, modifier) in [
+    for (path_id, template_id, post_template_id, ending_title, modifier, objective_kind) in [
         (
             "human_redoubt",
             "mirexis_redoubt_last_wall",
             "epilogue_redoubt_old_fire",
             "THE LAST WALL HOLDS",
             crate::data::OperationModifier::MirexisRedoubt,
+            crate::data::ObjectiveKind::DefendAsset,
         ),
         (
             "living_commonwealth",
@@ -348,6 +349,7 @@ fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
             "epilogue_commonwealth_new_roots",
             "THE ROOT CHOIR ANSWERS",
             crate::data::OperationModifier::MirexisCommonwealth,
+            crate::data::ObjectiveKind::SignalTrace,
         ),
         (
             "open_threshold",
@@ -355,6 +357,7 @@ fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
             "epilogue_threshold_return",
             "THE DOOR OF LIGHT OPENS",
             crate::data::OperationModifier::MirexisThreshold,
+            crate::data::ObjectiveKind::SecureAndClear,
         ),
     ] {
         let mut campaign = CampaignState::new(&data);
@@ -370,6 +373,7 @@ fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
         let mission = campaign.strategy.selected_mission().unwrap().clone();
         assert_eq!(mission.template_id, template_id);
         assert_eq!(mission.operation_modifier, modifier);
+        assert_eq!(mission.objective_kind, objective_kind);
         let outcome = MissionOutcome {
             result: ObjectiveState::Victory,
             colonists_deployed: 3,

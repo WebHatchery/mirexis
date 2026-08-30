@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.98.0
+Save/content version: 1.99.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -624,12 +624,13 @@ Costs, effects, and affordability are visible in the colony hub; the chosen path
 saved and continues to modify the existing defense, supply, or recovery calculation.
 
 Committing that choice immediately regenerates mission offers around one path-locked
-Phase Five operation. Human Redoubt opens `LAST WALL`, a Directorate elimination battle
-through a breached settlement perimeter. Living Commonwealth opens `ROOT CHOIR`, a
-Brood signal trace in a living garden. Open Threshold opens `DOOR OF LIGHT`, an
-Ascendant secure-and-clear operation at the colony's new gate. These templates remain
-mutually exclusive, carry distinct objectives and map families, and are prioritized
-for both new campaigns and migrated saves that already committed an identity.
+Phase Five operation. Human Redoubt opens `LAST WALL` as a Defend Asset battle around
+the Arsenal core, with Directorate breach teams testing whether the refuge will answer
+to the Redoubt. Living Commonwealth opens `ROOT CHOIR` as a Brood signal trace in a
+living garden. Open Threshold opens `DOOR OF LIGHT` as an Ascendant secure-and-clear
+operation at the colony's new gate. These templates remain mutually exclusive, carry
+distinct engine-facing objectives and map families, and are prioritized for both new
+campaigns and migrated saves that already committed an identity.
 
 Winning the operation belonging to the committed path sets the persistent Mirexis
 operation and campaign completion gates. The selected path supplies a data-backed ending
@@ -828,6 +829,7 @@ Migration coverage:
 | 1.96.0 | Path-specific engine effects in finale and epilogue tactical operations |
 | 1.97.0 | Persistent epilogue-work count and post-operation identity reflections |
 | 1.98.0 | Repeatable post-campaign identity-building stewardship and civic-pressure consequences |
+| 1.99.0 | Engine-facing finale objective contracts for the Redoubt, Commonwealth, and Threshold |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

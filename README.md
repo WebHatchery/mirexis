@@ -42,6 +42,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   stranded traveller home through the Threshold.
 - Finale and epilogue operations carry the chosen engine relationship into combat: hardened
   Redoubt armour, Commonwealth regeneration, or Threshold movement guidance.
+- Each finale has an engine-facing objective contract: defend the Redoubt Arsenal core,
+  secure the Commonwealth chorus, or bind and clear the Threshold route.
 - Victories in the continuing epilogue are recorded in the ending register and unlock a
   path-specific follow-up reflection from the identity contact.
 - After campaign completion, each identity building offers one stewardship action per operation:
