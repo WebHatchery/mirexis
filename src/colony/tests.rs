@@ -167,6 +167,49 @@ fn power_plant_level_two_branches_queue_complete_and_change_the_grid() {
 }
 
 #[test]
+fn hydroponics_level_two_branches_change_food_and_biomass_yields() {
+    let mut kitchen = ColonyState::new();
+    let hydroponics_id = kitchen
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Hydroponics)
+        .unwrap()
+        .id
+        .clone();
+    kitchen
+        .queue_facility_upgrade(&hydroponics_id, COMMUNITY_KITCHEN_UPGRADE)
+        .unwrap();
+    kitchen.advance_operation();
+    assert!(kitchen.has_active_upgrade(BuildingKind::Hydroponics, COMMUNITY_KITCHEN_UPGRADE));
+    assert_eq!(kitchen.resources.food, 29);
+    assert_eq!(kitchen.resources.biomass, 12);
+
+    let mut culture_beds = ColonyState::new();
+    let hydroponics_id = culture_beds
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Hydroponics)
+        .unwrap()
+        .id
+        .clone();
+    culture_beds
+        .queue_facility_upgrade(&hydroponics_id, CULTURE_BEDS_UPGRADE)
+        .unwrap();
+    culture_beds.advance_operation();
+    assert!(culture_beds.has_active_upgrade(BuildingKind::Hydroponics, CULTURE_BEDS_UPGRADE));
+    assert_eq!(culture_beds.resources.food, 27);
+    assert_eq!(culture_beds.resources.biomass, 14);
+    culture_beds
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == hydroponics_id)
+        .unwrap()
+        .damaged = true;
+    culture_beds.advance_operation();
+    assert_eq!(culture_beds.resources.biomass, 14);
+}
+
+#[test]
 fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() {
     for kind in [
         BuildingKind::Barricade,

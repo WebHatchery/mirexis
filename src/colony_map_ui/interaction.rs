@@ -35,12 +35,13 @@ pub(super) fn draw_hover_card(
         } else if building.kind == BuildingKind::GeneLab {
             "GENE LAB // TAP TO OPEN EVOLUTION CHAMBER".to_owned()
         } else if building.kind == BuildingKind::Commons {
+            let food_cost = campaign.commons_meal_food_cost();
             if campaign.commons_meal_available() {
-                "COMMONS // TAP TO HOST SHARED MEAL // 4 FOOD".to_owned()
+                format!("COMMONS // TAP TO HOST SHARED MEAL // {food_cost} FOOD")
             } else if campaign.commons_meal_operation == Some(campaign.operations_completed) {
                 "COMMONS // SHARED MEAL ALREADY HOSTED THIS OPERATION".to_owned()
             } else {
-                "COMMONS // NEEDS 4 FOOD + 2 READY SQUAD MEMBERS".to_owned()
+                format!("COMMONS // NEEDS {food_cost} FOOD + 2 READY SQUAD MEMBERS")
             }
         } else if building.kind == BuildingKind::RelayMast {
             if campaign.relay_scan_available() {

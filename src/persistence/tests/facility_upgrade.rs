@@ -19,7 +19,7 @@ fn legacy_save_without_facility_upgrade_fields_defaults_to_empty_state() {
         .queue_facility_upgrade(&plant_id, HOT_CORE_UPGRADE)
         .unwrap();
     let session = GameSession::new(&data.config, &data.mission, &data.roster);
-    let mut legacy = serde_json::to_value(session.to_save("1.75.0", &campaign)).unwrap();
+    let mut legacy = serde_json::to_value(session.to_save("1.76.0", &campaign)).unwrap();
     let current =
         migrate_save_value(Some(data.config.version.clone()), legacy.clone(), &data).unwrap();
     assert_eq!(
@@ -39,7 +39,7 @@ fn legacy_save_without_facility_upgrade_fields_defaults_to_empty_state() {
     colony.remove("facility_upgrade_queue");
     colony.remove("facility_upgrades");
 
-    let migrated = migrate_save_value(Some("1.75.0".to_owned()), legacy, &data).unwrap();
+    let migrated = migrate_save_value(Some("1.76.0".to_owned()), legacy, &data).unwrap();
 
     assert!(migrated.campaign.colony.facility_upgrade_queue.is_empty());
     assert!(migrated.campaign.colony.facility_upgrades.is_empty());

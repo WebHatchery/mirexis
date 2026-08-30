@@ -1,7 +1,6 @@
 //! Strategic facility-upgrade actions emitted by the colony operations panel.
 
 use super::Game;
-use crate::colony::BuildingKind;
 use crate::ui::UiAction;
 
 impl Game {
@@ -9,15 +8,16 @@ impl Game {
         match action {
             UiAction::OpenFacilityUpgrade => {
                 let can_open = self.campaign.colony.buildings.iter().any(|building| {
-                    building.kind == BuildingKind::PowerPlant
+                    !building.kind.upgrade_options().is_empty()
                         && building.level < 2
                         && !building.damaged
+                        && self.campaign.colony.building_is_powered(&building.id)
                 });
                 if can_open {
                     self.facility_upgrade_open = true;
                 } else {
                     self.notifications
-                        .warning("The Power Plant cannot accept an upgrade right now");
+                        .warning("No facility can accept an upgrade right now");
                 }
                 true
             }

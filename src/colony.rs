@@ -8,6 +8,8 @@ pub const COLONY_HEIGHT: i32 = 20;
 pub const SETTLEMENT_CENTER: [i32; 2] = [10, 10];
 pub const REDUNDANT_GRID_UPGRADE: &str = "redundant_grid";
 pub const HOT_CORE_UPGRADE: &str = "hot_core";
+pub const COMMUNITY_KITCHEN_UPGRADE: &str = "community_kitchen";
+pub const CULTURE_BEDS_UPGRADE: &str = "culture_beds";
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -87,6 +89,18 @@ impl BuildingKind {
                     id: HOT_CORE_UPGRADE,
                     name: "Hot Core",
                     description: "The plant feeds three extra power, but draws more attention.",
+                },
+            ],
+            Self::Hydroponics => &[
+                FacilityUpgradeOption {
+                    id: COMMUNITY_KITCHEN_UPGRADE,
+                    name: "Community Kitchen",
+                    description: "The harvest feeds more mouths and makes Commons meals cheaper.",
+                },
+                FacilityUpgradeOption {
+                    id: CULTURE_BEDS_UPGRADE,
+                    name: "Culture Beds",
+                    description: "The beds cultivate two extra biomass after each operation.",
                 },
             ],
             _ => &[],
@@ -403,19 +417,36 @@ impl ColonyState {
                 });
             }
         }
-        self.resources.food += if self.has_facility(BuildingKind::Hydroponics) {
-            3
+        let hydroponics_online = self.has_facility(BuildingKind::Hydroponics);
+        self.resources.food += if hydroponics_online {
+            3 + i32::from(
+                self.has_active_upgrade(BuildingKind::Hydroponics, COMMUNITY_KITCHEN_UPGRADE),
+            ) * 2
         } else if self.has_facility(BuildingKind::CommandCentre) {
             1
         } else {
             0
         };
+        if hydroponics_online
+            && self.has_active_upgrade(BuildingKind::Hydroponics, CULTURE_BEDS_UPGRADE)
+        {
+            self.resources.biomass += 2;
+        }
     }
 
     pub fn has_upgrade(&self, building_id: &str, upgrade_id: &str) -> bool {
         self.facility_upgrades
             .iter()
             .any(|upgrade| upgrade.building_id == building_id && upgrade.upgrade_id == upgrade_id)
+    }
+
+    pub fn has_active_upgrade(&self, kind: BuildingKind, upgrade_id: &str) -> bool {
+        self.buildings.iter().any(|building| {
+            building.kind == kind
+                && !building.damaged
+                && self.has_upgrade(&building.id, upgrade_id)
+                && self.building_is_powered(&building.id)
+        })
     }
 
     pub fn queue_facility_upgrade(

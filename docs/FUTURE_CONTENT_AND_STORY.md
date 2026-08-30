@@ -293,9 +293,9 @@ The current fixed facilities already cover command, training, medicine, crafting
 power, and mutation evolution. Future work should give those places upgrades, inhabitants,
 and events before adding many new structures.
 
-Each core facility may reach level 2 and choose one visible branch. The Power Plant's
-first branch pair is implemented as the initial vertical slice of this system. Level 3 should be
-reserved for the late-game colony identity, not a generic numeric improvement.
+Each core facility may reach level 2 and choose one visible branch. The Power Plant and
+Hydroponics branch pairs are implemented as the initial vertical slice of this system.
+Level 3 should be reserved for the late-game colony identity, not a generic numeric improvement.
 
 | Facility | Branch A | Branch B | Defence consequence |
 |---|---|---|---|
@@ -303,7 +303,7 @@ reserved for the late-game colony identity, not a generic numeric improvement.
 | Barracks | **Simulation Hall:** cheaper retraining and skill trials | **Doctrine Yard:** squad formation and preparation options | Provides a rally zone or training barricades in colony defence. |
 | Infirmary | **Trauma Ward:** better scar and recovery choices | **Adaptation Clinic:** safer mutation complications and biological treatment | Can stabilise one nearby defender or become an urgent casualty objective. |
 | Workshop | **Precision Bench:** weapon and armour modification | **Drone Bay:** reusable deployables and repairs | Adds a friendly emplacement but stores volatile components. |
-| Hydroponics | **Community Kitchen:** food efficiency and relationship events | **Culture Beds:** biomass cultivation and biotech ingredients | Creates soft cover and a fragile food objective. |
+| Hydroponics | **Community Kitchen:** food efficiency and relationship events *(implemented)* | **Culture Beds:** biomass cultivation and biotech ingredients *(implemented)* | Creates soft cover and a fragile food objective. |
 | Power Plant | **Redundant Grid:** damage tolerance and reliable supply *(implemented)* | **Hot Core:** higher supply with an attention cost *(implemented)* | Changes which systems fail first during an assault. |
 | Gene Lab | **Stabilisation Wing:** manage complications and reversals | **Evolution Chamber:** stronger or earlier mutation evolution | Provides bio-cover but risks a hostile growth if breached. |
 
@@ -435,6 +435,8 @@ Goal: make building and upgrade choices visible in city life and defence.
   to colony defence and loses that benefit when the grid fails.
 - Implemented: queue the first level-2 Power Plant branch, complete it after an operation,
   and carry its supply or faction-attention consequence through saves and mission outcomes.
+- Implemented: queue a level-2 Hydroponics branch, with Community Kitchen improving food
+  and Commons efficiency or Culture Beds growing biomass while the facility is online.
 - Implement the three identity buildings and their defence-map consequences.
 - Connect power failure, damage, repair, and NPC scenes to every new facility.
 

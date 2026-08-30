@@ -6,7 +6,6 @@ mod derivation;
 mod outsider;
 mod relay;
 
-pub(crate) use commons::COMMONS_MEAL_FOOD_COST;
 pub(super) use derivation::derive_unit;
 pub(crate) use outsider::{outsider_beat, OutsiderChoice};
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};

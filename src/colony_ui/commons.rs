@@ -1,6 +1,6 @@
 //! Operations-panel affordance for the Commons social preparation action.
 
-use crate::campaign::{CampaignState, COMMONS_MEAL_FOOD_COST};
+use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
@@ -19,7 +19,10 @@ pub(super) fn draw(
     let label = if already_hosted {
         "COMMONS MEAL // HOSTED THIS OPERATION".to_owned()
     } else {
-        format!("HOST COMMONS MEAL // {} FOOD", COMMONS_MEAL_FOOD_COST)
+        format!(
+            "HOST COMMONS MEAL // {} FOOD",
+            campaign.commons_meal_food_cost()
+        )
     };
     if button(
         Rect::new(878.0, 344.0, 176.0, 30.0),
