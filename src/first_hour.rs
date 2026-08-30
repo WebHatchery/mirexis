@@ -151,8 +151,10 @@ impl FirstHourProgress {
         self.advance_lesson(TacticalLesson::Select, TacticalLesson::MoveToCover);
     }
 
-    pub(crate) fn moved(&mut self) {
-        self.advance_lesson(TacticalLesson::MoveToCover, TacticalLesson::Attack);
+    pub(crate) fn moved(&mut self, beside_cover: bool) {
+        if beside_cover {
+            self.advance_lesson(TacticalLesson::MoveToCover, TacticalLesson::Attack);
+        }
     }
 
     pub(crate) fn attacked(&mut self) {

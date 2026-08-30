@@ -23,3 +23,10 @@ pub(crate) fn penalty(edges: &[CoverEdgeDef], target: TilePos, attacker: TilePos
         })
         .map_or(0, |edge| i32::from(edge.strength))
 }
+
+pub(crate) fn is_adjacent_to_edge(edges: &[CoverEdgeDef], tile: TilePos) -> bool {
+    edges.iter().any(|edge| {
+        let cover = TilePos::new(edge.position[0], edge.position[1]);
+        (cover.x - tile.x).abs() + (cover.y - tile.y).abs() == 1
+    })
+}

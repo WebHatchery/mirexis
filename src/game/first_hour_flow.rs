@@ -2,9 +2,41 @@
 
 use super::{AppState, Game};
 use crate::ui::{self, UiAction};
+use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::ui::VirtualUi;
 
 impl Game {
+    pub(super) fn create_first_hour_session(
+        &self,
+        roster: &[crate::data::UnitDef],
+    ) -> crate::state::GameSession {
+        let mut session =
+            crate::state::GameSession::new(&self.data.config, &self.active_mission, roster);
+        if self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::FirstOperation
+            && !session
+                .tactical
+                .cover_edges
+                .iter()
+                .any(|edge| edge.position == [6, 18])
+        {
+            session
+                .tactical
+                .cover_edges
+                .push(crate::data::CoverEdgeDef {
+                    position: [6, 18],
+                    direction: crate::data::EdgeDirection::North,
+                    strength: 25,
+                });
+        }
+        session
+    }
+
+    pub(super) fn record_first_hour_move(&mut self, tile: TilePos) {
+        let beside_cover =
+            crate::cover_rules::is_adjacent_to_edge(&self.session.tactical.cover_edges, tile);
+        self.campaign.first_hour.moved(beside_cover);
+    }
+
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
         if self.state != AppState::Title
             && !(self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete

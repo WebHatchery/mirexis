@@ -489,8 +489,7 @@ impl Game {
                         &self.data.config,
                         self.deployment_formation,
                     );
-                    self.session =
-                        GameSession::new(&self.data.config, &self.active_mission, &roster);
+                    self.session = self.create_first_hour_session(&roster);
                     self.tactical_camera =
                         WorldCamera::tactical_start(self.session.tactical.selected_tile);
                     self.state = AppState::Tactical;
@@ -667,7 +666,7 @@ impl Game {
             }
             UiAction::MoveSelected(tile) => {
                 if self.session.move_selected_to(tile) {
-                    self.campaign.first_hour.moved();
+                    self.record_first_hour_move(tile);
                     self.notifications.info("Colonist repositioned");
                 } else {
                     self.notifications

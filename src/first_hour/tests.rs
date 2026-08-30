@@ -18,7 +18,9 @@ fn tactical_lessons_follow_the_authored_order() {
     progress.attacked();
     assert_eq!(progress.lesson, TacticalLesson::Select);
     progress.selected();
-    progress.moved();
+    progress.moved(false);
+    assert_eq!(progress.lesson, TacticalLesson::MoveToCover);
+    progress.moved(true);
     progress.attacked();
     progress.ended_phase();
     progress.touched_objective();

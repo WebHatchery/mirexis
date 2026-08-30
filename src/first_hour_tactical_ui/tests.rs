@@ -31,12 +31,24 @@ fn tactical_focus_is_gated_to_guided_first_operation() {
 
 #[test]
 fn tactical_focus_tracks_cover_objective_and_hostile_targets() {
-    let session = session();
+    let mut session = session();
     let selected = session.selected_unit().unwrap().position;
+    session
+        .tactical
+        .cover_edges
+        .push(crate::data::CoverEdgeDef {
+            position: [6, 18],
+            direction: crate::data::EdgeDirection::North,
+            strength: 25,
+        });
 
     let move_target = map_focus_tile(&progress(TacticalLesson::MoveToCover), &session).unwrap();
     assert_ne!(move_target, selected);
     assert!(session.can_move_selected_to(move_target));
+    assert!(crate::cover_rules::is_adjacent_to_edge(
+        &session.tactical.cover_edges,
+        move_target
+    ));
 
     assert_eq!(
         map_focus_tile(&progress(TacticalLesson::Objective), &session),
