@@ -148,6 +148,7 @@ fn tactical_save_gains_technique_runtime_fields() {
             "active_skills",
             "used_skill_ids",
             "next_attack_ignores_armour",
+            "next_equipment_overcharged",
         ] {
             unit.remove(key);
         }
@@ -170,6 +171,7 @@ fn tactical_save_gains_technique_runtime_fields() {
         .any(|skill| skill.ends_with("_fundamentals")));
     assert!(colonist.used_skill_ids.is_empty());
     assert!(!colonist.next_attack_ignores_armour);
+    assert!(!colonist.next_equipment_overcharged);
 }
 #[test]
 fn class_action_save_gains_reinforcement_queue() {

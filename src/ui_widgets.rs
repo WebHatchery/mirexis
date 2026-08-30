@@ -79,8 +79,13 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
     } else {
         "CLASS READY"
     };
+    let equipment = if unit.next_equipment_overcharged {
+        " · EQUIPMENT OVERCHARGE READY"
+    } else {
+        ""
+    };
     if unit.statuses.is_empty() {
-        format!("{} · {}", mutation, class)
+        format!("{} · {}{}", mutation, class, equipment)
     } else {
         let statuses = unit
             .statuses
@@ -90,7 +95,7 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
             })
             .collect::<Vec<_>>()
             .join(" / ");
-        format!("{} · {}", statuses, class)
+        format!("{} · {}{}", statuses, class, equipment)
     }
 }
 

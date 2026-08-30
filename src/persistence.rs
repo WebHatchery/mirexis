@@ -363,6 +363,8 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             .or_insert_with(|| serde_json::json!([]));
         unit.entry("next_attack_ignores_armour".to_owned())
             .or_insert_with(|| serde_json::json!(false));
+        unit.entry("next_equipment_overcharged".to_owned())
+            .or_insert_with(|| serde_json::json!(false));
     }
     Ok(())
 }

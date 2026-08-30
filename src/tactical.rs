@@ -135,6 +135,8 @@ pub struct UnitState {
     #[serde(default)]
     pub next_attack_ignores_armour: bool,
     #[serde(default)]
+    pub next_equipment_overcharged: bool,
+    #[serde(default)]
     pub class_action_used: bool,
     #[serde(default)]
     pub used_equipment_ids: Vec<String>,
@@ -187,6 +189,7 @@ impl UnitState {
             temporary_weapon_damage: 0,
             used_skill_ids: Vec::new(),
             next_attack_ignores_armour: false,
+            next_equipment_overcharged: false,
             class_action_used: false,
             used_equipment_ids: Vec::new(),
             statuses: Vec::new(),

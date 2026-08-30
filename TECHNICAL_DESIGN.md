@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.67.0
+Save/content version: 1.68.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -177,11 +177,14 @@ tiles share the same presentation; previewing never mutates state or consumes RN
   Static Rifts Disrupt. Units are immune to hazards authored by their own faction.
 - Hazard geometry is serialized, mirrored with its map recipe, visibly marked, and named
   in both the grid legend and ordered battle events.
-- Soldier, Defender, and Scout each have two data-defined techniques. Controlled Burst
-  fires twice for the weapon cost, Armour Drill halves armour for the next attack,
-  Interpose and Anchor Point apply one-phase Guarded protection, Slipstep crosses a
-  highlighted hazard without landing resolution, and Spotter's Mark grants the next
-  allied attack a cover-breaking accuracy bonus.
+- Soldier, Defender, Scout, Medic, and Engineer each have two data-defined techniques.
+  Controlled Burst fires twice for the weapon cost, Armour Drill halves armour for the
+  next attack, Interpose and Anchor Point apply one-phase Guarded protection, Slipstep
+  crosses a highlighted hazard without landing resolution, and Spotter's Mark grants the
+  next allied attack a cover-breaking accuracy bonus. Stabilise revives an incapacitated
+  ally at one vitality without actions, Combat Stimulant trades two immediate ally AP for
+  two Hindered phases, Portable Cover places adjacent destructible directional cover, and
+  Overcharge strengthens the next carried equipment action.
 - Colony-defense blocked tiles are derived from saved building coordinates.
 - Destroyed cover is removed from the authoritative blocked set, immediately opening
   that tile to pathfinding and any firing line that crosses it.
@@ -666,6 +669,8 @@ Migration coverage:
 | 1.56.0 | No new fields; danger reach derives from one validated move and remaining attack AP |
 | 1.64.0 | Persistent first-hour stage, tactical lesson, outcomes, investment, and guide settings; 1.63 saves infer arrival, investment, or completion from resolved operations |
 | 1.65.0 | Persistent first-hour elapsed time, milestone timings, operation duration/round counts, invalid commands, and guide opens; 1.64 onboarding progress remains exact while metrics default safely |
+| 1.67.0 | Soldier, Defender, and Scout technique pairs, active loadouts, tactical targeting, and phase-use migration |
+| 1.68.0 | Medic and Engineer technique pairs, one-round equipment overcharge state, and legacy tactical default migration |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

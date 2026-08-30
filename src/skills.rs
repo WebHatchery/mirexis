@@ -1,8 +1,8 @@
 //! Data-backed base-class techniques and their deterministic tactical effects.
 
-use crate::data::{Team, TechniqueTarget};
+use crate::data::{CoverEdgeDef, EdgeDirection, Team, TechniqueTarget};
 use crate::state::{BattleEvent, Command, CommandCost, GameSession, RuleError, UnitState};
-use crate::tactical::{manhattan, path_cost, StatusKind};
+use crate::tactical::{manhattan, path_cost, StatusKind, UnitAnimationState};
 use macroquad_toolkit::grid::TilePos;
 
 pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
@@ -13,6 +13,10 @@ pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
         "anchor_point" => Some("ANCHOR POINT"),
         "slipstep" => Some("SLIPSTEP"),
         "spotters_mark" => Some("SPOTTER'S MARK"),
+        "stabilise" => Some("STABILISE"),
+        "combat_stimulant" => Some("COMBAT STIMULANT"),
+        "portable_cover" => Some("PORTABLE COVER"),
+        "overcharge" => Some("OVERCHARGE"),
         _ => None,
     }
 }
@@ -20,9 +24,9 @@ pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
 pub(crate) fn target_kind(skill_id: &str) -> Option<TechniqueTarget> {
     match skill_id {
         "controlled_burst" | "spotters_mark" => Some(TechniqueTarget::Hostile),
-        "interpose" => Some(TechniqueTarget::Ally),
-        "slipstep" => Some(TechniqueTarget::Tile),
-        "armour_drill" | "anchor_point" => Some(TechniqueTarget::SelfTarget),
+        "interpose" | "stabilise" | "combat_stimulant" => Some(TechniqueTarget::Ally),
+        "slipstep" | "portable_cover" => Some(TechniqueTarget::Tile),
+        "armour_drill" | "anchor_point" | "overcharge" => Some(TechniqueTarget::SelfTarget),
         _ => None,
     }
 }
@@ -35,9 +39,9 @@ pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str, skill_id: &
     match target_kind(skill_id) {
         Some(TechniqueTarget::Tile) => session
             .tactical
-            .hazards
-            .iter()
-            .any(|hazard| can_target_tile(session, unit_id, skill_id, hazard.position)),
+            .fog
+            .iter_with_pos()
+            .any(|(tile, _)| can_target_tile(session, unit_id, skill_id, tile)),
         Some(TechniqueTarget::SelfTarget) => session
             .validate(&Command::ActivateSkill {
                 unit_id: unit_id.to_owned(),
@@ -161,19 +165,21 @@ pub(crate) fn validate(
         return Err(RuleError::SkillUnavailable);
     }
     let valid = match target_kind(skill_id) {
-        Some(TechniqueTarget::SelfTarget) => target_id.is_none() && target_tile.is_none(),
+        Some(TechniqueTarget::SelfTarget) => {
+            target_id.is_none() && target_tile.is_none() && valid_self_target(unit, skill_id)
+        }
         Some(TechniqueTarget::Hostile) => {
             target_id
                 .is_some_and(|target_id| valid_hostile_target(session, unit, skill_id, target_id))
                 && target_tile.is_none()
         }
         Some(TechniqueTarget::Ally) => {
-            target_id.is_some_and(|target_id| valid_ally_target(session, unit, target_id))
+            target_id.is_some_and(|target_id| valid_ally_target(session, unit, skill_id, target_id))
                 && target_tile.is_none()
         }
         Some(TechniqueTarget::Tile) => {
             target_id.is_none()
-                && target_tile.is_some_and(|tile| valid_slipstep_tile(session, unit, tile))
+                && target_tile.is_some_and(|tile| valid_tile_target(session, unit, skill_id, tile))
         }
         None => false,
     };
@@ -207,24 +213,76 @@ fn valid_hostile_target(
         && (skill_id == "spotters_mark" || session.has_line_of_fire(unit.position, target.position))
 }
 
-fn valid_ally_target(session: &GameSession, unit: &UnitState, target_id: &str) -> bool {
+fn valid_ally_target(
+    session: &GameSession,
+    unit: &UnitState,
+    skill_id: &str,
+    target_id: &str,
+) -> bool {
     session.unit(target_id).is_some_and(|target| {
         target.team == Team::Colony
             && target.id != unit.id
-            && !target.incapacitated
-            && manhattan(unit.position, target.position) <= 2
+            && (skill_id == "stabilise" || !target.incapacitated)
+            && manhattan(unit.position, target.position)
+                <= if skill_id == "interpose" { 2 } else { 4 }
     })
 }
 
-fn valid_slipstep_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
-    session
-        .tactical
-        .hazards
-        .iter()
-        .any(|hazard| hazard.position == tile)
-        && session.movement_path(&unit.id, tile).is_some_and(|path| {
-            let cost = path_cost(&path, &session.tactical.terrain_costs);
-            cost > 0 && cost <= unit.effective_move_range()
+fn valid_tile_target(
+    session: &GameSession,
+    unit: &UnitState,
+    skill_id: &str,
+    tile: TilePos,
+) -> bool {
+    match skill_id {
+        "slipstep" => {
+            session
+                .tactical
+                .hazards
+                .iter()
+                .any(|hazard| hazard.position == tile)
+                && session.movement_path(&unit.id, tile).is_some_and(|path| {
+                    let cost = path_cost(&path, &session.tactical.terrain_costs);
+                    cost > 0 && cost <= unit.effective_move_range()
+                })
+        }
+        "portable_cover" => valid_cover_tile(session, unit, tile),
+        _ => false,
+    }
+}
+
+fn valid_cover_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
+    manhattan(unit.position, tile) == 1
+        && session.tactical.fog.is_valid(tile)
+        && !session.tactical.blocked.contains(&tile)
+        && !session
+            .tactical
+            .units
+            .iter()
+            .any(|other| other.position == tile)
+        && !session
+            .tactical
+            .hazards
+            .iter()
+            .any(|hazard| hazard.position == tile)
+        && tile != session.tactical.objective_tile
+        && !session
+            .tactical
+            .destructible_cover
+            .iter()
+            .any(|cover| cover.position == tile)
+        && !session
+            .tactical
+            .cover_edges
+            .iter()
+            .any(|edge| edge.position == [tile.x, tile.y])
+}
+
+fn valid_self_target(unit: &UnitState, skill_id: &str) -> bool {
+    skill_id != "overcharge"
+        || unit.equipment_ids.iter().any(|equipment_id| {
+            crate::equipment_actions::action_name(equipment_id).is_some()
+                && !unit.used_equipment_ids.contains(equipment_id)
         })
 }
 
@@ -316,6 +374,41 @@ pub(crate) fn execute(
                 &mut events,
             );
         }
+        "stabilise" => {
+            spend_one_action_point(session, unit_id);
+            stabilise_target(
+                session,
+                target_id.expect("validated stabilise target"),
+                &mut events,
+            );
+        }
+        "combat_stimulant" => {
+            spend_one_action_point(session, unit_id);
+            let target_id = target_id.expect("validated stimulant target");
+            let target = unit_mut(session, target_id).expect("validated stimulant target");
+            target.action_points = target.action_points.saturating_add(2);
+            crate::class_actions::apply_status(
+                session,
+                target_id,
+                StatusKind::Hindered,
+                2,
+                &mut events,
+            );
+        }
+        "portable_cover" => {
+            spend_one_action_point(session, unit_id);
+            place_portable_cover(
+                session,
+                unit_id,
+                target_tile.expect("validated portable cover tile"),
+            );
+        }
+        "overcharge" => {
+            spend_one_action_point(session, unit_id);
+            unit_mut(session, unit_id)
+                .expect("validated overcharge user")
+                .next_equipment_overcharged = true;
+        }
         _ => unreachable!("validated skill has an implementation"),
     }
     if skill_id != "controlled_burst" {
@@ -335,6 +428,53 @@ fn spend_one_action_point(session: &mut GameSession, unit_id: &str) {
     unit_mut(session, unit_id)
         .expect("validated skill user")
         .action_points -= 1;
+}
+
+fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
+    let target = unit_mut(session, target_id).expect("validated stabilise target");
+    let before = target.health;
+    target.health = 1.min(target.max_health);
+    target.incapacitated = false;
+    target.presentation_state = UnitAnimationState::Idle;
+    target.presentation_seconds = 0.0;
+    events.push(BattleEvent::UnitHealed {
+        unit_id: target_id.to_owned(),
+        amount: target.health - before,
+        remaining: target.health,
+    });
+}
+
+fn place_portable_cover(session: &mut GameSession, unit_id: &str, position: TilePos) {
+    let origin = session
+        .unit(unit_id)
+        .expect("validated cover user")
+        .position;
+    session.tactical.blocked.insert(position);
+    session
+        .tactical
+        .destructible_cover
+        .push(crate::state::DestructibleCover {
+            position,
+            health: 6,
+            max_health: 6,
+        });
+    session.tactical.cover_edges.push(CoverEdgeDef {
+        position: [position.x, position.y],
+        direction: cover_direction(origin, position),
+        strength: 18,
+    });
+}
+
+fn cover_direction(origin: TilePos, position: TilePos) -> EdgeDirection {
+    if origin.x < position.x {
+        EdgeDirection::West
+    } else if origin.x > position.x {
+        EdgeDirection::East
+    } else if origin.y < position.y {
+        EdgeDirection::North
+    } else {
+        EdgeDirection::South
+    }
 }
 
 fn unit_mut<'a>(session: &'a mut GameSession, unit_id: &str) -> Option<&'a mut UnitState> {

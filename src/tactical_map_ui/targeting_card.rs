@@ -22,14 +22,11 @@ pub(crate) fn draw_skill_target_tiles(ctx: &UiContext<'_>, view: GridView) {
     if crate::skills::target_kind(skill_id) != Some(crate::data::TechniqueTarget::Tile) {
         return;
     }
-    for hazard in &ctx.session.tactical.hazards {
-        if crate::skills::can_target_tile(ctx.session, unit_id, skill_id, hazard.position) {
-            super::draw_diamond_fill(
-                view.diamond(hazard.position),
-                Color::new(0.95, 0.65, 0.20, 0.25),
-            );
+    for (position, _) in ctx.session.tactical.fog.iter_with_pos() {
+        if crate::skills::can_target_tile(ctx.session, unit_id, skill_id, position) {
+            super::draw_diamond_fill(view.diamond(position), Color::new(0.95, 0.65, 0.20, 0.25));
             super::draw_diamond_outline(
-                view.diamond(hazard.position),
+                view.diamond(position),
                 Color::new(1.0, 0.78, 0.30, 1.0),
                 3.0,
             );

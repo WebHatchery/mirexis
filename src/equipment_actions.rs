@@ -117,6 +117,8 @@ pub(crate) fn execute(
         .expect("validated equipment user exists");
     unit.action_points -= 1;
     unit.used_equipment_ids.push(equipment_id.to_owned());
+    let overcharged = unit.next_equipment_overcharged;
+    unit.next_equipment_overcharged = false;
     let mut events = vec![BattleEvent::EquipmentUsed {
         unit_id: unit_id.to_owned(),
         equipment_id: equipment_id.to_owned(),
@@ -131,7 +133,8 @@ pub(crate) fn execute(
                 .find(|unit| unit.id == target_id)
                 .expect("validated equipment target exists");
             let before = target.health;
-            target.health = (target.health + 5).min(target.max_health);
+            let amount = if overcharged { 8 } else { 5 };
+            target.health = (target.health + amount).min(target.max_health);
             events.push(BattleEvent::UnitHealed {
                 unit_id: target_id.to_owned(),
                 amount: target.health - before,
@@ -142,14 +145,14 @@ pub(crate) fn execute(
             session,
             target_id,
             StatusKind::Guarded,
-            2,
+            if overcharged { 3 } else { 2 },
             &mut events,
         ),
         "survey_harness" => crate::class_actions::apply_status(
             session,
             target_id,
             StatusKind::Disrupted,
-            2,
+            if overcharged { 3 } else { 2 },
             &mut events,
         ),
         _ => unreachable!("validated equipment has an action"),

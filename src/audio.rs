@@ -188,6 +188,7 @@ fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
         | BattleEvent::ObjectiveDestroyed => Some(SoundCue::Objective),
         BattleEvent::MutationActivated { .. }
         | BattleEvent::ClassActionActivated { .. }
+        | BattleEvent::SkillActivated { .. }
         | BattleEvent::EquipmentUsed { .. }
         | BattleEvent::EnemyAbilityActivated { .. } => Some(SoundCue::Ability),
         BattleEvent::DamageApplied { .. }

@@ -2,9 +2,9 @@ use crate::campaign::CampaignState;
 use crate::data::GameData;
 
 #[test]
-fn base_classes_expose_two_data_backed_techniques() {
+fn support_and_combat_classes_expose_two_data_backed_techniques() {
     let data = GameData::load().unwrap();
-    for class_id in ["soldier", "defender", "scout"] {
+    for class_id in ["soldier", "defender", "scout", "medic", "engineer"] {
         let class = data
             .classes
             .iter()

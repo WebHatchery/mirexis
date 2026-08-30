@@ -1,5 +1,5 @@
 use crate::campaign::CampaignState;
-use crate::data::{GameData, HazardKind};
+use crate::data::{EdgeDirection, GameData, HazardKind};
 use crate::state::GameSession;
 use crate::tactical::{BattleEvent, HazardTile, StatusKind};
 use macroquad_toolkit::grid::TilePos;
@@ -12,6 +12,25 @@ fn session_with_skill(skill_id: &str) -> GameSession {
     let kira = unit_mut(&mut session, "kira_voss");
     kira.active_skills.push(skill_id.to_owned());
     session.tactical.selected_unit = Some("kira_voss".to_owned());
+    session
+}
+
+fn session_with_unit_skill(unit_id: &str, skill_id: &str) -> GameSession {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mut roster = campaign.deployment_roster(&data, &data.mission);
+    if !roster.iter().any(|unit| unit.id == unit_id) {
+        roster.push(
+            campaign
+                .derived_character_unit(unit_id, &data)
+                .expect("test unit has a derived character profile"),
+        );
+    }
+    let mut session = GameSession::new(&data.config, &data.mission, &roster);
+    unit_mut(&mut session, unit_id)
+        .active_skills
+        .push(skill_id.to_owned());
+    session.tactical.selected_unit = Some(unit_id.to_owned());
     session
 }
 
@@ -137,4 +156,120 @@ fn slipstep_reaches_a_hazard_without_triggering_its_landing_effect() {
     assert!(!events
         .iter()
         .any(|event| matches!(event, BattleEvent::HazardTriggered { .. })));
+}
+
+#[test]
+fn stabilise_revives_an_incapacitated_ally_without_granting_actions() {
+    let mut session = session_with_unit_skill("ilya_reed", "stabilise");
+    unit_mut(&mut session, "ilya_reed").position = TilePos::new(5, 20);
+    let target = unit_mut(&mut session, "mara_venn");
+    target.position = TilePos::new(6, 20);
+    target.health = 0;
+    target.incapacitated = true;
+    target.action_points = 0;
+
+    let events = session
+        .activate_skill_on("ilya_reed", "stabilise", "mara_venn")
+        .unwrap();
+
+    let target = session.unit("mara_venn").unwrap();
+    assert_eq!(target.health, 1);
+    assert!(!target.incapacitated);
+    assert_eq!(target.action_points, 0);
+    assert!(events.iter().any(|event| matches!(
+        event,
+        BattleEvent::UnitHealed {
+            unit_id,
+            amount: 1,
+            remaining: 1
+        } if unit_id == "mara_venn"
+    )));
+}
+
+#[test]
+fn combat_stimulant_trades_two_actions_for_a_visible_hindered_window() {
+    let mut session = session_with_unit_skill("ilya_reed", "combat_stimulant");
+    unit_mut(&mut session, "ilya_reed").position = TilePos::new(5, 20);
+    let target = unit_mut(&mut session, "mara_venn");
+    target.position = TilePos::new(6, 20);
+    target.action_points = 1;
+
+    session
+        .activate_skill_on("ilya_reed", "combat_stimulant", "mara_venn")
+        .unwrap();
+
+    let target = session.unit("mara_venn").unwrap();
+    assert_eq!(target.action_points, 3);
+    assert_eq!(
+        target
+            .statuses
+            .iter()
+            .find(|status| status.kind == StatusKind::Hindered)
+            .unwrap()
+            .remaining_phases,
+        2
+    );
+}
+
+#[test]
+fn portable_cover_blocks_an_empty_adjacent_tile_with_directional_protection() {
+    let mut session = session_with_unit_skill("sol_cairn", "portable_cover");
+    let position = TilePos::new(6, 19);
+    let cover_tile = TilePos::new(7, 19);
+    unit_mut(&mut session, "sol_cairn").position = position;
+
+    session
+        .activate_skill_on_tile("sol_cairn", "portable_cover", cover_tile)
+        .unwrap();
+
+    assert!(session.tactical.blocked.contains(&cover_tile));
+    assert_eq!(
+        session
+            .tactical
+            .destructible_cover
+            .iter()
+            .find(|cover| cover.position == cover_tile)
+            .unwrap()
+            .health,
+        6
+    );
+    assert!(session.tactical.cover_edges.iter().any(|edge| {
+        edge.position == [7, 19] && edge.direction == EdgeDirection::West && edge.strength == 18
+    }));
+}
+
+#[test]
+fn overcharge_improves_the_next_equipment_action_and_is_consumed() {
+    let mut session = session_with_unit_skill("sol_cairn", "overcharge");
+    unit_mut(&mut session, "sol_cairn").position = TilePos::new(6, 19);
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(7, 19);
+
+    session.activate_selected_skill("overcharge").unwrap();
+    assert!(
+        session
+            .unit("sol_cairn")
+            .unwrap()
+            .next_equipment_overcharged
+    );
+    session
+        .use_equipment("sol_cairn", "field_toolkit", "kira_voss")
+        .unwrap();
+
+    assert!(
+        !session
+            .unit("sol_cairn")
+            .unwrap()
+            .next_equipment_overcharged
+    );
+    assert_eq!(
+        session
+            .unit("kira_voss")
+            .unwrap()
+            .statuses
+            .iter()
+            .find(|status| status.kind == StatusKind::Guarded)
+            .unwrap()
+            .remaining_phases,
+        3
+    );
 }

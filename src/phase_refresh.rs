@@ -14,6 +14,7 @@ impl GameSession {
                 unit.class_action_used = false;
                 unit.enemy_ability_used = false;
                 unit.used_skill_ids.clear();
+                unit.next_equipment_overcharged = false;
                 unit.temporary_armour = 0;
                 unit.temporary_accuracy = 0;
                 unit.temporary_move_range = 0;
