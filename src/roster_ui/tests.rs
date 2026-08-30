@@ -10,3 +10,51 @@ fn full_recruited_roster_stays_above_relationships() {
     assert!(step < default_step);
     assert!(last_row_bottom <= 524.0);
 }
+
+#[test]
+fn training_labels_name_the_blocking_prerequisite() {
+    assert_eq!(
+        class_training_label(false, None, false, true, "Scout", 80),
+        "SCOUT · REQUIRES BARRACKS"
+    );
+    assert_eq!(
+        class_training_label(false, None, true, false, "Scout", 80),
+        "SCOUT · NEEDS 80 MAT"
+    );
+    assert_eq!(
+        class_training_label(false, Some("REQUIRES LEVEL 3"), true, true, "Vanguard", 110,),
+        "VANGUARD · REQUIRES LEVEL 3"
+    );
+}
+
+#[test]
+fn technique_labels_name_barracks_xp_and_slot_gates() {
+    assert_eq!(
+        technique_label(false, false, false, true, true, "Stabilise", 20),
+        "REQUIRES BARRACKS: Stabilise"
+    );
+    assert_eq!(
+        technique_label(false, false, true, false, true, "Stabilise", 20),
+        "NEEDS 20 XP: Stabilise"
+    );
+    assert_eq!(
+        technique_label(false, true, true, true, false, "Stabilise", 20),
+        "SLOTS FULL: Stabilise"
+    );
+}
+
+#[test]
+fn equipment_labels_name_workshop_and_material_gates() {
+    assert_eq!(
+        equipment_label(true, false, false, false, true, "Field Medkit", 20),
+        "REQUIRES WORKSHOP: Field Medkit"
+    );
+    assert_eq!(
+        equipment_label(true, false, false, true, false, "Field Medkit", 20),
+        "NEEDS 20 MAT: Field Medkit"
+    );
+    assert_eq!(
+        equipment_label(false, false, false, true, true, "Exile Cipher", 20),
+        "LOCKED: Exile Cipher"
+    );
+}

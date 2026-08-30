@@ -19,6 +19,75 @@ fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
     (row_step, (row_step - 4.0).max(44.0))
 }
 
+fn class_training_label(
+    active: bool,
+    lock_reason: Option<&str>,
+    has_barracks: bool,
+    affordable: bool,
+    class_name: &str,
+    cost: u32,
+) -> String {
+    if active {
+        format!("ACTIVE: {}", class_name)
+    } else if let Some(reason) = lock_reason {
+        format!("{} · {}", class_name.to_uppercase(), reason)
+    } else if !has_barracks {
+        format!("{} · REQUIRES BARRACKS", class_name.to_uppercase())
+    } else if !affordable {
+        format!("{} · NEEDS {} MAT", class_name.to_uppercase(), cost)
+    } else {
+        format!("TRAIN: {} · {} MAT", class_name, cost)
+    }
+}
+
+fn technique_label(
+    active: bool,
+    learned: bool,
+    has_barracks: bool,
+    has_experience: bool,
+    has_slot: bool,
+    technique_name: &str,
+    required_experience: u32,
+) -> String {
+    if active {
+        format!("EQUIPPED: {}", technique_name)
+    } else if learned && !has_slot {
+        format!("SLOTS FULL: {}", technique_name)
+    } else if learned {
+        format!("EQUIP: {}", technique_name)
+    } else if !has_barracks {
+        format!("REQUIRES BARRACKS: {}", technique_name)
+    } else if !has_experience {
+        format!("NEEDS {} XP: {}", required_experience, technique_name)
+    } else {
+        format!("LEARN: {} · {} XP", technique_name, required_experience)
+    }
+}
+
+fn equipment_label(
+    unlocked: bool,
+    equipped: bool,
+    prototype_available: bool,
+    has_workshop: bool,
+    affordable: bool,
+    item_name: &str,
+    cost: u32,
+) -> String {
+    if !unlocked {
+        format!("LOCKED: {}", item_name)
+    } else if equipped {
+        format!("EQUIPPED: {}", item_name)
+    } else if prototype_available {
+        format!("PROTOTYPE: {}", item_name)
+    } else if !has_workshop {
+        format!("REQUIRES WORKSHOP: {}", item_name)
+    } else if !affordable {
+        format!("NEEDS {} MAT: {}", cost, item_name)
+    } else {
+        format!("CRAFT: {} · {} MAT", item_name, cost)
+    }
+}
+
 pub(crate) fn draw_roster(
     campaign: &CampaignState,
     data: &GameData,
@@ -337,10 +406,18 @@ fn draw_selected_character(
     for (index, class) in data.classes.iter().enumerate() {
         let cost = campaign.training_cost(&character.id, class).unwrap_or(100);
         let lock = campaign.class_training_lock_reason(&character.id, class);
-        let enabled = campaign.colony.has_facility(BuildingKind::Barracks)
-            && character.active_class != class.id
-            && lock.is_none()
-            && campaign.colony.resources.materials >= cost as i32;
+        let has_barracks = campaign.colony.has_facility(BuildingKind::Barracks);
+        let affordable = campaign.colony.resources.materials >= cost as i32;
+        let enabled =
+            has_barracks && character.active_class != class.id && lock.is_none() && affordable;
+        let label = class_training_label(
+            character.active_class == class.id,
+            lock.as_deref(),
+            has_barracks,
+            affordable,
+            &class.name,
+            cost,
+        );
         let column = index % 3;
         let row = index / 3;
         let rect = Rect::new(
@@ -352,18 +429,7 @@ fn draw_selected_character(
         if rect.contains(mouse) {
             inspected_class = Some(class);
         }
-        if button(
-            rect,
-            &if character.active_class == class.id {
-                format!("ACTIVE: {}", class.name)
-            } else if let Some(reason) = lock {
-                format!("{} · {}", class.name.to_uppercase(), reason)
-            } else {
-                format!("TRAIN: {} · {} MAT", class.name, cost)
-            },
-            enabled,
-            mouse,
-        ) {
+        if button(rect, &label, enabled, mouse) {
             actions.push(UiAction::TrainSelected(class.id.clone()));
         }
     }
@@ -409,19 +475,23 @@ fn draw_selected_character(
                 .iter()
                 .filter(|skill| class.techniques.iter().any(|entry| &entry.id == *skill))
                 .count();
+            let has_barracks = campaign.colony.has_facility(BuildingKind::Barracks);
+            let has_experience = character.experience >= required_experience;
+            let has_slot = equipped_count < class.technique_slots as usize;
             let enabled = if learned {
-                active || equipped_count < class.technique_slots as usize
+                active || has_slot
             } else {
-                campaign.colony.has_facility(BuildingKind::Barracks)
-                    && character.experience >= required_experience
+                has_barracks && has_experience
             };
-            let label = if active {
-                format!("EQUIPPED: {}", technique.name)
-            } else if learned {
-                format!("EQUIP: {}", technique.name)
-            } else {
-                format!("LEARN: {} · {} XP", technique.name, required_experience)
-            };
+            let label = technique_label(
+                active,
+                learned,
+                has_barracks,
+                has_experience,
+                has_slot,
+                &technique.name,
+                required_experience,
+            );
             if button(rect, "", enabled, mouse) {
                 actions.push(if learned {
                     UiAction::ToggleSelectedSkill(technique.id.clone())
@@ -508,10 +578,9 @@ fn draw_selected_character(
         let unlocked = campaign.equipment_is_unlocked(item);
         let prototype_available =
             campaign.salvage_prototypes > 0 && item.required_protocol.is_empty();
-        let enabled = campaign.colony.has_facility(BuildingKind::Workshop)
-            && unlocked
-            && !equipped
-            && (prototype_available || campaign.colony.resources.materials >= cost as i32);
+        let has_workshop = campaign.colony.has_facility(BuildingKind::Workshop);
+        let affordable = prototype_available || campaign.colony.resources.materials >= cost as i32;
+        let enabled = has_workshop && unlocked && !equipped && affordable;
         let column = index % 3;
         let row = index / 3;
         let rect = Rect::new(
@@ -520,15 +589,15 @@ fn draw_selected_character(
             282.0,
             30.0,
         );
-        let label = if !unlocked {
-            format!("LOCKED: {}", item.name)
-        } else if equipped {
-            format!("EQUIPPED: {}", item.name)
-        } else if prototype_available {
-            format!("PROTOTYPE: {}", item.name)
-        } else {
-            format!("CRAFT: {} · {} MAT", item.name, cost)
-        };
+        let label = equipment_label(
+            unlocked,
+            equipped,
+            prototype_available,
+            has_workshop,
+            affordable,
+            &item.name,
+            cost,
+        );
         if button(rect, "", enabled, mouse) {
             actions.push(UiAction::CraftSelected(item.id.clone()));
         }
