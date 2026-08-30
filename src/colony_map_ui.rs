@@ -126,7 +126,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
         camera.guard_next_primary_release();
     }
     if explorer.build_mode() {
-        interaction::draw_hover_card(campaign, hovered, camera.pending_colony_plot());
+        interaction::draw_hover_card(campaign, data, hovered, camera.pending_colony_plot());
         interaction::handle_plot_click(
             campaign,
             data,

@@ -9,6 +9,7 @@ use macroquad::prelude::*;
 
 pub(super) fn draw_hover_card(
     campaign: &CampaignState,
+    data: &GameData,
     hovered: Option<[i32; 2]>,
     pending: Option<[i32; 2]>,
 ) {
@@ -64,14 +65,19 @@ pub(super) fn draw_hover_card(
         } else if building.kind == BuildingKind::Watchtower {
             "WATCHTOWER // ONLINE // STRONG WESTERN COVER".to_owned()
         } else if building.kind == BuildingKind::Waystation {
-            if !campaign
+            if let Some(outsider) = campaign.available_outsider(data) {
+                format!(
+                    "WAYSTATION // TAP TO REVIEW {}",
+                    outsider.origin.to_uppercase()
+                )
+            } else if campaign
                 .roster
                 .iter()
-                .any(|character| character.id == "veya_orn")
+                .any(|character| !character.origin.is_empty())
             {
-                "WAYSTATION // TAP TO REVIEW DIRECTORATE EXILE".to_owned()
-            } else {
                 "WAYSTATION // CONTACT ROUTE STABLE // ONLINE".to_owned()
+            } else {
+                "WAYSTATION // ONLINE // AWAITING CONTACT ROUTE".to_owned()
             }
         } else {
             format!(
