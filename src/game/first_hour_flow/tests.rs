@@ -111,3 +111,13 @@ fn next_ready_selection_advances_the_first_hour_select_lesson() {
         crate::first_hour::TacticalLesson::MoveToCover
     );
 }
+
+#[test]
+fn first_hour_guide_actions_keep_tactical_save_context_when_needed() {
+    assert!(first_hour_action_needs_current_save(AppState::Tactical));
+    assert!(first_hour_action_needs_current_save(AppState::Debrief));
+    assert!(!first_hour_action_needs_current_save(AppState::Colony));
+    assert!(!first_hour_action_needs_current_save(
+        AppState::MissionBriefing
+    ));
+}

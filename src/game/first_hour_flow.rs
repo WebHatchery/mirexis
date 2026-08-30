@@ -141,8 +141,16 @@ impl Game {
             }
             _ => return false,
         };
-        self.autosave_campaign_only(save_message);
+        self.autosave_first_hour_action(save_message);
         true
+    }
+
+    fn autosave_first_hour_action(&mut self, success_message: &str) {
+        if first_hour_action_needs_current_save(self.state) {
+            self.autosave_current(success_message);
+        } else {
+            self.autosave_campaign_only(success_message);
+        }
     }
 
     pub(super) fn record_first_hour_outcome(&mut self) {
@@ -185,6 +193,10 @@ impl Game {
                 .unwrap_or_else(|| fallback.to_owned()),
         );
     }
+}
+
+fn first_hour_action_needs_current_save(state: AppState) -> bool {
+    matches!(state, AppState::Tactical | AppState::Debrief)
 }
 
 pub(super) fn advance_first_hour_selection(
