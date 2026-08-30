@@ -9,6 +9,7 @@ use crate::grid_ui::WorldCamera;
 use crate::phase_replay::PhaseReplay;
 use crate::state::GameSession;
 use crate::ui::UiAction;
+use crate::ui_action::BattleLogFilter;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::Texture2D;
 use macroquad_toolkit::assets::AssetManager;
@@ -77,6 +78,7 @@ impl Game {
             targeting: None,
             show_tactical_help: false,
             show_battle_log: false,
+            battle_log_filter: BattleLogFilter::All,
             combat_feedback: CombatFeedback::default(),
             observed_event_count: 0,
             phase_replay: PhaseReplay::default(),

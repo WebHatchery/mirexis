@@ -3,6 +3,14 @@
 use crate::colony::BuildingKind;
 use macroquad_toolkit::grid::TilePos;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BattleLogFilter {
+    All,
+    Combat,
+    Ground,
+    System,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartMission,
@@ -66,6 +74,7 @@ pub enum UiAction {
     SkipPhaseReplay,
     ToggleTacticalHelp,
     ToggleBattleLog,
+    SetBattleLogFilter(BattleLogFilter),
     AdvanceFirstHour,
     AcknowledgeColonist(String),
     ToggleFirstHourHelp,

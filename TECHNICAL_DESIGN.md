@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.136.0
+Save/content version: 1.137.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -70,7 +70,7 @@ Important transition payloads:
 | `main.rs` | Window configuration, frame loop, capture entry | Game rules |
 | `action_preview.rs` | Read-only validated movement/attack consequence and rejection projection | State mutation or drawing |
 | `action_preview_ui.rs` | Command banner, movement route, valid-shot tracer, and rejection styling | Command execution |
-| `battle_log_ui.rs` | Command-blocking recent ordered-event history panel | Simulation mutation |
+| `battle_log_ui.rs` | Command-blocking recent ordered-event history panel with semantic filters | Simulation mutation |
 | `combat_feedback.rs` | Bounded transient damage, healing, miss, and status callouts | Simulation mutation or persistence |
 | `briefing_intel_ui.rs` | Materialized contract, hostile, ability, and hazard briefing summary | Mission generation |
 | `briefing_loadout_ui.rs` | Selected colonist derived combat/loadout summary in briefing | Campaign mutation |
@@ -912,6 +912,7 @@ Migration coverage:
 | 1.134.0 | Blocking colony overlays also suppress map gestures, walking, approaches, drawer toggles, and stale camera interaction; no new save fields |
 | 1.135.0 | First-hour help and settings also suppress tactical camera gestures and world-input state; no new save fields |
 | 1.136.0 | Loading a save clears transient overlays, end-phase confirmation, combat feedback, and aligns the audio event cursor with restored tactical history; no new save fields |
+| 1.137.0 | Battle history adds touch-visible ALL, COMBAT, GROUND, and SYSTEM filters while preserving original event numbering; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

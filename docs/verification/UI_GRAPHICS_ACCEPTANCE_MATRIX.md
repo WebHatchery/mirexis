@@ -137,7 +137,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | first_hour_return | First-hour return/recovery handoff | First return names a colonist but does not visibly route or highlight the conversation target | `ui_first_hour_return.png` | PASS |
 | first_hour_promise | First-hour promise consequence | Second-operation outcome does not visibly distinguish a hardened outer route from a breach | `ui_first_hour_promise.png` | PASS |
 | first_hour_operations | First-hour colony handoff | Operations drawer does not make the next briefing action obvious | `ui_first_hour_operations.png` | PASS |
-| battle_log | Battle log | Plain chronological text | `ui_battle_log.png` | PASS |
+| battle_log | Battle log | Chronological event history with touch-visible semantic filters | `ui_battle_log.png` | PASS |
 | combat_feedback | Tactical/feedback | Impact/recoil/critical and miss treatment | `ui_combat_feedback.png` | PASS |
 | phase_replay | Tactical/replay | Weak replay staging | `ui_phase_replay.png` | PASS |
 | end_phase_guard | Tactical/warning | Warning hierarchy is small | `ui_end_phase_guard.png` | PASS |

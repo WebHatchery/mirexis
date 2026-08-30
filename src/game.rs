@@ -32,6 +32,7 @@ use crate::grid_ui::WorldCamera;
 use crate::phase_replay::PhaseReplay;
 use crate::state::{GameSession, MissionOutcome};
 use crate::ui::{self, TargetingView, UiAction, UiContext};
+use crate::ui_action::BattleLogFilter;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -62,6 +63,7 @@ pub struct Game {
     targeting: Option<TacticalTargeting>,
     show_tactical_help: bool,
     show_battle_log: bool,
+    battle_log_filter: BattleLogFilter,
     combat_feedback: CombatFeedback,
     observed_event_count: usize,
     phase_replay: PhaseReplay,
@@ -197,6 +199,7 @@ impl Game {
                     }),
                     show_help: self.show_tactical_help,
                     show_battle_log: self.show_battle_log,
+                    battle_log_filter: self.battle_log_filter,
                     show_settings: self.show_settings,
                 },
                 &mut self.tactical_camera,
@@ -705,6 +708,7 @@ impl Game {
                 self.show_tactical_help = false;
                 self.targeting = None;
             }
+            UiAction::SetBattleLogFilter(filter) => self.battle_log_filter = filter,
             UiAction::Save => self.save_game(),
             UiAction::Load => self.load_game(),
             _ => unreachable!("prehandled application action reached the game state match"),

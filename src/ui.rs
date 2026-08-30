@@ -118,6 +118,7 @@ pub struct UiContext<'a> {
     pub targeting: Option<TargetingView<'a>>,
     pub show_help: bool,
     pub show_battle_log: bool,
+    pub battle_log_filter: crate::ui_action::BattleLogFilter,
     pub show_settings: bool,
 }
 
@@ -333,7 +334,7 @@ pub fn draw_tactical(
         crate::help_ui::draw(mouse, &mut actions);
     } else if ctx.show_battle_log {
         actions.clear();
-        crate::battle_log_ui::draw(ctx.session, mouse, &mut actions);
+        crate::battle_log_ui::draw(ctx.session, ctx.battle_log_filter, mouse, &mut actions);
     }
     if ctx.phase_replay.is_active() {
         actions.clear();

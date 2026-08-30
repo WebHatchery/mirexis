@@ -108,7 +108,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 73 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
 | 74 | first_hour_promise | `ui_first_hour_promise.png` | 880688 | `1074d5123a8762eee8c922f4e2efbbd897be1100cb860e2f182e953c7bcf48a5` |
 | 75 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
-| 76 | battle_log | `ui_battle_log.png` | 372152 | `f70c358f9d6ad10037fab7f49bf77daa03d4a7dc21d706b58e6240fc399d152d` |
+| 76 | battle_log | `ui_battle_log.png` | 655810 | `3a0d56f8d97647193717f7d0a882db8e0f7111fa2f601700eb7f0d2f744d88c0` |
 | 77 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |
 | 78 | phase_replay | `ui_phase_replay.png` | 559533 | `c8eace3ed8ec5c0736af49d223accd1021977243b20876553edd0b389c9dcf53` |
 | 79 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |

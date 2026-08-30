@@ -1,14 +1,26 @@
 //! Expandable recent battle-event history over the live tactical field.
 
-use crate::state::GameSession;
+use crate::state::{BattleEvent, GameSession};
 use crate::ui::UiAction;
-use crate::ui_widgets::{button, event_summary};
+use crate::ui_action::BattleLogFilter;
+use crate::ui_widgets::{button, button_with_state, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-const VISIBLE_EVENTS: usize = 10;
+const VISIBLE_EVENTS: usize = 9;
+const FILTERS: [(BattleLogFilter, &str); 4] = [
+    (BattleLogFilter::All, "ALL"),
+    (BattleLogFilter::Combat, "COMBAT"),
+    (BattleLogFilter::Ground, "GROUND"),
+    (BattleLogFilter::System, "SYSTEM"),
+];
 
-pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub(crate) fn draw(
+    session: &GameSession,
+    filter: BattleLogFilter,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.62));
     let panel = Rect::new(690.0, 88.0, 550.0, 544.0);
     draw_surface(
@@ -28,13 +40,27 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
         panel.y + 67.0,
         TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
-    let start = session
+    for (index, (option, label)) in FILTERS.iter().enumerate() {
+        let rect = Rect::new(
+            panel.x + 24.0 + index as f32 * 122.0,
+            panel.y + 78.0,
+            116.0,
+            28.0,
+        );
+        if button_with_state(rect, label, true, filter == *option, mouse) {
+            actions.push(UiAction::SetBattleLogFilter(*option));
+        }
+    }
+    let filtered_events = session
         .tactical
         .event_log
-        .len()
-        .saturating_sub(VISIBLE_EVENTS);
-    for (row, event) in session.tactical.event_log[start..].iter().enumerate() {
-        let y = panel.y + 92.0 + row as f32 * 39.0;
+        .iter()
+        .enumerate()
+        .filter(|(_, event)| filter_matches(filter, event))
+        .collect::<Vec<_>>();
+    let start = filtered_events.len().saturating_sub(VISIBLE_EVENTS);
+    for (row, &(event_index, event)) in filtered_events[start..].iter().enumerate() {
+        let y = panel.y + 112.0 + row as f32 * 39.0;
         let row_rect = Rect::new(panel.x + 18.0, y, panel.w - 36.0, 34.0);
         draw_rectangle(
             row_rect.x,
@@ -49,7 +75,7 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
         );
         draw_event_icon(event, vec2(row_rect.x + 18.0, row_rect.y + 17.0));
         draw_text_ex(
-            format!("{:02}", start + row + 1),
+            format!("{:02}", event_index + 1),
             row_rect.x + 34.0,
             row_rect.y + 14.0,
             TextStyle::new(10.0, Color::new(0.46, 0.66, 0.62, 1.0)).params(),
@@ -67,11 +93,15 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
             TextStyle::new(10.0, Color::new(0.45, 0.62, 0.60, 1.0)).params(),
         );
     }
-    if session.tactical.event_log.is_empty() {
+    if filtered_events.is_empty() {
         draw_text_ex(
-            "No tactical events recorded yet.",
+            if session.tactical.event_log.is_empty() {
+                "No tactical events recorded yet."
+            } else {
+                "No events match this filter."
+            },
             panel.x + 24.0,
-            panel.y + 118.0,
+            panel.y + 236.0,
             TextStyle::new(15.0, dark::TEXT_DIM).params(),
         );
     }
@@ -90,8 +120,31 @@ pub(crate) fn draw(session: &GameSession, mouse: Vec2, actions: &mut Vec<UiActio
     }
 }
 
-fn event_kind(event: &crate::state::BattleEvent) -> &'static str {
-    use crate::state::BattleEvent::*;
+fn filter_matches(filter: BattleLogFilter, event: &BattleEvent) -> bool {
+    filter == BattleLogFilter::All || event_filter(event) == filter
+}
+
+fn event_filter(event: &BattleEvent) -> BattleLogFilter {
+    use BattleEvent::*;
+    match event {
+        AttackRolled { .. }
+        | DamageApplied { .. }
+        | UnitIncapacitated { .. }
+        | OverwatchSet { .. }
+        | ReactionTriggered { .. } => BattleLogFilter::Combat,
+        UnitMoved { .. }
+        | ExtractionCompleted { .. }
+        | CoverDamaged { .. }
+        | CoverDestroyed { .. }
+        | HazardTriggered { .. }
+        | HazardConverted { .. }
+        | ReinforcementsArrived { .. } => BattleLogFilter::Ground,
+        _ => BattleLogFilter::System,
+    }
+}
+
+fn event_kind(event: &BattleEvent) -> &'static str {
+    use BattleEvent::*;
     match event {
         UnitMoved { .. } => "MOVEMENT",
         AttackRolled { .. } | ReactionTriggered { .. } => "ATTACK",
@@ -139,14 +192,18 @@ fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
     }
 }
 
-fn event_color(event: &crate::state::BattleEvent) -> Color {
+fn event_color(event: &BattleEvent) -> Color {
     match event {
-        crate::state::BattleEvent::DamageApplied { .. }
-        | crate::state::BattleEvent::UnitIncapacitated { .. }
-        | crate::state::BattleEvent::HazardTriggered { .. } => Color::new(0.98, 0.55, 0.38, 1.0),
-        crate::state::BattleEvent::HazardConverted { .. } => Color::new(0.42, 0.94, 0.72, 1.0),
-        crate::state::BattleEvent::PhaseStarted { .. }
-        | crate::state::BattleEvent::BattleEnded { .. } => Color::new(0.46, 0.86, 0.72, 1.0),
+        BattleEvent::DamageApplied { .. }
+        | BattleEvent::UnitIncapacitated { .. }
+        | BattleEvent::HazardTriggered { .. } => Color::new(0.98, 0.55, 0.38, 1.0),
+        BattleEvent::HazardConverted { .. } => Color::new(0.42, 0.94, 0.72, 1.0),
+        BattleEvent::PhaseStarted { .. } | BattleEvent::BattleEnded { .. } => {
+            Color::new(0.46, 0.86, 0.72, 1.0)
+        }
         _ => dark::TEXT_DIM,
     }
 }
+
+#[cfg(test)]
+mod tests;

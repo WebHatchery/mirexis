@@ -126,6 +126,7 @@ impl Game {
         self.targeting = None::<TacticalTargeting>;
         self.show_tactical_help = false;
         self.show_battle_log = false;
+        self.battle_log_filter = crate::ui_action::BattleLogFilter::All;
         self.show_settings = false;
         self.phase_replay.clear();
         self.end_phase_armed = false;
