@@ -1,10 +1,12 @@
 //! Materialized mission threat intelligence for deployment planning.
 
+use crate::campaign::CampaignState;
+use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::{GameData, HazardKind, MissionDef, ObjectiveKind, Team};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(crate) fn draw(data: &GameData, mission: &MissionDef, origin: Vec2) {
+pub(crate) fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionDef, origin: Vec2) {
     let danger = crate::danger_rating::for_mission(mission, data);
     draw_text_ex(
         format!("THREAT INTELLIGENCE // {} {}", danger.label(), danger.score),
@@ -12,7 +14,14 @@ pub(crate) fn draw(data: &GameData, mission: &MissionDef, origin: Vec2) {
         origin.y,
         TextStyle::new(15.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
     );
-    let lines = intel_lines(data, mission);
+    let cartography_active = campaign
+        .colony
+        .has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE);
+    let lines = if cartography_active {
+        intel_lines_with_cartography(data, mission, true)
+    } else {
+        intel_lines(data, mission)
+    };
     for (index, line) in lines.iter().enumerate() {
         draw_text_ex(
             line,
@@ -24,6 +33,14 @@ pub(crate) fn draw(data: &GameData, mission: &MissionDef, origin: Vec2) {
 }
 
 fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
+    intel_lines_with_cartography(data, mission, true)
+}
+
+fn intel_lines_with_cartography(
+    data: &GameData,
+    mission: &MissionDef,
+    cartography_active: bool,
+) -> Vec<String> {
     let hostiles = data
         .roster
         .iter()
@@ -77,10 +94,17 @@ fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
         } else {
             format!("HAZARDS // {}", hazards)
         },
-        crate::reinforcements::briefing_forecast(data, mission).map_or_else(
-            || "WAVES // NONE".to_owned(),
-            |wave| format!("WAVES // {}", wave),
-        ),
+        {
+            let wave_forecast = if cartography_active {
+                crate::reinforcements::briefing_forecast(data, mission)
+            } else {
+                crate::reinforcements::briefing_forecast_with_detail(data, mission, false)
+            };
+            wave_forecast.map_or_else(
+                || "WAVES // NONE".to_owned(),
+                |wave| format!("WAVES // {}", wave),
+            )
+        },
     ]
 }
 

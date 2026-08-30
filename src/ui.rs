@@ -225,7 +225,7 @@ pub fn draw_mission_briefing(
             TextStyle::new(15.0, dark::TEXT_DIM).params(),
         );
     }
-    crate::briefing_intel_ui::draw(data, mission, vec2(880.0, 328.0));
+    crate::briefing_intel_ui::draw(campaign, data, mission, vec2(880.0, 328.0));
     crate::briefing_loadout_ui::draw(campaign, data, assets, visuals, vec2(880.0, 454.0));
     crate::briefing_deployment_ui::draw(
         campaign,

@@ -1,7 +1,7 @@
 //! Colony hub presentation and strategic intent production.
 
 use crate::campaign::{Availability, CampaignState};
-use crate::colony::BuildingKind;
+use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::visual_assets::VisualCatalog;
@@ -270,16 +270,23 @@ pub(super) fn draw_operations(
         crate::colony_decision_ui::draw_decision_dossier(decision, campaign, assets, visuals);
     } else {
         draw_ui_text_ex(
-            "MISSION OFFERS",
+            if campaign
+                .colony
+                .has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE)
+            {
+                "MISSION ROUTES // SIGNAL CARTOGRAPHY ONLINE"
+            } else {
+                "MISSION OFFERS"
+            },
             878.0,
-            384.0,
+            380.0,
             TextStyle::new(15.0, dark::ACCENT).params(),
         );
-        for (index, mission) in campaign.strategy.mission_offers.iter().take(2).enumerate() {
+        for (index, mission) in campaign.strategy.mission_offers.iter().take(3).enumerate() {
             let selected = mission.id == campaign.strategy.selected_mission_id;
             let danger = crate::danger_rating::for_instance(mission, data);
             if colony_button(
-                Rect::new(878.0, 396.0 + index as f32 * 38.0, 362.0, 32.0),
+                Rect::new(878.0, 386.0 + index as f32 * 28.0, 362.0, 26.0),
                 &format!(
                     "{}{} // {}",
                     if selected { "> " } else { "" },
@@ -293,7 +300,7 @@ pub(super) fn draw_operations(
             }
         }
         if colony_button(
-            Rect::new(878.0, 474.0, 362.0, 36.0),
+            Rect::new(878.0, 478.0, 362.0, 30.0),
             "BRIEF SELECTED MISSION",
             campaign.strategy.selected_mission().is_some(),
             mouse,

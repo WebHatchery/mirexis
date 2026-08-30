@@ -70,7 +70,7 @@ pub fn migrate_save_value(
             .iter()
             .any(|character| !character.mutation_evolution_id.is_empty())
     {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() == Some("1.13.0")
         && save
@@ -82,27 +82,27 @@ pub fn migrate_save_value(
         save.campaign.colony.ensure_gene_lab();
     }
     if detected_version.as_deref() == Some("1.18.0") && save.campaign.strategy.adaptation_complete {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() == Some("1.20.0")
         && !save.campaign.strategy.escalation_response_id.is_empty()
     {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() == Some("1.21.0")
         && save.campaign.strategy.phase_id == "escalation"
     {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() == Some("1.24.0")
         && !save.campaign.strategy.mirexis_path_id.is_empty()
     {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() == Some("1.95.0")
         && !save.campaign.strategy.mirexis_path_id.is_empty()
     {
-        save.campaign.strategy.regenerate_missions(data);
+        save.campaign.refresh_mission_offers(data);
     }
     if detected_version.as_deref() != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete

@@ -5,6 +5,7 @@ mod deployment;
 mod derivation;
 mod evolution;
 mod identity;
+mod mission;
 mod outsider;
 mod relay;
 mod story;
@@ -16,8 +17,8 @@ pub(crate) use outsider::OutsiderChoice;
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
 use crate::colony::{
-    BuildingKind, ColonyState, HOT_CORE_UPGRADE, PRECISION_BENCH_UPGRADE,
-    STABILISATION_WING_UPGRADE,
+    BuildingKind, ColonyState, COUNTERINTELLIGENCE_CELL_UPGRADE, HOT_CORE_UPGRADE,
+    PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE,
 };
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
@@ -429,7 +430,18 @@ impl CampaignState {
                 faction.attention = (faction.attention + 1).min(100);
             }
         }
-        self.strategy.resolve_mission(outcome, mission, data);
+        let counterintelligence_active = self.colony.has_active_upgrade(
+            BuildingKind::CommandCentre,
+            COUNTERINTELLIGENCE_CELL_UPGRADE,
+        );
+        let mission_offer_limit = self.mission_offer_limit();
+        self.strategy.resolve_mission_with_options(
+            outcome,
+            mission,
+            data,
+            if counterintelligence_active { 2 } else { 0 },
+            mission_offer_limit,
+        );
         self.strategy.refresh_isolation_completion(&mut self.colony);
         if outcome.result == ObjectiveState::Victory {
             self.strengthen_shared_victory(&deployed_ids);
@@ -708,7 +720,7 @@ impl CampaignState {
     pub fn refresh_escalation_completion(&mut self, data: &GameData) -> bool {
         let changed = self.strategy.refresh_escalation_completion();
         if changed {
-            self.strategy.regenerate_missions(data);
+            self.refresh_mission_offers(data);
         }
         changed
     }

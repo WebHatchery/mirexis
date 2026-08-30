@@ -1,6 +1,6 @@
 //! Phase One campaign pressure, research, events, and mission generation.
 
-use crate::colony::ColonyState;
+use crate::colony::{BuildingKind, ColonyState, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::{GameData, MissionTemplateDef, ObjectiveKind, OperationModifier};
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy_events::{
@@ -232,11 +232,23 @@ impl StrategyState {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn resolve_mission(
         &mut self,
         outcome: &MissionOutcome,
         mission: &MissionInstance,
         data: &GameData,
+    ) {
+        self.resolve_mission_with_options(outcome, mission, data, 0, 2);
+    }
+
+    pub(crate) fn resolve_mission_with_options(
+        &mut self,
+        outcome: &MissionOutcome,
+        mission: &MissionInstance,
+        data: &GameData,
+        attention_relief: i32,
+        mission_offer_limit: usize,
     ) {
         let victory = outcome.result == ObjectiveState::Victory;
         let is_post_campaign_operation = data
@@ -315,7 +327,9 @@ impl StrategyState {
             .iter_mut()
             .find(|faction| faction.id == mission.faction_id)
         {
-            faction.attention = (faction.attention + if victory { 8 } else { 3 }).clamp(0, 100);
+            faction.attention = (faction.attention
+                + (if victory { 8 } else { 3 } - attention_relief).max(0))
+            .clamp(0, 100);
         }
         for threat in &mut self.threats {
             if mission.map_recipe == "colony_defense" && threat.faction_id == mission.faction_id {
@@ -332,7 +346,7 @@ impl StrategyState {
                 }
             }
         }
-        self.generate_missions(data);
+        self.generate_missions_with_limit(data, mission_offer_limit);
     }
 
     pub fn complete_research(
@@ -411,7 +425,14 @@ impl StrategyState {
         }
         colony.resources.alien_components -= protocol.alien_components_cost;
         self.contact_protocol_id = protocol.id.clone();
-        self.generate_missions(data);
+        self.generate_missions_with_limit(
+            data,
+            if colony.has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE) {
+                3
+            } else {
+                2
+            },
+        );
         Ok(protocol.name.clone())
     }
 
@@ -542,6 +563,10 @@ impl StrategyState {
     }
 
     fn generate_missions(&mut self, data: &GameData) {
+        self.generate_missions_with_limit(data, 2);
+    }
+
+    fn generate_missions_with_limit(&mut self, data: &GameData, offer_limit: usize) {
         if let Some(threat) = self
             .threats
             .iter()
@@ -624,7 +649,7 @@ impl StrategyState {
         }
         self.mission_offers = templates
             .into_iter()
-            .take(2)
+            .take(offer_limit.max(1))
             .map(|template| self.instantiate(template))
             .collect();
         if let Some(first) = self.mission_offers.first() {
@@ -710,6 +735,14 @@ impl StrategyState {
 
     pub fn regenerate_missions(&mut self, data: &GameData) {
         self.generate_missions(data);
+    }
+
+    pub(crate) fn regenerate_missions_with_offer_limit(
+        &mut self,
+        data: &GameData,
+        offer_limit: usize,
+    ) {
+        self.generate_missions_with_limit(data, offer_limit);
     }
 }
 

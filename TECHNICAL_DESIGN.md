@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.102.0
+Save/content version: 1.103.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -123,7 +123,7 @@ Important transition payloads:
 | `phase_replay.rs` | Bounded timed hostile-event playback and skip affordance | Simulation ordering or persistence |
 | `trauma.rs` | Bounded persistent scar selection and deployment tradeoff modifiers | Temporary recovery or rendering |
 | `colony.rs` | Resources, facilities, placement, queue, defense-map derivation | Mission rendering |
-| `strategy.rs` | Attention, threats, research, events, mission generation | Tactical mutation |
+| `strategy.rs` | Attention, threats, research, events, mission generation, and facility-aware pressure | Tactical mutation |
 | `strategy_choices.rs` | Irreversible Contact-independent strategic choice transactions | Mission generation or rendering |
 | `strategy_events.rs` | Campaign-event projection and availability rules | Event consequences or UI |
 | `strategy_rewards.rs` | Contact and Escalation mission-recovery bonuses | Mission generation or colony mutation |
@@ -468,6 +468,9 @@ resolution after the upgrade has completed and before normal mission faction pre
 Community Kitchen and Culture Beds apply only while Hydroponics is operational and powered.
 Precision Bench discounts primary and armour equipment while the Workshop is operational and
 powered. Drone Bay discounts facility repairs while its Workshop remains online.
+Signal Cartography reveals a third mission route while the Command Centre is operational and
+powered. Counterintelligence Cell reduces the normal mission attention increase by two while
+the Command Centre is operational and powered.
 Stabilisation Wing suppresses mutation-evolution complications while the Gene Lab is operational
 and powered. Evolution Chamber reduces each mutation-evolution biomass cost by four, with a
 minimum cost of one, while the Gene Lab is operational and powered.
@@ -842,6 +845,7 @@ Migration coverage:
 | 1.100.0 | Persistent identity-building damage, repair, power-failure, and restoration civic arcs |
 | 1.101.0 | Pre-finale identity-building preparation actions, faction-pressure relief, and contact reflections |
 | 1.102.0 | Gene Lab level-two Stabilisation Wing and Evolution Chamber branches with operational evolution effects |
+| 1.103.0 | Command Centre level-two Signal Cartography and Counterintelligence Cell branches with route and pressure effects |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -933,7 +937,7 @@ these explicit boundaries when continuing:
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
-  the Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
+  the Command Centre, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
   population, free placement for every building, and the remaining facility branches remain future

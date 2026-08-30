@@ -63,7 +63,7 @@ impl CampaignState {
             .expect("evolution character was validated")
             .mutation_evolution_id = evolution.id.clone();
         if !self.refresh_adaptation_completion(data) {
-            self.strategy.regenerate_missions(data);
+            self.refresh_mission_offers(data);
         }
         Ok(evolution.name.clone())
     }
@@ -85,7 +85,7 @@ impl CampaignState {
             .strategy
             .refresh_adaptation_completion(evolved >= 2, lab);
         if changed {
-            self.strategy.regenerate_missions(data);
+            self.refresh_mission_offers(data);
         }
         changed
     }

@@ -10,6 +10,8 @@ pub const PRECISION_BENCH_UPGRADE: &str = "precision_bench";
 pub const DRONE_BAY_UPGRADE: &str = "drone_bay";
 pub const STABILISATION_WING_UPGRADE: &str = "stabilisation_wing";
 pub const EVOLUTION_CHAMBER_UPGRADE: &str = "evolution_chamber";
+pub const SIGNAL_CARTOGRAPHY_UPGRADE: &str = "signal_cartography";
+pub const COUNTERINTELLIGENCE_CELL_UPGRADE: &str = "counterintelligence_cell";
 
 impl BuildingKind {
     pub fn upgrade_options(self) -> &'static [FacilityUpgradeOption] {
@@ -61,6 +63,18 @@ impl BuildingKind {
                     id: EVOLUTION_CHAMBER_UPGRADE,
                     name: "Evolution Chamber",
                     description: "Reduces each mutation evolution's biomass cost by four.",
+                },
+            ],
+            Self::CommandCentre => &[
+                FacilityUpgradeOption {
+                    id: SIGNAL_CARTOGRAPHY_UPGRADE,
+                    name: "Signal Cartography",
+                    description: "Reveals a third mission route and clearer wave intelligence.",
+                },
+                FacilityUpgradeOption {
+                    id: COUNTERINTELLIGENCE_CELL_UPGRADE,
+                    name: "Counterintelligence Cell",
+                    description: "Cuts mission pressure and keeps hostile attention in check.",
                 },
             ],
             _ => &[],

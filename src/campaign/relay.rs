@@ -47,7 +47,7 @@ impl CampaignState {
         {
             faction.attention = (faction.attention + RELAY_SIGNAL_ATTENTION).clamp(0, 100);
         }
-        self.strategy.regenerate_missions(data);
+        self.refresh_mission_offers(data);
         self.relay_scans_used = self.relay_scans_used.saturating_add(1);
         self.relay_scan_operation = Some(self.operations_completed);
         Ok(format!(

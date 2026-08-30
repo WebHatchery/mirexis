@@ -78,6 +78,14 @@ pub(crate) fn deploy(session: &mut GameSession, action_points: u8) {
 }
 
 pub(crate) fn briefing_forecast(data: &GameData, mission: &MissionDef) -> Option<String> {
+    briefing_forecast_with_detail(data, mission, true)
+}
+
+pub(crate) fn briefing_forecast_with_detail(
+    data: &GameData,
+    mission: &MissionDef,
+    reveal_roles: bool,
+) -> Option<String> {
     let rounds = wave_rounds(mission)
         .map(|round| format!("R{}", round))
         .collect::<Vec<_>>();
@@ -98,7 +106,13 @@ pub(crate) fn briefing_forecast(data: &GameData, mission: &MissionDef) -> Option
         .take(2)
         .map(|unit| forecast_role(&unit.role))
         .collect::<Vec<_>>();
-    (!roles.is_empty()).then(|| format!("{} · {} · EAST", rounds.join("/"), roles.join("+")))
+    (!roles.is_empty()).then(|| {
+        if reveal_roles {
+            format!("{} · {} · EAST", rounds.join("/"), roles.join("+"))
+        } else {
+            format!("{} · UNKNOWN ROLES · EAST", rounds.join("/"))
+        }
+    })
 }
 
 pub(crate) fn next_wave_forecast(session: &GameSession) -> Option<String> {

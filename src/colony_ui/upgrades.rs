@@ -8,7 +8,8 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
 const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
-const UPGRADEABLE_FACILITIES: [BuildingKind; 4] = [
+const UPGRADEABLE_FACILITIES: [BuildingKind; 5] = [
+    BuildingKind::CommandCentre,
     BuildingKind::PowerPlant,
     BuildingKind::Hydroponics,
     BuildingKind::Workshop,
@@ -83,7 +84,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         else {
             continue;
         };
-        let y = 134.0 + index as f32 * 115.0;
+        let y = 130.0 + index as f32 * 98.0;
         draw_text_ex(
             kind.name().to_uppercase(),
             886.0,
@@ -111,18 +112,18 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             && !queued
             && campaign.colony.resources.materials >= kind.upgrade_cost();
         for (option_index, option) in kind.upgrade_options().iter().enumerate() {
-            let card_y = y + 28.0 + option_index as f32 * 50.0;
+            let card_y = y + 25.0 + option_index as f32 * 38.0;
             draw_rectangle(
                 886.0,
                 card_y,
                 360.0,
-                44.0,
+                34.0,
                 Color::new(0.025, 0.055, 0.060, 1.0),
             );
             draw_text_ex(
                 option.name,
                 902.0,
-                card_y + 14.0,
+                card_y + 12.0,
                 TextParams {
                     font_size: 12,
                     color: dark::TEXT_BRIGHT,
@@ -132,7 +133,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             draw_text_ex(
                 option.description,
                 902.0,
-                card_y + 29.0,
+                card_y + 25.0,
                 TextParams {
                     font_size: 9,
                     color: dark::TEXT_DIM,
@@ -140,7 +141,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
                 },
             );
             if button(
-                Rect::new(1094.0, card_y + 7.0, 136.0, 26.0),
+                Rect::new(1094.0, card_y + 5.0, 136.0, 22.0),
                 &format!("QUEUE // {} MAT", kind.upgrade_cost()),
                 can_queue,
                 mouse,
@@ -156,7 +157,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         draw_text_ex(
             message,
             886.0,
-            635.0,
+            638.0,
             TextParams {
                 font_size: 10,
                 color: dark::WARNING,

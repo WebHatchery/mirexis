@@ -1,5 +1,7 @@
 use super::*;
-use crate::colony::{BuildingKind, EVOLUTION_CHAMBER_UPGRADE, HOT_CORE_UPGRADE};
+use crate::colony::{
+    BuildingKind, EVOLUTION_CHAMBER_UPGRADE, HOT_CORE_UPGRADE, SIGNAL_CARTOGRAPHY_UPGRADE,
+};
 use crate::state::GameSession;
 
 #[test]
@@ -101,5 +103,33 @@ fn version_101_save_preserves_gene_lab_upgrade_queue() {
     assert_eq!(
         migrated.campaign.colony.facility_upgrade_queue[0].upgrade_id,
         EVOLUTION_CHAMBER_UPGRADE
+    );
+}
+
+#[test]
+fn version_102_save_preserves_command_centre_upgrade_queue() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let command_centre_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::CommandCentre)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&command_centre_id, SIGNAL_CARTOGRAPHY_UPGRADE)
+        .unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let legacy = serde_json::to_value(session.to_save("1.102.0", &campaign)).unwrap();
+
+    let migrated = migrate_save_value(Some("1.102.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(
+        migrated.campaign.colony.facility_upgrade_queue[0].upgrade_id,
+        SIGNAL_CARTOGRAPHY_UPGRADE
     );
 }

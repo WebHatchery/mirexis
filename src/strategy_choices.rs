@@ -1,6 +1,6 @@
 //! Irreversible campaign choices and their immediate strategic transactions.
 
-use crate::colony::ColonyState;
+use crate::colony::{BuildingKind, ColonyState, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::GameData;
 use crate::strategy::StrategyState;
 
@@ -44,7 +44,7 @@ impl StrategyState {
                 .saturating_add(response.threat_delay);
         }
         self.escalation_response_id = response.id.clone();
-        self.regenerate_missions(data);
+        self.regenerate_missions_with_offer_limit(data, mission_offer_limit(colony));
         Ok(response.name.clone())
     }
 
@@ -80,7 +80,7 @@ impl StrategyState {
         colony.resources.biomass -= path.biomass_cost;
         colony.resources.power -= path.power_cost;
         self.mirexis_path_id = path.id.clone();
-        self.regenerate_missions(data);
+        self.regenerate_missions_with_offer_limit(data, mission_offer_limit(colony));
         Ok(path.name.clone())
     }
 
@@ -101,5 +101,13 @@ impl StrategyState {
         self.phase_name = path.ending_title.clone();
         self.phase_summary = format!("{} {}", path.revelation, path.legacy);
         true
+    }
+}
+
+fn mission_offer_limit(colony: &ColonyState) -> usize {
+    if colony.has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE) {
+        3
+    } else {
+        2
     }
 }

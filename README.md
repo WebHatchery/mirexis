@@ -26,6 +26,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   but the faction already watching hardest gains attention.
 - A placeable powered Watchtower that becomes strong directional cover in colony-defense
   operations while remaining a physical obstacle when its grid goes dark.
+- Level-2 Command Centre branches: Signal Cartography reveals a third mission route with
+  clearer reinforcement intelligence, or Counterintelligence Cell reduces mission pressure.
 - A level-2 Power Plant branch choice: Redundant Grid preserves damaged-plant supply, or
   Hot Core raises output while increasing the most visible faction's attention per operation.
 - Level-2 Hydroponics branches: Community Kitchen improves food and Commons efficiency, or

@@ -16,3 +16,19 @@ fn materialized_briefing_intel_names_contract_roles_ability_and_hazards() {
     assert!(lines.contains("PREDATORY SURGE"));
     assert!(lines.contains("SPORE BLOOM"));
 }
+
+#[test]
+fn signal_cartography_reveals_reinforcement_roles_in_the_briefing() {
+    let data = GameData::load().unwrap();
+    let mut mission = data.mission.clone();
+    mission.objective_kind = ObjectiveKind::Holdout;
+    mission.hostile_faction = "brood".to_owned();
+    mission.round_limit = 6;
+
+    let basic = intel_lines_with_cartography(&data, &mission, false).join(" ");
+    let mapped = intel_lines_with_cartography(&data, &mission, true).join(" ");
+
+    assert!(basic.contains("WAVES // R3/R5 · UNKNOWN ROLES · EAST"));
+    assert!(mapped.contains("WAVES // R3/R5 · "));
+    assert!(!mapped.contains("UNKNOWN ROLES"));
+}

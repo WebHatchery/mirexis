@@ -1,7 +1,8 @@
 use super::*;
 use crate::colony::{
-    BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, DRONE_BAY_UPGRADE,
-    EVOLUTION_CHAMBER_UPGRADE, PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE,
+    BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, COUNTERINTELLIGENCE_CELL_UPGRADE,
+    DRONE_BAY_UPGRADE, EVOLUTION_CHAMBER_UPGRADE, PRECISION_BENCH_UPGRADE,
+    SIGNAL_CARTOGRAPHY_UPGRADE, STABILISATION_WING_UPGRADE,
 };
 
 fn campaign_with_online_gene_lab(data: &GameData) -> CampaignState {
@@ -229,4 +230,75 @@ fn evolution_chamber_reduces_mutation_evolution_biomass_cost() {
         .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
         .unwrap();
     assert_eq!(campaign.colony.resources.biomass, 0);
+}
+
+#[test]
+fn signal_cartography_reveals_a_third_mission_route() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let command_centre_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::CommandCentre)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&command_centre_id, SIGNAL_CARTOGRAPHY_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    campaign.refresh_mission_offers(&data);
+
+    assert_eq!(campaign.strategy.mission_offers.len(), 3);
+}
+
+#[test]
+fn counterintelligence_cell_reduces_mission_attention_pressure() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let command_centre_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::CommandCentre)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&command_centre_id, COUNTERINTELLIGENCE_CELL_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+    let mission = campaign.strategy.selected_mission().unwrap().clone();
+    let faction_id = mission.faction_id.clone();
+    let attention_before = campaign
+        .strategy
+        .factions
+        .iter()
+        .find(|faction| faction.id == faction_id)
+        .unwrap()
+        .attention;
+    let outcome = MissionOutcome {
+        result: ObjectiveState::Victory,
+        colonists_deployed: 3,
+        colonists_incapacitated: Vec::new(),
+        hostiles_neutralised: 3,
+        materials_awarded: 0,
+        biomass_awarded: 0,
+        power_awarded: 0,
+    };
+
+    campaign.apply_mission_outcome(&outcome, &mission, &data);
+
+    let attention_after = campaign
+        .strategy
+        .factions
+        .iter()
+        .find(|faction| faction.id == faction_id)
+        .unwrap()
+        .attention;
+    assert_eq!(attention_after, attention_before + 6);
 }
