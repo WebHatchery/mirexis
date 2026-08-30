@@ -17,6 +17,16 @@ impl Game {
             self.notifications.warning("Controller disconnected");
         }
         self.gamepad_connected = pad.connected;
+        if let Some(action) =
+            settings_overlay_input(self.show_settings, input.escape_pressed, pad.cancel)
+        {
+            self.events.push(action);
+        }
+        if self.show_settings {
+            // Keep queued UI actions drainable, but do not let physical input
+            // fall through to the screen underneath the settings modal.
+            return false;
+        }
         match self.state {
             AppState::Title => {
                 if input.left_pressed {
@@ -283,3 +293,18 @@ impl Game {
         }
     }
 }
+
+fn settings_overlay_input(
+    show_settings: bool,
+    escape_pressed: bool,
+    cancel_pressed: bool,
+) -> Option<UiAction> {
+    if show_settings && (escape_pressed || cancel_pressed) {
+        Some(UiAction::ToggleSettings)
+    } else {
+        None
+    }
+}
+
+#[cfg(test)]
+mod tests;

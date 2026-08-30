@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.128.0
+Save/content version: 1.129.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -77,7 +77,7 @@ Important transition payloads:
 | `briefing_deployment_ui.rs` | Squad rows, formation selector, and deploy/stand-down controls | Session creation |
 | `danger_rating.rs` | Deterministic shared offer/briefing danger score and bands | Save state or rendering |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
-| `game/input.rs` | State-aware keyboard translation and replay input lock | Simulation mutation |
+| `game/input.rs` | State-aware keyboard translation, settings-modal input lock, and replay input lock | Simulation mutation |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
 | `game/capture_tactical.rs` | Tactical mechanic showcase capture construction | Runtime input handling |
 | `ui_debrief.rs` | Operation results and campaign-finale presentation | Outcome or campaign mutation |
@@ -903,6 +903,7 @@ Migration coverage:
 | 1.126.0 | Debrief squad tableau distinguishes the fielded squad from reserves using the live tactical deployment; no new save fields |
 | 1.127.0 | Debrief tableau prioritizes fielded recruits before reserve fill slots so every deployed colonist remains visible; no new save fields |
 | 1.128.0 | Recruited colonists remain inside the visible briefing, roster, and Gene Lab lists; no new save fields |
+| 1.129.0 | Settings modal consumes underlying keyboard and controller commands while preserving its close path; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -955,7 +956,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (394 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (396 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 95-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
