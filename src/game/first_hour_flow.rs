@@ -102,9 +102,7 @@ impl Game {
                 "Tutorial prompts skipped; campaign goals preserved"
             }
             UiAction::RestartFirstHourTutorial => {
-                self.campaign
-                    .first_hour
-                    .restart(self.campaign.operations_completed);
+                self.campaign.first_hour.restart();
                 self.clear_colony_explorer_motion();
                 "First-hour guide restarted"
             }

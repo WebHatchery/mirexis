@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.140.0, validated and committed with this matrix
+Audit baseline: save/content 1.141.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -36,7 +36,7 @@ developer are not substitutes for that evidence.
 | Exact visible-control or gesture language | Prompts consistently name Tap, Drag, CONTINUE, OPERATIONS, DEPLOY, ATTACK, END PHASE, HELP, and visible targets | VERIFIED |
 | Highlight relevant target without blocking inspection | Non-blocking goal banner, Mara/Ilya markers and route traces, colony Operations/briefing/preparation focus, tactical overlays, and lesson-specific map/command focus | VERIFIED |
 | Visible revisitable help | FIRST-HOUR FIELD GUIDE and tactical HELP | VERIFIED |
-| Restartable and skippable prompts without removing goals | `restart`, `guidance_enabled`, and first-hour tests | VERIFIED |
+| Restartable and skippable prompts without removing goals | Stage-preserving `restart`, current-lesson reset for tactical stages, `guidance_enabled`, and first-hour tests | VERIFIED |
 | Persist progress and migrate saves with no tutorial fields | Save schema 1.65 and migration fixtures for 1.63 and 1.64 | VERIFIED |
 | Defer non-actionable panels | Deferred-system list and first-hour gating in colony controls | VERIFIED |
 

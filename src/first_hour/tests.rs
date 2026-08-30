@@ -127,6 +127,41 @@ fn enemy_phase_prompt_explains_the_conditional_confirmation() {
 }
 
 #[test]
+fn restarting_the_guide_preserves_campaign_stage_and_restarts_only_current_lesson() {
+    let mut tactical = FirstHourProgress {
+        stage: FirstHourStage::FirstOperation,
+        lesson: TacticalLesson::Ability,
+        guidance_enabled: false,
+        help_open: true,
+        ..FirstHourProgress::default()
+    };
+    tactical.restart();
+    assert_eq!(tactical.stage, FirstHourStage::FirstOperation);
+    assert_eq!(tactical.lesson, TacticalLesson::Select);
+    assert!(tactical.guidance_enabled);
+    assert!(!tactical.help_open);
+
+    let mut second_operation = FirstHourProgress {
+        stage: FirstHourStage::SecondOperationTactical,
+        lesson: TacticalLesson::ApplyLearning,
+        ..FirstHourProgress::default()
+    };
+    second_operation.restart();
+    assert_eq!(
+        second_operation.stage,
+        FirstHourStage::SecondOperationTactical
+    );
+    assert_eq!(second_operation.lesson, TacticalLesson::ApplyLearning);
+
+    let mut recovery = FirstHourProgress {
+        stage: FirstHourStage::FirstReturn,
+        ..FirstHourProgress::default()
+    };
+    recovery.restart();
+    assert_eq!(recovery.stage, FirstHourStage::FirstReturn);
+}
+
+#[test]
 fn missing_serialized_fields_use_safe_tutorial_defaults() {
     let progress: FirstHourProgress = serde_json::from_str("{}").unwrap();
     assert_eq!(progress, FirstHourProgress::default());

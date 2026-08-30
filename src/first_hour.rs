@@ -259,15 +259,14 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn restart(&mut self, operations_completed: u32) {
+    pub(crate) fn restart(&mut self) {
         self.guidance_enabled = true;
         self.help_open = false;
-        self.lesson = TacticalLesson::Select;
-        self.stage = match operations_completed {
-            0 => FirstHourStage::MeetCoordinator,
-            1 => FirstHourStage::MakeInvestment,
-            _ => FirstHourStage::Complete,
-        };
+        match self.stage {
+            FirstHourStage::FirstOperation => self.lesson = TacticalLesson::Select,
+            FirstHourStage::SecondOperationTactical => self.lesson = TacticalLesson::ApplyLearning,
+            _ => {}
+        }
     }
 
     pub(crate) fn migrate_from_operations(&mut self, operations_completed: u32) {
