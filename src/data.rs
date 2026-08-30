@@ -393,6 +393,8 @@ pub struct MissionTemplateDef {
     pub required_response: String,
     #[serde(default)]
     pub required_mirexis_path: String,
+    #[serde(default)]
+    pub post_campaign: bool,
     pub materials_reward: i32,
     #[serde(default)]
     pub biomass_reward: i32,
@@ -474,6 +476,12 @@ impl GameData {
                 return Err(format!(
                     "Mission template {} references missing Mirexis path {}",
                     template.id, template.required_mirexis_path
+                ));
+            }
+            if template.post_campaign && template.required_mirexis_path.is_empty() {
+                return Err(format!(
+                    "Post-campaign mission template {} must reference a Mirexis path",
+                    template.id
                 ));
             }
         }

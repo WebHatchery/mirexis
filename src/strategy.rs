@@ -577,11 +577,16 @@ impl StrategyState {
                         || template.required_response == self.escalation_response_id)
                     && (template.required_mirexis_path.is_empty()
                         || template.required_mirexis_path == self.mirexis_path_id)
-                    && (!self.campaign_complete || template.required_mirexis_path.is_empty())
+                    && (if self.campaign_complete {
+                        template.required_mirexis_path.is_empty() || template.post_campaign
+                    } else {
+                        !template.post_campaign
+                    })
             })
             .collect::<Vec<_>>();
         templates.sort_by_key(|template| {
             (
+                template.post_campaign != self.campaign_complete,
                 template.required_phase != self.phase_id,
                 template.required_response != self.escalation_response_id,
                 template.required_mirexis_path != self.mirexis_path_id,
@@ -595,6 +600,7 @@ impl StrategyState {
             templates.rotate_left(rotate);
             templates.sort_by_key(|template| {
                 (
+                    template.post_campaign != self.campaign_complete,
                     template.required_phase != self.phase_id,
                     template.required_response != self.escalation_response_id,
                     template.required_mirexis_path != self.mirexis_path_id,
@@ -636,7 +642,13 @@ impl StrategyState {
             id: format!("{}_{}", template.id, seed & 0xffff),
             template_id: template.id.clone(),
             name: template.name.clone(),
-            briefing: if !template.required_mirexis_path.is_empty() {
+            briefing: if template.post_campaign {
+                format!(
+                    "The {} path remains open after the campaign; this {} operation is work the refuge still has to do.",
+                    template.required_mirexis_path.replace('_', " "),
+                    template.faction
+                )
+            } else if !template.required_mirexis_path.is_empty() {
                 format!(
                     "The {} path has exposed a final {} battlefield beyond the convergence.",
                     template.required_mirexis_path.replace('_', " "),

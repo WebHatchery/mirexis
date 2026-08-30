@@ -139,9 +139,10 @@ them with recurring character and colony beats.
 | Mirexis | Pay off people and place before resolving the cosmic mystery | Last Wall, Root Choir, or Door of Light | The player chooses the engine's relationship with the colony, not a colour-coded ending. | The city, surviving recruits, bonds, scars, facilities, and earlier mercy are acknowledged in the ending. |
 
 Post-campaign operations should be an epilogue sandbox, not a sixth escalation phase.
-They show the work of living with the chosen future: putting down rogue weapons in the
-Redoubt, negotiating with new choruses in the Commonwealth, or rescuing travellers from
-unstable routes beyond the Threshold.
+The first repeatable path-specific loop is implemented: putting down rogue weapons in the
+Redoubt, answering a new chorus in the Commonwealth, or rescuing travellers from unstable
+routes beyond the Threshold. Generic pressure operations remain available alongside the
+path operation, so completion expands the world instead of closing the campaign hub.
 
 ## 4. Character arcs
 
@@ -498,6 +499,8 @@ Goal: make the implemented five-phase foundation narratively complete.
   colony voices instead of a finale-only lore dump.
 - Implemented: pay off all five starting arcs and the recruited route-exclusive outsider through
   path-specific finale field notes and the ending register.
+- Implemented: add one repeatable, path-gated post-campaign operation for each engine future,
+  using dedicated map variants and established objective verbs as an epilogue sandbox.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and

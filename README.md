@@ -37,6 +37,9 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,
   people, trusted bonds, scars, mutation evolutions, engine relationship, faction pressure,
   and witnessed mercy.
+- Completed campaigns prioritize a repeatable path-specific epilogue operation: clear inherited
+  Directorate fire in the Redoubt, answer a new Brood chorus in the Commonwealth, or bring a
+  stranded traveller home through the Threshold.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface phase-specific colony field notes through

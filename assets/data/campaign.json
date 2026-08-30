@@ -52,7 +52,10 @@
     { "id": "escalation_lattice_live_wire", "name": "ESCALATION: LIVE WIRE", "objective": "Activate the weaponized lattice and defend its trace while the Ascendants try to reclaim control.", "objective_kind": "signal_trace", "faction": "ascendants", "map_recipe": "lattice_storm", "required_phase": "escalation", "required_response": "weaponized_lattice", "materials_reward": 28, "biomass_reward": 4, "power_reward": 8, "round_limit": 5 },
     { "id": "mirexis_redoubt_last_wall", "name": "MIREXIS: LAST WALL", "objective": "Eliminate the Directorate breach teams before they mark the human redoubt for orbital fire.", "objective_kind": "eliminate_all", "faction": "directorate", "map_recipe": "redoubt_breach", "required_phase": "mirexis", "required_mirexis_path": "human_redoubt", "materials_reward": 45, "biomass_reward": 3, "power_reward": 2, "round_limit": 7 },
     { "id": "mirexis_commonwealth_root_choir", "name": "MIREXIS: ROOT CHOIR", "objective": "Activate the commonwealth chorus and defend its answer while the Brood tries to absorb it.", "objective_kind": "signal_trace", "faction": "brood", "map_recipe": "commonwealth_garden", "required_phase": "mirexis", "required_mirexis_path": "living_commonwealth", "materials_reward": 24, "biomass_reward": 16, "power_reward": 2, "round_limit": 5 },
-    { "id": "mirexis_threshold_door_of_light", "name": "MIREXIS: DOOR OF LIGHT", "objective": "Reach the open threshold, bind its control point, and clear every Ascendant claimant.", "objective_kind": "secure_and_clear", "faction": "ascendants", "map_recipe": "threshold_gate", "required_phase": "mirexis", "required_mirexis_path": "open_threshold", "materials_reward": 30, "biomass_reward": 5, "power_reward": 10, "round_limit": 6 }
+    { "id": "mirexis_threshold_door_of_light", "name": "MIREXIS: DOOR OF LIGHT", "objective": "Reach the open threshold, bind its control point, and clear every Ascendant claimant.", "objective_kind": "secure_and_clear", "faction": "ascendants", "map_recipe": "threshold_gate", "required_phase": "mirexis", "required_mirexis_path": "open_threshold", "materials_reward": 30, "biomass_reward": 5, "power_reward": 10, "round_limit": 6 },
+    { "id": "epilogue_redoubt_old_fire", "name": "EPILOGUE: OLD FIRE", "objective": "Eliminate the rogue fire-control teams still ranging the Redoubt before their inherited orders find a civilian target.", "objective_kind": "eliminate_all", "faction": "directorate", "map_recipe": "redoubt_watchline", "required_phase": "mirexis", "required_mirexis_path": "human_redoubt", "post_campaign": true, "materials_reward": 26, "biomass_reward": 2, "power_reward": 1, "round_limit": 7 },
+    { "id": "epilogue_commonwealth_new_roots", "name": "EPILOGUE: NEW ROOTS", "objective": "Reach the new chorus garden, secure its answer, and leave before the Brood turns an invitation into absorption.", "objective_kind": "signal_trace", "faction": "brood", "map_recipe": "commonwealth_new_roots", "required_phase": "mirexis", "required_mirexis_path": "living_commonwealth", "post_campaign": true, "materials_reward": 12, "biomass_reward": 12, "power_reward": 2, "round_limit": 5 },
+    { "id": "epilogue_threshold_return", "name": "EPILOGUE: RETURN CURRENT", "objective": "Reach the stranded traveller at the unstable threshold and bring them home before the route closes.", "objective_kind": "extraction", "faction": "ascendants", "map_recipe": "threshold_return", "required_phase": "mirexis", "required_mirexis_path": "open_threshold", "post_campaign": true, "materials_reward": 16, "biomass_reward": 2, "power_reward": 5, "round_limit": 6 }
   ],
   "map_recipes": [
     {
@@ -186,6 +189,27 @@
     {
       "id": "threshold_gate",
       "blocked_tiles": [[3, 1], [3, 4], [3, 6], [5, 0], [5, 5], [7, 1], [7, 4], [9, 2], [9, 5], [11, 0], [11, 7]],
+      "objective_tile": [8, 4],
+      "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [8, 4], "cost": 2 }, { "position": [10, 3], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 3], "direction": "east", "strength": 30 }, { "position": [6, 5], "direction": "north", "strength": 30 }, { "position": [8, 2], "direction": "south", "strength": 30 }, { "position": [10, 4], "direction": "west", "strength": 30 }]
+    },
+    {
+      "id": "redoubt_watchline",
+      "blocked_tiles": [[3, 0], [3, 2], [3, 7], [5, 1], [5, 4], [7, 2], [7, 6], [9, 3], [10, 0], [10, 7]],
+      "objective_tile": [6, 4],
+      "terrain_costs": [{ "position": [4, 3], "cost": 2 }, { "position": [6, 2], "cost": 2 }, { "position": [6, 5], "cost": 2 }, { "position": [8, 4], "cost": 2 }],
+      "cover_edges": [{ "position": [4, 4], "direction": "east", "strength": 35 }, { "position": [6, 3], "direction": "west", "strength": 35 }, { "position": [8, 5], "direction": "north", "strength": 35 }]
+    },
+    {
+      "id": "commonwealth_new_roots",
+      "blocked_tiles": [[4, 1], [4, 3], [4, 6], [6, 0], [6, 4], [6, 7], [8, 3], [8, 5], [10, 1], [10, 7]],
+      "objective_tile": [7, 4],
+      "terrain_costs": [{ "position": [3, 2], "cost": 2 }, { "position": [5, 5], "cost": 2 }, { "position": [7, 3], "cost": 2 }, { "position": [9, 4], "cost": 2 }, { "position": [11, 5], "cost": 2 }],
+      "cover_edges": [{ "position": [5, 2], "direction": "south", "strength": 20 }, { "position": [7, 4], "direction": "east", "strength": 20 }, { "position": [9, 5], "direction": "west", "strength": 20 }]
+    },
+    {
+      "id": "threshold_return",
+      "blocked_tiles": [[3, 1], [3, 4], [3, 6], [5, 0], [5, 5], [7, 1], [7, 4], [9, 2], [9, 6], [11, 0], [11, 7]],
       "objective_tile": [8, 4],
       "terrain_costs": [{ "position": [4, 2], "cost": 2 }, { "position": [6, 3], "cost": 2 }, { "position": [8, 4], "cost": 2 }, { "position": [10, 3], "cost": 2 }],
       "cover_edges": [{ "position": [4, 3], "direction": "east", "strength": 30 }, { "position": [6, 5], "direction": "north", "strength": 30 }, { "position": [8, 2], "direction": "south", "strength": 30 }, { "position": [10, 4], "direction": "west", "strength": 30 }]

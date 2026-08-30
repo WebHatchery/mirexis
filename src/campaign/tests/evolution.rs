@@ -334,20 +334,23 @@ fn mirexis_paths_change_defense_supply_and_recovery() {
 #[test]
 fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
     let data = GameData::load().unwrap();
-    for (path_id, template_id, ending_title) in [
+    for (path_id, template_id, post_template_id, ending_title) in [
         (
             "human_redoubt",
             "mirexis_redoubt_last_wall",
+            "epilogue_redoubt_old_fire",
             "THE LAST WALL HOLDS",
         ),
         (
             "living_commonwealth",
             "mirexis_commonwealth_root_choir",
+            "epilogue_commonwealth_new_roots",
             "THE ROOT CHOIR ANSWERS",
         ),
         (
             "open_threshold",
             "mirexis_threshold_door_of_light",
+            "epilogue_threshold_return",
             "THE DOOR OF LIGHT OPENS",
         ),
     ] {
@@ -383,5 +386,14 @@ fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
             .mission_offers
             .iter()
             .all(|offer| offer.template_id != template_id));
+        assert_eq!(
+            campaign.strategy.mission_offers[0].template_id,
+            post_template_id
+        );
+        campaign.strategy.regenerate_missions(&data);
+        assert_eq!(
+            campaign.strategy.mission_offers[0].template_id,
+            post_template_id
+        );
     }
 }
