@@ -445,3 +445,37 @@ fn completed_infirmary_branch_unlocks_ilyas_matching_field_note() {
         .colony_story
         .has_heard("facility_adaptation_clinic_ilya"));
 }
+
+#[test]
+fn treatment_availability_matches_injury_biomass_and_infirmary_state() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    assert!(!campaign.can_treat_first_injury());
+
+    campaign
+        .roster
+        .iter_mut()
+        .find(|character| character.id == "ilya_reed")
+        .unwrap()
+        .injuries
+        .push(InjuryRecord {
+            id: "test_trauma".to_owned(),
+            name: "Test trauma".to_owned(),
+            recovery_operations: 1,
+        });
+    assert!(campaign.can_treat_first_injury());
+
+    campaign.colony.resources.biomass = 4;
+    assert!(!campaign.can_treat_first_injury());
+    campaign.colony.resources.biomass = 5;
+    assert!(campaign.can_treat_first_injury());
+
+    campaign
+        .colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .damaged = true;
+    assert!(!campaign.can_treat_first_injury());
+}

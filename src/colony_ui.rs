@@ -261,7 +261,7 @@ pub(super) fn draw_operations(
                 5
             }
         ),
-        recovering > 0,
+        campaign.can_treat_first_injury(),
         mouse,
     ) {
         actions.push(UiAction::TreatInjury);

@@ -61,18 +61,31 @@ impl CampaignState {
         }
     }
 
-    pub fn treat_first_injury(&mut self) -> Result<String, String> {
-        if !self.colony.has_facility(BuildingKind::Infirmary) {
-            return Err("An operational infirmary is required".to_owned());
-        }
-        let cost = if self
+    pub fn can_treat_first_injury(&self) -> bool {
+        self.colony.has_facility(BuildingKind::Infirmary)
+            && self.colony.resources.biomass >= self.treatment_cost()
+            && self
+                .roster
+                .iter()
+                .any(|character| !character.injuries.is_empty())
+    }
+
+    fn treatment_cost(&self) -> i32 {
+        if self
             .colony
             .has_active_upgrade(BuildingKind::Infirmary, ADAPTATION_CLINIC_UPGRADE)
         {
             3
         } else {
             5
-        };
+        }
+    }
+
+    pub fn treat_first_injury(&mut self) -> Result<String, String> {
+        if !self.colony.has_facility(BuildingKind::Infirmary) {
+            return Err("An operational infirmary is required".to_owned());
+        }
+        let cost = self.treatment_cost();
         if self.colony.resources.biomass < cost {
             return Err(format!("Treatment requires {} biomass", cost));
         }

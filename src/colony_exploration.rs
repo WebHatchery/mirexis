@@ -404,7 +404,7 @@ impl ColonyExplorer {
             if button(
                 Rect::new(84.0, 532.0, 176.0, 30.0),
                 npc_action_label(character, npc.guest),
-                npc_action_enabled(campaign, character, &action, npc.guest),
+                npc_action_enabled(campaign, &action, npc.guest),
                 mouse,
             ) {
                 actions.push(action);
@@ -646,29 +646,12 @@ fn npc_action(character: &CharacterRecord, guest: bool) -> Option<UiAction> {
     }
 }
 
-fn npc_action_enabled(
-    campaign: &CampaignState,
-    character: &CharacterRecord,
-    action: &UiAction,
-    guest: bool,
-) -> bool {
+fn npc_action_enabled(campaign: &CampaignState, action: &UiAction, guest: bool) -> bool {
     if guest {
         return true;
     }
     match action {
-        UiAction::TreatInjury => {
-            let treatment_cost = if campaign.colony.has_active_upgrade(
-                BuildingKind::Infirmary,
-                crate::colony::ADAPTATION_CLINIC_UPGRADE,
-            ) {
-                3
-            } else {
-                5
-            };
-            !character.injuries.is_empty()
-                && campaign.colony.has_facility(BuildingKind::Infirmary)
-                && campaign.colony.resources.biomass >= treatment_cost
-        }
+        UiAction::TreatInjury => campaign.can_treat_first_injury(),
         UiAction::OpenGeneLab => campaign.colony.has_facility(BuildingKind::GeneLab),
         _ => true,
     }

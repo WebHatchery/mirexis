@@ -10,7 +10,7 @@ Status: automated and internal verification complete; external playtests pending
 | Continue | Browser refresh followed by **CONTINUE** restores the serialized city goal; finished tactical saves reopen the debrief with its reconstructed outcome and materialized mission context | pass |
 | Tactical save/load | Existing persistence tests and visible battle **SAVE** / **LOAD** controls | pass |
 | Victory and defeat | Deterministic outcome tests plus first-hour tests for both outcome values | pass |
-| Recovery | Failure advances to debrief and city; Ilya's routed recovery conversation precedes preparation; contextual treatment and Gene Lab actions only enable when actionable; emergency stores guarantee one 24-material preparation | pass |
+| Recovery | Failure advances to debrief and city; Ilya's routed recovery conversation precedes preparation; contextual and Operations treatment actions share injury, biomass, and infirmary gates; emergency stores guarantee one 24-material preparation | pass |
 | Tutorial restart/skip | Visible field-guide controls; both preserve the essential campaign goal | pass |
 | Destructive save actions | **NEW OPERATION** becomes **CONFIRM NEW COLONY** and **DELETE SAVE** becomes **CONFIRM DELETE** before mutation | pass |
 | Browser refresh | WebGL campaign autosave survived a page reload on 29 August 2026 | pass |
@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 422 Mirexis unit tests pass.
+- 423 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 95 audited 1280×720 scenes, including the first-hour

@@ -182,18 +182,28 @@ fn treatment_dialogue_action_requires_an_injury_and_prerequisites() {
         .unwrap();
     assert_eq!(npc_action(&ilya, false), None);
 
-    let mut injured = ilya;
-    injured.injuries.push(crate::campaign::InjuryRecord {
-        id: "test_trauma".to_owned(),
-        name: "Test trauma".to_owned(),
-        recovery_operations: 1,
-    });
-    let action = npc_action(&injured, false).unwrap();
+    campaign
+        .roster
+        .iter_mut()
+        .find(|character| character.id == "ilya_reed")
+        .unwrap()
+        .injuries
+        .push(crate::campaign::InjuryRecord {
+            id: "test_trauma".to_owned(),
+            name: "Test trauma".to_owned(),
+            recovery_operations: 1,
+        });
+    let injured = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "ilya_reed")
+        .unwrap();
+    let action = npc_action(injured, false).unwrap();
     assert_eq!(action, UiAction::TreatInjury);
-    assert!(npc_action_enabled(&campaign, &injured, &action, false));
+    assert!(npc_action_enabled(&campaign, &action, false));
 
     campaign.colony.resources.biomass = 0;
-    assert!(!npc_action_enabled(&campaign, &injured, &action, false));
+    assert!(!npc_action_enabled(&campaign, &action, false));
 }
 
 #[test]
@@ -207,5 +217,5 @@ fn gene_lab_dialogue_action_is_disabled_until_the_lab_is_online() {
         .unwrap();
     let action = npc_action(nadi, false).unwrap();
     assert_eq!(action, UiAction::OpenGeneLab);
-    assert!(!npc_action_enabled(&campaign, nadi, &action, false));
+    assert!(!npc_action_enabled(&campaign, &action, false));
 }
