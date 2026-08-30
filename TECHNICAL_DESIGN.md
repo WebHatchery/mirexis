@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.155.0
+Save/content version: 1.156.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -931,6 +931,7 @@ Migration coverage:
 | 1.153.0 | Damaged-building repair intents now require the effective material cost, and map hover copy reflects Drone Bay discounts; no new save fields |
 | 1.154.0 | Waystation guest dialogue and map recruitment intents now require the route recruit's effective resource cost; no new save fields |
 | 1.155.0 | Colony-map hover prompts and two-tap actions now share one actionable-plot classifier, preventing informational buildings and unavailable projects from presenting as tappable; no new save fields |
+| 1.156.0 | Armed field-item targeting keeps its visible cancel affordance even when no valid target remains; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

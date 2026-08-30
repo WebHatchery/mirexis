@@ -5,6 +5,10 @@ use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::button;
 use macroquad::prelude::{Color, Rect, Vec2, WHITE};
 
+fn action_button_enabled(targeting: bool, has_valid_target: bool) -> bool {
+    targeting || has_valid_target
+}
+
 pub(crate) fn draw_action_button(
     ctx: &UiContext<'_>,
     selected: Option<&UnitState>,
@@ -25,14 +29,15 @@ pub(crate) fn draw_action_button(
             Some(current)
         ) if active == current
     );
+    let has_valid_target = equipment_id.as_deref().is_some_and(|equipment_id| {
+        selected.is_some_and(|unit| {
+            crate::equipment_actions::has_valid_target(ctx.session, &unit.id, equipment_id)
+        })
+    });
     let clicked = button(
         rect,
         if targeting { "CANCEL" } else { equipment_label },
-        equipment_id.as_deref().is_some_and(|equipment_id| {
-            selected.is_some_and(|unit| {
-                crate::equipment_actions::has_valid_target(ctx.session, &unit.id, equipment_id)
-            })
-        }),
+        action_button_enabled(targeting, has_valid_target),
         mouse,
     );
     if let Some(id) = equipment_id.as_deref() {
@@ -59,3 +64,6 @@ pub(crate) fn draw_action_button(
         actions.push(UiAction::ArmEquipment(equipment_id));
     }
 }
+
+#[cfg(test)]
+mod tests;
