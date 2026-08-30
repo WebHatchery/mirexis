@@ -89,9 +89,7 @@ fn each_identity_building_has_one_path_specific_colony_voice() {
         assert_eq!(beat.id, beat_id);
         assert!(!beat.title.is_empty());
         assert!(!beat.text.is_empty());
-        assert!(
-            identity_beat(path_id, "ilya_reed").is_none_or(|candidate| candidate.id != beat_id)
-        );
+        assert!(identity_beat(path_id, "ilya_reed").is_none_or(|candidate| candidate.id != beat_id));
     }
     assert!(identity_npc("unknown_path").is_none());
     assert!(identity_beat("unknown_path", "mara_venn").is_none());

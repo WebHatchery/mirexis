@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.80.0
+Save/content version: 1.81.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -606,7 +606,9 @@ operation and campaign completion gates. The selected path supplies a data-backe
 title, revelation, and colony legacy: a sovereign redoubt, a planetary symbiosis, or an
 open link to the intelligence beneath Mirexis. The finale operation retires from the
 offer pool, the debrief and colony hub expose the ending, and generic post-campaign
-operations remain available so a completed save is still playable.
+operations remain available so a completed save is still playable. Those views also derive a
+colony legacy dossier from the chosen institution, ready and recovering people, trusted bonds,
+lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
 
 ## 9. Content Registry
 
@@ -736,6 +738,7 @@ Migration coverage:
 | 1.78.0 | Queued Workshop level-two branches, Precision Bench fabrication savings, Drone Bay repair savings, and three-facility upgrade layout |
 | 1.79.0 | Physical Mirexis identity buildings, path-specific defence consequences, Choir Garden biomass cycling, and identity-save migration |
 | 1.80.0 | Identity-building NPC placement, persistent path-specific field notes, ambient signals, and inspection copy |
+| 1.81.0 | Derived ending dossiers acknowledging the chosen civic institution, people, bonds, scars, and evolutions |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -787,7 +790,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (302 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (304 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -831,7 +834,8 @@ these explicit boundaries when continuing:
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
   population, free placement for every building, and the remaining facility branches remain future
-  work.
+  work. Completed campaigns now also expose a derived legacy dossier that acknowledges the
+  institution, people, bonds, scars, and evolutions carried through the ending.
 - Pair relationships now grow from shared victories and character events, and trusted
   deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,
   romances, bespoke relationship scenes, permanent death, and broader armour/tool

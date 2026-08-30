@@ -68,6 +68,9 @@ pub fn draw_debrief(
             20.0,
             dark::ACCENT,
         );
+        if let Some(dossier) = crate::epilogue::derive(campaign) {
+            draw_text(dossier.debrief_line(), 200.0, 232.0, 12.0, dark::POSITIVE);
+        }
     }
     if campaign.operations_completed <= 2 {
         draw_text(

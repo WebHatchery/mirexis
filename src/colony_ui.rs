@@ -335,6 +335,9 @@ pub(super) fn draw_operations(
                 565.0,
                 TextStyle::new(9.5, dark::TEXT_DIM).params(),
             );
+            if let Some(dossier) = crate::epilogue::derive(campaign) {
+                draw_epilogue_dossier(&dossier);
+            }
         }
     } else if choosing_contact {
         draw_ui_text_ex(
@@ -756,6 +759,23 @@ fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &V
         2.0,
         accent,
     );
+}
+
+fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
+    draw_ui_text_ex(
+        "COLONY LEGACY REGISTER",
+        878.0,
+        590.0,
+        TextStyle::new(11.0, dark::ACCENT).params(),
+    );
+    for (index, line) in dossier.lines().iter().enumerate() {
+        draw_ui_text_ex(
+            line,
+            878.0,
+            607.0 + index as f32 * 14.0,
+            TextStyle::new(8.5, dark::TEXT_DIM).params(),
+        );
+    }
 }
 
 fn colony_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {

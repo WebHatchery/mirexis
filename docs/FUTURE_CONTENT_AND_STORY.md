@@ -394,7 +394,10 @@ Goal: deepen the existing people and city without new tactical systems.
   the next debrief, and authored post-operation field notes.
 - Add at least one phase-specific colony scene per campaign phase.
 - Establish the unified refuge-engine truth in internal narrative references.
-- Expand ending acknowledgement for bonds, scars, evolution, and one civic choice.
+- Implemented: ending acknowledgement now derives a colony legacy dossier from bonds, scars,
+  evolution, people, and the chosen civic institution.
+- Expand the dossier into authored character-specific epilogue variations and additional
+  post-ending scenes.
 
 Exit test: players recall three colonists, can describe one changing relationship, and
 notice the colony responding to an operation without opening a ledger.

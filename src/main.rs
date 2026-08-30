@@ -32,6 +32,7 @@ mod defense_objective;
 mod enemy_abilities;
 mod enemy_intent;
 mod enemy_intent_ui;
+mod epilogue;
 mod equipment_actions;
 mod equipment_catalog;
 mod equipment_ui;
