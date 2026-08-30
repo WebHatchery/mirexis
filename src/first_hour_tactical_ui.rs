@@ -1,6 +1,6 @@
 //! Contextual battlefield and command-rail emphasis for the first operation lesson.
 
-use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
+use crate::first_hour::{FirstHourProgress, TacticalLesson};
 use crate::grid_ui::GridView;
 use crate::state::GameSession;
 use crate::ui::{draw_ui_text_ex, UiContext};
@@ -21,7 +21,7 @@ pub(crate) fn map_focus_tile(
     progress: &FirstHourProgress,
     session: &GameSession,
 ) -> Option<TilePos> {
-    if !progress.guidance_enabled || progress.stage != FirstHourStage::FirstOperation {
+    if !progress.guidance_enabled || !progress.is_tactical_stage() {
         return None;
     }
     match progress.lesson {
@@ -175,7 +175,7 @@ fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
 
 fn guidance_is_active(ctx: &UiContext<'_>) -> bool {
     ctx.first_hour.guidance_enabled
-        && ctx.first_hour.stage == FirstHourStage::FirstOperation
+        && ctx.first_hour.is_tactical_stage()
         && !ctx.first_hour.help_open
         && !ctx.show_help
         && !ctx.show_battle_log

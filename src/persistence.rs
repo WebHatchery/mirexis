@@ -142,6 +142,12 @@ pub fn migrate_save_value(
             .first_hour
             .migrate_from_operations(save.campaign.operations_completed);
     }
+    if detected_version.as_deref() != Some(data.config.version.as_str())
+        && save.campaign.operations_completed == 1
+        && save.tactical.is_some()
+    {
+        save.campaign.first_hour.entered_second_operation_tactical();
+    }
     if detected_version.as_deref() != Some(data.config.version.as_str()) {
         if let Some(tactical) = &mut save.tactical {
             for unit in &mut tactical.units {

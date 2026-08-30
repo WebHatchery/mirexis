@@ -1,7 +1,7 @@
 //! Three-quarter battlefield rendering, projected overlays, depth, and hit handling.
 
 use crate::data::{ObjectiveKind, Team};
-use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
+use crate::first_hour::{FirstHourProgress, TacticalLesson};
 use crate::grid_ui::{
     CameraInsets, GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
     STRUCTURE_ART_SCALE, TERRAIN_ART_PIVOT, TERRAIN_ART_SCALE,
@@ -703,7 +703,7 @@ fn normal_tile_action(
 
 fn guided_attack_needs_confirmation(progress: &FirstHourProgress) -> bool {
     progress.guidance_enabled
-        && progress.stage == FirstHourStage::FirstOperation
+        && progress.is_tactical_stage()
         && matches!(
             progress.lesson,
             TacticalLesson::Attack | TacticalLesson::ApplyLearning

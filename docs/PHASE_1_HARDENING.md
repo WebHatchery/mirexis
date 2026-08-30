@@ -31,12 +31,13 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 375 Mirexis unit tests pass.
+- 378 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 89 audited 1280×720 scenes, including the first-hour
-  field guide, guided tactical lesson, actionable ability lesson, and colony handoff;
-  forecast and first-hour layout changes replace their affected images.
+- The canonical set contains 90 audited 1280×720 scenes, including the first-hour
+  field guide, guided tactical lesson, second-operation tactical lesson, actionable
+  ability lesson, and colony handoff; forecast and first-hour layout changes replace
+  their affected images.
 
 ## Honest boundary
 

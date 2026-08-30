@@ -188,6 +188,13 @@ impl Game {
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Ability;
                 super::first_hour_flow::prepare_first_hour_ability_selection(&mut self.session);
             }
+            "second_operation_tactical" => {
+                self.capture_valid_shot();
+                self.campaign.operations_completed = 1;
+                self.campaign.first_hour.stage =
+                    crate::first_hour::FirstHourStage::SecondOperationTactical;
+                self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::ApplyLearning;
+            }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",

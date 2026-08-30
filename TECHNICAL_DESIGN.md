@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.117.0
+Save/content version: 1.118.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -182,7 +182,9 @@ normal/critical damage, and weapon AP for an attackable unit. Hover and keyboard
 tiles share the same presentation; previewing never mutates state or consumes RNG. Guided
 first-operation attack lessons select a hostile before committing and expose a visible
 `ATTACK` confirmation in the forecast card, so touch players can inspect the result first;
-ordinary missions retain their direct hostile intent.
+ordinary missions retain their direct hostile intent. The second operation enters a
+distinct tactical guidance stage after deployment, keeping the colony handoff goal from
+overwriting the in-battle ApplyLearning prompt and focus.
 
 ### 5.2 Movement
 
@@ -890,6 +892,7 @@ Migration coverage:
 | 1.115.0 | First-hour colony handoffs focus the visible Operations, briefing, and preparation controls |
 | 1.116.0 | First-hour ability teaching selects a usable colonist and focuses one actionable ability control |
 | 1.117.0 | Guided first-operation attacks expose a forecast confirmation and post-ability guidance points at remaining hostiles |
+| 1.118.0 | Second-operation deployment enters a persisted tactical guidance stage with migrated save recovery and hostile focus |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -927,7 +930,7 @@ units use labels as well as faction color, and colony buildings use text labels.
 `finale_debrief`,
 `adaptation_operation`, `glass_nerve`, `thin_shelter`, `breakwater`, `false_heart`, `live_wire`, `last_wall`,
 `root_choir`, `door_of_light`, `legacy`,
-`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `first_hour_tactical`, `first_hour_ability`, `first_hour_operations`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
+`briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `first_hour_tactical`, `first_hour_ability`, `second_operation_tactical`, `first_hour_operations`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`, `readiness_markers`, `vitality_markers`,
 `equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
@@ -941,8 +944,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (375 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic 89-scene capture with visual inspection
+- `cargo test` (378 Mirexis unit tests plus asset-registry and source-size gates)
+- deterministic 90-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 

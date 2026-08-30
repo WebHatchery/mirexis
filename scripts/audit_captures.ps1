@@ -141,6 +141,7 @@ $lines.Add("- ``ui_class_target.png``: transformed unit targeting and contextual
 $lines.Add("- ``ui_colony.png``: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.")
 $lines.Add("- ``ui_first_hour_tactical.png``: guided tactical lesson marks a legal move target without blocking the battlefield inspection.")
 $lines.Add("- ``ui_first_hour_ability.png``: guided ability lesson focuses a currently actionable mutation, class action, or field item.")
+$lines.Add("- ``ui_second_operation_tactical.png``: the persisted transfer lesson keeps the ApplyLearning hostile focus and forecast prompt active after deployment.")
 $lines.Add("- ``ui_first_hour_operations.png``: guided colony handoff keeps the next mission briefing visible inside the open Operations drawer.")
 $lines.Add("- ``ui_construction.png``: placement blueprint and reserved resources remain visible at fixed building scale.")
 $lines.Add("")

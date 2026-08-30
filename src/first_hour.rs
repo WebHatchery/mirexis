@@ -14,6 +14,7 @@ pub(crate) enum FirstHourStage {
     FirstReturn,
     MakeInvestment,
     SecondOperation,
+    SecondOperationTactical,
     SecondReturn,
     Promise,
     Complete,
@@ -82,7 +83,9 @@ impl FirstHourProgress {
             FirstHourStage::FirstBriefing => {
                 "Tap colonists to choose up to three, then tap DEPLOY SQUAD."
             }
-            FirstHourStage::FirstOperation => lesson_prompt(self.lesson),
+            FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical => {
+                lesson_prompt(self.lesson)
+            }
             FirstHourStage::FirstReturn => {
                 "Tap RETURN TO COLONY, then speak with the highlighted colonist."
             }
@@ -110,6 +113,9 @@ impl FirstHourProgress {
             FirstHourStage::FirstOperation => {
                 "Secure the refuge and neutralise the remaining Brood."
             }
+            FirstHourStage::SecondOperationTactical => {
+                "Complete the mission and neutralise remaining hostiles."
+            }
             _ => self.primary_goal(),
         }
     }
@@ -136,9 +142,22 @@ impl FirstHourProgress {
             self.stage = FirstHourStage::FirstOperation;
             self.lesson = TacticalLesson::Select;
         } else if operations_completed == 1 {
-            self.stage = FirstHourStage::SecondOperation;
+            self.entered_second_operation_tactical();
+        }
+    }
+
+    pub(crate) fn entered_second_operation_tactical(&mut self) {
+        if self.stage == FirstHourStage::SecondOperation {
+            self.stage = FirstHourStage::SecondOperationTactical;
             self.lesson = TacticalLesson::ApplyLearning;
         }
+    }
+
+    pub(crate) fn is_tactical_stage(&self) -> bool {
+        matches!(
+            self.stage,
+            FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical
+        )
     }
 
     pub(crate) fn opened_briefing(&mut self, operations_completed: u32) {

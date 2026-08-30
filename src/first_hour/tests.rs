@@ -64,6 +64,25 @@ fn first_investment_changes_only_the_second_deployment() {
 }
 
 #[test]
+fn second_deployment_enters_a_distinct_tactical_guidance_stage() {
+    let mut progress = FirstHourProgress {
+        stage: FirstHourStage::MakeInvestment,
+        ..FirstHourProgress::default()
+    };
+    progress.invested("survey_uplink");
+    assert_eq!(progress.stage, FirstHourStage::SecondOperation);
+
+    progress.deployed(1);
+
+    assert_eq!(progress.stage, FirstHourStage::SecondOperationTactical);
+    assert_eq!(progress.lesson, TacticalLesson::ApplyLearning);
+    assert_eq!(
+        progress.primary_goal(),
+        "Tap a remaining hostile, review the forecast, then tap ATTACK."
+    );
+}
+
+#[test]
 fn missing_serialized_fields_use_safe_tutorial_defaults() {
     let progress: FirstHourProgress = serde_json::from_str("{}").unwrap();
     assert_eq!(progress, FirstHourProgress::default());

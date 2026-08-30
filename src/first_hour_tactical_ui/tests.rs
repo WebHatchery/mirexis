@@ -17,7 +17,7 @@ fn progress(lesson: TacticalLesson) -> FirstHourProgress {
 }
 
 #[test]
-fn tactical_focus_is_gated_to_guided_first_operation() {
+fn tactical_focus_is_gated_to_guided_tactical_stages() {
     let session = session();
     let mut guided = progress(TacticalLesson::Select);
     assert!(map_focus_tile(&guided, &session).is_some());
@@ -28,6 +28,10 @@ fn tactical_focus_is_gated_to_guided_first_operation() {
     guided.guidance_enabled = true;
     guided.stage = FirstHourStage::FirstBriefing;
     assert_eq!(map_focus_tile(&guided, &session), None);
+
+    guided.stage = FirstHourStage::SecondOperationTactical;
+    guided.lesson = TacticalLesson::ApplyLearning;
+    assert!(map_focus_tile(&guided, &session).is_some());
 }
 
 #[test]
@@ -108,7 +112,14 @@ fn apply_learning_focus_points_to_a_remaining_hostile() {
     };
 
     assert_eq!(
-        map_focus_tile(&progress(TacticalLesson::ApplyLearning), &session),
+        map_focus_tile(
+            &FirstHourProgress {
+                stage: FirstHourStage::SecondOperationTactical,
+                lesson: TacticalLesson::ApplyLearning,
+                ..FirstHourProgress::default()
+            },
+            &session,
+        ),
         Some(hostile_tile)
     );
     assert!(session.can_attack_selected(&hostile_id));
