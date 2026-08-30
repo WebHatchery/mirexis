@@ -203,12 +203,16 @@ fn draw_class_action(
             dark::ACCENT,
         );
     }
+    let action_name = user
+        .and_then(|unit| crate::class_actions::action_name(&unit.class_id))
+        .unwrap_or("CLASS ACTION");
+    let action_instruction = if tile_target {
+        format!("{} // CHOOSE HIGHLIGHTED TILE", action_name)
+    } else {
+        format!("{} // CHOOSE HIGHLIGHTED UNIT", action_name)
+    };
     draw_ui_text_ex(
-        if tile_target {
-            "CLASS ACTION TARGETING // CHOOSE HIGHLIGHTED TILE"
-        } else {
-            "CLASS ACTION TARGETING // CHOOSE HIGHLIGHTED UNIT"
-        },
+        &action_instruction,
         card.x + 82.0,
         card.y + 25.0,
         TextStyle::new(16.0, dark::WARNING).params(),

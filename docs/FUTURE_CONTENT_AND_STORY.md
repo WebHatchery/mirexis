@@ -15,8 +15,8 @@ This document plans the next content horizon: playable peoples and origins, clas
 skills, buildings, upgrades, recruits, and the story that connects them. It is subordinate
 to `PLAYABLE_GAME_PHASE_1.md` until the required uncoached first-hour playtests are
 complete. All fourteen base-class techniques are now implemented as a deliberately
-bounded tactical slice; mastery forks and the remaining concepts below are still
-planning direction.
+bounded tactical slice; mastery forks, new peoples, buildings, and later story work
+remain planning direction.
 
 ## 2. Expansion rules
 
