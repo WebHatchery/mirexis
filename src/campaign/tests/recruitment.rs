@@ -124,6 +124,26 @@ fn outsider_arc_persists_two_disagreements_and_a_third_closing_beat() {
 }
 
 #[test]
+fn recruited_outsider_arcs_keep_progress_separate_across_routes() {
+    let data = GameData::load().unwrap();
+    let mut campaign = directorate_waystation_campaign(&data);
+    campaign.recruit_outsider(&data).unwrap();
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    campaign.strategy.contact_complete = true;
+    campaign.recruit_outsider(&data).unwrap();
+
+    campaign.resolve_outsider_beat(0, "shelter_cipher").unwrap();
+    assert_eq!(campaign.outsider_arc_stage, 1);
+    assert_eq!(campaign.outsider_arc_beat().unwrap().outsider_id, "sedge");
+
+    campaign
+        .resolve_outsider_beat(0, "sedge_keep_map_personal")
+        .unwrap();
+    assert_eq!(campaign.outsider_arc_stage, 1);
+    assert_eq!(campaign.outsider_arc_states["sedge"].stage, 1);
+}
+
+#[test]
 fn adaptation_recruitment_uses_biomass_and_adds_the_mireborn_route_map() {
     let data = GameData::load().unwrap();
     let mut campaign = adaptation_waystation_campaign(&data);
@@ -164,6 +184,59 @@ fn adaptation_recruitment_uses_biomass_and_adds_the_mireborn_route_map() {
             .move_range
             >= 6
     );
+}
+
+#[test]
+fn adaptation_outsider_arc_tracks_sedge_and_brood_attention() {
+    let data = GameData::load().unwrap();
+    let mut campaign = adaptation_waystation_campaign(&data);
+    campaign.recruit_outsider(&data).unwrap();
+    let biomass_before = campaign.colony.resources.biomass;
+    let brood_attention_before = campaign
+        .strategy
+        .factions
+        .iter()
+        .find(|faction| faction.id == "brood")
+        .unwrap()
+        .attention;
+
+    campaign
+        .resolve_outsider_beat(0, "sedge_trade_the_route")
+        .unwrap();
+    assert_eq!(campaign.colony.resources.biomass, biomass_before - 2);
+    assert_eq!(campaign.outsider_arc_states["sedge"].stage, 1);
+    assert_eq!(
+        campaign
+            .strategy
+            .factions
+            .iter()
+            .find(|faction| faction.id == "brood")
+            .unwrap()
+            .attention,
+        brood_attention_before + 3
+    );
+
+    campaign.operations_completed = 1;
+    campaign
+        .resolve_outsider_beat(1, "sedge_follow_the_pulse")
+        .unwrap();
+    assert_eq!(campaign.outsider_arc_states["sedge"].stage, 2);
+
+    campaign.operations_completed = 2;
+    campaign
+        .resolve_outsider_beat(2, "sedge_publish_the_route")
+        .unwrap();
+    assert_eq!(campaign.outsider_arc_states["sedge"].stage, 3);
+    assert_eq!(
+        campaign.outsider_arc_states["sedge"].final_choice,
+        "sedge_publish_the_route"
+    );
+    assert!(!campaign.outsider_arc_available());
+
+    let saved = serde_json::to_value(&campaign).unwrap();
+    let restored: CampaignState = serde_json::from_value(saved).unwrap();
+    assert_eq!(restored.outsider_arc_states["sedge"].disagreements, 2);
+    assert_eq!(restored.outsider_arc_states["sedge"].stage, 3);
 }
 
 #[test]

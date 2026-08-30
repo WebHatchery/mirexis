@@ -8,7 +8,7 @@ mod relay;
 mod story;
 
 pub(super) use derivation::derive_unit;
-pub(crate) use outsider::{outsider_beat, OutsiderChoice};
+pub(crate) use outsider::OutsiderChoice;
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
 use crate::colony::{BuildingKind, ColonyState, HOT_CORE_UPGRADE, PRECISION_BENCH_UPGRADE};
@@ -102,6 +102,16 @@ impl CharacterRecord {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub(crate) struct OutsiderArcState {
+    #[serde(default)]
+    pub(crate) stage: u8,
+    #[serde(default)]
+    pub(crate) disagreements: u8,
+    #[serde(default)]
+    pub(crate) final_choice: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CampaignState {
     pub roster: Vec<CharacterRecord>,
@@ -122,6 +132,8 @@ pub struct CampaignState {
     pub outsider_disagreements: u8,
     #[serde(default)]
     pub outsider_final_choice: String,
+    #[serde(default)]
+    pub(crate) outsider_arc_states: BTreeMap<String, OutsiderArcState>,
     #[serde(default)]
     pub commons_meals_hosted: u32,
     #[serde(default)]
@@ -158,6 +170,7 @@ impl CampaignState {
             outsider_arc_stage: 0,
             outsider_disagreements: 0,
             outsider_final_choice: String::new(),
+            outsider_arc_states: BTreeMap::new(),
             commons_meals_hosted: 0,
             commons_meal_operation: None,
             relay_scans_used: 0,

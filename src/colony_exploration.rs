@@ -532,6 +532,7 @@ fn npc_status(character: &CharacterRecord) -> String {
         "sol_cairn" => "CHIEF ENGINEER",
         "nadi_vale" => "XENOBIOLOGY LEAD",
         "veya_orn" => "DIRECTORATE EXILE",
+        "sedge" => "MIREBORN COURIER",
         _ => "COLONIST",
     };
     format!(
@@ -547,7 +548,7 @@ fn npc_status(character: &CharacterRecord) -> String {
 fn npc_action_label(character: &CharacterRecord) -> &'static str {
     match character.id.as_str() {
         "ilya_reed" => "REQUEST TREATMENT",
-        "nadi_vale" => "ENTER GENE LAB",
+        "nadi_vale" | "sedge" => "ENTER GENE LAB",
         _ => "OPEN ROSTER",
     }
 }
@@ -555,7 +556,7 @@ fn npc_action_label(character: &CharacterRecord) -> &'static str {
 fn npc_action(character: &CharacterRecord) -> UiAction {
     match character.id.as_str() {
         "ilya_reed" => UiAction::TreatInjury,
-        "nadi_vale" => UiAction::OpenGeneLab,
+        "nadi_vale" | "sedge" => UiAction::OpenGeneLab,
         _ => UiAction::OpenRoster,
     }
 }

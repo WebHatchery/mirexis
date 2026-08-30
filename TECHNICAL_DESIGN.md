@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.88.0
+Save/content version: 1.89.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -111,7 +111,7 @@ Important transition payloads:
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
 | `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
 | `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
-| `campaign/outsider.rs` | Waystation recruitment gates and Contact-era outsider conversations | Rendering or raw input |
+| `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
@@ -287,6 +287,12 @@ Route-specific character definitions carry a recruitment protocol, optional camp
 resource, and cost. The Waystation resolves the first matching definition rather than
 hard-coding a recruit: Veya uses Contact materials, while Sedge uses Adaptation biomass and
 raises Brood attention when the colony shelters their pre-recorded mutation.
+
+Each recruited outsider has an independent three-beat Waystation arc. Veya's existing
+legacy fields remain readable for old saves; additional outsider state is keyed by character
+ID so a campaign that recruits both Veya and Sedge cannot merge their disagreements, costs,
+or closing choices. Sedge's arc spends food, materials, or biomass, changes Brood attention,
+strengthens a named relationship, and records a route legacy on the courier.
 
 Contact route field notes are keyed by the selected protocol and three authoritative campaign
 flags: before trace completion, after the trace but before Contact completion, and after Contact
@@ -768,6 +774,7 @@ Migration coverage:
 | 1.86.0 | Third-beat post-ending identity scenes unlocked by final-reflection acknowledgement |
 | 1.87.0 | Mireborn Adapted Sedge recruitment, biomass route cost, Waystation presence, and MAP HAZARD equipment action |
 | 1.88.0 | Three-stage witness, contradiction, and aftermath colony notes for every Contact protocol |
+| 1.89.0 | Independent route-specific outsider arcs for Sedge with Brood attention, resource choices, and persisted legacies |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -819,7 +826,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (316 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (318 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

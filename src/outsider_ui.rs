@@ -1,6 +1,6 @@
-//! Contact-era Waystation conversations and route-exclusive outsider choices.
+//! Waystation conversations and route-exclusive outsider choices.
 
-use crate::campaign::{outsider_beat, CampaignState, OutsiderChoice};
+use crate::campaign::{CampaignState, OutsiderChoice};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
@@ -15,14 +15,14 @@ pub(crate) fn draw(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let Some(beat) = outsider_beat(campaign.outsider_arc_stage) else {
+    let Some(beat) = campaign.outsider_arc_beat() else {
         return;
     };
     draw_ui_text_ex(
         &format!(
             "WAYSTATION // OUTSIDER ARC // BEAT {}/3 // DISAGREEMENTS {}/2",
             beat.stage + 1,
-            campaign.outsider_disagreements.min(2)
+            campaign.outsider_arc_disagreements().min(2)
         ),
         878.0,
         510.0,
@@ -30,8 +30,8 @@ pub(crate) fn draw(
     );
     visuals.draw_portrait(
         assets,
-        "veya_orn",
-        "Veya Orn",
+        beat.outsider_id,
+        beat.outsider_name,
         Rect::new(878.0, 518.0, 48.0, 56.0),
         dark::WARNING,
     );
@@ -90,6 +90,7 @@ fn affordable(campaign: &CampaignState, choice: &OutsiderChoice) -> bool {
     campaign.colony.resources.materials >= choice.materials_cost
         && campaign.colony.resources.food >= choice.food_cost
         && campaign.colony.resources.power >= choice.power_cost
+        && campaign.colony.resources.biomass >= choice.biomass_cost
 }
 
 fn cost_label(choice: &OutsiderChoice) -> String {
@@ -102,6 +103,9 @@ fn cost_label(choice: &OutsiderChoice) -> String {
     }
     if choice.power_cost > 0 {
         costs.push(format!("{} POWER", choice.power_cost));
+    }
+    if choice.biomass_cost > 0 {
+        costs.push(format!("{} BIOMASS", choice.biomass_cost));
     }
     if costs.is_empty() {
         "NO RESOURCE COST".to_owned()

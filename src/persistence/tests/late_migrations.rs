@@ -254,6 +254,7 @@ fn version_171_save_gains_outsider_runtime_defaults() {
     campaign.remove("outsider_arc_stage");
     campaign.remove("outsider_disagreements");
     campaign.remove("outsider_final_choice");
+    campaign.remove("outsider_arc_states");
     campaign.remove("commons_meals_hosted");
     campaign.remove("commons_meal_operation");
     for character in campaign["roster"].as_array_mut().unwrap() {
@@ -268,6 +269,7 @@ fn version_171_save_gains_outsider_runtime_defaults() {
     assert_eq!(migrated.campaign.outsider_arc_stage, 0);
     assert_eq!(migrated.campaign.outsider_disagreements, 0);
     assert!(migrated.campaign.outsider_final_choice.is_empty());
+    assert!(migrated.campaign.outsider_arc_states.is_empty());
     assert_eq!(migrated.campaign.commons_meals_hosted, 0);
     assert_eq!(migrated.campaign.commons_meal_operation, None);
     assert!(migrated
