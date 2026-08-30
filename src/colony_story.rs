@@ -3,7 +3,9 @@
 use serde::{Deserialize, Serialize};
 
 mod identity;
-pub(crate) use identity::{identity_arc_beat, identity_npc, IdentityBuildingState};
+pub(crate) use identity::{
+    identity_arc_beat, identity_npc, IdentityArcProgress, IdentityBuildingState,
+};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct ColonyStoryState {

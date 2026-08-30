@@ -25,7 +25,8 @@ pub(super) fn draw_hover_card(
     let text = if let Some(building) = building {
         if building.kind.is_identity() {
             campaign
-                .identity_stewardship_copy()
+                .identity_preparation_copy()
+                .or_else(|| campaign.identity_stewardship_copy())
                 .unwrap_or_else(|| identity_building_copy(campaign, building))
         } else if building.damaged {
             format!(
@@ -208,6 +209,8 @@ pub(super) fn handle_plot_click(
             && campaign.relay_scan_available()
         {
             actions.push(UiAction::RunRelayScan);
+        } else if building.kind.is_identity() && campaign.identity_preparation_available() {
+            actions.push(UiAction::PrepareIdentityBuilding);
         } else if building.kind.is_identity() && campaign.identity_stewardship_available() {
             actions.push(UiAction::RunIdentityStewardship);
         }

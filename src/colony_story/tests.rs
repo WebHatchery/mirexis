@@ -225,8 +225,16 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
         ),
     ] {
         let mut story = ColonyStoryState::default();
-        let identity = identity_arc_beat(path_id, character_id, false, 0, 0, &story, None)
-            .expect("identity establishment note");
+        let identity = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            IdentityArcProgress::default(),
+            &story,
+            None,
+        )
+        .expect("identity establishment note");
         story.acknowledge(identity.id);
 
         let damaged = identity_arc_beat(
@@ -234,7 +242,7 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
             character_id,
             false,
             0,
-            0,
+            IdentityArcProgress::default(),
             &story,
             Some(IdentityBuildingState {
                 damaged: true,
@@ -249,7 +257,7 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
             character_id,
             false,
             0,
-            0,
+            IdentityArcProgress::default(),
             &story,
             Some(IdentityBuildingState {
                 damaged: false,
@@ -264,7 +272,7 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
             character_id,
             false,
             0,
-            0,
+            IdentityArcProgress::default(),
             &story,
             Some(IdentityBuildingState {
                 damaged: false,
@@ -278,7 +286,7 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
             character_id,
             false,
             0,
-            0,
+            IdentityArcProgress::default(),
             &story,
             Some(IdentityBuildingState {
                 damaged: false,
@@ -293,7 +301,7 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
             character_id,
             false,
             0,
-            0,
+            IdentityArcProgress::default(),
             &story,
             Some(IdentityBuildingState {
                 damaged: false,
@@ -302,6 +310,62 @@ fn identity_building_failures_open_a_repair_and_power_recovery_arc() {
         )
         .expect("power restoration identity note");
         assert_eq!(power_restored.id, power_restored_id);
+    }
+}
+
+#[test]
+fn identity_preparation_unlocks_one_path_specific_reflection() {
+    for (path_id, character_id, preparation_id) in [
+        ("human_redoubt", "mara_venn", "preparation_redoubt_mara"),
+        (
+            "living_commonwealth",
+            "nadi_vale",
+            "preparation_commonwealth_nadi",
+        ),
+        ("open_threshold", "sol_cairn", "preparation_threshold_sol"),
+    ] {
+        let mut story = ColonyStoryState::default();
+        let identity = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            IdentityArcProgress::default(),
+            &story,
+            None,
+        )
+        .expect("identity establishment note");
+        story.acknowledge(identity.id);
+
+        let preparation = identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            IdentityArcProgress {
+                preparations_completed: 1,
+                stewardship_completed: 0,
+            },
+            &story,
+            None,
+        )
+        .expect("identity preparation note");
+        assert_eq!(preparation.id, preparation_id);
+        assert!(!preparation.text.is_empty());
+        story.acknowledge(preparation.id);
+        assert!(identity_arc_beat(
+            path_id,
+            character_id,
+            false,
+            0,
+            IdentityArcProgress {
+                preparations_completed: 1,
+                stewardship_completed: 0
+            },
+            &story,
+            None
+        )
+        .is_none());
     }
 }
 
@@ -328,24 +392,98 @@ fn post_ending_identity_scene_unlocks_after_the_final_reflection() {
         ),
     ] {
         let story = ColonyStoryState::default();
-        let ending = identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).unwrap();
+        let ending = identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            0,
+            IdentityArcProgress::default(),
+            &story,
+            None,
+        )
+        .unwrap();
         assert!(ending.id.ends_with("_ending"));
 
         let mut story = story;
         story.acknowledge(ending.id);
-        let post = identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).unwrap();
+        let post = identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            0,
+            IdentityArcProgress::default(),
+            &story,
+            None,
+        )
+        .unwrap();
         assert_eq!(post.id, post_id);
         assert!(!post.title.is_empty());
         assert!(!post.text.is_empty());
         story.acknowledge(post.id);
-        assert!(identity_arc_beat(path_id, character_id, true, 0, 0, &story, None).is_none());
-        let stewardship =
-            identity_arc_beat(path_id, character_id, true, 0, 1, &story, None).unwrap();
+        assert!(identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            0,
+            IdentityArcProgress::default(),
+            &story,
+            None
+        )
+        .is_none());
+        let stewardship = identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            0,
+            IdentityArcProgress {
+                preparations_completed: 0,
+                stewardship_completed: 1,
+            },
+            &story,
+            None,
+        )
+        .unwrap();
         assert!(stewardship.id.starts_with("stewardship_"));
         story.acknowledge(stewardship.id);
-        assert!(identity_arc_beat(path_id, character_id, true, 0, 1, &story, None).is_none());
-        let operation = identity_arc_beat(path_id, character_id, true, 1, 1, &story, None).unwrap();
+        assert!(identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            0,
+            IdentityArcProgress {
+                preparations_completed: 0,
+                stewardship_completed: 1
+            },
+            &story,
+            None
+        )
+        .is_none());
+        let operation = identity_arc_beat(
+            path_id,
+            character_id,
+            true,
+            1,
+            IdentityArcProgress {
+                preparations_completed: 0,
+                stewardship_completed: 1,
+            },
+            &story,
+            None,
+        )
+        .unwrap();
         assert_eq!(operation.id, operation_id);
-        assert!(identity_arc_beat(path_id, "ilya_reed", true, 1, 1, &story, None).is_none());
+        assert!(identity_arc_beat(
+            path_id,
+            "ilya_reed",
+            true,
+            1,
+            IdentityArcProgress {
+                preparations_completed: 0,
+                stewardship_completed: 1
+            },
+            &story,
+            None
+        )
+        .is_none());
     }
 }

@@ -12,6 +12,75 @@ fn campaign_with_identity(data: &GameData, path_id: &str) -> CampaignState {
     campaign
 }
 
+fn campaign_with_pre_finale_identity(data: &GameData, path_id: &str) -> CampaignState {
+    let mut campaign = CampaignState::new(data);
+    campaign.strategy.escalation_complete = true;
+    campaign.strategy.mirexis_path_id = path_id.to_owned();
+    campaign.colony.ensure_identity_building(path_id).unwrap();
+    if path_id == "open_threshold" {
+        campaign.colony.resources.power += 6;
+    }
+    campaign
+}
+
+#[test]
+fn each_identity_building_can_prepare_the_finale_before_campaign_completion() {
+    let data = GameData::load().unwrap();
+    for (path_id, faction_id, resource) in [
+        ("human_redoubt", "directorate", "materials"),
+        ("living_commonwealth", "brood", "biomass"),
+        ("open_threshold", "ascendants", "power"),
+    ] {
+        let mut campaign = campaign_with_pre_finale_identity(&data, path_id);
+        let materials = campaign.colony.resources.materials;
+        let biomass = campaign.colony.resources.biomass;
+        let power = campaign.colony.resources.power;
+        let attention = campaign
+            .strategy
+            .factions
+            .iter()
+            .find(|faction| faction.id == faction_id)
+            .unwrap()
+            .attention;
+
+        assert!(!campaign.strategy.campaign_complete);
+        assert!(campaign.identity_preparation_available());
+        let summary = campaign.prepare_identity_building().unwrap();
+
+        assert!(summary.contains("ATTENTION -3"));
+        assert_eq!(campaign.identity_preparations_completed, 1);
+        assert_eq!(campaign.identity_preparation_operation, Some(0));
+        assert!(!campaign.identity_preparation_available());
+        assert_eq!(
+            campaign
+                .strategy
+                .factions
+                .iter()
+                .find(|faction| faction.id == faction_id)
+                .unwrap()
+                .attention,
+            (attention - 3).max(0)
+        );
+        match resource {
+            "materials" => assert_eq!(campaign.colony.resources.materials, materials - 4),
+            "biomass" => assert_eq!(campaign.colony.resources.biomass, biomass - 2),
+            "power" => assert_eq!(campaign.colony.resources.power, power - 2),
+            _ => unreachable!(),
+        }
+        campaign.operations_completed = 1;
+        assert!(campaign.identity_preparation_available());
+    }
+}
+
+#[test]
+fn identity_preparation_is_only_available_before_the_finale() {
+    let data = GameData::load().unwrap();
+    let mut campaign = campaign_with_identity(&data, "human_redoubt");
+
+    assert!(!campaign.identity_preparation_available());
+    assert!(campaign.prepare_identity_building().is_err());
+}
+
 #[test]
 fn each_identity_building_can_trade_its_resource_for_less_faction_pressure() {
     let data = GameData::load().unwrap();

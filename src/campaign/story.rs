@@ -1,6 +1,6 @@
 use super::CampaignState;
 use crate::colony::BuildingKind;
-use crate::colony_story::IdentityBuildingState;
+use crate::colony_story::{IdentityArcProgress, IdentityBuildingState};
 
 impl CampaignState {
     pub(crate) fn identity_building_story_state(&self) -> Option<IdentityBuildingState> {
@@ -24,7 +24,10 @@ impl CampaignState {
             character_id,
             self.strategy.campaign_complete,
             self.strategy.post_campaign_operations_completed,
-            self.identity_stewardship_completed,
+            IdentityArcProgress {
+                preparations_completed: self.identity_preparations_completed,
+                stewardship_completed: self.identity_stewardship_completed,
+            },
             &self.colony_story,
             self.identity_building_story_state(),
         )

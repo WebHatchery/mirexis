@@ -8,6 +8,12 @@ pub(crate) struct IdentityBuildingState {
     pub(crate) powered: bool,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct IdentityArcProgress {
+    pub(crate) preparations_completed: u32,
+    pub(crate) stewardship_completed: u32,
+}
+
 #[derive(Debug, Clone, Copy)]
 struct IdentityCivicArc {
     damage: ColonyBeat,
@@ -74,21 +80,38 @@ pub(crate) fn identity_arc_beat(
     character_id: &str,
     campaign_complete: bool,
     post_campaign_operations_completed: u32,
-    identity_stewardship_completed: u32,
+    progress: IdentityArcProgress,
     story: &ColonyStoryState,
     identity_building_state: Option<IdentityBuildingState>,
 ) -> Option<ColonyBeat> {
     let identity = identity_beat(path_id, character_id, campaign_complete);
     let identity = identity.filter(|beat| !story.has_heard(beat.id));
     if !campaign_complete {
-        return identity.or_else(|| {
-            identity_condition_beat(path_id, character_id, identity_building_state, story)
-        });
+        return identity
+            .or_else(|| {
+                identity_condition_beat(path_id, character_id, identity_building_state, story)
+            })
+            .or_else(|| {
+                preparation_beat(
+                    path_id,
+                    character_id,
+                    progress.preparations_completed,
+                    story,
+                )
+            });
     }
     identity
         .or_else(|| identity_condition_beat(path_id, character_id, identity_building_state, story))
+        .or_else(|| {
+            preparation_beat(
+                path_id,
+                character_id,
+                progress.preparations_completed,
+                story,
+            )
+        })
         .or_else(|| post_ending_beat(path_id, character_id, story))
-        .or_else(|| stewardship_beat(path_id, character_id, identity_stewardship_completed, story))
+        .or_else(|| stewardship_beat(path_id, character_id, progress.stewardship_completed, story))
         .or_else(|| {
             post_campaign_operation_beat(
                 path_id,
@@ -226,6 +249,36 @@ fn stewardship_beat(
             "stewardship_threshold_sol",
             "RETURN IS A SYSTEM",
             "A route is not open because it can be crossed once. The Spire needs people to guide the return, record what came through, and keep the door from becoming somebody else's command.",
+        ),
+        _ => return None,
+    };
+    (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
+}
+
+fn preparation_beat(
+    path_id: &str,
+    character_id: &str,
+    completed_actions: u32,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    if completed_actions == 0 || identity_npc(path_id) != Some(character_id) {
+        return None;
+    }
+    let (id, title, text) = match path_id {
+        "human_redoubt" => (
+            "preparation_redoubt_mara",
+            "THE WATCH LEARNS THE WALL",
+            "Mara ran the watch through the Arsenal until the wall stopped being a promise made by one defender. The Directorate will see our readiness; the colony will decide what that readiness is for.",
+        ),
+        "living_commonwealth" => (
+            "preparation_commonwealth_nadi",
+            "THE CHORUS IS TUNED",
+            "Nadi tuned the Garden's answer without asking it to become one voice. We are preparing for the convergence by leaving room for the Commonwealth to disagree in public.",
+        ),
+        "open_threshold" => (
+            "preparation_threshold_sol",
+            "CALIBRATION IS CONSENT",
+            "Sol calibrated the Spire with every route limit written down. An open door is not permission granted by a machine; it is a risk the colony must be able to understand before it crosses.",
         ),
         _ => return None,
     };

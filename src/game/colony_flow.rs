@@ -32,4 +32,14 @@ impl Game {
             Err(err) => self.notifications.warning(err),
         }
     }
+
+    pub(super) fn handle_identity_preparation(&mut self) {
+        match self.campaign.prepare_identity_building() {
+            Ok(summary) => {
+                self.notifications.success(summary);
+                self.autosave_campaign_only("Identity preparation autosaved");
+            }
+            Err(err) => self.notifications.warning(err),
+        }
+    }
 }

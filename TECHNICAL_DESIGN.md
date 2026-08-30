@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.100.0
+Save/content version: 1.101.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -113,7 +113,7 @@ Important transition payloads:
 | `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
-| `colony_story/identity.rs` | Path-specific identity-building establishment, failure, repair, and power-state field notes | Rendering or building mutation |
+| `colony_story/identity.rs` | Path-specific identity-building establishment, preparation, failure, repair, and power-state field notes | Rendering or building mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |
@@ -835,6 +835,7 @@ Migration coverage:
 | 1.98.0 | Repeatable post-campaign identity-building stewardship and civic-pressure consequences |
 | 1.99.0 | Engine-facing finale objective contracts for the Redoubt, Commonwealth, and Threshold |
 | 1.100.0 | Persistent identity-building damage, repair, power-failure, and restoration civic arcs |
+| 1.101.0 | Pre-finale identity-building preparation actions, faction-pressure relief, and contact reflections |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

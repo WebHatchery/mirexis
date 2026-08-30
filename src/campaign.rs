@@ -147,6 +147,10 @@ pub struct CampaignState {
     pub identity_stewardship_completed: u32,
     #[serde(default)]
     pub identity_stewardship_operation: Option<u32>,
+    #[serde(default)]
+    pub identity_preparations_completed: u32,
+    #[serde(default)]
+    pub identity_preparation_operation: Option<u32>,
 }
 
 impl CampaignState {
@@ -182,6 +186,8 @@ impl CampaignState {
             relay_scan_operation: None,
             identity_stewardship_completed: 0,
             identity_stewardship_operation: None,
+            identity_preparations_completed: 0,
+            identity_preparation_operation: None,
         }
     }
 

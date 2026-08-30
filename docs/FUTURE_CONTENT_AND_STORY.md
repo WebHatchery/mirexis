@@ -368,7 +368,9 @@ The late-game city art, defence map, epilogue, associated NPC placement, ambient
 persistent identity-building field notes now acknowledge the chosen project. A completed campaign
 also exposes one touch-accessible stewardship action per operation at the identity building;
 multi-scene identity arcs now react to building damage, repair, power failure, and restoration;
-bespoke pre-campaign building interactions remain follow-up work.
+before completion, each identity building also exposes one path-specific preparation action per
+operation that spends its associated resource, relieves linked faction attention, and unlocks a
+contact reflection.
 
 ### 8.4 Defence structures
 
@@ -487,6 +489,8 @@ Goal: make building and upgrade choices visible in city life and defence.
   path-specific field note, and expose powered/offline/damaged inspection copy and ambient cues.
 - Implemented: expand the identity field notes into persistent multi-scene civic arcs that connect
   power failure, damage, repair, and restoration to the associated NPC scene.
+- Implemented: add touch-accessible pre-finale identity preparation actions that trade the path
+  resource for linked faction-pressure relief and a path-specific contact reflection.
 
 Exit test: screenshots of two campaigns communicate different civic choices, and those
 differences alter both preparation and a colony assault.

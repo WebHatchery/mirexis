@@ -19,6 +19,7 @@ pub enum UiAction {
     HostCommonsMeal,
     RunRelayScan,
     RunIdentityStewardship,
+    PrepareIdentityBuilding,
     DeployMission,
     CycleFormation,
     ToggleDeployment(String),

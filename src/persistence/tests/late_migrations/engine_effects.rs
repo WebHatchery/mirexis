@@ -49,6 +49,14 @@ fn previous_save_without_continuing_work_defaults_to_zero() {
         .as_object_mut()
         .unwrap()
         .remove("identity_stewardship_operation");
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_preparations_completed");
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_preparation_operation");
 
     let migrated = migrate_save_value(Some("1.97.0".to_owned()), value, &data).unwrap();
     assert_eq!(
@@ -60,4 +68,27 @@ fn previous_save_without_continuing_work_defaults_to_zero() {
     );
     assert_eq!(migrated.campaign.identity_stewardship_completed, 0);
     assert_eq!(migrated.campaign.identity_stewardship_operation, None);
+    assert_eq!(migrated.campaign.identity_preparations_completed, 0);
+    assert_eq!(migrated.campaign.identity_preparation_operation, None);
+}
+
+#[test]
+fn version_100_save_gains_pre_finale_identity_preparation_defaults() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let save = SaveData::campaign_only("1.100.0", &campaign);
+    let mut value = serde_json::to_value(save).unwrap();
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_preparations_completed");
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_preparation_operation");
+
+    let migrated = migrate_save_value(Some("1.100.0".to_owned()), value, &data).unwrap();
+
+    assert_eq!(migrated.campaign.identity_preparations_completed, 0);
+    assert_eq!(migrated.campaign.identity_preparation_operation, None);
 }

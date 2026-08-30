@@ -51,6 +51,9 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   faction's attention for a disclosed resource cost.
 - Identity-building conversations react to damage and power failure, then remember the repair or
   restoration that brings the civic project back online.
+- Before the finale, each identity building offers one preparation action per operation:
+  drill the Redoubt, tune the Commonwealth, or calibrate the Threshold to reduce linked faction
+  attention for a disclosed resource cost and unlock a named contact reflection.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface phase-specific colony field notes through

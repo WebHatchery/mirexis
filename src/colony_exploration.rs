@@ -316,7 +316,10 @@ impl ColonyExplorer {
             &character.id,
             campaign.strategy.campaign_complete,
             campaign.strategy.post_campaign_operations_completed,
-            campaign.identity_stewardship_completed,
+            colony_story::IdentityArcProgress {
+                preparations_completed: campaign.identity_preparations_completed,
+                stewardship_completed: campaign.identity_stewardship_completed,
+            },
             &campaign.colony_story,
             campaign.identity_building_story_state(),
         )
