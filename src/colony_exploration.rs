@@ -404,7 +404,7 @@ impl ColonyExplorer {
             if button(
                 Rect::new(84.0, 532.0, 176.0, 30.0),
                 npc_action_label(character, npc.guest),
-                true,
+                npc_action_enabled(campaign, character, &action, npc.guest),
                 mouse,
             ) {
                 actions.push(action);
@@ -639,9 +639,38 @@ fn npc_action(character: &CharacterRecord, guest: bool) -> Option<UiAction> {
         return Some(UiAction::RecruitOutsider);
     }
     match character.id.as_str() {
-        "ilya_reed" => Some(UiAction::TreatInjury),
+        "ilya_reed" if !character.injuries.is_empty() => Some(UiAction::TreatInjury),
+        "ilya_reed" => None,
         "nadi_vale" | "sedge" => Some(UiAction::OpenGeneLab),
         _ => Some(UiAction::OpenRoster),
+    }
+}
+
+fn npc_action_enabled(
+    campaign: &CampaignState,
+    character: &CharacterRecord,
+    action: &UiAction,
+    guest: bool,
+) -> bool {
+    if guest {
+        return true;
+    }
+    match action {
+        UiAction::TreatInjury => {
+            let treatment_cost = if campaign.colony.has_active_upgrade(
+                BuildingKind::Infirmary,
+                crate::colony::ADAPTATION_CLINIC_UPGRADE,
+            ) {
+                3
+            } else {
+                5
+            };
+            !character.injuries.is_empty()
+                && campaign.colony.has_facility(BuildingKind::Infirmary)
+                && campaign.colony.resources.biomass >= treatment_cost
+        }
+        UiAction::OpenGeneLab => campaign.colony.has_facility(BuildingKind::GeneLab),
+        _ => true,
     }
 }
 

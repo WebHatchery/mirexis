@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.146.0, validated and committed with this matrix
+Audit baseline: save/content 1.147.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -17,7 +17,7 @@ developer are not substitutes for that evidence.
 | D02 | Five first-time players complete without external instructions | Five empty required rows in `PHASE_1_PLAYTEST_LOG.md` | HUMAN PENDING |
 | D03 | At least two end-to-end runs use visible touch/click controls only | Touch-primary rows 2 and 4 await observed runs | HUMAN PENDING |
 | D04 | Operation one teaches the core loop and operation two demonstrates transfer | Ordered `TacticalLesson` transitions, a cover-tile-gated first move, reachable opening firing lane and objective route, guided forecast confirmation, contextual tactical focus, a persisted `SecondOperationTactical` focus, colony-side handoff focus, usable ability recovery, and unscripted second-operation play; player transfer must still be observed | IMPLEMENTED / HUMAN PENDING |
-| D05 | City supplies direction, preparation, character connection, and visible consequences | `first_hour_ui.rs`, `first_hour_investment_ui.rs`, colony conversations, outcome-sensitive `first_hour_consequences_ui.rs`, clear debrief goal/result layering, fielded-versus-reserve squad disclosure including recruited fielded colonists, recruited-roster list coverage, deployed-squad XP disclosure, and colony/debrief captures | VERIFIED |
+| D05 | City supplies direction, preparation, character connection, and visible consequences | `first_hour_ui.rs`, `first_hour_investment_ui.rs`, colony conversations with prerequisite-aware contextual actions, outcome-sensitive `first_hour_consequences_ui.rs`, clear debrief goal/result layering, fielded-versus-reserve squad disclosure including recruited fielded colonists, recruited-roster list coverage, deployed-squad XP disclosure, and colony/debrief captures | VERIFIED |
 | D06 | First investment has a clear observable effect | Three 24-material preparations, persistent Operations/tactical breadcrumbs in `ui_first_hour_operations.png` and `ui_second_operation_tactical.png`, and `first_investment_changes_only_the_second_deployment` | VERIFIED |
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests including finished-save debrief restoration, and the recorded WebGL operator pass | VERIFIED |
 | D08 | Audio/settings exist and critical information remains visual | `audio.rs`, audio tests, settings UI, settings-modal input isolation, event prose/markers, and browser persistence pass; fatigue remains an observation target | VERIFIED / HUMAN PENDING |

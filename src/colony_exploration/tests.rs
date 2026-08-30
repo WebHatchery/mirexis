@@ -169,3 +169,43 @@ fn unchosen_mireborn_outsider_uses_the_waystation_before_recruitment() {
     assert_eq!(npc_position(&campaign, "sedge"), Some(grid_vec([3, 9])));
     assert!(npc(&campaign, &data, "sedge").is_some_and(|guest| guest.guest));
 }
+
+#[test]
+fn treatment_dialogue_action_requires_an_injury_and_prerequisites() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let ilya = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "ilya_reed")
+        .cloned()
+        .unwrap();
+    assert_eq!(npc_action(&ilya, false), None);
+
+    let mut injured = ilya;
+    injured.injuries.push(crate::campaign::InjuryRecord {
+        id: "test_trauma".to_owned(),
+        name: "Test trauma".to_owned(),
+        recovery_operations: 1,
+    });
+    let action = npc_action(&injured, false).unwrap();
+    assert_eq!(action, UiAction::TreatInjury);
+    assert!(npc_action_enabled(&campaign, &injured, &action, false));
+
+    campaign.colony.resources.biomass = 0;
+    assert!(!npc_action_enabled(&campaign, &injured, &action, false));
+}
+
+#[test]
+fn gene_lab_dialogue_action_is_disabled_until_the_lab_is_online() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let nadi = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "nadi_vale")
+        .unwrap();
+    let action = npc_action(nadi, false).unwrap();
+    assert_eq!(action, UiAction::OpenGeneLab);
+    assert!(!npc_action_enabled(&campaign, nadi, &action, false));
+}
