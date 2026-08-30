@@ -19,6 +19,14 @@ fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
     (row_step, (row_step - 4.0).max(50.0))
 }
 
+fn evolution_button_label(affordable: bool, biomass_cost: i32) -> String {
+    if affordable {
+        format!("EVOLVE // {} BIOMASS", biomass_cost)
+    } else {
+        format!("NEEDS {} BIOMASS", biomass_cost)
+    }
+}
+
 pub(crate) fn draw_gene_lab(
     campaign: &CampaignState,
     data: &GameData,
@@ -283,6 +291,7 @@ fn draw_evolution_panel(
         for (index, evolution) in mutation.evolutions.iter().enumerate() {
             let y = 324.0 + index as f32 * 118.0;
             let biomass_cost = campaign.mutation_evolution_cost(evolution);
+            let affordable = campaign.colony.resources.biomass >= biomass_cost;
             draw_surface(
                 Rect::new(366.0, y, 840.0, 100.0),
                 &SurfaceStyle::new(Color::new(0.06, 0.11, 0.11, 1.0))
@@ -306,8 +315,8 @@ fn draw_evolution_panel(
             );
             if button(
                 Rect::new(930.0, y + 30.0, 250.0, 48.0),
-                &format!("EVOLVE // {} BIOMASS", biomass_cost),
-                campaign.colony.resources.biomass >= biomass_cost,
+                &evolution_button_label(affordable, biomass_cost),
+                affordable,
                 mouse,
             ) {
                 actions.push(UiAction::ChooseMutationEvolution(

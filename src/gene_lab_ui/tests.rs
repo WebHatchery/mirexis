@@ -1,6 +1,12 @@
 use super::*;
 
 #[test]
+fn evolution_button_labels_disclose_biomass_gate() {
+    assert_eq!(evolution_button_label(true, 20), "EVOLVE // 20 BIOMASS");
+    assert_eq!(evolution_button_label(false, 20), "NEEDS 20 BIOMASS");
+}
+
+#[test]
 fn full_recruited_roster_stays_inside_gene_lab_list() {
     let (default_step, default_height) = character_list_row_layout(5);
     assert_eq!((default_step, default_height), (88.0, 72.0));
