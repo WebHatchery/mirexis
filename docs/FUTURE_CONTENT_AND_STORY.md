@@ -6,7 +6,7 @@ Planning horizon: after Playable Game Phase 1 human acceptance
 
 ## 1. Purpose
 
-Mirexis already proves its five-phase campaign, seven base classes, six advanced
+Mirexis already proves its five-phase campaign, seven base classes, eight advanced
 classes, colony construction, mutation evolution, and three ending paths. Future work
 should deepen those systems into a memorable campaign rather than merely increasing
 their counts.
@@ -177,26 +177,23 @@ Each new origin requires:
 The seven base classes remain the complete entry-level training set: Soldier, Defender,
 Scout, Medic, Engineer, Psionic, and Biotech Specialist. Six implemented advanced
 classes now form the first hybrid tier: Vanguard, Pathfinder, Lifewright, Null Adept,
-Breacher, and Fortifier.
+Breacher, Fortifier, Rescue Specialist, and Chorus Warden.
 
 The “possible paths” in the main design document are a pool of class fantasies, not a
 commitment to build four subtrees for every base class. Skills should provide most
-specialisation before more class IDs are added.
+specialisation before more class IDs are added. The eight current hybrids are enough
+to cover the demonstrated breach, fortification, rescue, and hazard-conversion verbs;
+new class IDs should wait for play data to expose a real missing decision.
 
-### 6.2 Next advanced classes
+### 6.2 Hybrid signature actions
 
-Add advanced classes only where they create a missing tactical verb.
-
-| Class | Prerequisites | Missing role | Signature concept |
-|---|---|---|---|
-| Rescue Specialist | Scout + Medic | Recovering an exposed ally without becoming another casualty | **Carry Through:** reposition to an ally, move both toward safety, and stabilise the ally without a full heal. |
-| Chorus Warden | Psionic + Biotech Specialist | Hazard conversion and controlled status sharing | **Borrowed Weather:** convert one nearby faction hazard into a brief neutral or colony-aligned field at a personal complication cost. |
-
-Breacher's Make an Entrance and Fortifier's Raise Bastion are now implemented through
-the validated tile-targeting command path. The remaining two concepts would produce eight
-advanced classes total; do not fill all 21 possible class pairings unless play data
-demonstrates real missing builds. Later path-specific mastery should be
-a skill or doctrine, not another mandatory class tier.
+All eight current hybrid signatures are implemented through the validated unit/tile
+targeting command path. Breacher's Make an Entrance and Fortifier's Raise Bastion open
+or shape a firing lane; Rescue Specialist's Carry Through and Chorus Warden's Borrowed
+Weather turn rescue and hazard conversion into explicit tactical choices. Do not fill
+all 21 possible class pairings unless play data demonstrates a real missing build.
+Later path-specific mastery should be a skill or doctrine, not another mandatory class
+tier.
 
 ## 7. Skills and build expression
 
@@ -373,7 +370,8 @@ Goal: turn retained skill fields and class slots into meaningful builds.
 - Implement and balance the first two techniques for all seven base classes as a vertical slice.
 - Add skill preview, loadout, learning, save migration, and touch controls.
 - Tune the fourteen-technique interactions before adding mastery branches.
-- Balance Breacher and Fortifier before adding the two more systemic advanced classes.
+- Balance the eight hybrid class actions against the fourteen base techniques before
+  adding mastery branches or other class IDs.
 
 Exit test: two characters in the same class can play differently, and retraining creates
 a useful hybrid without creating an obviously optimal skill pile.

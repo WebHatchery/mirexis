@@ -28,7 +28,7 @@ fn complete_content_registry_is_valid() {
     assert!(data.classes.len() >= 7);
     assert_eq!(
         data.classes.iter().filter(|class| class.advanced).count(),
-        6
+        8
     );
     assert!(data.mutations.len() >= 5);
     assert_eq!(data.campaign.phase_id, "isolation");

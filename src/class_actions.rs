@@ -5,6 +5,8 @@ use crate::state::{BattleEvent, Command, CommandCost, GameSession, RuleError};
 use crate::tactical::{manhattan, path_cost, StatusEffect, StatusKind};
 use macroquad_toolkit::grid::TilePos;
 
+mod advanced;
+
 pub(crate) fn action_name(class_id: &str) -> Option<&'static str> {
     match class_id {
         "soldier" => Some("STEADY AIM"),
@@ -20,6 +22,8 @@ pub(crate) fn action_name(class_id: &str) -> Option<&'static str> {
         "null_adept" => Some("NULL LANCE"),
         "breacher" => Some("MAKE AN ENTRANCE"),
         "fortifier" => Some("RAISE BASTION"),
+        "rescue_specialist" => Some("CARRY THROUGH"),
+        "chorus_warden" => Some("BORROWED WEATHER"),
         _ => None,
     }
 }
@@ -29,6 +33,8 @@ pub(crate) fn target_kind(class_id: &str) -> Option<TechniqueTarget> {
         "medic" | "lifewright" => Some(TechniqueTarget::Ally),
         "engineer" | "psionic" | "null_adept" => Some(TechniqueTarget::Hostile),
         "breacher" | "fortifier" => Some(TechniqueTarget::Tile),
+        "chorus_warden" => Some(TechniqueTarget::Tile),
+        "rescue_specialist" => Some(TechniqueTarget::Ally),
         _ => None,
     }
 }
@@ -177,6 +183,14 @@ pub(crate) fn validate(
             target_id.is_none()
                 && target_tile.is_some_and(|tile| valid_fortifier_tile(session, unit, tile))
         }
+        "rescue_specialist" => {
+            target_tile.is_none() && advanced::valid_rescue_target(session, unit, target_id)
+        }
+        "chorus_warden" => {
+            target_id.is_none()
+                && target_tile
+                    .is_some_and(|tile| advanced::valid_chorus_warden_tile(session, unit, tile))
+        }
         _ => target_id.is_none() && target_tile.is_none(),
     };
     target_valid
@@ -282,6 +296,12 @@ pub(crate) fn execute(
         }
         "breacher" => execute_breacher(session, unit_id, target_tile.unwrap(), &mut events),
         "fortifier" => execute_fortifier(session, unit_id, target_tile.unwrap()),
+        "rescue_specialist" => {
+            advanced::execute_rescue_specialist(session, unit_id, target_id.unwrap(), &mut events)
+        }
+        "chorus_warden" => {
+            advanced::execute_chorus_warden(session, unit_id, target_tile.unwrap(), &mut events)
+        }
         _ => unreachable!("validated class has an action"),
     }
     session.check_outcome(&mut events);

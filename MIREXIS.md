@@ -631,12 +631,16 @@ Classes represent training rather than biology.
 
 The playable class tree begins with seven broad disciplines. After reaching level 3,
 entering Adaptation, and mastering both prerequisite disciplines, a colonist can train
-one of four hybrid advanced classes:
+one of eight hybrid advanced classes:
 
 - Soldier + Defender → Vanguard: projects Guarded status across a nearby formation.
 - Scout + Engineer → Pathfinder: combines action economy, mobility, and focused fire.
 - Medic + Biotech Specialist → Lifewright: heals an ally and seeds regeneration.
 - Psionic + Engineer → Null Adept: damages and disrupts a hostile at extended range.
+- Soldier + Scout → Breacher: crosses a short route to break cover or mark a hostile.
+- Defender + Engineer → Fortifier: raises stronger directional cover on an open tile.
+- Scout + Medic → Rescue Specialist: carries an injured ally toward safety and stabilises them.
+- Psionic + Biotech Specialist → Chorus Warden: converts a faction hazard into a shared field.
 
 Advanced training costs more materials than base retraining. Class history persists,
 so experimentation builds toward promotion instead of being discarded.

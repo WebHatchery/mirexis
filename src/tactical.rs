@@ -426,6 +426,11 @@ pub enum BattleEvent {
         unit_id: String,
         kind: HazardKind,
     },
+    HazardConverted {
+        unit_id: String,
+        position: TilePos,
+        kind: HazardKind,
+    },
     EnemyAbilityActivated {
         unit_id: String,
         ability: String,

@@ -98,7 +98,7 @@ fn event_kind(event: &crate::state::BattleEvent) -> &'static str {
         DamageApplied { .. } | UnitIncapacitated { .. } => "IMPACT",
         PhaseStarted { .. } => "PHASE",
         BattleEnded { .. } => "OUTCOME",
-        HazardTriggered { .. } => "HAZARD",
+        HazardTriggered { .. } | HazardConverted { .. } => "HAZARD",
         ReinforcementsArrived { .. } => "WAVE",
         _ => "ACTION",
     }
@@ -144,6 +144,7 @@ fn event_color(event: &crate::state::BattleEvent) -> Color {
         crate::state::BattleEvent::DamageApplied { .. }
         | crate::state::BattleEvent::UnitIncapacitated { .. }
         | crate::state::BattleEvent::HazardTriggered { .. } => Color::new(0.98, 0.55, 0.38, 1.0),
+        crate::state::BattleEvent::HazardConverted { .. } => Color::new(0.42, 0.94, 0.72, 1.0),
         crate::state::BattleEvent::PhaseStarted { .. }
         | crate::state::BattleEvent::BattleEnded { .. } => Color::new(0.46, 0.86, 0.72, 1.0),
         _ => dark::TEXT_DIM,

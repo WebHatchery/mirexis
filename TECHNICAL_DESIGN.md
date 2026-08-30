@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.70.0
+Save/content version: 1.71.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -191,10 +191,15 @@ tiles share the same presentation; previewing never mutates state or consumes RN
   onto a validated clear tile, Premonition applies one-phase Disrupted intent, Adaptive
   Secretion gives an ally resistance to the nearest visible hazard, and Spore Veil creates
   a one-phase radius-one obscuring field with an accuracy penalty.
-- Breacher and Fortifier complete the first six hybrid advanced classes. Make an Entrance
+- Eight hybrid advanced classes now complete the first hybrid tier. Make an Entrance
   crosses a short validated route to breach cover or strike and mark a hostile; Raise
-  Bastion places stronger destructible directional cover on a valid map tile. Both use
-  the same authoritative tile-targeting path as techniques and remain battle-local.
+  Bastion places stronger destructible directional cover on a valid map tile. Carry
+  Through moves a nearby injured or incapacitated ally and the specialist toward a
+  deterministic safe tile before stabilising both behind Guarded protection. Borrowed
+  Weather converts a nearby faction hazard into a one-phase neutral field, shares
+  regeneration with allies in its radius, and leaves the Warden Hindered. All four
+  advanced actions use the same authoritative unit/tile targeting path as techniques;
+  their temporary battlefield geometry remains battle-local.
 - Colony-defense blocked tiles are derived from saved building coordinates.
 - Destroyed cover is removed from the authoritative blocked set, immediately opening
   that tile to pathfinding and any firing line that crosses it.
@@ -687,6 +692,7 @@ Migration coverage:
 | 1.68.0 | Medic and Engineer technique pairs, one-round equipment overcharge state, and legacy tactical default migration |
 | 1.69.0 | Psionic and Biotech technique pairs, hazard adaptation, obscuring fields, and tactical runtime migration defaults |
 | 1.70.0 | Breacher and Fortifier hybrid class actions, tile-targeted class-action input, and advanced-class migration defaults |
+| 1.71.0 | Rescue Specialist and Chorus Warden hybrid class actions, hazard conversion events, and advanced-class migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

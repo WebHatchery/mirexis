@@ -22,8 +22,9 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   resources, research, recruitment, and faction pressure.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
-- Six hybrid advanced classes with deterministic class actions, including Breacher lunge/
-  breach pressure and Fortifier map-deployed bastions.
+- Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/
+  breach pressure, Fortifier map-deployed bastions, Rescue Specialist extraction, and
+  Chorus Warden hazard conversion.
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
   experience, injury, and recovery.
 - XP-gated techniques for all seven base classes with one-slot loadouts,

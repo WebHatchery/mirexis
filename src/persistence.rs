@@ -229,6 +229,9 @@ fn migrate_legacy_tactical_world(save: &mut SaveData, config: &GameConfig) -> Re
     for cover in &mut tactical.destructible_cover {
         cover.position = project_legacy_tile(cover.position);
     }
+    for field in &mut tactical.obscuring_fields {
+        field.center = project_legacy_tile(field.center);
+    }
     for unit in &mut tactical.units {
         unit.position = project_legacy_tile(unit.position);
     }
@@ -252,7 +255,8 @@ fn migrate_positional_events(tactical: &mut TacticalState) {
                 }
             }
             BattleEvent::CoverDamaged { position, .. }
-            | BattleEvent::CoverDestroyed { position } => {
+            | BattleEvent::CoverDestroyed { position }
+            | BattleEvent::HazardConverted { position, .. } => {
                 *position = project_legacy_tile(*position);
             }
             _ => {}
@@ -299,6 +303,9 @@ fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
     for cover in &tactical.destructible_cover {
         check("destructible cover", cover.position)?;
     }
+    for field in &tactical.obscuring_fields {
+        check("obscuring field", field.center)?;
+    }
     for unit in &tactical.units {
         check("unit", unit.position)?;
     }
@@ -316,6 +323,7 @@ fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
             }
             BattleEvent::CoverDamaged { position, .. }
             | BattleEvent::CoverDestroyed { position } => check("cover history", *position)?,
+            BattleEvent::HazardConverted { position, .. } => check("hazard history", *position)?,
             _ => {}
         }
     }
@@ -349,6 +357,8 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             "Null Adept" => "null_adept",
             "Breacher" => "breacher",
             "Fortifier" => "fortifier",
+            "Rescue Specialist" => "rescue_specialist",
+            "Chorus Warden" => "chorus_warden",
             _ => "",
         };
         unit.entry("class_id".to_owned())

@@ -132,6 +132,49 @@ fn faction_save_gains_class_actions_and_statuses() {
 }
 
 #[test]
+fn version_170_save_gains_the_remaining_hybrid_class_ids() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut legacy = serde_json::to_value(session.to_save("1.70.0", &campaign)).unwrap();
+    for (id, role) in [
+        ("mara_venn", "Rescue Specialist"),
+        ("kira_voss", "Chorus Warden"),
+    ] {
+        let unit = legacy["tactical"]["units"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|unit| unit["id"] == id)
+            .unwrap()
+            .as_object_mut()
+            .unwrap();
+        unit.insert("role".to_owned(), serde_json::json!(role));
+        unit.remove("class_id");
+    }
+
+    let migrated = migrate_save_value(Some("1.70.0".to_owned()), legacy, &data).unwrap();
+    assert_eq!(migrated.version, data.config.version);
+    let units = migrated.tactical.unwrap().units;
+    assert_eq!(
+        units
+            .iter()
+            .find(|unit| unit.id == "mara_venn")
+            .unwrap()
+            .class_id,
+        "rescue_specialist"
+    );
+    assert_eq!(
+        units
+            .iter()
+            .find(|unit| unit.id == "kira_voss")
+            .unwrap()
+            .class_id,
+        "chorus_warden"
+    );
+}
+
+#[test]
 fn tactical_save_gains_technique_runtime_fields() {
     let data = GameData::load().unwrap();
     let campaign = CampaignState::new(&data);

@@ -1,7 +1,7 @@
 use super::*;
 use crate::campaign::CampaignState;
 use crate::data::GameData;
-use crate::state::{GameSession, UnitState};
+use crate::state::{GameSession, HazardTile, UnitState};
 use macroquad_toolkit::grid::TilePos;
 
 fn session() -> GameSession {
@@ -298,4 +298,83 @@ fn fortifier_places_a_stronger_directional_bastion_on_a_valid_tile() {
     assert!(session.tactical.cover_edges.iter().any(|edge| {
         edge.position == [8, 19] && edge.direction == EdgeDirection::West && edge.strength == 25
     }));
+}
+
+#[test]
+fn rescue_specialist_moves_a_pair_away_from_pressure_and_revives_the_ally() {
+    let mut session = session();
+    session.tactical.blocked.clear();
+    session.tactical.hazards.clear();
+    unit_mut(&mut session, "mara_venn").class_id = "rescue_specialist".to_owned();
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(11, 10);
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(12, 10);
+    unit_mut(&mut session, "kira_voss").health = 0;
+    unit_mut(&mut session, "kira_voss").incapacitated = true;
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(14, 10);
+    let events = session
+        .activate_class_action_on("mara_venn", "kira_voss")
+        .unwrap();
+
+    let mara = session.unit("mara_venn").unwrap();
+    let kira = session.unit("kira_voss").unwrap();
+    assert_eq!(kira.health, 1);
+    assert!(!kira.incapacitated);
+    assert!(mara.position != TilePos::new(11, 10));
+    assert!(kira.position != TilePos::new(12, 10));
+    assert_eq!(manhattan(mara.position, kira.position), 1);
+    assert!(manhattan(kira.position, TilePos::new(14, 10)) > 2);
+    assert!(mara.has_status(StatusKind::Guarded));
+    assert!(kira.has_status(StatusKind::Guarded));
+    assert!(
+        events
+            .iter()
+            .filter(|event| matches!(event, BattleEvent::UnitMoved { cost: 0, .. }))
+            .count()
+            >= 2
+    );
+}
+
+#[test]
+fn chorus_warden_converts_a_hazard_and_shares_a_short_regeneration_field() {
+    let mut session = session();
+    session.tactical.blocked.clear();
+    session.tactical.cover_edges.clear();
+    session.tactical.destructible_cover.clear();
+    session.tactical.obscuring_fields.clear();
+    session.tactical.hazards = vec![HazardTile {
+        position: TilePos::new(9, 2),
+        kind: crate::data::HazardKind::SporeBloom,
+    }];
+    unit_mut(&mut session, "mara_venn").class_id = "chorus_warden".to_owned();
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(7, 2);
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(8, 2);
+
+    let events = session
+        .activate_class_action_on_tile("mara_venn", TilePos::new(9, 2))
+        .unwrap();
+
+    assert!(session
+        .tactical
+        .hazards
+        .iter()
+        .all(|hazard| hazard.position != TilePos::new(9, 2)));
+    assert!(session.tactical.obscuring_fields.iter().any(|field| {
+        field.center == TilePos::new(9, 2) && field.radius == 1 && field.remaining_phases == 1
+    }));
+    assert!(session
+        .unit("mara_venn")
+        .unwrap()
+        .has_status(StatusKind::Hindered));
+    assert!(session
+        .unit("kira_voss")
+        .unwrap()
+        .has_status(StatusKind::Regenerating));
+    assert!(events.iter().any(|event| matches!(
+        event,
+        BattleEvent::HazardConverted {
+            position,
+            kind: crate::data::HazardKind::SporeBloom,
+            ..
+        } if *position == TilePos::new(9, 2)
+    )));
 }

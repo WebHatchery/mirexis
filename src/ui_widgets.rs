@@ -48,6 +48,13 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::HazardTriggered { unit_id, kind } => {
             format!("{} crossed {}", unit_id, kind.label())
         }
+        BattleEvent::HazardConverted { unit_id, kind, .. } => {
+            format!(
+                "{} converted {} into a neutral field",
+                unit_id,
+                kind.label()
+            )
+        }
         BattleEvent::EnemyAbilityActivated { unit_id, ability } => {
             format!("{} used {}", unit_id, ability)
         }

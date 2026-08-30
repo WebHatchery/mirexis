@@ -32,7 +32,9 @@ fn gene_lab_save_gains_maras_unevolved_paths() {
 #[test]
 fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_world() {
     use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind};
-    use crate::tactical::{BattleEvent, DestructibleCover, HazardTile, ReinforcementWave};
+    use crate::tactical::{
+        BattleEvent, DestructibleCover, HazardTile, ObscuringField, ReinforcementWave,
+    };
     use macroquad_toolkit::grid::{FlatGrid, FogState, TilePos};
     use std::collections::HashSet;
 
@@ -57,6 +59,11 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
         health: 4,
         max_health: 6,
     }];
+    tactical.obscuring_fields = vec![ObscuringField {
+        center: TilePos::new(9, 7),
+        radius: 1,
+        remaining_phases: 1,
+    }];
     for (index, unit) in tactical.units.iter_mut().enumerate() {
         unit.position = TilePos::new(index as i32 + 1, 2);
     }
@@ -79,6 +86,11 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
             amount: 2,
             remaining: 4,
         },
+        BattleEvent::HazardConverted {
+            unit_id: "kira_voss".to_owned(),
+            position: TilePos::new(9, 7),
+            kind: HazardKind::SporeBloom,
+        },
     ];
 
     let legacy = serde_json::to_value(session.to_save(&data.config.version, &campaign)).unwrap();
@@ -93,6 +105,7 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
         tactical.destructible_cover[0].position,
         TilePos::new(26, 29)
     );
+    assert_eq!(tactical.obscuring_fields[0].center, TilePos::new(28, 33));
     assert_eq!(tactical.units[0].position, TilePos::new(12, 13));
     assert_eq!(
         tactical.reinforcement_waves[0].units[0].position,
@@ -112,12 +125,21 @@ fn same_version_small_battle_save_projects_every_spatial_field_into_the_large_wo
             ..
         }
     ));
+    assert!(matches!(
+        tactical.event_log[2],
+        BattleEvent::HazardConverted {
+            position: TilePos { x: 28, y: 33 },
+            ..
+        }
+    ));
 }
 
 #[test]
 fn current_world_save_rejects_every_out_of_bounds_positional_family() {
     use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind};
-    use crate::tactical::{BattleEvent, DestructibleCover, HazardTile, ReinforcementWave};
+    use crate::tactical::{
+        BattleEvent, DestructibleCover, HazardTile, ObscuringField, ReinforcementWave,
+    };
     use macroquad_toolkit::grid::TilePos;
 
     let data = GameData::load().unwrap();
@@ -160,6 +182,13 @@ fn current_world_save_rejects_every_out_of_bounds_positional_family() {
     }];
     cases.push(("destructible cover", save));
     let mut save = base.clone();
+    save.tactical.as_mut().unwrap().obscuring_fields = vec![ObscuringField {
+        center: outside,
+        radius: 1,
+        remaining_phases: 1,
+    }];
+    cases.push(("obscuring field", save));
+    let mut save = base.clone();
     save.tactical.as_mut().unwrap().units[0].position = outside;
     cases.push(("unit", save));
     let mut save = base.clone();
@@ -177,10 +206,17 @@ fn current_world_save_rejects_every_out_of_bounds_positional_family() {
         cost: 1,
     }];
     cases.push(("movement history", save));
-    let mut save = base;
+    let mut save = base.clone();
     save.tactical.as_mut().unwrap().event_log =
         vec![BattleEvent::CoverDestroyed { position: outside }];
     cases.push(("cover history", save));
+    let mut save = base;
+    save.tactical.as_mut().unwrap().event_log = vec![BattleEvent::HazardConverted {
+        unit_id: "kira_voss".to_owned(),
+        position: outside,
+        kind: HazardKind::SporeBloom,
+    }];
+    cases.push(("hazard history", save));
 
     for (label, save) in cases {
         let value = serde_json::to_value(save).unwrap();
