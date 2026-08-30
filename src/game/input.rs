@@ -27,6 +27,16 @@ impl Game {
             // fall through to the screen underneath the settings modal.
             return false;
         }
+        if let Some(action) = first_hour_help_overlay_input(
+            self.campaign.first_hour.help_open,
+            input.escape_pressed,
+            pad.cancel,
+        ) {
+            self.events.push(action);
+        }
+        if self.campaign.first_hour.help_open {
+            return false;
+        }
         match self.state {
             AppState::Title => {
                 if input.left_pressed {
@@ -301,6 +311,18 @@ fn settings_overlay_input(
 ) -> Option<UiAction> {
     if show_settings && (escape_pressed || cancel_pressed) {
         Some(UiAction::ToggleSettings)
+    } else {
+        None
+    }
+}
+
+fn first_hour_help_overlay_input(
+    help_open: bool,
+    escape_pressed: bool,
+    cancel_pressed: bool,
+) -> Option<UiAction> {
+    if help_open && (escape_pressed || cancel_pressed) {
+        Some(UiAction::ToggleFirstHourHelp)
     } else {
         None
     }

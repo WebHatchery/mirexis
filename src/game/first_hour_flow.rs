@@ -84,6 +84,8 @@ impl Game {
                     self.campaign.first_hour.metrics.opened_guide();
                 }
                 self.campaign.first_hour.help_open = !self.campaign.first_hour.help_open;
+                self.colony_explorer
+                    .set_keyboard_direction(macroquad::prelude::Vec2::ZERO);
                 "Field-guide state and session metrics autosaved"
             }
             UiAction::SkipFirstHourTutorial => {

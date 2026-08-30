@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.131.0
+Save/content version: 1.132.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -907,6 +907,7 @@ Migration coverage:
 | 1.129.0 | Settings modal consumes underlying keyboard and controller commands while preserving its close path; no new save fields |
 | 1.130.0 | Finished tactical saves reopen the debrief with reconstructed rewards and casualty context; no new save fields |
 | 1.131.0 | Tactical saves preserve the materialized mission context so a restored debrief names the completed contract and rewards; adds optional active-mission save context |
+| 1.132.0 | First-hour field-guide input is isolated from the underlying game while the overlay is open; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
