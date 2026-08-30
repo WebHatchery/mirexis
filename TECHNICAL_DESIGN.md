@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.85.0
+Save/content version: 1.86.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -618,6 +618,9 @@ add another save schema.
 The completed-campaign dossier adds an authored voice line from the identity contact for each
 path. Its wording reflects whether that person is ready or recovering, so the ending acknowledges
 the lived condition of the named survivor without storing another derived field.
+After that final reflection is acknowledged, the continuing colony sandbox exposes one more
+path-specific scene from the same contact: an open gate, room to disagree, or a route with a return
+current. The scene is selected from the existing story ledger and remains presentation-only.
 
 ## 9. Content Registry
 
@@ -752,6 +755,7 @@ Migration coverage:
 | 1.83.0 | Persisted acknowledgement of identity establishment and completed-finale field notes |
 | 1.84.0 | Phase-specific Contact, Adaptation, and Escalation colony field notes with persisted acknowledgement |
 | 1.85.0 | Authored identity-contact epilogue voices with readiness-aware ending variations |
+| 1.86.0 | Third-beat post-ending identity scenes unlocked by final-reflection acknowledgement |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -803,7 +807,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (308 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (309 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

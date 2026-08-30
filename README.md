@@ -36,7 +36,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Garden, or Threshold Spire, each changing colony defence and preparation.
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,
   people, trusted bonds, scars, and mutation evolutions.
-- The identity contact returns a second, path-specific reflection after the final operation.
+- The identity contact returns a second, path-specific reflection after the final operation, then
+  unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface a phase-specific colony field note through a
   named colonist voice and persistent acknowledgement.
 - Completed ending dossiers add an authored identity-contact voice that reflects the named

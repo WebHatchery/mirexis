@@ -323,5 +323,50 @@ pub(crate) fn identity_beat(
     Some(ColonyBeat { id, title, text })
 }
 
+pub(crate) fn identity_arc_beat(
+    path_id: &str,
+    character_id: &str,
+    campaign_complete: bool,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    let identity = identity_beat(path_id, character_id, campaign_complete);
+    if !campaign_complete {
+        return identity;
+    }
+    identity
+        .filter(|beat| !story.has_heard(beat.id))
+        .or_else(|| post_ending_beat(path_id, character_id, story))
+}
+
+fn post_ending_beat(
+    path_id: &str,
+    character_id: &str,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    let ending = identity_beat(path_id, character_id, true)?;
+    if !story.has_heard(ending.id) {
+        return None;
+    }
+    let (id, title, text) = match path_id {
+        "human_redoubt" if character_id == "mara_venn" => (
+            "post_ending_redoubt_mara",
+            "THE GATE IS A CHOICE",
+            "Mara has started the Arsenal's first open-gate drill. The point is not to make every visitor safe; it is to make sure safety remains a decision the people behind the wall can see and change.",
+        ),
+        "living_commonwealth" if character_id == "nadi_vale" => (
+            "post_ending_commonwealth_nadi",
+            "ROOM TO DISAGREE",
+            "Nadi leaves one bed in the Garden unclaimed and one path through it unpruned. A living refuge is not finished when it grows; it is finished only when it can make room for a voice that says no.",
+        ),
+        "open_threshold" if character_id == "sol_cairn" => (
+            "post_ending_threshold_sol",
+            "A RETURN CURRENT",
+            "Sol has marked the Threshold's first route with a light that points both ways. Opening a door is easy compared with proving that the people who cross it still have a way home.",
+        ),
+        _ => return None,
+    };
+    Some(ColonyBeat { id, title, text })
+}
+
 #[cfg(test)]
 mod tests;

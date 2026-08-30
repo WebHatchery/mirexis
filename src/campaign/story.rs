@@ -3,10 +3,11 @@ use super::CampaignState;
 impl CampaignState {
     pub fn acknowledge_colonist(&mut self, character_id: &str) {
         self.first_hour.acknowledge_colonist(character_id);
-        let beat = crate::colony_story::identity_beat(
+        let beat = crate::colony_story::identity_arc_beat(
             &self.strategy.mirexis_path_id,
             character_id,
             self.strategy.campaign_complete,
+            &self.colony_story,
         )
         .or_else(|| crate::colony_story::phase_beat(&self.strategy.phase_id, character_id))
         .or_else(|| {

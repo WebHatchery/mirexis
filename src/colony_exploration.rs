@@ -265,10 +265,11 @@ impl ColonyExplorer {
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        let beat = colony_story::identity_beat(
+        let beat = colony_story::identity_arc_beat(
             &campaign.strategy.mirexis_path_id,
             &character.id,
             campaign.strategy.campaign_complete,
+            &campaign.colony_story,
         )
         .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
         .or_else(|| {

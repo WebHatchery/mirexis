@@ -403,7 +403,8 @@ Goal: deepen the existing people and city without new tactical systems.
   including the completed-path reflection.
 - Implemented: the ending dossier includes an authored, readiness-aware voice variation from the
   identity contact for each path.
-- Expand the dossier into additional character-specific post-ending scenes.
+- Implemented: each identity path unlocks a third, character-specific post-ending scene after its
+  final reflection is acknowledged.
 
 Exit test: players recall three colonists, can describe one changing relationship, and
 notice the colony responding to an operation without opening a ledger.

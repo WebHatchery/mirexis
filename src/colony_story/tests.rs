@@ -116,3 +116,28 @@ fn each_identity_building_has_one_path_specific_colony_voice() {
     assert!(identity_npc("unknown_path").is_none());
     assert!(identity_beat("unknown_path", "mara_venn", false).is_none());
 }
+
+#[test]
+fn post_ending_identity_scene_unlocks_after_the_final_reflection() {
+    for (path_id, character_id, post_id) in [
+        ("human_redoubt", "mara_venn", "post_ending_redoubt_mara"),
+        (
+            "living_commonwealth",
+            "nadi_vale",
+            "post_ending_commonwealth_nadi",
+        ),
+        ("open_threshold", "sol_cairn", "post_ending_threshold_sol"),
+    ] {
+        let story = ColonyStoryState::default();
+        let ending = identity_arc_beat(path_id, character_id, true, &story).unwrap();
+        assert!(ending.id.ends_with("_ending"));
+
+        let mut story = story;
+        story.acknowledge(ending.id);
+        let post = identity_arc_beat(path_id, character_id, true, &story).unwrap();
+        assert_eq!(post.id, post_id);
+        assert!(!post.title.is_empty());
+        assert!(!post.text.is_empty());
+        assert!(identity_arc_beat(path_id, "ilya_reed", true, &story).is_none());
+    }
+}
