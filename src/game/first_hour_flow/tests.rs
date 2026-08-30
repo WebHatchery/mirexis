@@ -81,3 +81,24 @@ fn first_hour_help_closes_other_tactical_modal_layers() {
         (false, false, false)
     );
 }
+
+#[test]
+fn next_ready_selection_advances_the_first_hour_select_lesson() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = crate::campaign::CampaignState::new(&data);
+    let mission = campaign
+        .strategy
+        .materialize_selected(&data, &campaign.colony);
+    let mut session = crate::state::GameSession::new(&data.config, &mission, &data.roster);
+    let mut progress = crate::first_hour::FirstHourProgress {
+        stage: FirstHourStage::FirstOperation,
+        lesson: crate::first_hour::TacticalLesson::Select,
+        ..crate::first_hour::FirstHourProgress::default()
+    };
+
+    assert!(advance_first_hour_selection(&mut session, &mut progress));
+    assert_eq!(
+        progress.lesson,
+        crate::first_hour::TacticalLesson::MoveToCover
+    );
+}

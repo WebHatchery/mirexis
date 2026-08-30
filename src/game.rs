@@ -589,7 +589,7 @@ impl Game {
                 }
             }
             UiAction::SelectNextReady => {
-                if crate::phase_readiness::select_next(&mut self.session).is_none() {
+                if !self.select_next_ready_for_first_hour() {
                     self.notifications.info("No colonist has actions remaining");
                 }
             }

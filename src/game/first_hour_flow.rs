@@ -56,6 +56,10 @@ impl Game {
         self.campaign.first_hour.moved(on_cover);
     }
 
+    pub(super) fn select_next_ready_for_first_hour(&mut self) -> bool {
+        advance_first_hour_selection(&mut self.session, &mut self.campaign.first_hour)
+    }
+
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
         if self.state != AppState::Title
             && !(self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
@@ -177,6 +181,17 @@ impl Game {
                 .unwrap_or_else(|| fallback.to_owned()),
         );
     }
+}
+
+pub(super) fn advance_first_hour_selection(
+    session: &mut GameSession,
+    progress: &mut crate::first_hour::FirstHourProgress,
+) -> bool {
+    let selected = crate::phase_readiness::select_next(session).is_some();
+    if selected {
+        progress.selected();
+    }
+    selected
 }
 
 fn first_hour_help_overlay_state(
