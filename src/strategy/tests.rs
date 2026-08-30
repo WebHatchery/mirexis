@@ -47,6 +47,16 @@ fn isolation_starts_with_pressure_threats_and_content() {
 }
 
 #[test]
+fn character_event_affordance_tracks_available_food() {
+    let data = GameData::load().unwrap();
+    let strategy = StrategyState::new(&data);
+    let event = strategy.available_event().unwrap();
+
+    assert!(strategy.can_resolve_first_event(event.food_cost));
+    assert!(!strategy.can_resolve_first_event(event.food_cost.saturating_sub(1)));
+}
+
+#[test]
 fn mission_resolution_advances_pressure_and_generates_seeded_offers() {
     let data = GameData::load().unwrap();
     let mut a = StrategyState::new(&data);

@@ -544,6 +544,11 @@ impl StrategyState {
         })
     }
 
+    pub fn can_resolve_first_event(&self, available_food: i32) -> bool {
+        self.available_event()
+            .is_some_and(|event| event.food_cost <= available_food)
+    }
+
     pub fn ensure_character_events(&mut self, data: &GameData) {
         for definition in &data.campaign.events {
             if !self

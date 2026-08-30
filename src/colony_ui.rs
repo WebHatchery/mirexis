@@ -728,7 +728,9 @@ fn draw_character_event(
                 legacy_amount,
                 legacy_stat.to_uppercase()
             ),
-            true,
+            campaign
+                .strategy
+                .can_resolve_first_event(campaign.colony.resources.food),
             mouse,
         ) {
             actions.push(UiAction::ResolveCharacterEvent(participant_id.clone()));
