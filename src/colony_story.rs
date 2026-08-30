@@ -254,25 +254,44 @@ pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn identity_beat(path_id: &str, character_id: &str) -> Option<ColonyBeat> {
+pub(crate) fn identity_beat(
+    path_id: &str,
+    character_id: &str,
+    campaign_complete: bool,
+) -> Option<ColonyBeat> {
     if identity_npc(path_id) != Some(character_id) {
         return None;
     }
-    let (id, title, text) = match path_id {
-        "human_redoubt" => (
+    let (id, title, text) = match (path_id, campaign_complete) {
+        ("human_redoubt", false) => (
             "identity_redoubt_arsenal",
             "A WALL WITH A NAME",
             "The Arsenal is not a monument to fear. It is a promise that the people behind this wall get to decide what kind of emergency comes next.",
         ),
-        "living_commonwealth" => (
+        ("human_redoubt", true) => (
+            "identity_redoubt_ending",
+            "THE WALL REMEMBERS",
+            "The Arsenal did not make us safe. It made our fear answer to the people who live behind it. If the wall stands after us, let it remember who chose its shape.",
+        ),
+        ("living_commonwealth", false) => (
             "identity_choir_garden",
             "THE GARDEN LISTENS",
             "The Choir Garden has started answering before we ask. I want the colony to learn its language without letting the first loud voice call that consent.",
         ),
-        "open_threshold" => (
+        ("living_commonwealth", true) => (
+            "identity_choir_ending",
+            "THE GARDEN ANSWERS",
+            "The Garden answers in more than one voice now. We did not become Brood, and we did not stay untouched; we became a colony that can disagree without mistaking difference for danger.",
+        ),
+        ("open_threshold", false) => (
             "identity_threshold_spire",
             "A DOOR NEEDS A GRID",
             "The Threshold Spire is a door only while we can keep its current alive. If the lights fail, we do not lose a building—we lose the question we built it to ask.",
+        ),
+        ("open_threshold", true) => (
+            "identity_threshold_ending",
+            "THE DOOR HAS WITNESSES",
+            "The Spire is open, but the door is not an escape from Mirexis. It is an invitation with witnesses: we will meet what answers as a colony, or not at all.",
         ),
         _ => return None,
     };

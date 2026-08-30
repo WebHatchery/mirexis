@@ -265,21 +265,25 @@ impl ColonyExplorer {
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        let beat = colony_story::identity_beat(&campaign.strategy.mirexis_path_id, &character.id)
-            .or_else(|| {
-                campaign
-                    .last_operation_had_commons_meal()
-                    .then(|| colony_story::commons_meal_beat(&character.id))
-                    .flatten()
-            })
-            .or_else(|| {
-                colony_story::current_beat(
-                    &character.id,
-                    campaign.operations_completed,
-                    campaign.first_hour.first_outcome_won,
-                    campaign.first_hour.second_outcome_won,
-                )
-            });
+        let beat = colony_story::identity_beat(
+            &campaign.strategy.mirexis_path_id,
+            &character.id,
+            campaign.strategy.campaign_complete,
+        )
+        .or_else(|| {
+            campaign
+                .last_operation_had_commons_meal()
+                .then(|| colony_story::commons_meal_beat(&character.id))
+                .flatten()
+        })
+        .or_else(|| {
+            colony_story::current_beat(
+                &character.id,
+                campaign.operations_completed,
+                campaign.first_hour.first_outcome_won,
+                campaign.first_hour.second_outcome_won,
+            )
+        });
         let (title, text, heard) = beat.map_or(
             ("COLONY BIOGRAPHY", character.biography.as_str(), true),
             |beat| {

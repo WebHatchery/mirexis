@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.81.0
+Save/content version: 1.82.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -442,8 +442,8 @@ and becomes the preferred defence objective; Choir Garden adds powered biomass c
 cover; Threshold Spire requires two power and projects strong shield cover only while online.
 The path transaction is also the building transaction, so migrated saves with an existing path
 are repaired into the same physical identity project. The associated colony voice relocates to
-that building and receives one persistent path-specific field note; static ambient signals and
-inspection copy make the power and damage consequences visible in the city.
+that building and receives persistent establishment and completed-finale field notes; static
+ambient signals and inspection copy make the power and damage consequences visible in the city.
 
 Deployment commits one food per ready squad member plus positive mutation upkeep.
 Powered Hydroponics returns three food after an operation, sustaining the standard
@@ -609,6 +609,8 @@ offer pool, the debrief and colony hub expose the ending, and generic post-campa
 operations remain available so a completed save is still playable. Those views also derive a
 colony legacy dossier from the chosen institution, ready and recovering people, trusted bonds,
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
+The identity contact's final field note changes with the completed path, giving the dossier a
+character voice instead of only a summary ledger.
 
 ## 9. Content Registry
 
@@ -739,6 +741,7 @@ Migration coverage:
 | 1.79.0 | Physical Mirexis identity buildings, path-specific defence consequences, Choir Garden biomass cycling, and identity-save migration |
 | 1.80.0 | Identity-building NPC placement, persistent path-specific field notes, ambient signals, and inspection copy |
 | 1.81.0 | Derived ending dossiers acknowledging the chosen civic institution, people, bonds, scars, and evolutions |
+| 1.82.0 | Completed-path identity contact reflections that extend each civic institution into a two-beat arc |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

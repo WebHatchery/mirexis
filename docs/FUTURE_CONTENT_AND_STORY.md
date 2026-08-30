@@ -396,6 +396,8 @@ Goal: deepen the existing people and city without new tactical systems.
 - Establish the unified refuge-engine truth in internal narrative references.
 - Implemented: ending acknowledgement now derives a colony legacy dossier from bonds, scars,
   evolution, people, and the chosen civic institution.
+- Implemented: each identity contact now has an establishment note and a completed-path
+  reflection after the final Mirexis operation.
 - Expand the dossier into authored character-specific epilogue variations and additional
   post-ending scenes.
 
