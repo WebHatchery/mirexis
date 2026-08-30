@@ -20,7 +20,10 @@ pub(super) fn draw_hover_card(
         && project.is_none()
         && !campaign.can_construct_building(campaign.colony.planned_construction, position);
     let action_unavailable = building.is_some_and(|building| {
-        building.damaged && !campaign.colony.can_repair_building(&building.id)
+        (building.damaged && !campaign.colony.can_repair_building(&building.id))
+            || (building.kind == BuildingKind::Waystation
+                && campaign.available_outsider(data).is_some()
+                && !campaign.can_recruit_outsider(data))
     });
     let text = if let Some(building) = building {
         if building.damaged {
@@ -109,10 +112,26 @@ pub(super) fn draw_hover_card(
             "WATCHTOWER // ONLINE // STRONG WESTERN COVER".to_owned()
         } else if building.kind == BuildingKind::Waystation {
             if let Some(outsider) = campaign.available_outsider(data) {
-                format!(
-                    "WAYSTATION // TAP TO REVIEW {}",
-                    outsider.origin.to_uppercase()
-                )
+                let resource = if outsider.recruitment_resource.is_empty() {
+                    "MATERIALS"
+                } else {
+                    outsider.recruitment_resource.as_str()
+                };
+                if campaign.can_recruit_outsider(data) {
+                    format!(
+                        "WAYSTATION // TAP TO RECRUIT {} // {} {}",
+                        outsider.name.to_uppercase(),
+                        outsider.recruitment_cost,
+                        resource.to_uppercase()
+                    )
+                } else {
+                    format!(
+                        "WAYSTATION // {} // NEED {} {}",
+                        outsider.origin.to_uppercase(),
+                        outsider.recruitment_cost,
+                        resource.to_uppercase()
+                    )
+                }
             } else if campaign
                 .roster
                 .iter()
@@ -234,7 +253,7 @@ pub(super) fn handle_plot_click(
             actions.push(UiAction::OpenGeneLab);
         } else if building.kind == BuildingKind::Waystation
             && campaign.colony.building_is_powered(&building.id)
-            && campaign.outsider_recruit_available(data)
+            && campaign.can_recruit_outsider(data)
         {
             actions.push(UiAction::RecruitOutsider);
         } else if building.kind == BuildingKind::Commons

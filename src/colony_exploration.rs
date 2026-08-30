@@ -25,6 +25,9 @@ const NPC_STATIONS: [[i32; 2]; 7] = [
     [17, 6],
 ];
 
+mod dialogue;
+use dialogue::{npc_action_button_label, npc_action_enabled};
+
 #[derive(Debug, Clone)]
 pub(crate) struct ColonyExplorer {
     position: Vec2,
@@ -401,10 +404,11 @@ impl ColonyExplorer {
         );
         draw_wrapped(text, 84.0, 491.0, 660.0);
         if let Some(action) = npc_action(character, npc.guest) {
+            let action_label = npc_action_button_label(campaign, data, character, npc.guest);
             if button(
                 Rect::new(84.0, 532.0, 176.0, 30.0),
-                npc_action_label(character, npc.guest),
-                npc_action_enabled(campaign, &action, npc.guest),
+                &action_label,
+                npc_action_enabled(campaign, data, &action, npc.guest),
                 mouse,
             ) {
                 actions.push(action);
@@ -643,17 +647,6 @@ fn npc_action(character: &CharacterRecord, guest: bool) -> Option<UiAction> {
         "ilya_reed" => None,
         "nadi_vale" | "sedge" => Some(UiAction::OpenGeneLab),
         _ => Some(UiAction::OpenRoster),
-    }
-}
-
-fn npc_action_enabled(campaign: &CampaignState, action: &UiAction, guest: bool) -> bool {
-    if guest {
-        return true;
-    }
-    match action {
-        UiAction::TreatInjury => campaign.can_treat_first_injury(),
-        UiAction::OpenGeneLab => campaign.colony.has_facility(BuildingKind::GeneLab),
-        _ => true,
     }
 }
 

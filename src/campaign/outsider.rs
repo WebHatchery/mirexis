@@ -312,6 +312,13 @@ impl CampaignState {
         self.available_outsider(data).is_some()
     }
 
+    pub fn can_recruit_outsider(&self, data: &GameData) -> bool {
+        self.available_outsider(data).is_some_and(|definition| {
+            self.recruitment_resource_amount(recruitment_resource(definition))
+                >= definition.recruitment_cost
+        })
+    }
+
     pub fn recruit_outsider(&mut self, data: &GameData) -> Result<String, String> {
         let definition = self
             .available_outsider(data)

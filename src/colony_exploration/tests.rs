@@ -128,9 +128,18 @@ fn unchosen_directorate_outsider_stands_at_the_waystation_as_a_guest() {
         "RECRUIT CONTACT"
     );
     assert_eq!(
+        npc_action_button_label(&campaign, &data, &guest.character, guest.guest),
+        "RECRUIT // 30 MATERIALS"
+    );
+    assert_eq!(
         npc_action(&guest.character, guest.guest),
         Some(UiAction::RecruitOutsider)
     );
+    let recruitment_cost = campaign.available_outsider(&data).unwrap().recruitment_cost;
+    let action = npc_action(&guest.character, guest.guest).unwrap();
+    assert!(npc_action_enabled(&campaign, &data, &action, guest.guest));
+    campaign.colony.resources.materials = recruitment_cost - 1;
+    assert!(!npc_action_enabled(&campaign, &data, &action, guest.guest));
 
     let mut explorer = ColonyExplorer::default();
     let station = npc_position(&campaign, "veya_orn").unwrap();
@@ -200,10 +209,10 @@ fn treatment_dialogue_action_requires_an_injury_and_prerequisites() {
         .unwrap();
     let action = npc_action(injured, false).unwrap();
     assert_eq!(action, UiAction::TreatInjury);
-    assert!(npc_action_enabled(&campaign, &action, false));
+    assert!(npc_action_enabled(&campaign, &data, &action, false));
 
     campaign.colony.resources.biomass = 0;
-    assert!(!npc_action_enabled(&campaign, &action, false));
+    assert!(!npc_action_enabled(&campaign, &data, &action, false));
 }
 
 #[test]
@@ -217,5 +226,5 @@ fn gene_lab_dialogue_action_is_disabled_until_the_lab_is_online() {
         .unwrap();
     let action = npc_action(nadi, false).unwrap();
     assert_eq!(action, UiAction::OpenGeneLab);
-    assert!(!npc_action_enabled(&campaign, &action, false));
+    assert!(!npc_action_enabled(&campaign, &data, &action, false));
 }

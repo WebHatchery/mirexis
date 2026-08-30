@@ -83,6 +83,7 @@ fn outsider_recruitment_adds_a_reserve_with_a_distinct_origin_profile() {
     let materials_before = campaign.colony.resources.materials;
 
     assert!(campaign.outsider_recruit_available(&data));
+    assert!(campaign.can_recruit_outsider(&data));
     assert_eq!(campaign.recruit_outsider(&data).unwrap(), "Veya Orn");
     let veya = campaign
         .roster
@@ -209,6 +210,18 @@ fn adaptation_recruitment_uses_biomass_and_adds_the_mireborn_route_map() {
             .move_range
             >= 6
     );
+}
+
+#[test]
+fn outsider_recruit_affordance_tracks_the_route_resource_boundary() {
+    let data = GameData::load().unwrap();
+    let mut campaign = directorate_waystation_campaign(&data);
+    let cost = campaign.available_outsider(&data).unwrap().recruitment_cost;
+
+    campaign.colony.resources.materials = cost - 1;
+    assert!(!campaign.can_recruit_outsider(&data));
+    campaign.colony.resources.materials = cost;
+    assert!(campaign.can_recruit_outsider(&data));
 }
 
 #[test]
