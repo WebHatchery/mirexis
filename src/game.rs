@@ -218,6 +218,7 @@ impl Game {
                 operations_open: &mut self.colony_operations_open,
                 facility_upgrade_open: &mut self.facility_upgrade_open,
                 salvage_open: &mut self.salvage_open,
+                settings_open: self.show_settings,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,

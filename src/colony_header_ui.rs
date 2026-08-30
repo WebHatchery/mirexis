@@ -25,6 +25,7 @@ pub(crate) fn draw(
     campaign: &CampaignState,
     mouse: Vec2,
     operations_open: &mut bool,
+    interaction_enabled: bool,
     actions: &mut Vec<UiAction>,
 ) {
     draw_surface(
@@ -60,7 +61,7 @@ pub(crate) fn draw(
         40.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
-    if button(settings_bounds(), "SETTINGS", true, mouse) {
+    if button(settings_bounds(), "SETTINGS", interaction_enabled, mouse) {
         actions.push(UiAction::ToggleSettings);
     }
     if button(
@@ -70,12 +71,12 @@ pub(crate) fn draw(
         } else {
             "OPERATIONS"
         },
-        true,
+        interaction_enabled,
         mouse,
     ) {
         *operations_open = !*operations_open;
     }
-    if button(title_bounds(), "TITLE", true, mouse) {
+    if button(title_bounds(), "TITLE", interaction_enabled, mouse) {
         actions.push(UiAction::ReturnToTitle);
     }
 }

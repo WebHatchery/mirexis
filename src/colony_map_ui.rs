@@ -32,6 +32,7 @@ pub(crate) struct ColonyMapContext<'a> {
     pub(crate) explorer: &'a mut crate::colony_exploration::ColonyExplorer,
     pub(crate) mouse: Vec2,
     pub(crate) operations_open: bool,
+    pub(crate) interaction_enabled: bool,
     pub(crate) actions: &'a mut Vec<UiAction>,
 }
 
@@ -46,6 +47,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
         explorer,
         mouse,
         operations_open,
+        interaction_enabled,
         actions,
     } = context;
     let panel = panel_bounds(operations_open);
@@ -56,14 +58,20 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             .with_inner_border(6.0, 1.0, Color::new(0.12, 0.28, 0.27, 0.7)),
     );
     let viewport = viewport_bounds(panel);
-    let camera_control_clicked = crate::camera_controls::draw_zoom(
-        camera,
-        viewport,
-        mouse,
-        camera_controls_origin(panel),
-        !camera.primary_gesture_active(),
-    );
-    let camera_dragged = camera.update(viewport, mouse);
+    let camera_control_clicked = interaction_enabled
+        && crate::camera_controls::draw_zoom(
+            camera,
+            viewport,
+            mouse,
+            camera_controls_origin(panel),
+            !camera.primary_gesture_active(),
+        );
+    let camera_dragged = if interaction_enabled {
+        camera.update(viewport, mouse)
+    } else {
+        camera.clear_pointer_interaction();
+        false
+    };
     if camera_control_clicked {
         camera.guard_next_primary_release();
     }
@@ -84,7 +92,14 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     crate::ui::set_ui_clip(ui, Some(viewport));
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
-    explorer.update_approach(campaign, data);
+    if interaction_enabled {
+        explorer.update_approach(campaign, data);
+    }
+    let interaction_mouse = if interaction_enabled {
+        mouse
+    } else {
+        vec2(-1_000_000.0, -1_000_000.0)
+    };
     let hovered = hovered_plot(view, mouse);
     let planning_site = hovered.filter(|position| {
         campaign.colony.building_at(*position).is_none()
@@ -122,7 +137,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
                     assets,
                     visuals,
                     view,
-                    mouse,
+                    mouse: interaction_mouse,
                 },
             )
         });
@@ -131,13 +146,15 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     crate::first_hour_consequences_ui::draw(campaign, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
-    if let Some(npc_id) = clicked_npc.as_deref() {
-        if let Some(position) = crate::colony_exploration::npc_position(campaign, npc_id) {
-            explorer.request_approach(npc_id, position, &campaign.colony);
+    if interaction_enabled {
+        if let Some(npc_id) = clicked_npc.as_deref() {
+            if let Some(position) = crate::colony_exploration::npc_position(campaign, npc_id) {
+                explorer.request_approach(npc_id, position, &campaign.colony);
+            }
+            camera.guard_next_primary_release();
         }
-        camera.guard_next_primary_release();
     }
-    if explorer.build_mode() {
+    if interaction_enabled && explorer.build_mode() {
         interaction::draw_hover_card(campaign, data, hovered, camera.pending_colony_plot());
         interaction::handle_plot_click(
             campaign,
@@ -148,7 +165,9 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             actions,
         );
         controls::draw_build_controls(campaign, mouse, actions);
-    } else if !suppress_plot_click
+    } else if interaction_enabled
+        && !explorer.build_mode()
+        && !suppress_plot_click
         && clicked_npc.is_none()
         && !explorer.is_talking()
         && is_mouse_button_released(MouseButton::Left)
@@ -157,8 +176,15 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             explorer.request_walk(view.world_position(mouse, position), &campaign.colony);
         }
     }
-    controls::draw_exploration_controls(campaign, data, explorer, mouse, actions);
-    explorer.draw_dialogue(campaign, data, mouse, actions);
+    if interaction_enabled {
+        controls::draw_exploration_controls(campaign, data, explorer, mouse, actions);
+    } else {
+        explorer.set_keyboard_direction(Vec2::ZERO);
+        explorer.set_touch_direction(Vec2::ZERO);
+    }
+    if interaction_enabled {
+        explorer.draw_dialogue(campaign, data, mouse, actions);
+    }
     let instruction_y = if explorer.build_mode() {
         panel.y + 42.0
     } else {

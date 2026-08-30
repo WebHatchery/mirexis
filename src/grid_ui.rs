@@ -146,6 +146,15 @@ impl WorldCamera {
         self.pending_colony_plot = None;
     }
 
+    pub(crate) fn clear_pointer_interaction(&mut self) {
+        self.drag_anchor = None;
+        self.primary_drag_start = None;
+        self.primary_drag_anchor = None;
+        self.primary_dragged = false;
+        self.primary_release_pending = false;
+        self.pending_colony_plot = None;
+    }
+
     fn begin_primary_press(&mut self, inside: bool, pressed: bool) {
         if inside && pressed {
             self.primary_release_pending = false;

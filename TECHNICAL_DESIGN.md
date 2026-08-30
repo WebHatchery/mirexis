@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.133.0
+Save/content version: 1.134.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -909,6 +909,7 @@ Migration coverage:
 | 1.131.0 | Tactical saves preserve the materialized mission context so a restored debrief names the completed contract and rewards; adds optional active-mission save context |
 | 1.132.0 | First-hour field-guide input is isolated from the underlying game while the overlay is open; no new save fields |
 | 1.133.0 | Colony overlays isolate keyboard, controller, and explorer movement input while open; no new save fields |
+| 1.134.0 | Blocking colony overlays also suppress map gestures, walking, approaches, drawer toggles, and stale camera interaction; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

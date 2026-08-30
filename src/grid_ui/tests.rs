@@ -327,6 +327,23 @@ fn colony_plot_actions_require_two_taps_on_the_same_plot() {
 }
 
 #[test]
+fn clearing_pointer_interaction_discards_stale_gesture_and_plot_state() {
+    let mut camera = WorldCamera::colony_start(SETTLEMENT_CENTER);
+    camera.confirm_colony_plot([12, 11]);
+    camera.guard_next_primary_release();
+    camera.begin_primary_press(true, true);
+    camera.update_primary_drag(true, false, vec2(200.0, 200.0));
+    assert!(camera.primary_gesture_active());
+    assert_eq!(camera.pending_colony_plot(), Some([12, 11]));
+
+    camera.clear_pointer_interaction();
+
+    assert!(!camera.primary_gesture_active());
+    assert_eq!(camera.pending_colony_plot(), None);
+    assert!(!camera.update_primary_drag(false, true, vec2(200.0, 200.0)));
+}
+
+#[test]
 fn primary_tap_does_not_pan_or_suppress_selection() {
     let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
     let before = camera.center;
