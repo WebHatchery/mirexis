@@ -45,3 +45,49 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(lines[4].contains("EVOLUTION"));
     assert!(dossier.debrief_line().contains("COLONY LEGACY"));
 }
+
+#[test]
+fn epilogue_adds_an_authored_voice_for_each_identity_path() {
+    for (path_id, character_id, character_name, ready_line, recovering_line) in [
+        (
+            "human_redoubt",
+            "mara_venn",
+            "Mara Venn",
+            "THE ARSENAL OPENS FROM THE INSIDE.",
+            "THE ARSENAL KEEPS THE INJURED WITHIN ITS LIGHT.",
+        ),
+        (
+            "living_commonwealth",
+            "nadi_vale",
+            "Nadi Vale",
+            "WE DID NOT BECOME ONE BODY; WE MADE ROOM FOR DIFFERENCE.",
+            "THE GARDEN HAS ROOM FOR THE BODY THAT NEEDS TIME.",
+        ),
+        (
+            "open_threshold",
+            "sol_cairn",
+            "Sol Cairn",
+            "EVERY OPEN ROUTE NEEDS A WAY HOME.",
+            "THE THRESHOLD WAITS; RETURN IS PART OF THE JOURNEY.",
+        ),
+    ] {
+        let data = crate::data::GameData::load().unwrap();
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.campaign_complete = true;
+        campaign.strategy.mirexis_path_id = path_id.to_owned();
+
+        let ready = derive(&campaign).unwrap().lines();
+        assert!(ready[5].contains(character_name));
+        assert!(ready[5].contains(ready_line));
+
+        campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == character_id)
+            .unwrap()
+            .availability = Availability::Recovering;
+        let recovering = derive(&campaign).unwrap().lines();
+        assert!(recovering[5].contains(recovering_line));
+        assert_ne!(ready[5], recovering[5]);
+    }
+}

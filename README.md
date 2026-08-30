@@ -39,6 +39,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - The identity contact returns a second, path-specific reflection after the final operation.
 - Contact, Adaptation, and Escalation each surface a phase-specific colony field note through a
   named colonist voice and persistent acknowledgement.
+- Completed ending dossiers add an authored identity-contact voice that reflects the named
+  survivor's readiness or recovery.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

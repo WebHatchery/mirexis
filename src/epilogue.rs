@@ -12,10 +12,11 @@ pub(crate) struct EpilogueDossier {
     bond_detail: String,
     scars: String,
     evolutions: String,
+    character_voice: String,
 }
 
 impl EpilogueDossier {
-    pub(crate) fn lines(&self) -> [String; 5] {
+    pub(crate) fn lines(&self) -> [String; 6] {
         [
             format!(
                 "CIVIC // {} // {}",
@@ -29,6 +30,7 @@ impl EpilogueDossier {
             ),
             format!("SCARS // {}", self.scars),
             format!("EVOLUTION // {}", self.evolutions),
+            format!("VOICE // {}", self.character_voice),
         ]
     }
 
@@ -135,6 +137,7 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
     } else {
         format!("{} COLONISTS // {}", evolved.len(), evolved.join(", "))
     };
+    let character_voice = character_voice(campaign);
 
     Some(EpilogueDossier {
         institution,
@@ -144,7 +147,42 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         bond_detail,
         scars,
         evolutions,
+        character_voice,
     })
+}
+
+fn character_voice(campaign: &CampaignState) -> String {
+    let (character_id, ready_line, recovering_line) =
+        match campaign.strategy.mirexis_path_id.as_str() {
+            "human_redoubt" => (
+                "mara_venn",
+                "THE ARSENAL OPENS FROM THE INSIDE.",
+                "THE ARSENAL KEEPS THE INJURED WITHIN ITS LIGHT.",
+            ),
+            "living_commonwealth" => (
+                "nadi_vale",
+                "WE DID NOT BECOME ONE BODY; WE MADE ROOM FOR DIFFERENCE.",
+                "THE GARDEN HAS ROOM FOR THE BODY THAT NEEDS TIME.",
+            ),
+            "open_threshold" => (
+                "sol_cairn",
+                "EVERY OPEN ROUTE NEEDS A WAY HOME.",
+                "THE THRESHOLD WAITS; RETURN IS PART OF THE JOURNEY.",
+            ),
+            _ => return "NO PATH CONTACT // THE COLONY'S ACCOUNT REMAINS OPEN.".to_owned(),
+        };
+    let line = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == character_id)
+        .map_or(recovering_line, |character| {
+            if character.availability == Availability::Ready {
+                ready_line
+            } else {
+                recovering_line
+            }
+        });
+    format!("{} // {}", character_name(campaign, character_id), line)
 }
 
 fn character_name(campaign: &CampaignState, character_id: &str) -> String {

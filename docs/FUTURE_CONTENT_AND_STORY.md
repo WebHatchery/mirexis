@@ -401,8 +401,9 @@ Goal: deepen the existing people and city without new tactical systems.
   reflection after the final Mirexis operation.
 - Implemented: acknowledging either identity note archives it in the campaign story ledger,
   including the completed-path reflection.
-- Expand the dossier into authored character-specific epilogue variations and additional
-  post-ending scenes.
+- Implemented: the ending dossier includes an authored, readiness-aware voice variation from the
+  identity contact for each path.
+- Expand the dossier into additional character-specific post-ending scenes.
 
 Exit test: players recall three colonists, can describe one changing relationship, and
 notice the colony responding to an operation without opening a ledger.
