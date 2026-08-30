@@ -557,10 +557,10 @@ impl Game {
                     return;
                 }
                 if kind == crate::colony::BuildingKind::Waystation
-                    && self.campaign.strategy.contact_protocol_id != "directorate_requisition"
+                    && !self.campaign.waystation_unlocked()
                 {
                     self.notifications
-                        .warning("The Waystation requires Directorate Requisition");
+                        .warning("The Waystation unlocks through Contact or Adaptation");
                     return;
                 }
                 match self.campaign.colony.select_construction(kind) {
@@ -577,10 +577,10 @@ impl Game {
                     return;
                 }
                 if kind == crate::colony::BuildingKind::Waystation
-                    && self.campaign.strategy.contact_protocol_id != "directorate_requisition"
+                    && !self.campaign.waystation_unlocked()
                 {
                     self.notifications
-                        .warning("The Waystation requires Directorate Requisition");
+                        .warning("The Waystation unlocks through Contact or Adaptation");
                     return;
                 }
                 match self.campaign.colony.place_construction(kind, position) {

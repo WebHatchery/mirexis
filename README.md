@@ -52,8 +52,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
   origins, experience, injury, and recovery, including route-specific outsider arcs for
   Veya Orn's Directorate Exile and Sedge's Mireborn Adapted origin.
-- The Contact-era Waystation recruits Veya through Directorate Requisition and gives her
-  the origin-specific BREAK TARGETING NET equipment action.
+- The Waystation recruits Veya through Directorate Requisition or Sedge once Adaptation
+  opens a route, and gives each outsider an origin-specific equipment action.
 - Adaptation can recruit Sedge through the Waystation for biomass; their origin-specific
   MAP HAZARD action braces the courier while disrupting a hostile, and their three-beat
   arc records Brood attention, relationships, disagreements, and route legacies.

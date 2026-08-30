@@ -289,6 +289,11 @@ pub(crate) fn outsider_beat(outsider_id: &str, stage: u8) -> Option<OutsiderBeat
 }
 
 impl CampaignState {
+    pub(crate) fn waystation_unlocked(&self) -> bool {
+        self.strategy.contact_protocol_id == "directorate_requisition"
+            || (self.strategy.phase_id == "adaptation" && self.strategy.contact_complete)
+    }
+
     pub fn available_outsider<'a>(&self, data: &'a GameData) -> Option<&'a CharacterDef> {
         if !self.colony.has_facility(BuildingKind::Waystation) {
             return None;

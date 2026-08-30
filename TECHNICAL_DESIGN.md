@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.89.0
+Save/content version: 1.90.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -287,6 +287,10 @@ Route-specific character definitions carry a recruitment protocol, optional camp
 resource, and cost. The Waystation resolves the first matching definition rather than
 hard-coding a recruit: Veya uses Contact materials, while Sedge uses Adaptation biomass and
 raises Brood attention when the colony shelters their pre-recorded mutation.
+
+The Waystation is buildable after a Contact protocol is selected or once a completed Contact
+opens Adaptation. This keeps Sedge reachable on Brood Cultivation and Ascendant Capacitor
+campaigns instead of tying every outsider to the Directorate route.
 
 Each recruited outsider has an independent three-beat Waystation arc. Veya's existing
 legacy fields remain readable for old saves; additional outsider state is keyed by character
@@ -775,6 +779,7 @@ Migration coverage:
 | 1.87.0 | Mireborn Adapted Sedge recruitment, biomass route cost, Waystation presence, and MAP HAZARD equipment action |
 | 1.88.0 | Three-stage witness, contradiction, and aftermath colony notes for every Contact protocol |
 | 1.89.0 | Independent route-specific outsider arcs for Sedge with Brood attention, resource choices, and persisted legacies |
+| 1.90.0 | Adaptation route access to the Waystation so Sedge is reachable on every Contact protocol |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -826,7 +831,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (318 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (319 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -865,7 +870,7 @@ these explicit boundaries when continuing:
   early and Contact battlefields now carry faction hazards. Additional transforms,
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
-  Adaptation-gated Gene Lab, one Contact-gated Waystation, a Commons, and a Relay Mast;
+  Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
   the Power Plant, Hydroponics, and Workshop now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while

@@ -52,6 +52,31 @@ fn route_exclusive_outsider_requires_the_matching_operational_waystation() {
 }
 
 #[test]
+fn waystation_unlocks_for_adaptation_route_contacts() {
+    let data = GameData::load().unwrap();
+    for protocol_id in ["brood_cultivation", "ascendant_capacitor"] {
+        let mut campaign = CampaignState::new(&data);
+        assert!(!campaign.waystation_unlocked());
+        campaign.strategy.contact_protocol_id = protocol_id.to_owned();
+        assert!(!campaign.waystation_unlocked());
+
+        campaign.strategy.phase_id = "adaptation".to_owned();
+        assert!(!campaign.waystation_unlocked());
+        campaign.strategy.contact_complete = true;
+        assert!(campaign.waystation_unlocked());
+
+        campaign.colony.buildings.push(BuildingState {
+            id: format!("adaptation_waystation_gate_test_{protocol_id}"),
+            kind: BuildingKind::Waystation,
+            position: [2, 11],
+            level: 1,
+            damaged: false,
+        });
+        assert_eq!(campaign.available_outsider(&data).unwrap().id, "sedge");
+    }
+}
+
+#[test]
 fn outsider_recruitment_adds_a_reserve_with_a_distinct_origin_profile() {
     let data = GameData::load().unwrap();
     let mut campaign = directorate_waystation_campaign(&data);

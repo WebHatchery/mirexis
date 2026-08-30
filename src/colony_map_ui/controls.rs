@@ -30,7 +30,7 @@ pub(super) fn draw_build_controls(
     {
         kinds.push(BuildingKind::GeneLab);
     }
-    if campaign.strategy.contact_protocol_id == "directorate_requisition"
+    if campaign.waystation_unlocked()
         && !campaign
             .colony
             .buildings
