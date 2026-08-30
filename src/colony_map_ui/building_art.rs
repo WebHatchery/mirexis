@@ -80,3 +80,47 @@ pub(super) fn draw_commons(center: Vec2, zoom: f32, powered: bool, damaged: bool
         );
     }
 }
+
+pub(super) fn draw_relay_mast(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.48, 0.72, 1.0, 0.94)
+    } else {
+        Color::new(0.38, 0.46, 0.62, 0.82)
+    };
+    draw_line(
+        center.x,
+        center.y - 56.0 * zoom,
+        center.x,
+        center.y - 17.0 * zoom,
+        2.0 * zoom,
+        accent,
+    );
+    draw_line(
+        center.x - 15.0 * zoom,
+        center.y - 43.0 * zoom,
+        center.x + 15.0 * zoom,
+        center.y - 43.0 * zoom,
+        1.5 * zoom,
+        accent,
+    );
+    draw_circle(
+        center.x,
+        center.y - 58.0 * zoom,
+        4.0 * zoom,
+        Color::new(
+            accent.r,
+            accent.g,
+            accent.b,
+            if powered { 0.9 } else { 0.3 },
+        ),
+    );
+    draw_circle_lines(
+        center.x,
+        center.y - 58.0 * zoom,
+        12.0 * zoom,
+        1.2 * zoom,
+        Color::new(accent.r, accent.g, accent.b, 0.56),
+    );
+}

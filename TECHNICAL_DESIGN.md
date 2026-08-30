@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.73.0
+Save/content version: 1.74.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -110,6 +110,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
 | `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
+| `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and Contact-era outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
@@ -701,6 +702,7 @@ Migration coverage:
 | 1.71.0 | Rescue Specialist and Chorus Warden hybrid class actions, hazard conversion events, and advanced-class migration defaults |
 | 1.72.0 | Waystation construction, Directorate Exile recruitment, origin-derived profiles, Exile Cipher action, and outsider-arc migration defaults |
 | 1.73.0 | Commons construction, once-per-operation shared meals, relationship progression, and Commons migration defaults |
+| 1.74.0 | Relay Mast construction, once-per-operation route scans, mission refresh, attention exposure, and relay migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -752,7 +754,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (280 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (287 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -791,8 +793,8 @@ these explicit boundaries when continuing:
   early and Contact battlefields now carry faction hazards. Additional transforms,
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
-  Adaptation-gated Gene Lab, one Contact-gated Waystation, and a Commons; population
-  and free placement for every building remain.
+  Adaptation-gated Gene Lab, one Contact-gated Waystation, a Commons, and a Relay Mast;
+  population and free placement for every building remain.
 - Pair relationships now grow from shared victories and character events, and trusted
   deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,
   romances, bespoke relationship scenes, permanent death, and broader armour/tool

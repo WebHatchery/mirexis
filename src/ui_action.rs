@@ -17,6 +17,7 @@ pub enum UiAction {
     RecruitOutsider,
     ResolveOutsiderBeat(u8, String),
     HostCommonsMeal,
+    RunRelayScan,
     DeployMission,
     CycleFormation,
     ToggleDeployment(String),

@@ -20,11 +20,15 @@ The Commons is also now a working home-space slice: a powered settlement can hos
 shared meal per operation, spend food, and turn the active squad's table into persistent
 relationship progress.
 
+The Relay Mast now gives that settlement a risky communication choice: one powered scan per
+operation refreshes mission routes and exposes the colony to whichever faction is watching
+hardest.
+
 This document plans the next content horizon: playable peoples and origins, classes,
 skills, buildings, upgrades, recruits, and the story that connects them. It is subordinate
 to `PLAYABLE_GAME_PHASE_1.md` until the required uncoached first-hour playtests are
 complete. All fourteen base-class techniques are now implemented as a deliberately
-bounded tactical slice; mastery forks, new peoples, buildings, and later story work
+bounded tactical slice; mastery forks, new peoples, and later story work
   remain planning direction beyond the implemented Directorate Exile slice.
 
 ## 2. Expansion rules
@@ -294,10 +298,11 @@ reserved for the late-game colony identity, not a generic numeric improvement.
 Build these in priority order:
 
 1. **Commons.** Implemented as a powered, once-per-operation shared meal that spends food
-   and advances bonds among the active squad. Future work can add relationship scenes,
-   arguments, celebrations, post-operation recovery, and a fuller civilian defence role.
-2. **Relay Mast.** Expands operation intelligence and communication choices while making
-   the colony easier to locate. It creates a clean risk/reward loop with faction attention.
+   and advances bonds among the active squad. Future work can add arguments, celebrations,
+   post-operation recovery, and a fuller civilian defence role.
+2. **Relay Mast.** Implemented as a powered, once-per-operation route scan that refreshes
+   mission offers for stored power while raising the dominant faction's attention. Future
+   work can add authored communication choices without hiding the broadcast risk.
 3. **Research Annex.** Gives research a physical home, displays recovered artefacts, and
    hosts debates over dangerous discoveries. It should organise branching research, not
    add a second unrelated research currency.
@@ -409,7 +414,8 @@ presence provokes at least two disagreements that do not reduce to approval poin
 Goal: make building and upgrade choices visible in city life and defence.
 
 - Add level-2 branch upgrades to three existing facilities first.
-- Build Relay Mast and one new defence structure.
+- Implemented: build a Relay Mast and use its once-per-operation route scan.
+- Build one new defence structure.
 - Implement the three identity buildings and their defence-map consequences.
 - Connect power failure, damage, repair, and NPC scenes to every new facility.
 

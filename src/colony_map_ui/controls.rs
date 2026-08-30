@@ -14,6 +14,7 @@ pub(super) fn draw_build_controls(
 ) {
     let mut kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
     kinds.push(BuildingKind::Commons);
+    kinds.push(BuildingKind::RelayMast);
     if campaign.strategy.contact_complete
         && !campaign
             .colony

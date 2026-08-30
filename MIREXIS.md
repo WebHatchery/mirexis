@@ -1167,6 +1167,10 @@ character events. Roster inspection names each known bond, mission briefing iden
 deployed trusted partners, debrief reports meal and victory consequences, and the colony
 can answer a shared meal with authored post-operation field notes.
 
+The colony's communication layer now has a corresponding cost: a powered Relay Mast can
+refresh the operation routes once per operation, but the strongest opposing signal notices
+the broadcast and gains attention.
+
 At bond 3, a deployed pair becomes **Trusted** and each partner gains +2 accuracy. At
 bond 5, the pair becomes **Bonded** and each partner also gains +1 armour. Only a
 character's strongest deployed bond applies, so relationship bonuses remain small and

@@ -21,6 +21,7 @@ pub enum BuildingKind {
     GeneLab,
     Waystation,
     Commons,
+    RelayMast,
 }
 
 impl BuildingKind {
@@ -36,6 +37,7 @@ impl BuildingKind {
             Self::GeneLab => "Gene Lab",
             Self::Waystation => "Waystation",
             Self::Commons => "Commons",
+            Self::RelayMast => "Relay Mast",
         }
     }
 
@@ -46,6 +48,7 @@ impl BuildingKind {
             Self::GeneLab => 50,
             Self::Waystation => 55,
             Self::Commons => 40,
+            Self::RelayMast => 45,
             _ => 0,
         }
     }
@@ -57,6 +60,7 @@ impl BuildingKind {
             Self::GeneLab => 3,
             Self::Waystation => 1,
             Self::Commons => 1,
+            Self::RelayMast => 1,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -233,6 +237,7 @@ impl ColonyState {
                 | BuildingKind::GeneLab
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
+                | BuildingKind::RelayMast
         ) {
             return Err(format!("{} cannot be planned here", kind.name()));
         }
@@ -248,7 +253,10 @@ impl ColonyState {
         self.validate_construction_site(position)?;
         if matches!(
             kind,
-            BuildingKind::GeneLab | BuildingKind::Waystation | BuildingKind::Commons
+            BuildingKind::GeneLab
+                | BuildingKind::Waystation
+                | BuildingKind::Commons
+                | BuildingKind::RelayMast
         ) && (self.buildings.iter().any(|building| building.kind == kind)
             || self
                 .construction_queue
@@ -370,7 +378,8 @@ impl ColonyState {
                     | BuildingKind::PowerPlant
                     | BuildingKind::GeneLab
                     | BuildingKind::Waystation
-                    | BuildingKind::Commons => critical_objectives.push(position),
+                    | BuildingKind::Commons
+                    | BuildingKind::RelayMast => critical_objectives.push(position),
                 }
             }
         }

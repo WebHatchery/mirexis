@@ -4,10 +4,12 @@ mod commons;
 mod deployment;
 mod derivation;
 mod outsider;
+mod relay;
 
 pub(crate) use commons::COMMONS_MEAL_FOOD_COST;
 pub(super) use derivation::derive_unit;
 pub(crate) use outsider::{outsider_beat, OutsiderChoice};
+pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
 use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
@@ -124,6 +126,10 @@ pub struct CampaignState {
     pub commons_meals_hosted: u32,
     #[serde(default)]
     pub commons_meal_operation: Option<u32>,
+    #[serde(default)]
+    pub relay_scans_used: u32,
+    #[serde(default)]
+    pub relay_scan_operation: Option<u32>,
 }
 
 impl CampaignState {
@@ -154,6 +160,8 @@ impl CampaignState {
             outsider_final_choice: String::new(),
             commons_meals_hosted: 0,
             commons_meal_operation: None,
+            relay_scans_used: 0,
+            relay_scan_operation: None,
         }
     }
 

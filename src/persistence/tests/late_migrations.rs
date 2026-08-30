@@ -295,6 +295,23 @@ fn version_172_save_gains_commons_runtime_defaults() {
 }
 
 #[test]
+fn version_173_save_gains_relay_runtime_defaults() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut legacy = serde_json::to_value(session.to_save("1.73.0", &campaign)).unwrap();
+    let campaign = legacy["campaign"].as_object_mut().unwrap();
+    campaign.remove("relay_scans_used");
+    campaign.remove("relay_scan_operation");
+
+    let migrated = migrate_save_value(Some("1.73.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(migrated.campaign.relay_scans_used, 0);
+    assert_eq!(migrated.campaign.relay_scan_operation, None);
+}
+
+#[test]
 fn same_version_corner_colony_save_moves_into_the_centered_frontier() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);

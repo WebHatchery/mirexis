@@ -22,7 +22,7 @@ pub(super) fn draw(
         format!("HOST COMMONS MEAL // {} FOOD", COMMONS_MEAL_FOOD_COST)
     };
     if button(
-        Rect::new(878.0, 344.0, 362.0, 30.0),
+        Rect::new(878.0, 344.0, 176.0, 30.0),
         &label,
         campaign.commons_meal_available(),
         mouse,

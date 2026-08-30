@@ -93,6 +93,7 @@ fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() 
         BuildingKind::GeneLab,
         BuildingKind::Waystation,
         BuildingKind::Commons,
+        BuildingKind::RelayMast,
     ] {
         let mut colony = ColonyState::new();
         colony.place_construction(kind, [3, 3]).unwrap();
@@ -360,5 +361,19 @@ fn commons_is_unique_and_online_on_the_redundant_starting_grid() {
         .is_err());
     colony.advance_operation();
     assert!(colony.has_facility(BuildingKind::Commons));
+    assert_eq!(colony.power_demand(), 8);
+}
+
+#[test]
+fn relay_mast_is_unique_and_online_on_the_redundant_starting_grid() {
+    let mut colony = ColonyState::new();
+    colony
+        .place_construction(BuildingKind::RelayMast, [2, 10])
+        .unwrap();
+    assert!(colony
+        .place_construction(BuildingKind::RelayMast, [2, 14])
+        .is_err());
+    colony.advance_operation();
+    assert!(colony.has_facility(BuildingKind::RelayMast));
     assert_eq!(colony.power_demand(), 8);
 }

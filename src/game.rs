@@ -452,6 +452,7 @@ impl Game {
                 }
             }
             UiAction::HostCommonsMeal => self.handle_commons_meal(),
+            UiAction::RunRelayScan => self.handle_relay_scan(),
             UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
                 Ok(food_cost) => {
                     self.campaign

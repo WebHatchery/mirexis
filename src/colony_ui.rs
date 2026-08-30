@@ -11,6 +11,7 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::VirtualUi;
 
 mod commons;
+mod relay;
 
 // Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
 // when every label shares the toolkit font. The hub's buttons and map labels
@@ -290,6 +291,7 @@ fn draw_operations(
         None
     };
     commons::draw(campaign, decision.is_none(), mouse, actions);
+    relay::draw(campaign, decision.is_none(), mouse, actions);
     if let Some(decision) = decision {
         crate::colony_decision_ui::draw_decision_dossier(decision, campaign, assets, visuals);
     } else {

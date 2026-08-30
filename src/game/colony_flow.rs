@@ -12,4 +12,14 @@ impl Game {
             Err(err) => self.notifications.warning(err),
         }
     }
+
+    pub(super) fn handle_relay_scan(&mut self) {
+        match self.campaign.run_relay_scan(&self.data) {
+            Ok(summary) => {
+                self.notifications.warning(summary);
+                self.autosave_campaign_only("Relay scan autosaved");
+            }
+            Err(err) => self.notifications.warning(err),
+        }
+    }
 }
