@@ -14,5 +14,6 @@ mod facility_upgrade;
 mod identity;
 mod recruitment;
 mod relay;
+mod research;
 
 mod test_part_1;

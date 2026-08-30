@@ -40,6 +40,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Drone Bay makes facility repairs cheaper.
 - Level-2 Gene Lab branches: Stabilisation Wing suppresses evolution complications while
   online, or Evolution Chamber reduces mutation evolution biomass costs.
+- Optional Research Annex: a powered physical evidence archive reduces doctrine research by
+  five materials and becomes a visible colony-defence objective.
 - Phase Five path choices establish one physical identity building: Redoubt Arsenal, Choir
   Garden, or Threshold Spire, each changing colony defence and preparation.
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,

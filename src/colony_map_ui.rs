@@ -500,6 +500,9 @@ fn draw_plot(
             BuildingKind::ThresholdSpire => {
                 building_art::draw_threshold_spire(center, view.zoom, powered, building.damaged)
             }
+            BuildingKind::ResearchAnnex => {
+                building_art::draw_research_annex(center, view.zoom, powered, building.damaged)
+            }
             _ => {}
         }
         identity_art::draw_ambient(building.kind, center, view.zoom, powered, building.damaged);
@@ -537,6 +540,7 @@ fn building_index(kind: BuildingKind) -> usize {
         BuildingKind::Hydroponics => 5,
         BuildingKind::PowerPlant => 6,
         BuildingKind::GeneLab => 7,
+        BuildingKind::ResearchAnnex => 7,
         BuildingKind::Waystation => 7,
         BuildingKind::Commons => 1,
         BuildingKind::RelayMast => 6,

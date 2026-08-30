@@ -190,3 +190,23 @@ fn version_104_save_preserves_infirmary_upgrade_queue() {
         ADAPTATION_CLINIC_UPGRADE
     );
 }
+
+#[test]
+fn version_105_save_preserves_research_annex_construction() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign
+        .colony
+        .place_construction(BuildingKind::ResearchAnnex, [1, 1])
+        .unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let legacy = serde_json::to_value(session.to_save("1.105.0", &campaign)).unwrap();
+
+    let migrated = migrate_save_value(Some("1.105.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(
+        migrated.campaign.colony.construction_queue[0].kind,
+        BuildingKind::ResearchAnnex
+    );
+}

@@ -349,10 +349,11 @@ impl StrategyState {
         self.generate_missions_with_limit(data, mission_offer_limit);
     }
 
-    pub fn complete_research(
+    pub fn complete_research_with_discount(
         &mut self,
         research_id: &str,
         colony: &mut ColonyState,
+        materials_discount: i32,
     ) -> Result<String, String> {
         let research = self
             .research
@@ -362,13 +363,11 @@ impl StrategyState {
         if research.completed {
             return Err("Research is already complete".to_owned());
         }
-        if colony.resources.materials < research.materials_cost {
-            return Err(format!(
-                "Research requires {} materials",
-                research.materials_cost
-            ));
+        let cost = (research.materials_cost - materials_discount).max(5);
+        if colony.resources.materials < cost {
+            return Err(format!("Research requires {} materials", cost));
         }
-        colony.resources.materials -= research.materials_cost;
+        colony.resources.materials -= cost;
         colony.resources.power += research.power_reward;
         research.completed = true;
         let name = research.name.clone();

@@ -41,6 +41,17 @@ pub(super) fn draw_hover_card(
             )
         } else if building.kind == BuildingKind::GeneLab {
             "GENE LAB // TAP TO OPEN EVOLUTION CHAMBER".to_owned()
+        } else if building.kind == BuildingKind::ResearchAnnex {
+            let doctrines = campaign
+                .strategy
+                .research
+                .iter()
+                .filter(|research| research.completed)
+                .count();
+            format!(
+                "RESEARCH ANNEX // ONLINE // {} DOCTRINES // -5 RESEARCH MAT",
+                doctrines
+            )
         } else if building.kind == BuildingKind::Commons {
             let food_cost = campaign.commons_meal_food_cost();
             if campaign.commons_meal_available() {

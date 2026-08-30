@@ -363,11 +363,7 @@ impl Game {
                 }
             }
             UiAction::CompleteResearch(research_id) => {
-                match self
-                    .campaign
-                    .strategy
-                    .complete_research(&research_id, &mut self.campaign.colony)
-                {
+                match self.campaign.complete_research(&research_id) {
                     Ok(name) => {
                         self.campaign.first_hour.invested(name.clone());
                         self.notifications

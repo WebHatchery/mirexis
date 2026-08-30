@@ -9,6 +9,7 @@ mod medical;
 mod mission;
 mod outsider;
 mod relay;
+mod research;
 mod story;
 
 #[allow(unused_imports)]

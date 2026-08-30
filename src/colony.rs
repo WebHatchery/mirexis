@@ -19,6 +19,7 @@ pub enum BuildingKind {
     CommandCentre,
     Barracks,
     Infirmary,
+    ResearchAnnex,
     Workshop,
     #[default]
     Barricade,
@@ -40,6 +41,7 @@ impl BuildingKind {
             Self::CommandCentre => "Command Centre",
             Self::Barracks => "Barracks",
             Self::Infirmary => "Infirmary",
+            Self::ResearchAnnex => "Research Annex",
             Self::Workshop => "Workshop",
             Self::Barricade => "Barricade",
             Self::Hydroponics => "Hydroponics",
@@ -64,13 +66,14 @@ impl BuildingKind {
             Self::Commons => 40,
             Self::RelayMast => 45,
             Self::Watchtower => 35,
+            Self::ResearchAnnex => 60,
             _ => 0,
         }
     }
 
     pub fn power_demand(self) -> i32 {
         match self {
-            Self::CommandCentre | Self::Barracks | Self::Infirmary => 1,
+            Self::CommandCentre | Self::Barracks | Self::Infirmary | Self::ResearchAnnex => 1,
             Self::Workshop | Self::Hydroponics => 2,
             Self::GeneLab => 3,
             Self::Waystation => 1,
@@ -301,6 +304,7 @@ impl ColonyState {
             BuildingKind::Barricade
                 | BuildingKind::PowerPlant
                 | BuildingKind::GeneLab
+                | BuildingKind::ResearchAnnex
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast
@@ -321,6 +325,7 @@ impl ColonyState {
         if matches!(
             kind,
             BuildingKind::GeneLab
+                | BuildingKind::ResearchAnnex
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast

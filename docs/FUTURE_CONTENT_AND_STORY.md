@@ -348,9 +348,9 @@ Build these in priority order:
 2. **Relay Mast.** Implemented as a powered, once-per-operation route scan that refreshes
    mission offers for stored power while raising the dominant faction's attention. Future
    work can add authored communication choices without hiding the broadcast risk.
-3. **Research Annex.** Gives research a physical home, displays recovered artefacts, and
-   hosts debates over dangerous discoveries. It should organise branching research, not
-   add a second unrelated research currency.
+3. **Research Annex.** Implemented as a 60-material, one-power physical evidence archive
+   and critical defence objective. While online it reduces doctrine research by five
+   materials, keeping research tied to the existing currency rather than adding a second one.
 4. **Waystation.** Implemented for Directorate Requisition and Mireborn Adaptation as
    adaptable quarters, quarantine, and cultural space for Veya Orn and Sedge. Unchosen
    matching outsiders remain visible as guests before recruitment, while future route variants
@@ -504,6 +504,8 @@ Goal: make building and upgrade choices visible in city life and defence.
 - Implemented: queue a level-2 Infirmary branch, with Trauma Ward shortening recovery, softening
   persistent scar tradeoffs, and adding a stabilization barricade, or Adaptation Clinic making
   mutation complications safer and direct treatment cheaper while the Infirmary is online.
+- Implemented: build a Research Annex as a physical evidence archive whose powered operation
+  reduces doctrine research costs without introducing a second research currency.
 - Implemented: establish one physical identity building for the chosen Mirexis path, with
   path-specific map cover, objective priority, power, and biomass consequences.
 - Implemented: move the associated colony voice to each identity building, add a persistent

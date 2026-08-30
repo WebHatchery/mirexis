@@ -487,7 +487,8 @@ pub(super) fn draw_operations(
                 Rect::new(878.0, 510.0, 362.0, 32.0),
                 &format!(
                     "RESEARCH {} // {} MAT",
-                    research.name, research.materials_cost
+                    research.name,
+                    campaign.research_material_cost(research.materials_cost)
                 ),
                 true,
                 mouse,
@@ -522,7 +523,8 @@ pub(super) fn draw_operations(
             draw_ui_text_ex(
                 &format!(
                     "PROJECT READY // COST {} MAT // GRID POWER +{}",
-                    research.materials_cost, research.power_reward
+                    campaign.research_material_cost(research.materials_cost),
+                    research.power_reward
                 ),
                 936.0,
                 588.0,

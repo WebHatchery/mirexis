@@ -294,3 +294,57 @@ pub(super) fn draw_threshold_spire(center: Vec2, zoom: f32, powered: bool, damag
         );
     }
 }
+
+pub(super) fn draw_research_annex(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.46, 0.82, 1.0, 0.94)
+    } else {
+        Color::new(0.34, 0.48, 0.62, 0.82)
+    };
+    draw_rectangle(
+        center.x - 23.0 * zoom,
+        center.y - 47.0 * zoom,
+        46.0 * zoom,
+        6.0 * zoom,
+        accent,
+    );
+    draw_line(
+        center.x - 18.0 * zoom,
+        center.y - 41.0 * zoom,
+        center.x - 18.0 * zoom,
+        center.y - 19.0 * zoom,
+        2.0 * zoom,
+        accent,
+    );
+    draw_line(
+        center.x + 18.0 * zoom,
+        center.y - 41.0 * zoom,
+        center.x + 18.0 * zoom,
+        center.y - 19.0 * zoom,
+        2.0 * zoom,
+        accent,
+    );
+    for offset in [-10.0, 0.0, 10.0] {
+        draw_circle(
+            center.x + offset * zoom,
+            center.y - 31.0 * zoom,
+            3.0 * zoom,
+            Color::new(
+                accent.r,
+                accent.g,
+                accent.b,
+                if powered { 0.88 } else { 0.28 },
+            ),
+        );
+    }
+    draw_line(
+        center.x - 23.0 * zoom,
+        center.y - 18.0 * zoom,
+        center.x + 23.0 * zoom,
+        center.y - 18.0 * zoom,
+        2.0 * zoom,
+        accent,
+    );
+}

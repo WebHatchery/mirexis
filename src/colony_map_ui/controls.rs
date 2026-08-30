@@ -17,6 +17,7 @@ pub(super) fn draw_build_controls(
     kinds.push(BuildingKind::Commons);
     kinds.push(BuildingKind::RelayMast);
     kinds.push(BuildingKind::Watchtower);
+    kinds.push(BuildingKind::ResearchAnnex);
     if campaign.strategy.contact_complete
         && !campaign
             .colony

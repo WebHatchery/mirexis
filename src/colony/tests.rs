@@ -17,6 +17,31 @@ fn construction_reserves_resources_and_completes_after_an_operation() {
 }
 
 #[test]
+fn research_annex_is_unique_online_and_a_defense_objective() {
+    let mut colony = ColonyState::new();
+    let id = colony
+        .place_construction(BuildingKind::ResearchAnnex, [1, 1])
+        .unwrap();
+    assert_eq!(colony.resources.materials, 60);
+    colony.advance_operation();
+
+    assert!(colony.has_facility(BuildingKind::ResearchAnnex));
+    assert!(colony
+        .place_construction(BuildingKind::ResearchAnnex, [1, 5])
+        .is_err());
+    let map = colony.defense_map();
+    assert!(map.critical_objectives.contains(&TilePos::new(3, 2)));
+
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == id)
+        .unwrap()
+        .damaged = true;
+    assert!(!colony.has_facility(BuildingKind::ResearchAnnex));
+}
+
+#[test]
 fn physical_placement_generates_the_colony_defense_map() {
     let mut colony = ColonyState::new();
     colony

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.105.0
+Save/content version: 1.106.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -111,6 +111,7 @@ Important transition payloads:
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
 | `campaign/evolution.rs` | Mutation evolution costs, choices, completion gates, and Gene Lab effects | Rendering or save migration |
 | `campaign/medical.rs` | Infirmary recovery, treatment, and mutation-aware injury consequences | Colony rendering or tactical mutation |
+| `campaign/research.rs` | Research cost derivation and CampaignState research actions tied to the Research Annex | Research content definitions or rendering |
 | `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
 | `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
@@ -445,6 +446,9 @@ Initial facilities have stable coordinates:
   choice costs 55 materials and completes after one operation: Redundant Grid keeps two
   power online when the plant is damaged, while an operational Hot Core raises supply to
   seven and adds one attention to the most visible faction after each resolved operation.
+- Research Annex: an optional 60-material, one-power evidence archive and critical defence
+  objective. While operational and powered, it reduces each doctrine research cost by five
+  materials without adding a second research currency.
 
 The colony grid always offers a 20-material Barricade, a 35-material powered Watchtower,
 or a 45-material Power Plant. A powered Watchtower contributes 45-strength directional
@@ -863,6 +867,7 @@ Migration coverage:
 | 1.103.0 | Command Centre level-two Signal Cartography and Counterintelligence Cell branches with route and pressure effects |
 | 1.104.0 | Barracks level-two Simulation Hall and Doctrine Yard branches with training and defence-preparation effects |
 | 1.105.0 | Infirmary level-two Trauma Ward and Adaptation Clinic branches with recovery, scar, treatment, and defence effects |
+| 1.106.0 | Optional Research Annex construction and powered doctrine-cost reduction |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -914,7 +919,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (326 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (354 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -953,7 +958,8 @@ these explicit boundaries when continuing:
   early and Contact battlefields now carry faction hazards. Additional transforms,
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
-  Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
+  Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, a Relay Mast,
+  and an optional Research Annex;
   the Command Centre, Barracks, Infirmary, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
