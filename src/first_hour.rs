@@ -90,7 +90,7 @@ impl FirstHourProgress {
                 "Tap OPERATIONS and choose one affordable preparation investment."
             }
             FirstHourStage::SecondOperation => {
-                "Brief and deploy the next Isolation operation; apply what you learned."
+                "Tap OPERATIONS, choose the next mission, then tap BRIEF SELECTED MISSION."
             }
             FirstHourStage::SecondReturn => {
                 "Tap RETURN TO COLONY to see what the two operations changed."

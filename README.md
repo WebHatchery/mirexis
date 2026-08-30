@@ -22,6 +22,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - A first-operation tactical lesson that marks the next map target or command-rail control,
   requires the squad to enter a real cover tile and then presents a reachable opening firing
   lane and objective route, without blocking battlefield inspection.
+- First-hour colony handoffs focus the visible Operations, briefing, and equal-choice preparation
+  controls so the campaign remains touch-completable between operations.
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
   resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - A powered Commons with one shared meal per operation, turning squad preparation into

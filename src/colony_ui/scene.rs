@@ -49,6 +49,9 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             &mut actions,
         );
     }
+    if !*facility_upgrade_open && !*salvage_open {
+        crate::first_hour_colony_ui::draw_focus(&campaign.first_hour, *operations_open);
+    }
     crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
     actions
 }

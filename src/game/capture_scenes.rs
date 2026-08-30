@@ -93,6 +93,12 @@ impl Game {
                 metrics.invalid_commands = 3;
                 metrics.guide_opens = 2;
             }
+            "first_hour_operations" => {
+                self.state = AppState::Colony;
+                self.campaign.operations_completed = 1;
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::SecondOperation;
+                self.colony_operations_open = true;
+            }
             "battle_log" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.session.end_player_phase(&self.data.config);

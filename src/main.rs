@@ -37,6 +37,7 @@ mod equipment_actions;
 mod equipment_catalog;
 mod equipment_ui;
 mod first_hour;
+mod first_hour_colony_ui;
 mod first_hour_consequences_ui;
 mod first_hour_investment_ui;
 mod first_hour_metrics;
