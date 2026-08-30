@@ -26,3 +26,15 @@ fn finished_tactical_saves_resume_in_the_debrief() {
         ObjectiveState::Victory
     );
 }
+
+#[test]
+fn restoring_state_closes_the_persisted_first_hour_field_guide() {
+    let mut progress = crate::first_hour::FirstHourProgress {
+        help_open: true,
+        ..crate::first_hour::FirstHourProgress::default()
+    };
+
+    clear_first_hour_help(&mut progress);
+
+    assert!(!progress.help_open);
+}

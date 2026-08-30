@@ -123,6 +123,7 @@ impl Game {
     }
 
     fn reset_transient_state_after_load(&mut self) {
+        clear_first_hour_help(&mut self.campaign.first_hour);
         self.targeting = None::<TacticalTargeting>;
         self.show_tactical_help = false;
         self.show_battle_log = false;
@@ -145,6 +146,10 @@ impl Game {
             Err(err) => self.notifications.danger(format!("Delete failed: {err}")),
         }
     }
+}
+
+fn clear_first_hour_help(progress: &mut crate::first_hour::FirstHourProgress) {
+    progress.help_open = false;
 }
 
 fn resume_state(session: &GameSession) -> AppState {
