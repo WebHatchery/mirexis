@@ -78,7 +78,7 @@ impl Game {
             targeting: None,
             show_tactical_help: false,
             show_battle_log: false,
-            battle_log_filter: BattleLogFilter::All,
+            battle_log_filter: BattleLogFilter::default(),
             combat_feedback: CombatFeedback::default(),
             observed_event_count: 0,
             phase_replay: PhaseReplay::default(),

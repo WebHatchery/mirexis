@@ -33,7 +33,7 @@ impl Game {
         self.targeting = None;
         self.show_tactical_help = false;
         self.show_battle_log = false;
-        self.battle_log_filter = crate::ui_action::BattleLogFilter::All;
+        self.battle_log_filter = crate::ui_action::BattleLogFilter::default();
         self.combat_feedback = CombatFeedback::default();
         self.observed_event_count = 0;
         self.phase_replay = PhaseReplay::default();

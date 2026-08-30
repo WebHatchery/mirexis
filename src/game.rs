@@ -259,6 +259,7 @@ impl Game {
         match action {
             UiAction::StartMission => {
                 self.targeting = None;
+                self.battle_log_filter = BattleLogFilter::default();
                 self.campaign = CampaignState::new(&self.data);
                 self.active_mission = self
                     .campaign
@@ -406,6 +407,7 @@ impl Game {
                     self.targeting = None;
                     self.show_tactical_help = false;
                     self.show_battle_log = false;
+                    self.battle_log_filter = BattleLogFilter::default();
                     self.normalize_deployment_formation();
                     let mut roster = self
                         .campaign

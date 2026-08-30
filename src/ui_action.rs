@@ -3,8 +3,9 @@
 use crate::colony::BuildingKind;
 use macroquad_toolkit::grid::TilePos;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum BattleLogFilter {
+    #[default]
     All,
     Combat,
     Ground,

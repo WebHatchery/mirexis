@@ -43,3 +43,8 @@ fn all_filter_keeps_every_event_and_specific_filters_reject_other_groups() {
     assert!(!filter_matches(BattleLogFilter::Ground, &attack));
     assert!(filter_matches(BattleLogFilter::System, &phase));
 }
+
+#[test]
+fn a_new_battle_history_view_starts_unfiltered() {
+    assert_eq!(BattleLogFilter::default(), BattleLogFilter::All);
+}

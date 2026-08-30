@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.139.0, validated and committed with this matrix
+Audit baseline: save/content 1.140.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -123,7 +123,7 @@ Clipping, stacking, fatigue, and muted comprehension require listening sessions.
 | Destructive confirmation/recovery | Two-step new-colony and delete-save guards | VERIFIED |
 | Desktop sizes and touch routes | 1024×768, 1280×720, and 1440×900 browser audit; visible controls | VERIFIED / HUMAN PENDING |
 | Text, contrast, colour redundancy, and motion/readability | Graphics acceptance matrix and reduced-motion setting | VERIFIED / HUMAN PENDING |
-| Overlay/focus/resize input safety | First-hour, settings, Facility Upgrades, and Salvage Yard overlays consume underlying physical input and suppress colony/tactical map gestures, walk requests, drawer toggles, and stale camera state; first-hour, tactical help, and battle-history references are mutually exclusive; save restore also clears transient overlays, end-phase confirmation, feedback, and stale audio cursors; modal input clearing, camera cleanup, map-release, and restore tests | VERIFIED |
+| Overlay/focus/resize input safety | First-hour, settings, Facility Upgrades, and Salvage Yard overlays consume underlying physical input and suppress colony/tactical map gestures, walk requests, drawer toggles, and stale camera state; first-hour, tactical help, and battle-history references are mutually exclusive; new colony/deployment sessions reset the battle-history filter; save restore also clears transient overlays, end-phase confirmation, feedback, and stale audio cursors; modal input clearing, camera cleanup, map-release, and restore tests | VERIFIED |
 | Explicit save migrations | Schema table and immediate-previous-version fixture | VERIFIED |
 | Canonical captures replaced rather than duplicated | Flat 95-scene capture inventory and audit | VERIFIED |
 
