@@ -293,7 +293,9 @@ fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
         TacticalLesson::Select => "Tap a colonist to select them.",
         TacticalLesson::MoveToCover => "Tap the gold-marked cover tile to move into cover.",
         TacticalLesson::Attack => "Tap a hostile, review the forecast, then tap ATTACK.",
-        TacticalLesson::EnemyPhase => "Tap END PHASE twice to watch the hostile response.",
+        TacticalLesson::EnemyPhase => {
+            "Tap END PHASE; if a READY warning appears, tap CONFIRM END again to watch the hostile response."
+        }
         TacticalLesson::Objective => "Move onto the gold objective and tap SECURE OBJECTIVE.",
         TacticalLesson::Ability => "Tap a visible CLASS, MUTATION, or GEAR action.",
         TacticalLesson::ApplyLearning => {

@@ -113,6 +113,20 @@ fn second_deployment_enters_a_distinct_tactical_guidance_stage() {
 }
 
 #[test]
+fn enemy_phase_prompt_explains_the_conditional_confirmation() {
+    let progress = FirstHourProgress {
+        stage: FirstHourStage::FirstOperation,
+        lesson: TacticalLesson::EnemyPhase,
+        ..FirstHourProgress::default()
+    };
+
+    assert_eq!(
+        progress.primary_goal(),
+        "Tap END PHASE; if a READY warning appears, tap CONFIRM END again to watch the hostile response."
+    );
+}
+
+#[test]
 fn missing_serialized_fields_use_safe_tutorial_defaults() {
     let progress: FirstHourProgress = serde_json::from_str("{}").unwrap();
     assert_eq!(progress, FirstHourProgress::default());
