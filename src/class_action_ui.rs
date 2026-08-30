@@ -22,13 +22,14 @@ pub(crate) fn draw_action_button(
     let requires_target = crate::class_actions::requires_target(&unit.class_id);
     let targeting = matches!(
         ctx.targeting,
-        Some(TargetingView::ClassAction { unit_id }) if unit_id == unit.id
+        Some(TargetingView::ClassAction { unit_id, .. }) if unit_id == unit.id
     );
-    let enabled = if requires_target {
-        crate::class_actions::has_valid_target(ctx.session, &unit.id)
-    } else {
-        ctx.session.can_activate_selected_class_action()
-    };
+    let enabled = targeting
+        || if requires_target {
+            crate::class_actions::has_valid_target(ctx.session, &unit.id)
+        } else {
+            ctx.session.can_activate_selected_class_action()
+        };
     if !button(
         rect,
         if targeting { "CANCEL" } else { label },

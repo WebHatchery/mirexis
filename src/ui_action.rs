@@ -41,6 +41,7 @@ pub enum UiAction {
     ActivateClassAction,
     ArmClassAction,
     UseClassActionOn(String),
+    UseClassActionOnTile(TilePos),
     ActivateSkill(String),
     ArmSkill(String),
     UseSkillOn(String),

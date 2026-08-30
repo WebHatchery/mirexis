@@ -218,8 +218,11 @@ impl Game {
                 {
                     Some(UiAction::UseEquipmentOn(target.id.clone()))
                 }
-                super::TacticalTargeting::ClassAction { unit_id }
-                    if self.session.can_target_class_action(unit_id, &target.id) =>
+                super::TacticalTargeting::ClassAction {
+                    unit_id,
+                    target_kind,
+                } if *target_kind != crate::data::TechniqueTarget::Tile
+                    && self.session.can_target_class_action(unit_id, &target.id) =>
                 {
                     Some(UiAction::UseClassActionOn(target.id.clone()))
                 }
@@ -236,6 +239,14 @@ impl Game {
                 _ => None,
             });
             let action = match targeting {
+                super::TacticalTargeting::ClassAction {
+                    unit_id,
+                    target_kind,
+                } if *target_kind == crate::data::TechniqueTarget::Tile
+                    && self.session.can_target_class_action_tile(unit_id, tile) =>
+                {
+                    UiAction::UseClassActionOnTile(tile)
+                }
                 super::TacticalTargeting::Skill { unit_id, skill_id }
                     if crate::skills::target_kind(skill_id)
                         == Some(crate::data::TechniqueTarget::Tile)

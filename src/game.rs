@@ -6,6 +6,7 @@ mod capture_debrief;
 mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
+mod class_action_flow;
 mod destructive_flow;
 mod first_hour_flow;
 mod input;
@@ -248,9 +249,13 @@ impl Game {
                             unit_id,
                             equipment_id,
                         },
-                        TacticalTargeting::ClassAction { unit_id } => {
-                            TargetingView::ClassAction { unit_id }
-                        }
+                        TacticalTargeting::ClassAction {
+                            unit_id,
+                            target_kind,
+                        } => TargetingView::ClassAction {
+                            unit_id,
+                            target_kind: *target_kind,
+                        },
                         TacticalTargeting::Skill { unit_id, skill_id } => {
                             TargetingView::Skill { unit_id, skill_id }
                         }
@@ -300,6 +305,9 @@ impl Game {
             self.end_phase_armed = false;
         }
         if self.apply_skill_action(&action, audio_event_count) {
+            return;
+        }
+        if self.apply_class_action(&action, audio_event_count) {
             return;
         }
         match action {
@@ -661,32 +669,6 @@ impl Game {
                     .notifications
                     .warning("Selected colonist cannot enter overwatch"),
             },
-            UiAction::ActivateClassAction => match self.session.activate_selected_class_action() {
-                Ok(events) => self.first_hour_ability_success(events, "Class action activated"),
-                Err(_) => self.notifications.warning("Class action is unavailable"),
-            },
-            UiAction::ArmClassAction => {
-                if let Some(unit_id) = self.session.tactical.selected_unit.clone() {
-                    self.targeting = Some(TacticalTargeting::ClassAction { unit_id });
-                    self.notifications
-                        .info("Choose a highlighted class-action target");
-                }
-            }
-            UiAction::UseClassActionOn(target_id) => {
-                let result = match self.targeting.take() {
-                    Some(TacticalTargeting::ClassAction { unit_id }) => self
-                        .session
-                        .activate_class_action_on(&unit_id, &target_id)
-                        .map_err(|_| ()),
-                    _ => Err(()),
-                };
-                match result {
-                    Ok(events) => self.first_hour_ability_success(events, "Class action activated"),
-                    Err(()) => self
-                        .notifications
-                        .warning("Class-action target is no longer valid"),
-                }
-            }
             UiAction::ArmEquipment(equipment_id) => {
                 if let Some(unit_id) = self.session.tactical.selected_unit.clone() {
                     self.targeting = Some(TacticalTargeting::Equipment {

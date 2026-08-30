@@ -94,6 +94,7 @@ pub enum TargetingView<'a> {
     },
     ClassAction {
         unit_id: &'a str,
+        target_kind: crate::data::TechniqueTarget,
     },
     Skill {
         unit_id: &'a str,

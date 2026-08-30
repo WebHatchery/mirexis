@@ -302,6 +302,7 @@ pub enum Command {
     ActivateClassAction {
         unit_id: String,
         target_id: Option<String>,
+        target_tile: Option<TilePos>,
     },
     ActivateSkill {
         unit_id: String,

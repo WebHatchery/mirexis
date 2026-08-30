@@ -113,6 +113,7 @@ pub(crate) fn draw(
         }
     }
     draw_obscuring_fields(ctx, view);
+    targeting_card::draw_class_action_target_tiles(ctx, view);
     targeting_card::draw_skill_target_tiles(ctx, view);
     for position in &tiles {
         if view.is_visible(*position, grid_rect, 90.0) {
@@ -136,7 +137,10 @@ pub(crate) fn draw(
             }) => ctx
                 .session
                 .can_use_equipment(unit_id, equipment_id, &unit.id),
-            Some(TargetingView::ClassAction { unit_id }) => {
+            Some(TargetingView::ClassAction {
+                unit_id,
+                target_kind,
+            }) if target_kind != crate::data::TechniqueTarget::Tile => {
                 ctx.session.can_target_class_action(unit_id, &unit.id)
             }
             Some(TargetingView::Skill { unit_id, skill_id })
@@ -146,6 +150,7 @@ pub(crate) fn draw(
                 crate::skills::can_target_unit(ctx.session, unit_id, skill_id, &unit.id)
             }
             None => false,
+            Some(TargetingView::ClassAction { .. }) => false,
             Some(TargetingView::Skill { .. }) => false,
         };
         crate::tactical_unit_ui::draw_unit(
@@ -613,7 +618,14 @@ fn handle_click(
                     .can_use_equipment(unit_id, equipment_id, &target.id)
                     .then(|| UiAction::UseEquipmentOn(target.id.clone()))
             }),
-            TargetingView::ClassAction { unit_id } => target.and_then(|target| {
+            TargetingView::ClassAction {
+                unit_id,
+                target_kind: crate::data::TechniqueTarget::Tile,
+            } => ctx
+                .session
+                .can_target_class_action_tile(unit_id, tile)
+                .then_some(UiAction::UseClassActionOnTile(tile)),
+            TargetingView::ClassAction { unit_id, .. } => target.and_then(|target| {
                 ctx.session
                     .can_target_class_action(unit_id, &target.id)
                     .then(|| UiAction::UseClassActionOn(target.id.clone()))

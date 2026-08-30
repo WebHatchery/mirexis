@@ -34,6 +34,29 @@ pub(crate) fn draw_skill_target_tiles(ctx: &UiContext<'_>, view: GridView) {
     }
 }
 
+pub(crate) fn draw_class_action_target_tiles(ctx: &UiContext<'_>, view: GridView) {
+    let Some(TargetingView::ClassAction {
+        unit_id,
+        target_kind,
+    }) = ctx.targeting
+    else {
+        return;
+    };
+    if target_kind != crate::data::TechniqueTarget::Tile {
+        return;
+    }
+    for (position, _) in ctx.session.tactical.fog.iter_with_pos() {
+        if ctx.session.can_target_class_action_tile(unit_id, position) {
+            super::draw_diamond_fill(view.diamond(position), Color::new(0.35, 0.82, 0.72, 0.24));
+            super::draw_diamond_outline(
+                view.diamond(position),
+                Color::new(0.45, 0.96, 0.82, 1.0),
+                3.0,
+            );
+        }
+    }
+}
+
 pub(crate) fn draw(
     ctx: &UiContext<'_>,
     tile: TilePos,
@@ -58,9 +81,10 @@ pub(crate) fn draw(
             unit_id,
             equipment_id,
         }) => draw_equipment(ctx, card, target, unit_id, equipment_id),
-        Some(TargetingView::ClassAction { unit_id }) => {
-            draw_class_action(ctx, card, target, unit_id)
-        }
+        Some(TargetingView::ClassAction {
+            unit_id,
+            target_kind,
+        }) => draw_class_action(ctx, card, target, tile, unit_id, target_kind),
         Some(TargetingView::Skill { unit_id, skill_id }) => {
             draw_skill(ctx, card, target, tile, unit_id, skill_id)
         }
@@ -81,6 +105,10 @@ pub(crate) fn draw(
         );
     }
     let instruction = match ctx.targeting {
+        Some(TargetingView::ClassAction {
+            target_kind: crate::data::TechniqueTarget::Tile,
+            ..
+        }) => "TAP HIGHLIGHTED TILE / A CONFIRM",
         Some(TargetingView::Skill { skill_id, .. })
             if crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile) =>
         {
@@ -155,11 +183,17 @@ fn draw_class_action(
     ctx: &UiContext<'_>,
     card: Rect,
     target: Option<&crate::state::UnitState>,
+    tile: TilePos,
     unit_id: &str,
+    target_kind: crate::data::TechniqueTarget,
 ) {
     let user = ctx.session.unit(unit_id);
-    let valid =
-        target.is_some_and(|target| ctx.session.can_target_class_action(unit_id, &target.id));
+    let tile_target = target_kind == crate::data::TechniqueTarget::Tile;
+    let valid = if tile_target {
+        ctx.session.can_target_class_action_tile(unit_id, tile)
+    } else {
+        target.is_some_and(|target| ctx.session.can_target_class_action(unit_id, &target.id))
+    };
     if let Some(user) = user {
         ctx.visuals.draw_portrait(
             ctx.assets,
@@ -170,7 +204,11 @@ fn draw_class_action(
         );
     }
     draw_ui_text_ex(
-        "CLASS ACTION TARGETING // CHOOSE HIGHLIGHTED UNIT",
+        if tile_target {
+            "CLASS ACTION TARGETING // CHOOSE HIGHLIGHTED TILE"
+        } else {
+            "CLASS ACTION TARGETING // CHOOSE HIGHLIGHTED UNIT"
+        },
         card.x + 82.0,
         card.y + 25.0,
         TextStyle::new(16.0, dark::WARNING).params(),
@@ -178,7 +216,11 @@ fn draw_class_action(
     draw_ui_text_ex(
         &format!(
             "{} // {}",
-            target.map_or("NO UNIT SELECTED", |unit| unit.name.as_str()),
+            if tile_target {
+                format!("TILE {},{}", tile.x, tile.y)
+            } else {
+                target.map_or("NO UNIT SELECTED".to_owned(), |unit| unit.name.clone())
+            },
             validity_label(valid)
         ),
         card.x + 82.0,

@@ -347,6 +347,8 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             "Pathfinder" => "pathfinder",
             "Lifewright" => "lifewright",
             "Null Adept" => "null_adept",
+            "Breacher" => "breacher",
+            "Fortifier" => "fortifier",
             _ => "",
         };
         unit.entry("class_id".to_owned())

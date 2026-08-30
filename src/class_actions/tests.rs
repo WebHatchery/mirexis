@@ -1,7 +1,7 @@
 use super::*;
 use crate::campaign::CampaignState;
 use crate::data::GameData;
-use crate::state::GameSession;
+use crate::state::{GameSession, UnitState};
 use macroquad_toolkit::grid::TilePos;
 
 fn session() -> GameSession {
@@ -18,6 +18,15 @@ fn engineer_session() -> GameSession {
     campaign.toggle_deployment("sol_cairn").unwrap();
     let roster = campaign.deployment_roster(&data, &data.mission);
     GameSession::new(&data.config, &data.mission, &roster)
+}
+
+fn unit_mut<'a>(session: &'a mut GameSession, id: &str) -> &'a mut UnitState {
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == id)
+        .unwrap()
 }
 
 #[test]
@@ -228,4 +237,65 @@ fn advanced_actions_create_hybrid_tactical_roles() {
         .unit("brood_stalker_a")
         .unwrap()
         .has_status(StatusKind::Disrupted));
+}
+
+#[test]
+fn breacher_crosses_a_short_route_breaks_a_hostile_and_opens_its_lane() {
+    let mut session = session();
+    unit_mut(&mut session, "mara_venn").class_id = "breacher".to_owned();
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(7, 2);
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(10, 2);
+    let before_health = session.unit("brood_stalker_a").unwrap().health;
+
+    let events = session
+        .activate_class_action_on_tile("mara_venn", TilePos::new(10, 2))
+        .unwrap();
+
+    assert_eq!(
+        session.unit("mara_venn").unwrap().position,
+        TilePos::new(9, 2)
+    );
+    assert_eq!(
+        session.unit("brood_stalker_a").unwrap().health,
+        before_health - 2
+    );
+    assert!(session
+        .unit("brood_stalker_a")
+        .unwrap()
+        .has_status(StatusKind::Marked));
+    assert!(events.iter().any(|event| matches!(
+        event,
+        BattleEvent::UnitMoved {
+            unit_id,
+            cost: 0,
+            ..
+        } if unit_id == "mara_venn"
+    )));
+}
+
+#[test]
+fn fortifier_places_a_stronger_directional_bastion_on_a_valid_tile() {
+    let mut session = session();
+    unit_mut(&mut session, "mara_venn").class_id = "fortifier".to_owned();
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(6, 19);
+    let tile = TilePos::new(8, 19);
+
+    session
+        .activate_class_action_on_tile("mara_venn", tile)
+        .unwrap();
+
+    assert!(session.tactical.blocked.contains(&tile));
+    assert_eq!(
+        session
+            .tactical
+            .destructible_cover
+            .iter()
+            .find(|cover| cover.position == tile)
+            .unwrap()
+            .health,
+        8
+    );
+    assert!(session.tactical.cover_edges.iter().any(|edge| {
+        edge.position == [8, 19] && edge.direction == EdgeDirection::West && edge.strength == 25
+    }));
 }

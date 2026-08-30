@@ -111,9 +111,11 @@ impl GameSession {
             } => self.validate_attack(attacker_id, target_id),
             Command::Interact { unit_id } => self.validate_interact(unit_id),
             Command::ActivateMutation { unit_id } => self.validate_mutation(unit_id),
-            Command::ActivateClassAction { unit_id, target_id } => {
-                crate::class_actions::validate(self, unit_id, target_id.as_deref())
-            }
+            Command::ActivateClassAction {
+                unit_id,
+                target_id,
+                target_tile,
+            } => crate::class_actions::validate(self, unit_id, target_id.as_deref(), *target_tile),
             Command::ActivateSkill {
                 unit_id,
                 skill_id,
@@ -156,9 +158,11 @@ impl GameSession {
             } => self.execute_attack(&attacker_id, &target_id),
             Command::Interact { unit_id } => self.execute_interact(&unit_id),
             Command::ActivateMutation { unit_id } => self.execute_mutation(&unit_id),
-            Command::ActivateClassAction { unit_id, target_id } => {
-                crate::class_actions::execute(self, &unit_id, target_id.as_deref())
-            }
+            Command::ActivateClassAction {
+                unit_id,
+                target_id,
+                target_tile,
+            } => crate::class_actions::execute(self, &unit_id, target_id.as_deref(), target_tile),
             Command::ActivateSkill {
                 unit_id,
                 skill_id,

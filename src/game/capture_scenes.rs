@@ -745,6 +745,7 @@ impl Game {
             .position;
         self.targeting = Some(TacticalTargeting::ClassAction {
             unit_id: "ilya_reed".to_owned(),
+            target_kind: crate::data::TechniqueTarget::Ally,
         });
     }
 }

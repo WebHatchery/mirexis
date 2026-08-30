@@ -78,7 +78,14 @@ pub(crate) fn execute(
         .find(|unit| unit.id == attacker_id)
         .expect("validated cover attacker exists")
         .action_points -= attacker.weapon_ap_cost;
-    let damage = attacker.effective_weapon_damage().max(1);
+    damage_cover(session, position, attacker.effective_weapon_damage().max(1))
+}
+
+pub(crate) fn damage_cover(
+    session: &mut GameSession,
+    position: TilePos,
+    damage: i32,
+) -> Vec<BattleEvent> {
     let cover = session
         .tactical
         .destructible_cover

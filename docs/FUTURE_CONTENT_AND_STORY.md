@@ -6,7 +6,7 @@ Planning horizon: after Playable Game Phase 1 human acceptance
 
 ## 1. Purpose
 
-Mirexis already proves its five-phase campaign, seven base classes, four advanced
+Mirexis already proves its five-phase campaign, seven base classes, six advanced
 classes, colony construction, mutation evolution, and three ending paths. Future work
 should deepen those systems into a memorable campaign rather than merely increasing
 their counts.
@@ -175,8 +175,9 @@ Each new origin requires:
 ### 6.1 Preserve the current foundation
 
 The seven base classes remain the complete entry-level training set: Soldier, Defender,
-Scout, Medic, Engineer, Psionic, and Biotech Specialist. The four implemented advanced
-classes remain the first hybrid tier: Vanguard, Pathfinder, Lifewright, and Null Adept.
+Scout, Medic, Engineer, Psionic, and Biotech Specialist. Six implemented advanced
+classes now form the first hybrid tier: Vanguard, Pathfinder, Lifewright, Null Adept,
+Breacher, and Fortifier.
 
 The “possible paths” in the main design document are a pool of class fantasies, not a
 commitment to build four subtrees for every base class. Skills should provide most
@@ -188,13 +189,13 @@ Add advanced classes only where they create a missing tactical verb.
 
 | Class | Prerequisites | Missing role | Signature concept |
 |---|---|---|---|
-| Breacher | Soldier + Scout | Mobile close assault and deliberate cover removal | **Make an Entrance:** move a short validated route, strike cover or a nearby hostile, then grant an ally a clear firing lane. |
-| Fortifier | Defender + Engineer | Player-created terrain and defence-objective support | **Raise Bastion:** deploy temporary directional cover that can protect a colonist or mission asset until destroyed. |
 | Rescue Specialist | Scout + Medic | Recovering an exposed ally without becoming another casualty | **Carry Through:** reposition to an ally, move both toward safety, and stabilise the ally without a full heal. |
 | Chorus Warden | Psionic + Biotech Specialist | Hazard conversion and controlled status sharing | **Borrowed Weather:** convert one nearby faction hazard into a brief neutral or colony-aligned field at a personal complication cost. |
 
-This produces eight advanced classes total. Do not fill all 21 possible class pairings
-unless play data demonstrates real missing builds. Later path-specific mastery should be
+Breacher's Make an Entrance and Fortifier's Raise Bastion are now implemented through
+the validated tile-targeting command path. The remaining two concepts would produce eight
+advanced classes total; do not fill all 21 possible class pairings unless play data
+demonstrates real missing builds. Later path-specific mastery should be
 a skill or doctrine, not another mandatory class tier.
 
 ## 7. Skills and build expression
@@ -372,7 +373,7 @@ Goal: turn retained skill fields and class slots into meaningful builds.
 - Implement and balance the first two techniques for all seven base classes as a vertical slice.
 - Add skill preview, loadout, learning, save migration, and touch controls.
 - Tune the fourteen-technique interactions before adding mastery branches.
-- Add Breacher and Fortifier before the two more systemic advanced classes.
+- Balance Breacher and Fortifier before adding the two more systemic advanced classes.
 
 Exit test: two characters in the same class can play differently, and retraining creates
 a useful hybrid without creating an obviously optimal skill pile.

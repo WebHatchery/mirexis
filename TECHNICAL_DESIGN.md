@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.69.0
+Save/content version: 1.70.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -191,6 +191,10 @@ tiles share the same presentation; previewing never mutates state or consumes RN
   onto a validated clear tile, Premonition applies one-phase Disrupted intent, Adaptive
   Secretion gives an ally resistance to the nearest visible hazard, and Spore Veil creates
   a one-phase radius-one obscuring field with an accuracy penalty.
+- Breacher and Fortifier complete the first six hybrid advanced classes. Make an Entrance
+  crosses a short validated route to breach cover or strike and mark a hostile; Raise
+  Bastion places stronger destructible directional cover on a valid map tile. Both use
+  the same authoritative tile-targeting path as techniques and remain battle-local.
 - Colony-defense blocked tiles are derived from saved building coordinates.
 - Destroyed cover is removed from the authoritative blocked set, immediately opening
   that tile to pathfinding and any firing line that crosses it.
@@ -283,9 +287,11 @@ Every base class has one once-per-round tactical action. Soldier focuses its sho
 Defender braces through the hostile phase; Scout converts Surge into action points and
 movement; Medic dresses a chosen nearby wound; Engineer launches an armour-ignoring
 shock drone at a chosen hostile; Psionic disrupts a chosen hostile; and Biotech grants
-short-lived squad regeneration. The three targeted actions use the same highlighted
-targeting mode and execution validator as field equipment. Class identity is carried
-into `UnitState` rather than inferred from text.
+short-lived squad regeneration. Vanguard, Pathfinder, Lifewright, and Null Adept provide
+the original hybrid actions, while Breacher and Fortifier now add map-targeted breach and
+bastion actions. Targeted actions use the same highlighted targeting mode and execution
+validator as field equipment. Class identity is carried into `UnitState` rather than
+inferred from text.
 
 The Field Medkit restores five vitality to a chosen wounded colonist within three
 tiles. The Field Toolkit grants Guarded to a chosen nearby colonist, and the Survey
@@ -680,6 +686,7 @@ Migration coverage:
 | 1.67.0 | Soldier, Defender, and Scout technique pairs, active loadouts, tactical targeting, and phase-use migration |
 | 1.68.0 | Medic and Engineer technique pairs, one-round equipment overcharge state, and legacy tactical default migration |
 | 1.69.0 | Psionic and Biotech technique pairs, hazard adaptation, obscuring fields, and tactical runtime migration defaults |
+| 1.70.0 | Breacher and Fortifier hybrid class actions, tile-targeted class-action input, and advanced-class migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
