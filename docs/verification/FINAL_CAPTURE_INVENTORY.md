@@ -18,7 +18,7 @@ Manifest: `scripts/capture_ui.ps1`
 
 - `ui_gameplay.png`: default tactical camera with a cropped 40 x 40 battlefield and readable elevation.
 - `ui_variant.png`: off-center tactical camera with selection, objective, hazard, unit, and contextual overlays intact.
-- `ui_movement_route.png` and `ui_valid_shot.png`: transformed route and target overlays remain aligned.
+- `ui_movement_route.png` and `ui_valid_shot.png`: transformed route, target overlays, and the visible ATTACK confirmation remain aligned.
 - `ui_class_target.png`: transformed unit targeting and contextual card remain aligned.
 - `ui_colony.png`: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.
 - `ui_first_hour_tactical.png`: guided tactical lesson marks a legal move target without blocking the battlefield inspection.
@@ -93,7 +93,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 61 | movement_route | `ui_movement_route.png` | 577371 | `8d516e3125429e2ac7f75cf20fedbd4b812ef7f3bf7db2799b46e25b274fdb76` |
 | 62 | cover_edges | `ui_cover_edges.png` | 592422 | `f66742237ffa0fb6de80679829a57b12a58a1714f98173184b10fb9a44f38c11` |
 | 63 | invalid_command | `ui_invalid_command.png` | 621952 | `692c8cf5737031be42a64126dfe508c19b0b1a4e6afbc6707cb2c55394951948` |
-| 64 | valid_shot | `ui_valid_shot.png` | 599005 | `365861e22fde44b4b77ce65b33775b40b8a44fa7b7a55e5c6c04da347614bead` |
+| 64 | valid_shot | `ui_valid_shot.png` | 1101894 | `c883fb4168ec56316215807cc23ba452e00c3d7aeeaadfca15766f076df8c9dc` |
 | 65 | threat_range | `ui_threat_range.png` | 621802 | `1bb02b56a287ec4be4db0aa3ba91af231a58240f7cb6844ff9266d0f48832c77` |
 | 66 | danger_reach | `ui_danger_reach.png` | 612994 | `bea205b685717599c3cc455640e3231da0514b273adfcde3ca241a12a35ac55f` |
 | 67 | help | `ui_help.png` | 332701 | `a1e0f3b1cca548d6bf1425a40587e26d6f098fb1fdbf094365ef89f97a65fe4e` |

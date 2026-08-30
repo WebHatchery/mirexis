@@ -262,7 +262,9 @@ fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
         TacticalLesson::EnemyPhase => "Tap END PHASE twice to watch the hostile response.",
         TacticalLesson::Objective => "Move onto the gold objective and tap SECURE OBJECTIVE.",
         TacticalLesson::Ability => "Tap a visible CLASS, MUTATION, or GEAR action.",
-        TacticalLesson::ApplyLearning => "Complete the objective; tap HELP to revisit any rule.",
+        TacticalLesson::ApplyLearning => {
+            "Tap a remaining hostile, review the forecast, then tap ATTACK."
+        }
     }
 }
 

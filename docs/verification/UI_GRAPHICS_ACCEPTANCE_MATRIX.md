@@ -125,7 +125,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | movement_route | Tactical/route | Route conforms to rectangles | `ui_movement_route.png` | PASS |
 | cover_edges | Tactical/cover | Cover is shallow procedural geometry | `ui_cover_edges.png` | PASS |
 | invalid_command | Tactical/feedback | Weak authored rejection feedback | `ui_invalid_command.png` | PASS |
-| valid_shot | Tactical/forecast | Weak attack comparison | `ui_valid_shot.png` | PASS |
+| valid_shot | Tactical/forecast | Attack forecast lacked a touch-visible confirmation control | `ui_valid_shot.png` | PASS |
 | threat_range | Tactical/overlay | Rectangular threat overlay | `ui_threat_range.png` | PASS |
 | danger_reach | Tactical/overlay | Rectangular danger overlay | `ui_danger_reach.png` | PASS |
 | help | Help | Dense small-text modal | `ui_help.png` | PASS |

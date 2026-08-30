@@ -1,4 +1,6 @@
 use super::*;
+use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
+use crate::state::GameSession;
 
 #[test]
 fn visible_tactical_camera_controls_stay_inside_the_header_and_outside_the_map() {
@@ -28,6 +30,75 @@ fn cancel_targeting_control_is_visible_without_covering_the_target_portrait() {
     assert!(cancel.y >= card.y);
     assert!(cancel.bottom() <= card.bottom());
     assert!(cancel.right() <= target_portrait.x);
+}
+
+#[test]
+fn guided_attack_selects_before_it_commits_the_shot() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let attacker = session.selected_unit().unwrap().position;
+    let hostile = session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.team == crate::data::Team::Hostile)
+        .unwrap();
+    hostile.position = TilePos::new(attacker.x + 4, attacker.y);
+    let hostile_id = hostile.id.clone();
+    let hostile_tile = hostile.position;
+    let progress = FirstHourProgress {
+        stage: FirstHourStage::FirstOperation,
+        lesson: TacticalLesson::Attack,
+        ..FirstHourProgress::default()
+    };
+
+    assert_eq!(
+        normal_tile_action(&session, &progress, hostile_tile),
+        UiAction::SelectTile(hostile_tile)
+    );
+    session.select_tile(hostile_tile);
+    assert_eq!(
+        normal_tile_action(&session, &progress, hostile_tile),
+        UiAction::AttackSelected(hostile_id)
+    );
+}
+
+#[test]
+fn unguided_attack_keeps_the_direct_hostile_intent() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let attacker = session.selected_unit().unwrap().position;
+    let hostile = session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.team == crate::data::Team::Hostile)
+        .unwrap();
+    hostile.position = TilePos::new(attacker.x + 4, attacker.y);
+    let hostile_id = hostile.id.clone();
+    let hostile_tile = hostile.position;
+
+    assert_eq!(
+        normal_tile_action(
+            &session,
+            &FirstHourProgress {
+                guidance_enabled: false,
+                ..FirstHourProgress::default()
+            },
+            hostile_tile,
+        ),
+        UiAction::AttackSelected(hostile_id)
+    );
+}
+
+#[test]
+fn attack_confirmation_card_stays_inside_the_tactical_panel() {
+    let panel = tactical_panel();
+    let card = crate::action_preview_ui::attack_card_bounds(panel);
+    assert!(card.x >= panel.x);
+    assert!(card.right() <= panel.right());
+    assert!(card.y >= panel.y);
+    assert!(card.bottom() <= panel.bottom());
 }
 
 #[test]

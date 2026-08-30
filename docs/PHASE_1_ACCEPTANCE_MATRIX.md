@@ -16,7 +16,7 @@ developer are not substitutes for that evidence.
 | D01 | Golden path reaches the second-operation promise beat | `FirstHourStage`, `first_hour/tests.rs`, `ui_briefing.png`, `ui_debrief.png`, and `ui_colony.png` | VERIFIED |
 | D02 | Five first-time players complete without external instructions | Five empty required rows in `PHASE_1_PLAYTEST_LOG.md` | HUMAN PENDING |
 | D03 | At least two end-to-end runs use visible touch/click controls only | Touch-primary rows 2 and 4 await observed runs | HUMAN PENDING |
-| D04 | Operation one teaches the core loop and operation two demonstrates transfer | Ordered `TacticalLesson` transitions, a cover-tile-gated first move, reachable opening firing lane and objective route, contextual tactical focus, colony-side handoff focus, usable ability recovery, and unscripted `SecondOperation`; player transfer must still be observed | IMPLEMENTED / HUMAN PENDING |
+| D04 | Operation one teaches the core loop and operation two demonstrates transfer | Ordered `TacticalLesson` transitions, a cover-tile-gated first move, reachable opening firing lane and objective route, guided forecast confirmation, contextual tactical focus, colony-side handoff focus, usable ability recovery, and unscripted `SecondOperation`; player transfer must still be observed | IMPLEMENTED / HUMAN PENDING |
 | D05 | City supplies direction, preparation, character connection, and visible consequences | `first_hour_ui.rs`, `first_hour_investment_ui.rs`, colony conversations, `first_hour_consequences_ui.rs`, and colony/debrief captures | VERIFIED |
 | D06 | First investment has a clear observable effect | Three 24-material preparations and `first_investment_changes_only_the_second_deployment` | VERIFIED |
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests, and the recorded WebGL operator pass | VERIFIED |
@@ -65,7 +65,7 @@ Ten-second goal recognition, city attachment, and traversal friction require obs
 | Authored teaching operation | `operation_glassroot` and first-operation stage | VERIFIED |
 | Core-rule order | `TacticalLesson`: select, cover move gated by entering a cover tile, attack through the reachable opening firing lane, enemy phase, objective within the guided travel window, ability | VERIFIED |
 | Less-scripted second operation | Generated Isolation offer with `ApplyLearning` guidance only | VERIFIED |
-| Reduce low-value clicks | Direct tile/hostile intents, target forecast, visible actions, guarded end phase | VERIFIED |
+| Reduce low-value clicks | Direct tile/hostile intents outside the lesson; guided attack forecast confirmation, visible actions, and guarded end phase | VERIFIED |
 | Camera, focus, targeting, end phase, and replay review | Camera/input tests and tactical capture set | VERIFIED |
 | Distinct visual/audio results | Event feedback, procedural palette, battle log, and tactical captures | VERIFIED |
 | Active effects and duration explicit | Status rail now displays each remaining phase count; dedicated unit test | VERIFIED |

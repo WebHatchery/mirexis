@@ -6,10 +6,19 @@ use crate::grid_ui::GridView;
 use crate::state::GameSession;
 use crate::state::RuleError;
 use crate::tactical::terrain_cost;
+use crate::ui::UiAction;
+use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
+use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
+
+pub(crate) struct PreviewInteraction<'a> {
+    pub(crate) mouse: Vec2,
+    pub(crate) actions: &'a mut Vec<UiAction>,
+    pub(crate) interactive: bool,
+}
 
 pub(crate) fn draw(
     session: &GameSession,
@@ -17,9 +26,10 @@ pub(crate) fn draw(
     panel: Rect,
     assets: &AssetManager,
     visuals: &VisualCatalog,
-) {
+    interaction: PreviewInteraction<'_>,
+) -> bool {
     let Some(preview) = action_preview::for_tile(session, tile) else {
-        return;
+        return false;
     };
     let invalid = matches!(preview, ActionPreview::Invalid { .. });
     if let ActionPreview::Attack {
@@ -33,7 +43,7 @@ pub(crate) fn draw(
         ..
     } = &preview
     {
-        draw_attack_comparison(
+        return draw_attack_comparison(
             session,
             *target_position,
             target_name,
@@ -45,8 +55,8 @@ pub(crate) fn draw(
             panel,
             assets,
             visuals,
+            interaction,
         );
-        return;
     }
     let label = match preview {
         ActionPreview::Move { cost, hazard, .. } => match hazard {
@@ -96,6 +106,18 @@ pub(crate) fn draw(
         rect.y + 19.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
+    false
+}
+
+pub(crate) fn attack_card_bounds(panel: Rect) -> Rect {
+    Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 84.0)
+}
+
+pub(crate) fn attack_preview_is_valid(session: &GameSession, tile: TilePos) -> bool {
+    matches!(
+        action_preview::for_tile(session, tile),
+        Some(ActionPreview::Attack { .. })
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -111,9 +133,10 @@ fn draw_attack_comparison(
     panel: Rect,
     assets: &AssetManager,
     visuals: &VisualCatalog,
-) {
+    interaction: PreviewInteraction<'_>,
+) -> bool {
     let Some(attacker) = session.selected_unit() else {
-        return;
+        return false;
     };
     let Some(target) = session
         .tactical
@@ -121,9 +144,9 @@ fn draw_attack_comparison(
         .iter()
         .find(|unit| unit.position == target_position)
     else {
-        return;
+        return false;
     };
-    let rect = Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 84.0);
+    let rect = attack_card_bounds(panel);
     draw_surface(
         rect,
         &SurfaceStyle::new(Color::new(0.025, 0.052, 0.058, 0.98))
@@ -174,6 +197,13 @@ fn draw_attack_comparison(
         rect.y + 67.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
+    let attack_button = Rect::new(rect.right() - 205.0, rect.y + 22.0, 126.0, 40.0);
+    if interaction.interactive && button(attack_button, "ATTACK", true, interaction.mouse) {
+        interaction
+            .actions
+            .push(UiAction::AttackSelected(target.id.clone()));
+    }
+    interaction.interactive && rect.contains(interaction.mouse)
 }
 
 fn rule_error_label(error: &RuleError) -> &'static str {

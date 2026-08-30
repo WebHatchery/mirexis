@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.116.0
+Save/content version: 1.117.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -179,7 +179,10 @@ Only `execute` mutates tactical state or consumes RNG.
 Player action preview also calls `validate(&Command)` rather than duplicating reachability
 or attack rules. It reports movement AP and landing hazard effects, or exact hit chance,
 normal/critical damage, and weapon AP for an attackable unit. Hover and keyboard-focused
-tiles share the same presentation; previewing never mutates state or consumes RNG.
+tiles share the same presentation; previewing never mutates state or consumes RNG. Guided
+first-operation attack lessons select a hostile before committing and expose a visible
+`ATTACK` confirmation in the forecast card, so touch players can inspect the result first;
+ordinary missions retain their direct hostile intent.
 
 ### 5.2 Movement
 
@@ -886,6 +889,7 @@ Migration coverage:
 | 1.114.0 | First-operation teaching encounter stages the existing objective within the guided travel window |
 | 1.115.0 | First-hour colony handoffs focus the visible Operations, briefing, and preparation controls |
 | 1.116.0 | First-hour ability teaching selects a usable colonist and focuses one actionable ability control |
+| 1.117.0 | Guided first-operation attacks expose a forecast confirmation and post-ability guidance points at remaining hostiles |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -937,7 +941,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (371 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (375 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 89-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

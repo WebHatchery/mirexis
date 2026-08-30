@@ -1,11 +1,12 @@
 //! Three-quarter battlefield rendering, projected overlays, depth, and hit handling.
 
 use crate::data::{ObjectiveKind, Team};
+use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
 use crate::grid_ui::{
     CameraInsets, GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
     STRUCTURE_ART_SCALE, TERRAIN_ART_PIVOT, TERRAIN_ART_SCALE,
 };
-use crate::state::ObjectiveState;
+use crate::state::{GameSession, ObjectiveState};
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -124,7 +125,15 @@ pub(crate) fn draw(
     crate::cover_ui::draw_edges(view, &ctx.session.tactical.cover_edges);
     crate::reinforcement_ui::draw(ctx.session, view, ctx.assets, ctx.visuals);
     crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
-    let preview_tile = hovered.unwrap_or(ctx.session.tactical.selected_tile);
+    let preview_tile = if crate::action_preview_ui::attack_card_bounds(panel).contains(mouse)
+        && crate::action_preview_ui::attack_preview_is_valid(
+            ctx.session,
+            ctx.session.tactical.selected_tile,
+        ) {
+        ctx.session.tactical.selected_tile
+    } else {
+        hovered.unwrap_or(ctx.session.tactical.selected_tile)
+    };
     crate::action_preview_ui::draw_route(ctx.session, preview_tile, view);
 
     let mut units = ctx.session.tactical.units.iter().collect::<Vec<_>>();
@@ -168,7 +177,18 @@ pub(crate) fn draw(
         .draw(ctx.session, view, ctx.assets, ctx.visuals);
     crate::first_hour_tactical_ui::draw_map_focus(ctx, view, grid_rect, input_enabled);
     crate::ui::set_ui_clip(ctx.ui, None);
-    crate::action_preview_ui::draw(ctx.session, preview_tile, panel, ctx.assets, ctx.visuals);
+    let preview_input_consumed = crate::action_preview_ui::draw(
+        ctx.session,
+        preview_tile,
+        panel,
+        ctx.assets,
+        ctx.visuals,
+        crate::action_preview_ui::PreviewInteraction {
+            mouse,
+            actions,
+            interactive: input_enabled && ctx.targeting.is_none(),
+        },
+    );
     if ctx.targeting.is_some() {
         targeting_card::draw(ctx, preview_tile, panel, mouse, actions);
     }
@@ -181,7 +201,14 @@ pub(crate) fn draw(
         panel.bottom() - 7.0,
         TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
     );
-    handle_click(ctx, view, grid_rect, mouse, suppress_map_click, actions);
+    handle_click(
+        ctx,
+        view,
+        grid_rect,
+        mouse,
+        suppress_map_click || preview_input_consumed,
+        actions,
+    );
     camera_dragged
 }
 
@@ -646,19 +673,39 @@ fn handle_click(
         actions.push(action.unwrap_or(UiAction::CancelTargeting));
         return;
     }
-    let hostile = ctx
-        .session
+    actions.push(normal_tile_action(ctx.session, ctx.first_hour, tile));
+}
+
+fn normal_tile_action(
+    session: &GameSession,
+    first_hour: &FirstHourProgress,
+    tile: TilePos,
+) -> UiAction {
+    let hostile = session
         .tactical
         .units
         .iter()
         .find(|unit| unit.position == tile && unit.team == Team::Hostile);
-    if let Some(hostile) = hostile.filter(|unit| ctx.session.can_attack_selected(&unit.id)) {
-        actions.push(UiAction::AttackSelected(hostile.id.clone()));
-    } else if ctx.session.can_attack_selected_cover(tile) {
-        actions.push(UiAction::AttackCover(tile));
-    } else if ctx.session.can_move_selected_to(tile) {
-        actions.push(UiAction::MoveSelected(tile));
-    } else {
-        actions.push(UiAction::SelectTile(tile));
+    if let Some(hostile) = hostile.filter(|unit| session.can_attack_selected(&unit.id)) {
+        if !guided_attack_needs_confirmation(first_hour) || session.tactical.selected_tile == tile {
+            return UiAction::AttackSelected(hostile.id.clone());
+        }
+        return UiAction::SelectTile(tile);
     }
+    if session.can_attack_selected_cover(tile) {
+        UiAction::AttackCover(tile)
+    } else if session.can_move_selected_to(tile) {
+        UiAction::MoveSelected(tile)
+    } else {
+        UiAction::SelectTile(tile)
+    }
+}
+
+fn guided_attack_needs_confirmation(progress: &FirstHourProgress) -> bool {
+    progress.guidance_enabled
+        && progress.stage == FirstHourStage::FirstOperation
+        && matches!(
+            progress.lesson,
+            TacticalLesson::Attack | TacticalLesson::ApplyLearning
+        )
 }

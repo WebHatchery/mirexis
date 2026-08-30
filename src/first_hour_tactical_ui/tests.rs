@@ -1,6 +1,7 @@
 use super::*;
 use crate::data::{GameData, Team};
 use crate::first_hour::{FirstHourStage, TacticalLesson};
+use macroquad_toolkit::grid::TilePos;
 
 fn session() -> GameSession {
     let data = GameData::load().unwrap();
@@ -89,4 +90,26 @@ fn ability_focus_chooses_the_first_visible_action_that_can_resolve() {
         ability_focus_slot(&session),
         Some(AbilityFocusSlot::ClassAction)
     );
+}
+
+#[test]
+fn apply_learning_focus_points_to_a_remaining_hostile() {
+    let mut session = session();
+    let selected = session.selected_unit().unwrap().position;
+    let (hostile_id, hostile_tile) = {
+        let hostile = session
+            .tactical
+            .units
+            .iter_mut()
+            .find(|unit| unit.team == Team::Hostile)
+            .unwrap();
+        hostile.position = TilePos::new(selected.x + 4, selected.y);
+        (hostile.id.clone(), hostile.position)
+    };
+
+    assert_eq!(
+        map_focus_tile(&progress(TacticalLesson::ApplyLearning), &session),
+        Some(hostile_tile)
+    );
+    assert!(session.can_attack_selected(&hostile_id));
 }

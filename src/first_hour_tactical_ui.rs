@@ -40,9 +40,8 @@ pub(crate) fn map_focus_tile(
             .min_by_key(|unit| focus_distance(session, unit.position))
             .map(|unit| unit.position),
         TacticalLesson::Objective => Some(session.tactical.objective_tile),
-        TacticalLesson::EnemyPhase | TacticalLesson::Ability | TacticalLesson::ApplyLearning => {
-            None
-        }
+        TacticalLesson::EnemyPhase | TacticalLesson::Ability => None,
+        TacticalLesson::ApplyLearning => apply_learning_focus_tile(session),
     }
 }
 
@@ -114,7 +113,7 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
             };
             ability_focus_rect(x, TACTICAL_PANEL.bottom() - 148.0, slot)
         }
-        TacticalLesson::ApplyLearning => Rect::new(390.0, 686.0, 82.0, 28.0),
+        TacticalLesson::ApplyLearning => return,
         TacticalLesson::Select
         | TacticalLesson::MoveToCover
         | TacticalLesson::Attack
@@ -225,6 +224,24 @@ fn focus_distance(session: &GameSession, tile: TilePos) -> i32 {
         .map_or(0, |selected| manhattan(selected.position, tile))
 }
 
+fn apply_learning_focus_tile(session: &GameSession) -> Option<TilePos> {
+    let hostiles = session
+        .tactical
+        .units
+        .iter()
+        .filter(|unit| unit.team == crate::data::Team::Hostile && !unit.incapacitated);
+    hostiles
+        .clone()
+        .filter(|unit| session.can_attack_selected(&unit.id))
+        .min_by_key(|unit| focus_key(session, unit.position))
+        .or_else(|| hostiles.min_by_key(|unit| focus_key(session, unit.position)))
+        .map(|unit| unit.position)
+}
+
+fn focus_key(session: &GameSession, tile: TilePos) -> (i32, i32, i32) {
+    (focus_distance(session, tile), tile.y, tile.x)
+}
+
 fn manhattan(from: TilePos, to: TilePos) -> i32 {
     (from.x - to.x).abs() + (from.y - to.y).abs()
 }
@@ -235,7 +252,8 @@ fn map_label(lesson: TacticalLesson) -> &'static str {
         TacticalLesson::MoveToCover => "NEXT // MOVE TO COVER",
         TacticalLesson::Attack => "NEXT // REVIEW FORECAST",
         TacticalLesson::Objective => "NEXT // SECURE OBJECTIVE",
-        TacticalLesson::EnemyPhase | TacticalLesson::Ability | TacticalLesson::ApplyLearning => "",
+        TacticalLesson::EnemyPhase | TacticalLesson::Ability => "",
+        TacticalLesson::ApplyLearning => "NEXT // CLEAR HOSTILES",
     }
 }
 

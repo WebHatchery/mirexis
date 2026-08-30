@@ -20,7 +20,7 @@ Status: automated and internal verification complete; external playtests pending
 
 | Concern | Implemented response | Remaining observation target |
 |---|---|---|
-| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
+| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; guided attacks add a visible forecast-card ATTACK confirmation; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
 | Text scale | Fixed 1280×720 virtual UI scales uniformly and preserves layout at audited desktop sizes | Ask testers to assess smallest 1024×768 labels |
 | Contrast | Bright text, outlined panels, dark surfaces, and high-luminance goal accents remain legible in captures | Observe low-quality displays and glare |
 | Colour-independent meaning | Buttons and status text name state; target rings, icons, forecasts, and event prose do not rely on hue alone | Include colour-vision feedback in external sessions |
@@ -31,12 +31,12 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 363 Mirexis unit tests pass.
+- 375 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 87 audited 1280×720 scenes, including the first-hour
-  field guide and guided tactical lesson; status-effect and first-hour layout changes
-  replace their affected images.
+- The canonical set contains 89 audited 1280×720 scenes, including the first-hour
+  field guide, guided tactical lesson, actionable ability lesson, and colony handoff;
+  forecast and first-hour layout changes replace their affected images.
 
 ## Honest boundary
 

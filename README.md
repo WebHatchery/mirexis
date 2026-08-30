@@ -21,7 +21,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   visible first-hour route trace to the coordinator's speech marker.
 - A first-operation tactical lesson that marks the next map target or command-rail control,
   requires the squad to enter a real cover tile and then presents a reachable opening firing
-  lane and objective route, without blocking battlefield inspection.
+  lane and objective route, without blocking battlefield inspection. Guided attacks select a
+  hostile first and expose the forecast card's visible ATTACK confirmation.
 - The ability lesson recovers onto a colonist with a valid visible action and focuses that
   specific mutation, class, or field-item control.
 - First-hour colony handoffs focus the visible Operations, briefing, and equal-choice preparation
@@ -160,7 +161,8 @@ shortcuts.
 - City: tap terrain to walk, hold the movement pad to move freely, tap a colonist to
   approach and talk, and use Build mode for construction and repairs.
 - Tactical missions: select a colonist, then use visible grid and command controls to
-  move, attack, use techniques or equipment, complete objectives, and end the phase.
+  move, attack, use techniques or equipment, complete objectives, and end the phase. During
+  guided attacks, tap a hostile to inspect its forecast, then tap ATTACK in the forecast card.
 - `W` / `A` / `S` / `D`: city movement.
 - `E`: talk to an adjacent city NPC.
 - Arrow keys: tactical cursor.
