@@ -75,7 +75,6 @@ impl Game {
         );
         match loaded {
             Ok(save) => {
-                self.targeting = None::<TacticalTargeting>;
                 let SaveData {
                     campaign,
                     active_mission,
@@ -102,6 +101,7 @@ impl Game {
                     self.state = AppState::Colony;
                 }
                 self.last_outcome = restored_outcome(&self.session, &self.active_mission);
+                self.reset_transient_state_after_load();
                 self.tactical_camera = crate::grid_ui::WorldCamera::tactical_start(
                     self.session.tactical.selected_tile,
                 );
@@ -120,6 +120,19 @@ impl Game {
             }
             Err(err) => self.notifications.warning(format!("Load failed: {err}")),
         }
+    }
+
+    fn reset_transient_state_after_load(&mut self) {
+        self.targeting = None::<TacticalTargeting>;
+        self.show_tactical_help = false;
+        self.show_battle_log = false;
+        self.show_settings = false;
+        self.phase_replay.clear();
+        self.end_phase_armed = false;
+        self.combat_feedback = crate::combat_feedback::CombatFeedback::default();
+        self.observed_event_count = self.session.tactical.event_log.len();
+        self.new_campaign_armed = false;
+        self.delete_save_armed = false;
     }
 
     pub(super) fn delete_save(&mut self) {

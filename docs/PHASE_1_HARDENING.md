@@ -26,7 +26,7 @@ Status: automated and internal verification complete; external playtests pending
 | Colour-independent meaning | Buttons and status text name state; target rings, icons, forecasts, and event prose do not rely on hue alone | Include colour-vision feedback in external sessions |
 | Motion | Persistent **REDUCED MOTION** completes unit presentation immediately and suppresses hostile replay animation | Confirm the faster state changes remain comprehensible |
 | Audio | Persistent 0–100% volume and mute; critical events retain text, markers, meters, and debrief state | Listen for fatigue and overlap in observed sessions |
-| Overlay input safety | First-hour field guide, settings, Facility Upgrades, Salvage Yard, tactical help, battle log, and hostile replay clear underlying release actions; blocking colony overlays suppress colony/tactical map gestures and drawer changes, pause movement, and preserve visible close paths | Repeat on touch-primary browsers |
+| Overlay input safety | First-hour field guide, settings, Facility Upgrades, Salvage Yard, tactical help, battle log, and hostile replay clear underlying release actions; blocking colony overlays suppress colony/tactical map gestures and drawer changes, pause movement, and preserve visible close paths; save restore clears transient overlays and stale tactical/audio state | Repeat on touch-primary browsers |
 | Playtest evidence | Campaign-persisted elapsed time, first-action milestones, operation durations/rounds, invalid commands, and field-guide opens are visible in the field guide | Observer still records exact input method and qualitative findings |
 
 ## Automated verification baseline
