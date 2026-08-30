@@ -315,6 +315,7 @@ impl ColonyExplorer {
             &campaign.strategy.mirexis_path_id,
             &character.id,
             campaign.strategy.campaign_complete,
+            campaign.strategy.post_campaign_operations_completed,
             &campaign.colony_story,
         )
         .or_else(|| {

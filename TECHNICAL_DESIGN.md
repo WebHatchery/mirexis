@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.96.0
+Save/content version: 1.97.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -644,6 +644,10 @@ The same path lock supplies a tactical engine effect to the finale and epilogue 
 Redoubt colonists gain armour, Commonwealth colonists recover additional health between phases,
 and Threshold colonists gain movement range. These are presented as engine effects rather than
 faction pressure and do not inflate the operation danger rating.
+Successful post-campaign operations increment a persistent work count in `StrategyState`; the
+ending register and debrief expose that count, and the identity contact offers one additional
+path-specific reflection after the first epilogue victory. The post-ending scene is archived
+once so the dialogue path can advance instead of repeating the same beat.
 Those views also derive a
 colony legacy dossier from the chosen institution, ready and recovering people, trusted bonds,
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
@@ -668,7 +672,10 @@ ledger for their closing notes. Kira's player-avatar culmination is presented as
 in the ending register rather than as a walk-up NPC conversation.
 After that final reflection is acknowledged, the continuing colony sandbox exposes one more
 path-specific scene from the same contact: an open gate, room to disagree, or a route with a return
-current. The scene is selected from the existing story ledger and remains presentation-only.
+current. After the first successful epilogue operation, the same contact can acknowledge the
+work that followed: a wall still needing hands, a chorus answering again, or a return route that
+must be maintained. Each scene is selected from the existing story ledger and remains
+presentation-only.
 
 ## 9. Content Registry
 
@@ -814,6 +821,7 @@ Migration coverage:
 | 1.94.0 | Path-specific finale field notes for starting colonists and recruited outsiders |
 | 1.95.0 | Repeatable path-specific post-campaign epilogue operations |
 | 1.96.0 | Path-specific engine effects in finale and epilogue tactical operations |
+| 1.97.0 | Persistent epilogue-work count and post-operation identity reflections |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -865,7 +873,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (321 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (323 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

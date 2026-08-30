@@ -592,6 +592,7 @@ pub(crate) fn identity_arc_beat(
     path_id: &str,
     character_id: &str,
     campaign_complete: bool,
+    post_campaign_operations_completed: u32,
     story: &ColonyStoryState,
 ) -> Option<ColonyBeat> {
     let identity = identity_beat(path_id, character_id, campaign_complete);
@@ -601,6 +602,14 @@ pub(crate) fn identity_arc_beat(
     identity
         .filter(|beat| !story.has_heard(beat.id))
         .or_else(|| post_ending_beat(path_id, character_id, story))
+        .or_else(|| {
+            post_campaign_operation_beat(
+                path_id,
+                character_id,
+                post_campaign_operations_completed,
+                story,
+            )
+        })
 }
 
 fn post_ending_beat(
@@ -630,7 +639,46 @@ fn post_ending_beat(
         ),
         _ => return None,
     };
-    Some(ColonyBeat { id, title, text })
+    (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
+}
+
+fn post_campaign_operation_beat(
+    path_id: &str,
+    character_id: &str,
+    completed_operations: u32,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    if completed_operations == 0 || identity_npc(path_id) != Some(character_id) {
+        return None;
+    }
+    let post_ending_id = match path_id {
+        "human_redoubt" => "post_ending_redoubt_mara",
+        "living_commonwealth" => "post_ending_commonwealth_nadi",
+        "open_threshold" => "post_ending_threshold_sol",
+        _ => return None,
+    };
+    if !story.has_heard(post_ending_id) {
+        return None;
+    }
+    let (id, title, text) = match path_id {
+        "human_redoubt" => (
+            "epilogue_operation_redoubt_mara",
+            "THE WALL HAS WORK LEFT",
+            "The old fire is quiet, but the Arsenal is not finished. Mara keeps the watchline open as a place where defence can be repaired, questioned, and handed to the next pair of hands.",
+        ),
+        "living_commonwealth" => (
+            "epilogue_operation_commonwealth_nadi",
+            "A CHORUS CAN ANSWER AGAIN",
+            "The new roots did not ask Nadi to speak for them. They asked her to return, listen, and leave room for the next voice to make the garden larger without making it one thing.",
+        ),
+        "open_threshold" => (
+            "epilogue_operation_threshold_sol",
+            "THE WAY BACK IS WORK",
+            "Sol marks another traveller's route beside the first. The Threshold is not a door the colony owns; it is a promise that has to be maintained by everyone who crosses it.",
+        ),
+        _ => return None,
+    };
+    (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 use crate::campaign::CampaignState;
 use crate::data::{GameData, OperationModifier};
 use crate::persistence::migrate_save_value;
-use crate::state::GameSession;
+use crate::state::{GameSession, SaveData};
 
 #[test]
 fn previous_path_save_refreshes_the_engine_effect_on_migration() {
@@ -28,5 +28,26 @@ fn previous_path_save_refreshes_the_engine_effect_on_migration() {
     assert_eq!(
         selected.operation_modifier,
         OperationModifier::MirexisThreshold
+    );
+}
+
+#[test]
+fn previous_save_without_epilogue_work_defaults_to_zero() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let save = SaveData::campaign_only("1.96.0", &campaign);
+    let mut value = serde_json::to_value(save).unwrap();
+    value["campaign"]["strategy"]
+        .as_object_mut()
+        .unwrap()
+        .remove("post_campaign_operations_completed");
+
+    let migrated = migrate_save_value(Some("1.96.0".to_owned()), value, &data).unwrap();
+    assert_eq!(
+        migrated
+            .campaign
+            .strategy
+            .post_campaign_operations_completed,
+        0
     );
 }

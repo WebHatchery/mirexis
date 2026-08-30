@@ -18,6 +18,7 @@ pub(crate) struct EpilogueDossier {
     engine_response: &'static str,
     faction_pressure: String,
     mercy_count: usize,
+    post_campaign_operations_completed: u32,
 }
 
 impl EpilogueDossier {
@@ -38,18 +39,19 @@ impl EpilogueDossier {
             format!("VOICE // {}", self.character_voice),
             format!("NAVIGATOR // {}", self.navigator_voice),
             format!(
-                "ENGINE // {} / {} // {} // MERCY {}",
+                "ENGINE // {} / {} // {} // MERCY {} // EPILOGUE WORK {}",
                 self.engine_relationship,
                 self.engine_response,
                 self.faction_pressure,
-                self.mercy_count
+                self.mercy_count,
+                self.post_campaign_operations_completed
             ),
         ]
     }
 
     pub(crate) fn debrief_line(&self) -> String {
         format!(
-            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {}",
+            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {} // EPILOGUE WORK {}",
             self.institution.to_uppercase(),
             self.institution_status,
             self.people,
@@ -58,7 +60,8 @@ impl EpilogueDossier {
             self.evolutions,
             self.engine_relationship,
             self.engine_response,
-            self.mercy_count
+            self.mercy_count,
+            self.post_campaign_operations_completed
         )
     }
 }
@@ -179,6 +182,7 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         engine_response,
         faction_pressure,
         mercy_count,
+        post_campaign_operations_completed: campaign.strategy.post_campaign_operations_completed,
     })
 }
 

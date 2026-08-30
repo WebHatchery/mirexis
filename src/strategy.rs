@@ -127,6 +127,8 @@ pub struct StrategyState {
     pub mirexis_operation_completed: bool,
     #[serde(default)]
     pub campaign_complete: bool,
+    #[serde(default)]
+    pub post_campaign_operations_completed: u32,
     rng: SeededRng,
 }
 
@@ -206,6 +208,7 @@ impl StrategyState {
             mirexis_path_id: String::new(),
             mirexis_operation_completed: false,
             campaign_complete: false,
+            post_campaign_operations_completed: 0,
             rng: SeededRng::new(data.config.battle_seed ^ 0x1501_A710),
         }
     }
@@ -236,6 +239,16 @@ impl StrategyState {
         data: &GameData,
     ) {
         let victory = outcome.result == ObjectiveState::Victory;
+        let is_post_campaign_operation = data
+            .campaign
+            .mission_templates
+            .iter()
+            .find(|template| template.id == mission.template_id)
+            .is_some_and(|template| template.post_campaign);
+        if victory && self.campaign_complete && is_post_campaign_operation {
+            self.post_campaign_operations_completed =
+                self.post_campaign_operations_completed.saturating_add(1);
+        }
         if victory {
             self.isolation_victories = self.isolation_victories.saturating_add(1).min(3);
             if mission.map_recipe == "colony_defense" {

@@ -7,6 +7,7 @@ impl CampaignState {
             &self.strategy.mirexis_path_id,
             character_id,
             self.strategy.campaign_complete,
+            self.strategy.post_campaign_operations_completed,
             &self.colony_story,
         )
         .or_else(|| {

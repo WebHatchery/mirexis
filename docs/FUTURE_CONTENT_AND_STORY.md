@@ -504,6 +504,9 @@ Goal: make the implemented five-phase foundation narratively complete.
 - Implemented: carry each engine relationship into those finale and epilogue battles as a
   distinct tactical effect—armour, regeneration, or movement guidance—without treating it as
   another faction-pressure penalty.
+- Implemented: record successful epilogue work in the campaign save, surface the count in the
+  ending register, and unlock a path-specific identity reflection after the first continuing
+  operation.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and

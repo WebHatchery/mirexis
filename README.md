@@ -42,6 +42,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   stranded traveller home through the Threshold.
 - Finale and epilogue operations carry the chosen engine relationship into combat: hardened
   Redoubt armour, Commonwealth regeneration, or Threshold movement guidance.
+- Victories in the continuing epilogue are recorded in the ending register and unlock a
+  path-specific follow-up reflection from the identity contact.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface phase-specific colony field notes through

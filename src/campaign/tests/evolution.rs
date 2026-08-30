@@ -407,5 +407,17 @@ fn matching_mirexis_operation_reveals_the_chosen_campaign_end() {
             campaign.strategy.mission_offers[0].operation_modifier,
             modifier
         );
+        let epilogue = campaign.strategy.selected_mission().unwrap().clone();
+        let epilogue_outcome = MissionOutcome {
+            result: ObjectiveState::Victory,
+            colonists_deployed: 3,
+            colonists_incapacitated: Vec::new(),
+            hostiles_neutralised: 3,
+            materials_awarded: epilogue.materials_reward,
+            biomass_awarded: epilogue.biomass_reward,
+            power_awarded: epilogue.power_reward,
+        };
+        campaign.apply_mission_outcome(&epilogue_outcome, &epilogue, &data);
+        assert_eq!(campaign.strategy.post_campaign_operations_completed, 1);
     }
 }
