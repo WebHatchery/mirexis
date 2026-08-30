@@ -17,7 +17,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 
 ## What works now
 
-- A title-to-city-to-operation-to-debrief loop with native and browser saves.
+- A title-to-city-to-operation-to-debrief loop with native and browser saves, including a
+  visible first-hour route trace to the coordinator's speech marker.
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
   resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - A powered Commons with one shared meal per operation, turning squad preparation into

@@ -138,7 +138,7 @@ $lines.Add("- ``ui_gameplay.png``: default tactical camera with a cropped 40 x 4
 $lines.Add("- ``ui_variant.png``: off-center tactical camera with selection, objective, hazard, unit, and contextual overlays intact.")
 $lines.Add("- ``ui_movement_route.png`` and ``ui_valid_shot.png``: transformed route and target overlays remain aligned.")
 $lines.Add("- ``ui_class_target.png``: transformed unit targeting and contextual card remain aligned.")
-$lines.Add("- ``ui_colony.png``: centered settlement with a visible undeveloped 20 x 20 frontier.")
+$lines.Add("- ``ui_colony.png``: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.")
 $lines.Add("- ``ui_construction.png``: placement blueprint and reserved resources remain visible at fixed building scale.")
 $lines.Add("")
 $lines.Add("## Files")

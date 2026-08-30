@@ -21,7 +21,7 @@ impl Game {
                 self.title_hover_preview = true;
             }
             "colony" => {
-                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::Arrival;
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
                 self.state = AppState::Colony;
             }
             "contact" => self.capture_contact(),

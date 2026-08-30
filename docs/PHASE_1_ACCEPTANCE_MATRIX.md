@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.107.0, validated and committed with this matrix
+Audit baseline: save/content 1.108.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -31,10 +31,10 @@ developer are not substitutes for that evidence.
 
 | Required work | Evidence | Status |
 |---|---|---|
-| Opening situation, immediate goal, and destination | Arrival goal and Mara marker/landmark | VERIFIED |
+| Opening situation, immediate goal, and destination | Arrival goal, Mara marker/landmark, and first-hour route trace | VERIFIED |
 | Introduce only the next meaningful control | Stage-owned `primary_goal` and ordered tactical lesson | VERIFIED |
 | Exact visible-control or gesture language | Prompts consistently name Tap, Drag, CONTINUE, OPERATIONS, DEPLOY, ATTACK, END PHASE, HELP, and visible targets | VERIFIED |
-| Highlight relevant target without blocking inspection | Non-blocking goal banner, Mara marker, operation control, and tactical overlays | VERIFIED |
+| Highlight relevant target without blocking inspection | Non-blocking goal banner, Mara marker and route trace, operation control, and tactical overlays | VERIFIED |
 | Visible revisitable help | FIRST-HOUR FIELD GUIDE and tactical HELP | VERIFIED |
 | Restartable and skippable prompts without removing goals | `restart`, `guidance_enabled`, and first-hour tests | VERIFIED |
 | Persist progress and migrate saves with no tutorial fields | Save schema 1.65 and migration fixtures for 1.63 and 1.64 | VERIFIED |
@@ -53,7 +53,7 @@ the right understood context remains part of H01–H04 below.
 | Readable colonists and facilities without permanent labels | Speech markers, proximity dialogue, building art/state | VERIFIED |
 | Outcome-sensitive post-operation conversation | Ilya debrief line and first-return conversation state | VERIFIED |
 | Physical/visual consequence after each operation | Refuge and outer-route consequence drawing | VERIFIED |
-| Travel supports atmosphere without delay | Direct tap-to-walk, short Mara route, visible OPERATIONS shortcut | IMPLEMENTED / HUMAN PENDING |
+| Travel supports atmosphere without delay | Direct tap-to-walk, short Mara route, destination trace, visible OPERATIONS shortcut | IMPLEMENTED / HUMAN PENDING |
 | Timely choices foregrounded | Three dedicated preparations; advanced systems deferred | VERIFIED |
 
 Ten-second goal recognition, city attachment, and traversal friction require observation.

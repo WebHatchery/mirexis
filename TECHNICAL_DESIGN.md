@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.107.0
+Save/content version: 1.108.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -136,6 +136,7 @@ Important transition payloads:
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
 | `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
+| `colony_map_ui.rs` | 2.5D settlement projection, first-hour destination trace, and plot intents | Campaign mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 | `formation.rs` | Safe deterministic wedge, line, and column colony entry placement | Tactical persistence |
@@ -875,6 +876,7 @@ Migration coverage:
 | 1.105.0 | Infirmary level-two Trauma Ward and Adaptation Clinic branches with recovery, scar, treatment, and defence effects |
 | 1.106.0 | Optional Research Annex construction and powered doctrine-cost reduction |
 | 1.107.0 | Optional Salvage Yard recovery choices with research insight and standard equipment prototypes |
+| 1.108.0 | First-hour coordinator destination trace and capture-state coverage |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -926,8 +928,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (360 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic eighty-two-scene capture with visual inspection
+- `cargo test` (361 Mirexis unit tests plus asset-registry and source-size gates)
+- deterministic 86-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 

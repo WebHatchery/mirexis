@@ -248,6 +248,23 @@ fn initial_camera_frames_the_centered_settlement_without_fitting_the_colony() {
 }
 
 #[test]
+fn first_hour_route_targets_mara_only_during_the_coordinator_step() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    assert!(first_hour_destination(&campaign).is_none());
+
+    campaign.first_hour.advance_arrival();
+    assert!(first_hour_destination(&campaign).is_some());
+
+    campaign.first_hour.acknowledge_colonist("mara_venn");
+    assert!(first_hour_destination(&campaign).is_none());
+
+    campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
+    campaign.first_hour.guidance_enabled = false;
+    assert!(first_hour_destination(&campaign).is_none());
+}
+
+#[test]
 fn visible_camera_controls_stay_below_the_interactive_colony_viewport() {
     let panel = panel_bounds(false);
     let viewport = viewport_bounds(panel);

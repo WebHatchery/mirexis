@@ -912,6 +912,9 @@ The hub is a small 2.5D place the player can move through freely rather than a s
 map or a plot-snapped movement grid.
 Colonists appear as inhabitants with tappable, proximity-based conversations and useful
 contextual actions. Construction remains a deliberate mode inside that explorable space.
+During the authored arrival, a non-blocking gold route trace connects the player to Mara
+Venn's speech marker. It remains visible only while that destination is current, so the
+city teaches direction without turning every inhabitant into a permanent label.
 
 The player makes meaningful decisions about:
 

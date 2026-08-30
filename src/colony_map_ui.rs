@@ -127,6 +127,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             )
         });
     }
+    draw_first_hour_route(campaign, explorer, view);
     crate::first_hour_consequences_ui::draw(campaign, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
     crate::ui::set_ui_clip(ui, None);
@@ -630,6 +631,68 @@ fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
             Color::new(0.34, 0.42, 0.36, 0.52),
         );
     }
+}
+
+fn first_hour_destination(campaign: &CampaignState) -> Option<Vec2> {
+    if !campaign.first_hour.guidance_enabled
+        || campaign.first_hour.stage != crate::first_hour::FirstHourStage::MeetCoordinator
+    {
+        return None;
+    }
+    crate::colony_exploration::npc_position(campaign, "mara_venn")
+}
+
+fn draw_first_hour_route(
+    campaign: &CampaignState,
+    explorer: &crate::colony_exploration::ColonyExplorer,
+    view: ColonyView,
+) {
+    let Some(destination) = first_hour_destination(campaign) else {
+        return;
+    };
+    let start = view.world_center(explorer.position());
+    let end = view.world_center(destination);
+    let direction = (end - start).normalize_or_zero();
+    if direction.length_squared() < 0.01 {
+        return;
+    }
+    let route_start = start + direction * 20.0;
+    let route_end = end - direction * 22.0;
+    let route_length = route_start.distance(route_end);
+    let dash = 11.0;
+    let gap = 8.0;
+    let mut distance = 0.0;
+    while distance < route_length {
+        let from = route_start + direction * distance;
+        let to = route_start + direction * (distance + dash).min(route_length);
+        draw_line(
+            from.x,
+            from.y,
+            to.x,
+            to.y,
+            3.0,
+            Color::new(0.95, 0.78, 0.30, 0.72),
+        );
+        distance += dash + gap;
+    }
+    let normal = vec2(-direction.y, direction.x);
+    let arrow_base = end - direction * 14.0;
+    draw_line(
+        end.x,
+        end.y,
+        arrow_base.x + normal.x * 8.0,
+        arrow_base.y + normal.y * 8.0,
+        3.0,
+        Color::new(0.95, 0.78, 0.30, 0.92),
+    );
+    draw_line(
+        end.x,
+        end.y,
+        arrow_base.x - normal.x * 8.0,
+        arrow_base.y - normal.y * 8.0,
+        3.0,
+        Color::new(0.95, 0.78, 0.30, 0.92),
+    );
 }
 
 fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
