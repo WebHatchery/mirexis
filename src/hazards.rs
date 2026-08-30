@@ -16,7 +16,9 @@ pub(crate) fn resolve_after_move(session: &mut GameSession, unit_id: &str) -> Ve
     else {
         return Vec::new();
     };
-    if unit.faction.as_deref() == Some(immune_faction(hazard.kind)) {
+    if unit.faction.as_deref() == Some(immune_faction(hazard.kind))
+        || (unit.has_status(StatusKind::Adapted) && unit.hazard_resistance == Some(hazard.kind))
+    {
         return Vec::new();
     }
 

@@ -141,6 +141,10 @@ fn tactical_save_gains_technique_runtime_fields() {
         &campaign.deployment_roster(&data, &data.mission),
     );
     let mut legacy = serde_json::to_value(session.to_save("1.66.0", &campaign)).unwrap();
+    legacy["tactical"]
+        .as_object_mut()
+        .unwrap()
+        .remove("obscuring_fields");
     for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
         let unit = unit.as_object_mut().unwrap();
         for key in [
@@ -149,14 +153,15 @@ fn tactical_save_gains_technique_runtime_fields() {
             "used_skill_ids",
             "next_attack_ignores_armour",
             "next_equipment_overcharged",
+            "hazard_resistance",
         ] {
             unit.remove(key);
         }
     }
     let migrated = migrate_save_value(Some("1.66.0".to_owned()), legacy, &data).unwrap();
-    let colonist = migrated
-        .tactical
-        .unwrap()
+    let tactical = migrated.tactical.unwrap();
+    assert!(tactical.obscuring_fields.is_empty());
+    let colonist = tactical
         .units
         .into_iter()
         .find(|unit| unit.team == Team::Colony)
@@ -172,6 +177,7 @@ fn tactical_save_gains_technique_runtime_fields() {
     assert!(colonist.used_skill_ids.is_empty());
     assert!(!colonist.next_attack_ignores_armour);
     assert!(!colonist.next_equipment_overcharged);
+    assert!(colonist.hazard_resistance.is_none());
 }
 #[test]
 fn class_action_save_gains_reinforcement_queue() {

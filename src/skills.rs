@@ -1,8 +1,10 @@
 //! Data-backed base-class techniques and their deterministic tactical effects.
 
-use crate::data::{CoverEdgeDef, EdgeDirection, Team, TechniqueTarget};
-use crate::state::{BattleEvent, Command, CommandCost, GameSession, RuleError, UnitState};
-use crate::tactical::{manhattan, path_cost, StatusKind, UnitAnimationState};
+use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind, Team, TechniqueTarget};
+use crate::state::{
+    BattleEvent, Command, CommandCost, GameSession, ObscuringField, RuleError, UnitState,
+};
+use crate::tactical::{manhattan, path_cost, StatusKind, UnitAnimationState, UnitFacing};
 use macroquad_toolkit::grid::TilePos;
 
 pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
@@ -17,15 +19,23 @@ pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
         "combat_stimulant" => Some("COMBAT STIMULANT"),
         "portable_cover" => Some("PORTABLE COVER"),
         "overcharge" => Some("OVERCHARGE"),
+        "kinetic_draw" => Some("KINETIC DRAW"),
+        "premonition" => Some("PREMONITION"),
+        "adaptive_secretion" => Some("ADAPTIVE SECRETION"),
+        "spore_veil" => Some("SPORE VEIL"),
         _ => None,
     }
 }
 
 pub(crate) fn target_kind(skill_id: &str) -> Option<TechniqueTarget> {
     match skill_id {
-        "controlled_burst" | "spotters_mark" => Some(TechniqueTarget::Hostile),
-        "interpose" | "stabilise" | "combat_stimulant" => Some(TechniqueTarget::Ally),
-        "slipstep" | "portable_cover" => Some(TechniqueTarget::Tile),
+        "controlled_burst" | "spotters_mark" | "kinetic_draw" | "premonition" => {
+            Some(TechniqueTarget::Hostile)
+        }
+        "interpose" | "stabilise" | "combat_stimulant" | "adaptive_secretion" => {
+            Some(TechniqueTarget::Ally)
+        }
+        "slipstep" | "portable_cover" | "spore_veil" => Some(TechniqueTarget::Tile),
         "armour_drill" | "anchor_point" | "overcharge" => Some(TechniqueTarget::SelfTarget),
         _ => None,
     }
@@ -210,7 +220,10 @@ fn valid_hostile_target(
         i32::from(unit.weapon_range)
     };
     manhattan(unit.position, target.position) <= range
-        && (skill_id == "spotters_mark" || session.has_line_of_fire(unit.position, target.position))
+        && (matches!(skill_id, "spotters_mark")
+            || session.has_line_of_fire(unit.position, target.position))
+        && (skill_id != "kinetic_draw"
+            || kinetic_draw_destination(session, unit.position, target.position).is_some())
 }
 
 fn valid_ally_target(
@@ -225,6 +238,7 @@ fn valid_ally_target(
             && (skill_id == "stabilise" || !target.incapacitated)
             && manhattan(unit.position, target.position)
                 <= if skill_id == "interpose" { 2 } else { 4 }
+            && (skill_id != "adaptive_secretion" || adaptive_hazard(session, target_id).is_some())
     })
 }
 
@@ -247,6 +261,7 @@ fn valid_tile_target(
                 })
         }
         "portable_cover" => valid_cover_tile(session, unit, tile),
+        "spore_veil" => valid_veil_tile(session, unit, tile),
         _ => false,
     }
 }
@@ -278,12 +293,70 @@ fn valid_cover_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> b
             .any(|edge| edge.position == [tile.x, tile.y])
 }
 
+fn valid_veil_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
+    manhattan(unit.position, tile) > 0
+        && manhattan(unit.position, tile) <= 3
+        && session.tactical.fog.is_valid(tile)
+        && !session.tactical.blocked.contains(&tile)
+        && !session
+            .tactical
+            .units
+            .iter()
+            .any(|other| other.position == tile)
+        && tile != session.tactical.objective_tile
+        && session.has_line_of_fire(unit.position, tile)
+        && !session
+            .tactical
+            .obscuring_fields
+            .iter()
+            .any(|field| field.center == tile)
+}
+
 fn valid_self_target(unit: &UnitState, skill_id: &str) -> bool {
     skill_id != "overcharge"
         || unit.equipment_ids.iter().any(|equipment_id| {
             crate::equipment_actions::action_name(equipment_id).is_some()
                 && !unit.used_equipment_ids.contains(equipment_id)
         })
+}
+
+pub(crate) fn adaptive_hazard(session: &GameSession, target_id: &str) -> Option<HazardKind> {
+    let target = session.unit(target_id)?;
+    session
+        .tactical
+        .hazards
+        .iter()
+        .filter(|hazard| manhattan(target.position, hazard.position) <= 6)
+        .min_by_key(|hazard| {
+            (
+                manhattan(target.position, hazard.position),
+                hazard.position.y,
+                hazard.position.x,
+            )
+        })
+        .map(|hazard| hazard.kind)
+}
+
+fn kinetic_draw_destination(
+    session: &GameSession,
+    source: TilePos,
+    target: TilePos,
+) -> Option<TilePos> {
+    let horizontal = (source.x - target.x).signum();
+    let vertical = (source.y - target.y).signum();
+    let candidates = [
+        (horizontal != 0).then(|| TilePos::new(target.x + horizontal, target.y)),
+        (vertical != 0).then(|| TilePos::new(target.x, target.y + vertical)),
+    ];
+    candidates.into_iter().flatten().find(|tile| {
+        session.tactical.fog.is_valid(*tile)
+            && !session.tactical.blocked.contains(tile)
+            && !session
+                .tactical
+                .units
+                .iter()
+                .any(|unit| !unit.incapacitated && unit.position == *tile)
+    })
 }
 
 fn skill_cost(
@@ -373,6 +446,62 @@ pub(crate) fn execute(
                 1,
                 &mut events,
             );
+        }
+        "kinetic_draw" => {
+            spend_one_action_point(session, unit_id);
+            let target_id = target_id.expect("validated kinetic draw target");
+            if let Some(destination) = kinetic_draw_destination(
+                session,
+                session.unit(unit_id).expect("validated draw user").position,
+                session
+                    .unit(target_id)
+                    .expect("validated draw target")
+                    .position,
+            ) {
+                let target = unit_mut(session, target_id).expect("validated draw target");
+                let from = target.position;
+                target.position = destination;
+                target.facing = UnitFacing::toward(from, destination);
+                events.push(BattleEvent::UnitMoved {
+                    unit_id: target_id.to_owned(),
+                    path: vec![from, destination],
+                    cost: 0,
+                });
+                events.extend(crate::hazards::resolve_after_move(session, target_id));
+            }
+        }
+        "premonition" => {
+            spend_one_action_point(session, unit_id);
+            crate::class_actions::apply_status(
+                session,
+                target_id.expect("validated premonition target"),
+                StatusKind::Disrupted,
+                1,
+                &mut events,
+            );
+        }
+        "adaptive_secretion" => {
+            spend_one_action_point(session, unit_id);
+            let target_id = target_id.expect("validated adaptive secretion target");
+            let hazard = adaptive_hazard(session, target_id).expect("validated visible hazard");
+            unit_mut(session, target_id)
+                .expect("validated adaptive secretion target")
+                .hazard_resistance = Some(hazard);
+            crate::class_actions::apply_status(
+                session,
+                target_id,
+                StatusKind::Adapted,
+                1,
+                &mut events,
+            );
+        }
+        "spore_veil" => {
+            spend_one_action_point(session, unit_id);
+            session.tactical.obscuring_fields.push(ObscuringField {
+                center: target_tile.expect("validated spore veil tile"),
+                radius: 1,
+                remaining_phases: 1,
+            });
         }
         "stabilise" => {
             spend_one_action_point(session, unit_id);

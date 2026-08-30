@@ -30,6 +30,7 @@ pub enum StatusKind {
     Hindered,
     Regenerating,
     Marked,
+    Adapted,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -55,6 +56,13 @@ pub struct DestructibleCover {
 pub struct HazardTile {
     pub position: TilePos,
     pub kind: HazardKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ObscuringField {
+    pub center: TilePos,
+    pub radius: u8,
+    pub remaining_phases: u8,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -137,6 +145,8 @@ pub struct UnitState {
     #[serde(default)]
     pub next_equipment_overcharged: bool,
     #[serde(default)]
+    pub hazard_resistance: Option<HazardKind>,
+    #[serde(default)]
     pub class_action_used: bool,
     #[serde(default)]
     pub used_equipment_ids: Vec<String>,
@@ -190,6 +200,7 @@ impl UnitState {
             used_skill_ids: Vec::new(),
             next_attack_ignores_armour: false,
             next_equipment_overcharged: false,
+            hazard_resistance: None,
             class_action_used: false,
             used_equipment_ids: Vec::new(),
             statuses: Vec::new(),
@@ -469,6 +480,20 @@ pub struct TacticalState {
     pub event_log: Vec<BattleEvent>,
     #[serde(default)]
     pub reinforcement_waves: Vec<ReinforcementWave>,
+    #[serde(default)]
+    pub obscuring_fields: Vec<ObscuringField>,
+}
+
+impl TacticalState {
+    pub(crate) fn obscuring_penalty(&self, target: TilePos) -> i32 {
+        if self.obscuring_fields.iter().any(|field| {
+            field.remaining_phases > 0 && manhattan(field.center, target) <= i32::from(field.radius)
+        }) {
+            15
+        } else {
+            0
+        }
+    }
 }
 
 pub(crate) fn terrain_cost(position: TilePos, costs: &[(TilePos, u8)]) -> u8 {

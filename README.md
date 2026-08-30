@@ -24,7 +24,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
   experience, injury, and recovery.
-- XP-gated Soldier, Defender, Scout, Medic, and Engineer techniques with one-slot loadouts,
+- XP-gated techniques for all seven base classes with one-slot loadouts,
   self/unit/tile targeting, deterministic effects, and save-safe phase use tracking.
 - Authored and generated operations against three mechanically distinct factions.
 - A complete prototype campaign-state path through Isolation, Contact, Adaptation,

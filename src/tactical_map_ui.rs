@@ -112,6 +112,7 @@ pub(crate) fn draw(
             draw_terrain_tile(ctx, view, *position, hovered);
         }
     }
+    draw_obscuring_fields(ctx, view);
     targeting_card::draw_skill_target_tiles(ctx, view);
     for position in &tiles {
         if view.is_visible(*position, grid_rect, 90.0) {
@@ -278,6 +279,25 @@ fn draw_terrain_tile(
         draw_diamond_outline(top, Color::new(0.58, 0.98, 0.90, 0.92), 2.0);
     } else {
         draw_diamond_outline(top, Color::new(0.20, 0.38, 0.36, 0.72), 1.0);
+    }
+}
+
+fn draw_obscuring_fields(ctx: &UiContext<'_>, view: GridView) {
+    for field in &ctx.session.tactical.obscuring_fields {
+        let radius = i32::from(field.radius);
+        for x in field.center.x - radius..=field.center.x + radius {
+            for y in field.center.y - radius..=field.center.y + radius {
+                let tile = TilePos::new(x, y);
+                if !ctx.session.tactical.fog.is_valid(tile)
+                    || crate::tactical::manhattan(field.center, tile) > radius
+                {
+                    continue;
+                }
+                let diamond = view.diamond(tile);
+                draw_diamond_fill(diamond, Color::new(0.52, 0.74, 0.34, 0.20));
+                draw_diamond_outline(diamond, Color::new(0.72, 0.92, 0.42, 0.72), 2.0);
+            }
+        }
     }
 }
 

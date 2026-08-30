@@ -249,6 +249,26 @@ fn draw_skill(
         card.y + 49.0,
         TextStyle::new(13.0, validity_color(valid)).params(),
     );
+    let effect = match skill_id {
+        "adaptive_secretion" => {
+            crate::skills::adaptive_hazard(ctx.session, target.map_or("", |unit| unit.id.as_str()))
+                .map_or("NO HAZARD IN RANGE".to_owned(), |kind| {
+                    format!("RESISTS {}", kind.label())
+                })
+        }
+        "spore_veil" => "RADIUS 1 // -15 ACCURACY".to_owned(),
+        "kinetic_draw" => "PULLS 1 CLEAR TILE".to_owned(),
+        "premonition" => "DISRUPTS 1 PHASE".to_owned(),
+        _ => technique
+            .map(|technique| technique.description.clone())
+            .unwrap_or_default(),
+    };
+    draw_ui_text_ex(
+        &effect,
+        card.x + 82.0,
+        card.y + 64.0,
+        TextStyle::new(10.0, dark::TEXT_DIM).params(),
+    );
 }
 
 fn validity_label(valid: bool) -> &'static str {

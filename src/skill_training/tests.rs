@@ -4,7 +4,9 @@ use crate::data::GameData;
 #[test]
 fn support_and_combat_classes_expose_two_data_backed_techniques() {
     let data = GameData::load().unwrap();
-    for class_id in ["soldier", "defender", "scout", "medic", "engineer"] {
+    for class_id in [
+        "soldier", "defender", "scout", "medic", "engineer", "psionic", "biotech",
+    ] {
         let class = data
             .classes
             .iter()

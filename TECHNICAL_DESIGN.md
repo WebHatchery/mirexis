@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.68.0
+Save/content version: 1.69.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -85,6 +85,7 @@ Important transition payloads:
 | `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
 | `defense_objective.rs` | Vulnerable-asset attacks, integrity, deadline result, and hostile targeting helpers | Rendering or campaign rewards |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
+| `state/creation.rs` | Fresh tactical-session construction and mission-derived defaults | Runtime command execution |
 | `tactical.rs` | Serializable tactical types and geometry helpers | Campaign or drawing |
 | `tactical_ai.rs` | Deterministic hostile targeting and movement | Presentation or strategy |
 | `reinforcements.rs` | Holdout wave construction, placement, deployment, and read-only forecasts | Rendering |
@@ -138,8 +139,9 @@ multi-objective logic that would push it toward the source limit.
 
 ### 5.1 State and commands
 
-`TacticalState` owns the grid, occupancy, terrain costs, faction hazard tiles, edge cover, units, phase,
-round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
+`TacticalState` owns the grid, occupancy, terrain costs, faction hazard tiles, edge cover,
+obscuring fields, units, phase, round, objective, seeded RNG, and serializable `BattleEvent` log.
+The supported
 commands are move, attack, interact, activate mutation, activate class action, and
 activate technique. Carried field equipment also grants validated target commands whose
 per-mission use is serialized with the unit. Techniques are learned by deployed
@@ -177,14 +179,18 @@ tiles share the same presentation; previewing never mutates state or consumes RN
   Static Rifts Disrupt. Units are immune to hazards authored by their own faction.
 - Hazard geometry is serialized, mirrored with its map recipe, visibly marked, and named
   in both the grid legend and ordered battle events.
-- Soldier, Defender, Scout, Medic, and Engineer each have two data-defined techniques.
+- Soldier, Defender, Scout, Medic, Engineer, Psionic, and Biotech Specialist each have two
+  data-defined techniques.
   Controlled Burst fires twice for the weapon cost, Armour Drill halves armour for the
   next attack, Interpose and Anchor Point apply one-phase Guarded protection, Slipstep
   crosses a highlighted hazard without landing resolution, and Spotter's Mark grants the
   next allied attack a cover-breaking accuracy bonus. Stabilise revives an incapacitated
   ally at one vitality without actions, Combat Stimulant trades two immediate ally AP for
   two Hindered phases, Portable Cover places adjacent destructible directional cover, and
-  Overcharge strengthens the next carried equipment action.
+  Overcharge strengthens the next carried equipment action. Kinetic Draw pulls a hostile
+  onto a validated clear tile, Premonition applies one-phase Disrupted intent, Adaptive
+  Secretion gives an ally resistance to the nearest visible hazard, and Spore Veil creates
+  a one-phase radius-one obscuring field with an accuracy penalty.
 - Colony-defense blocked tiles are derived from saved building coordinates.
 - Destroyed cover is removed from the authoritative blocked set, immediately opening
   that tile to pathfinding and any firing line that crosses it.
@@ -287,7 +293,9 @@ Harness applies Disrupted to a chosen hostile within six tiles. Each costs one a
 point and may be used once per mission. Arming an item highlights only targets accepted
 by the same command validator used at execution time.
 
-Focused, Guarded, Quickened, Disrupted, Hindered, and Regenerating are serialized timed statuses.
+Focused, Guarded, Quickened, Disrupted, Hindered, Regenerating, and Adapted are serialized
+timed statuses. Obscuring fields are serialized tactical geometry with explicit remaining
+phase counts and expire during phase refresh.
 Their modifiers feed the same effective-stat methods used by command validation,
 attacks, and hostile AI. Phase ownership controls expiry so defensive and hostile
 debuffs survive long enough to affect the opposing phase.
@@ -671,6 +679,7 @@ Migration coverage:
 | 1.65.0 | Persistent first-hour elapsed time, milestone timings, operation duration/round counts, invalid commands, and guide opens; 1.64 onboarding progress remains exact while metrics default safely |
 | 1.67.0 | Soldier, Defender, and Scout technique pairs, active loadouts, tactical targeting, and phase-use migration |
 | 1.68.0 | Medic and Engineer technique pairs, one-round equipment overcharge state, and legacy tactical default migration |
+| 1.69.0 | Psionic and Biotech technique pairs, hazard adaptation, obscuring fields, and tactical runtime migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

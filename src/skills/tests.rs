@@ -159,6 +159,100 @@ fn slipstep_reaches_a_hazard_without_triggering_its_landing_effect() {
 }
 
 #[test]
+fn kinetic_draw_pulls_a_hostile_into_the_nearest_clear_tile() {
+    let mut session = session_with_unit_skill("mara_venn", "kinetic_draw");
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(8, 2);
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(10, 2);
+
+    let events = session
+        .activate_skill_on("mara_venn", "kinetic_draw", "brood_stalker_a")
+        .unwrap();
+
+    assert_eq!(
+        session.unit("brood_stalker_a").unwrap().position,
+        TilePos::new(9, 2)
+    );
+    assert_eq!(session.unit("mara_venn").unwrap().action_points, 4);
+    assert!(events.iter().any(|event| matches!(
+        event,
+        BattleEvent::UnitMoved {
+            unit_id,
+            cost: 0,
+            ..
+        } if unit_id == "brood_stalker_a"
+    )));
+}
+
+#[test]
+fn premonition_softens_a_hostiles_accuracy_for_the_current_phase() {
+    let mut session = session_with_unit_skill("mara_venn", "premonition");
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(8, 2);
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(10, 2);
+    let before = session
+        .unit("brood_stalker_a")
+        .unwrap()
+        .effective_accuracy();
+
+    session
+        .activate_skill_on("mara_venn", "premonition", "brood_stalker_a")
+        .unwrap();
+
+    let target = session.unit("brood_stalker_a").unwrap();
+    assert!(target.has_status(StatusKind::Disrupted));
+    assert_eq!(target.effective_accuracy(), before - 20);
+}
+
+#[test]
+fn adaptive_secretion_resists_the_nearest_visible_hazard() {
+    let mut session = session_with_unit_skill("nadi_vale", "adaptive_secretion");
+    unit_mut(&mut session, "nadi_vale").position = TilePos::new(7, 20);
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(6, 20);
+    session.tactical.hazards.push(HazardTile {
+        position: TilePos::new(6, 21),
+        kind: HazardKind::StaticRift,
+    });
+
+    session
+        .activate_skill_on("nadi_vale", "adaptive_secretion", "kira_voss")
+        .unwrap();
+
+    let target = session.unit("kira_voss").unwrap();
+    assert_eq!(target.hazard_resistance, Some(HazardKind::StaticRift));
+    assert!(target.has_status(StatusKind::Adapted));
+    let health = target.health;
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(6, 21);
+    let events = crate::hazards::resolve_after_move(&mut session, "kira_voss");
+    assert_eq!(session.unit("kira_voss").unwrap().health, health);
+    assert!(!events
+        .iter()
+        .any(|event| matches!(event, BattleEvent::HazardTriggered { .. })));
+}
+
+#[test]
+fn spore_veil_adds_a_bounded_obscuring_field_used_by_attack_preview() {
+    let mut session = session_with_unit_skill("nadi_vale", "spore_veil");
+    unit_mut(&mut session, "nadi_vale").position = TilePos::new(7, 20);
+    unit_mut(&mut session, "kira_voss").position = TilePos::new(6, 19);
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(8, 19);
+    let attacker = session.unit("kira_voss").unwrap().clone();
+    let target = session.unit("brood_stalker_a").unwrap().clone();
+    let before = session.hit_chance(&attacker, &target);
+
+    session
+        .activate_skill_on_tile("nadi_vale", "spore_veil", TilePos::new(7, 19))
+        .unwrap();
+
+    assert_eq!(session.tactical.obscuring_fields.len(), 1);
+    assert_eq!(session.tactical.obscuring_penalty(target.position), 15);
+    assert_eq!(
+        before.saturating_sub(session.hit_chance(&attacker, &target)),
+        15
+    );
+    session.advance_obscuring_fields();
+    assert!(session.tactical.obscuring_fields.is_empty());
+}
+
+#[test]
 fn stabilise_revives_an_incapacitated_ally_without_granting_actions() {
     let mut session = session_with_unit_skill("ilya_reed", "stabilise");
     unit_mut(&mut session, "ilya_reed").position = TilePos::new(5, 20);

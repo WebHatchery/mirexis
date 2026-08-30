@@ -14,8 +14,8 @@ their counts.
 This document plans the next content horizon: playable peoples and origins, classes,
 skills, buildings, upgrades, recruits, and the story that connects them. It is subordinate
 to `PLAYABLE_GAME_PHASE_1.md` until the required uncoached first-hour playtests are
-complete. The first Soldier, Defender, Scout, Medic, and Engineer technique pairs now
-form a deliberately bounded tactical slice; the remaining concepts below are still
+complete. All fourteen base-class techniques are now implemented as a deliberately
+bounded tactical slice; mastery forks and the remaining concepts below are still
 planning direction.
 
 ## 2. Expansion rules
@@ -219,10 +219,11 @@ technique.
 
 ### 7.2 First skill set
 
-The first content pass should add two techniques per base class. Soldier, Defender, Scout,
-Medic, and Engineer now provide the implemented vertical slice, with one equipped
-technique slot, XP-gated learning, deterministic target validation, and visible touch
-controls. A later mastery choice can evolve one of them horizontally.
+The first content pass now has two techniques for every base class: Soldier, Defender,
+Scout, Medic, Engineer, Psionic, and Biotech Specialist. Each has one equipped technique
+slot, XP-gated learning, deterministic target validation, save migration, and visible
+touch controls. The next pass should balance the fourteen-technique set before a later
+mastery choice evolves one of them horizontally.
 
 | Class | Technique | Tactical purpose | Possible mastery fork |
 |---|---|---|---|
@@ -368,9 +369,9 @@ notice the colony responding to an operation without opening a ledger.
 
 Goal: turn retained skill fields and class slots into meaningful builds.
 
-- Implement the first two techniques for five base classes as a vertical slice.
+- Implement and balance the first two techniques for all seven base classes as a vertical slice.
 - Add skill preview, loadout, learning, save migration, and touch controls.
-- Expand to all fourteen base techniques only after the slice is balanced.
+- Tune the fourteen-technique interactions before adding mastery branches.
 - Add Breacher and Fortifier before the two more systemic advanced classes.
 
 Exit test: two characters in the same class can play differently, and retraining creates
