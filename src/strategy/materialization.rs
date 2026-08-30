@@ -97,7 +97,9 @@ impl StrategyState {
                     .map(|tile| CoverEdgeDef {
                         position: [tile.x, tile.y],
                         direction: EdgeDirection::West,
-                        strength: if defense.watchtower_tiles.contains(tile) {
+                        strength: if defense.watchtower_tiles.contains(tile)
+                            || defense.shield_tiles.contains(tile)
+                        {
                             45
                         } else {
                             25

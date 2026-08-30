@@ -186,3 +186,111 @@ pub(super) fn draw_watchtower(center: Vec2, zoom: f32, powered: bool, damaged: b
         );
     }
 }
+
+pub(super) fn draw_redoubt_arsenal(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.42, 0.78, 1.0, 0.94)
+    } else {
+        Color::new(0.42, 0.52, 0.62, 0.82)
+    };
+    draw_rectangle(
+        center.x - 27.0 * zoom,
+        center.y - 48.0 * zoom,
+        54.0 * zoom,
+        7.0 * zoom,
+        accent,
+    );
+    for offset in [-21.0, 21.0] {
+        draw_line(
+            center.x + offset * zoom,
+            center.y - 42.0 * zoom,
+            center.x + offset * zoom,
+            center.y - 18.0 * zoom,
+            4.0 * zoom,
+            accent,
+        );
+    }
+    draw_line(
+        center.x - 27.0 * zoom,
+        center.y - 18.0 * zoom,
+        center.x + 27.0 * zoom,
+        center.y - 18.0 * zoom,
+        3.0 * zoom,
+        accent,
+    );
+}
+
+pub(super) fn draw_choir_garden(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.58, 0.96, 0.34, 0.94)
+    } else {
+        Color::new(0.38, 0.54, 0.28, 0.82)
+    };
+    draw_line(
+        center.x,
+        center.y - 55.0 * zoom,
+        center.x,
+        center.y - 18.0 * zoom,
+        3.0 * zoom,
+        accent,
+    );
+    for (start, end) in [(-1.0, -19.0), (1.0, 19.0), (-0.6, 13.0), (0.6, -13.0)] {
+        draw_line(
+            center.x,
+            center.y - 39.0 * zoom,
+            center.x + end * zoom,
+            center.y - (39.0 + start * 15.0) * zoom,
+            2.0 * zoom,
+            accent,
+        );
+    }
+    draw_circle(
+        center.x,
+        center.y - 58.0 * zoom,
+        5.0 * zoom,
+        Color::new(
+            accent.r,
+            accent.g,
+            accent.b,
+            if powered { 0.9 } else { 0.3 },
+        ),
+    );
+}
+
+pub(super) fn draw_threshold_spire(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.76, 0.56, 1.0, 0.96)
+    } else {
+        Color::new(0.46, 0.38, 0.64, 0.82)
+    };
+    draw_line(
+        center.x,
+        center.y - 68.0 * zoom,
+        center.x,
+        center.y - 18.0 * zoom,
+        3.0 * zoom,
+        accent,
+    );
+    for radius in [22.0, 14.0, 7.0] {
+        draw_poly_lines(
+            center.x,
+            center.y - 48.0 * zoom,
+            4,
+            radius * zoom,
+            45.0,
+            1.4 * zoom,
+            Color::new(
+                accent.r,
+                accent.g,
+                accent.b,
+                if powered { 0.72 } else { 0.28 },
+            ),
+        );
+    }
+}

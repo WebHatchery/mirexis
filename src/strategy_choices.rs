@@ -75,6 +75,7 @@ impl StrategyState {
                 path.name, path.materials_cost, path.biomass_cost, path.power_cost
             ));
         }
+        colony.ensure_identity_building(&path.id)?;
         colony.resources.materials -= path.materials_cost;
         colony.resources.biomass -= path.biomass_cost;
         colony.resources.power -= path.power_cost;

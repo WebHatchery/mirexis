@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 298 Mirexis unit tests pass.
+- 300 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 86 audited 1280×720 scenes, including the first-hour

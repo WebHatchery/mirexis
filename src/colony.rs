@@ -3,6 +3,9 @@
 use macroquad_toolkit::grid::TilePos;
 use serde::{Deserialize, Serialize};
 
+mod defense;
+mod identity;
+
 pub const COLONY_WIDTH: i32 = 20;
 pub const COLONY_HEIGHT: i32 = 20;
 pub const SETTLEMENT_CENTER: [i32; 2] = [10, 10];
@@ -29,6 +32,9 @@ pub enum BuildingKind {
     Commons,
     RelayMast,
     Watchtower,
+    RedoubtArsenal,
+    ChoirGarden,
+    ThresholdSpire,
 }
 
 impl BuildingKind {
@@ -46,6 +52,9 @@ impl BuildingKind {
             Self::Commons => "Commons",
             Self::RelayMast => "Relay Mast",
             Self::Watchtower => "Watchtower",
+            Self::RedoubtArsenal => "Redoubt Arsenal",
+            Self::ChoirGarden => "Choir Garden",
+            Self::ThresholdSpire => "Threshold Spire",
         }
     }
 
@@ -71,6 +80,8 @@ impl BuildingKind {
             Self::Commons => 1,
             Self::RelayMast => 1,
             Self::Watchtower => 1,
+            Self::RedoubtArsenal | Self::ChoirGarden => 1,
+            Self::ThresholdSpire => 2,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -132,7 +143,10 @@ impl BuildingKind {
     pub fn repair_cost(self) -> i32 {
         match self {
             Self::Barricade => 10,
-            Self::CommandCentre => 35,
+            Self::CommandCentre
+            | Self::RedoubtArsenal
+            | Self::ChoirGarden
+            | Self::ThresholdSpire => 35,
             Self::GeneLab | Self::Waystation => 30,
             _ => 25,
         }
@@ -200,6 +214,7 @@ pub struct ColonyDefenseMap {
     pub blocked_tiles: Vec<TilePos>,
     pub cover_tiles: Vec<TilePos>,
     pub watchtower_tiles: Vec<TilePos>,
+    pub shield_tiles: Vec<TilePos>,
     pub critical_objectives: Vec<TilePos>,
 }
 
@@ -446,6 +461,9 @@ impl ColonyState {
         {
             self.resources.biomass += 2;
         }
+        if self.has_facility(BuildingKind::ChoirGarden) {
+            self.resources.biomass += 1;
+        }
     }
 
     pub fn has_upgrade(&self, building_id: &str, upgrade_id: &str) -> bool {
@@ -572,48 +590,6 @@ impl ColonyState {
         self.resources.materials -= cost;
         building.damaged = false;
         Ok((kind.name().to_owned(), cost))
-    }
-
-    pub fn defense_map(&self) -> ColonyDefenseMap {
-        let mut blocked_tiles = Vec::new();
-        let mut cover_tiles = Vec::new();
-        let mut watchtower_tiles = Vec::new();
-        let mut critical_objectives = Vec::new();
-        for building in &self.buildings {
-            for offset in building.kind.footprint() {
-                let position = TilePos::new(
-                    building.position[0] + offset[0] + 2,
-                    building.position[1] + offset[1] + 1,
-                );
-                blocked_tiles.push(position);
-                match building.kind {
-                    BuildingKind::Barricade | BuildingKind::Barracks | BuildingKind::Workshop => {
-                        cover_tiles.push(position)
-                    }
-                    BuildingKind::Watchtower
-                        if !building.damaged && self.building_is_powered(&building.id) =>
-                    {
-                        cover_tiles.push(position);
-                        watchtower_tiles.push(position);
-                    }
-                    BuildingKind::Watchtower => {}
-                    BuildingKind::CommandCentre
-                    | BuildingKind::Infirmary
-                    | BuildingKind::Hydroponics
-                    | BuildingKind::PowerPlant
-                    | BuildingKind::GeneLab
-                    | BuildingKind::Waystation
-                    | BuildingKind::Commons
-                    | BuildingKind::RelayMast => critical_objectives.push(position),
-                }
-            }
-        }
-        ColonyDefenseMap {
-            blocked_tiles,
-            cover_tiles,
-            watchtower_tiles,
-            critical_objectives,
-        }
     }
 
     #[cfg(test)]

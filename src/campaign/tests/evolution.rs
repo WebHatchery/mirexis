@@ -257,6 +257,11 @@ fn mirexis_paths_change_defense_supply_and_recovery() {
         .strategy
         .choose_mirexis_path("human_redoubt", &mut redoubt.colony, &data)
         .unwrap();
+    assert!(redoubt
+        .colony
+        .buildings
+        .iter()
+        .any(|building| building.kind == crate::colony::BuildingKind::RedoubtArsenal));
     assert_eq!(
         redoubt.strategy.selected_mission().unwrap().template_id,
         "mirexis_redoubt_last_wall"
@@ -280,6 +285,11 @@ fn mirexis_paths_change_defense_supply_and_recovery() {
         .strategy
         .choose_mirexis_path("living_commonwealth", &mut commonwealth.colony, &data)
         .unwrap();
+    assert!(commonwealth
+        .colony
+        .buildings
+        .iter()
+        .any(|building| building.kind == crate::colony::BuildingKind::ChoirGarden));
     assert_eq!(commonwealth.deployment_food_cost(&data), food_before - 1);
     assert_eq!(
         commonwealth
@@ -298,6 +308,11 @@ fn mirexis_paths_change_defense_supply_and_recovery() {
         .strategy
         .choose_mirexis_path("open_threshold", &mut threshold.colony, &data)
         .unwrap();
+    assert!(threshold
+        .colony
+        .buildings
+        .iter()
+        .any(|building| building.kind == crate::colony::BuildingKind::ThresholdSpire));
     assert_eq!(
         threshold.strategy.selected_mission().unwrap().template_id,
         "mirexis_threshold_door_of_light"

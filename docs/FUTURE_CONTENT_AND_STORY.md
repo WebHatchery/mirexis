@@ -336,15 +336,15 @@ Build these in priority order:
 Escalation should unlock exactly one major identity project. These are inhabited civic
 institutions, not superweapons.
 
-- **Redoubt Arsenal:** human engineering, resilient cover, militia preparation, and
+- **Redoubt Arsenal** *(implemented)*: human engineering, resilient cover, militia preparation, and
   controlled Directorate salvage. Its risk is hierarchy becoming permanent emergency law.
-- **Choir Garden:** living walls, communal healing, Brood dialogue, and biomass cycling.
+- **Choir Garden** *(implemented)*: living walls, communal healing, Brood dialogue, and biomass cycling.
   Its risk is the colony's needs being interpreted by a growing nonhuman consensus.
-- **Threshold Spire:** phase routes, shield fields, Echo-Bound visitors, and remote
+- **Threshold Spire** *(implemented)*: phase routes, shield fields, Echo-Bound visitors, and remote
   exploration. Its risk is power dependence and attention from beyond Mirexis.
 
-The late-game city art, NPC placement, ambient effects, defence map, and epilogue should
-all acknowledge the chosen project.
+The late-game city art, defence map, and epilogue now acknowledge the chosen project. NPC
+placement, ambient effects, and bespoke identity-building scenes remain follow-up work.
 
 ### 8.4 Defence structures
 
@@ -441,7 +441,8 @@ Goal: make building and upgrade choices visible in city life and defence.
   and Commons efficiency or Culture Beds growing biomass while the facility is online.
 - Implemented: queue a level-2 Workshop branch, with Precision Bench reducing weapon and armour
   fabrication costs or Drone Bay reducing facility repair costs while the Workshop is online.
-- Implement the three identity buildings and their defence-map consequences.
+- Implemented: establish one physical identity building for the chosen Mirexis path, with
+  path-specific map cover, objective priority, power, and biomass consequences.
 - Connect power failure, damage, repair, and NPC scenes to every new facility.
 
 Exit test: screenshots of two campaigns communicate different civic choices, and those

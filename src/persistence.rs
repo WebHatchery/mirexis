@@ -56,6 +56,11 @@ pub fn migrate_save_value(
     save.campaign.colony.ensure_phase_one_infrastructure(
         detected_version.as_deref() != Some(data.config.version.as_str()),
     );
+    if !save.campaign.strategy.mirexis_path_id.is_empty() {
+        save.campaign
+            .colony
+            .ensure_identity_building(&save.campaign.strategy.mirexis_path_id)?;
+    }
     save.campaign.refresh_contact_completion(data);
     if detected_version.as_deref() == Some("1.12.0")
         && save.campaign.strategy.contact_complete

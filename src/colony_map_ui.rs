@@ -469,6 +469,15 @@ fn draw_plot(
             BuildingKind::Watchtower => {
                 building_art::draw_watchtower(center, view.zoom, powered, building.damaged)
             }
+            BuildingKind::RedoubtArsenal => {
+                building_art::draw_redoubt_arsenal(center, view.zoom, powered, building.damaged)
+            }
+            BuildingKind::ChoirGarden => {
+                building_art::draw_choir_garden(center, view.zoom, powered, building.damaged)
+            }
+            BuildingKind::ThresholdSpire => {
+                building_art::draw_threshold_spire(center, view.zoom, powered, building.damaged)
+            }
             _ => {}
         }
         draw_building_state(center, building.damaged, powered);
@@ -509,6 +518,9 @@ fn building_index(kind: BuildingKind) -> usize {
         BuildingKind::Commons => 1,
         BuildingKind::RelayMast => 6,
         BuildingKind::Watchtower => 6,
+        BuildingKind::RedoubtArsenal => 1,
+        BuildingKind::ChoirGarden => 5,
+        BuildingKind::ThresholdSpire => 7,
     }
 }
 

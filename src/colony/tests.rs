@@ -210,6 +210,69 @@ fn hydroponics_level_two_branches_change_food_and_biomass_yields() {
 }
 
 #[test]
+fn identity_projects_are_path_specific_and_change_defense_behavior() {
+    let mut redoubt = ColonyState::new();
+    redoubt.ensure_identity_building("human_redoubt").unwrap();
+    let redoubt_tile = redoubt
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::RedoubtArsenal)
+        .map(|building| TilePos::new(building.position[0] + 2, building.position[1] + 1))
+        .unwrap();
+    let redoubt_map = redoubt.defense_map();
+    assert_eq!(redoubt_map.critical_objectives[0], redoubt_tile);
+    assert!(redoubt_map.cover_tiles.contains(&redoubt_tile));
+    assert!(redoubt
+        .ensure_identity_building("living_commonwealth")
+        .is_err());
+
+    let mut choir = ColonyState::new();
+    choir
+        .ensure_identity_building("living_commonwealth")
+        .unwrap();
+    let biomass = choir.resources.biomass;
+    choir.advance_operation();
+    assert_eq!(choir.resources.biomass, biomass + 1);
+    let choir_building = choir
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::ChoirGarden)
+        .unwrap();
+    let choir_tile = TilePos::new(
+        choir_building.position[0] + 2,
+        choir_building.position[1] + 1,
+    );
+    assert!(choir.defense_map().cover_tiles.contains(&choir_tile));
+
+    let mut threshold = ColonyState::new();
+    threshold
+        .ensure_identity_building("open_threshold")
+        .unwrap();
+    assert!(threshold.defense_map().shield_tiles.is_empty());
+    threshold.resources.power += 2;
+    let threshold_building = threshold
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::ThresholdSpire)
+        .unwrap();
+    let threshold_tile = TilePos::new(
+        threshold_building.position[0] + 2,
+        threshold_building.position[1] + 1,
+    );
+    assert!(threshold
+        .defense_map()
+        .shield_tiles
+        .contains(&threshold_tile));
+    threshold
+        .buildings
+        .iter_mut()
+        .find(|building| building.kind == BuildingKind::ThresholdSpire)
+        .unwrap()
+        .damaged = true;
+    assert!(threshold.defense_map().shield_tiles.is_empty());
+}
+
+#[test]
 fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() {
     for kind in [
         BuildingKind::Barricade,
@@ -269,6 +332,9 @@ fn every_building_kind_owns_only_its_anchor_tile() {
         BuildingKind::Commons,
         BuildingKind::RelayMast,
         BuildingKind::Watchtower,
+        BuildingKind::RedoubtArsenal,
+        BuildingKind::ChoirGarden,
+        BuildingKind::ThresholdSpire,
     ] {
         let mut colony = ColonyState::new();
         colony.buildings.clear();
