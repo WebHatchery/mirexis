@@ -649,3 +649,23 @@ fn phase_conversations_archive_the_current_phase_beat() {
 
     assert!(campaign.colony_story.has_heard("phase_adaptation_nadi"));
 }
+
+#[test]
+fn contact_route_conversations_archive_each_stage_for_the_chosen_protocol() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "brood_cultivation".to_owned();
+
+    campaign.acknowledge_colonist("nadi_vale");
+    assert!(campaign.colony_story.has_heard("contact_brood_witness"));
+
+    campaign.strategy.contact_trace_completed = true;
+    campaign.acknowledge_colonist("ilya_reed");
+    assert!(campaign
+        .colony_story
+        .has_heard("contact_brood_contradiction"));
+
+    campaign.strategy.contact_complete = true;
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign.colony_story.has_heard("contact_brood_aftermath"));
+}

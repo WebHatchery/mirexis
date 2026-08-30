@@ -285,6 +285,14 @@ impl ColonyExplorer {
             campaign.strategy.campaign_complete,
             &campaign.colony_story,
         )
+        .or_else(|| {
+            colony_story::contact_route_beat(
+                &campaign.strategy.contact_protocol_id,
+                &character.id,
+                campaign.strategy.contact_trace_completed,
+                campaign.strategy.contact_complete,
+            )
+        })
         .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
         .or_else(|| {
             campaign

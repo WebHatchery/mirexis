@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.87.0
+Save/content version: 1.88.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -287,6 +287,11 @@ Route-specific character definitions carry a recruitment protocol, optional camp
 resource, and cost. The Waystation resolves the first matching definition rather than
 hard-coding a recruit: Veya uses Contact materials, while Sedge uses Adaptation biomass and
 raises Brood attention when the colony shelters their pre-recorded mutation.
+
+Contact route field notes are keyed by the selected protocol and three authoritative campaign
+flags: before trace completion, after the trace but before Contact completion, and after Contact
+completion. Each stage names one starting colonist, so all three routes retain visible witness,
+contradiction, and aftermath voices without requiring a route-specific recruit.
 
 The colony roster screen persists a selected colonist and exposes every base class with
 aptitude-priced material costs. Workshop choices cover starter equipment plus three
@@ -762,6 +767,7 @@ Migration coverage:
 | 1.85.0 | Authored identity-contact epilogue voices with readiness-aware ending variations |
 | 1.86.0 | Third-beat post-ending identity scenes unlocked by final-reflection acknowledgement |
 | 1.87.0 | Mireborn Adapted Sedge recruitment, biomass route cost, Waystation presence, and MAP HAZARD equipment action |
+| 1.88.0 | Three-stage witness, contradiction, and aftermath colony notes for every Contact protocol |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -813,7 +819,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (314 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (316 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

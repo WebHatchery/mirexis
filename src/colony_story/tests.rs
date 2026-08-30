@@ -98,6 +98,47 @@ fn phase_beats_give_each_middle_campaign_phase_a_specific_voice() {
 }
 
 #[test]
+fn each_contact_route_has_a_witness_contradiction_and_aftermath() {
+    for (protocol_id, characters, ids) in [
+        (
+            "directorate_requisition",
+            ["kira_voss", "sol_cairn", "mara_venn"],
+            [
+                "contact_directorate_witness",
+                "contact_directorate_contradiction",
+                "contact_directorate_aftermath",
+            ],
+        ),
+        (
+            "brood_cultivation",
+            ["nadi_vale", "ilya_reed", "mara_venn"],
+            [
+                "contact_brood_witness",
+                "contact_brood_contradiction",
+                "contact_brood_aftermath",
+            ],
+        ),
+        (
+            "ascendant_capacitor",
+            ["sol_cairn", "kira_voss", "nadi_vale"],
+            [
+                "contact_ascendant_witness",
+                "contact_ascendant_contradiction",
+                "contact_ascendant_aftermath",
+            ],
+        ),
+    ] {
+        for (stage, (character_id, beat_id)) in characters.iter().zip(ids).enumerate() {
+            let beat =
+                contact_route_beat(protocol_id, character_id, stage >= 1, stage >= 2).unwrap();
+            assert_eq!(beat.id, beat_id);
+            assert!(!beat.text.is_empty());
+        }
+        assert!(contact_route_beat(protocol_id, "veya_orn", false, false).is_none());
+    }
+}
+
+#[test]
 fn each_identity_building_has_one_path_specific_colony_voice() {
     for (path_id, character_id, beat_id) in [
         ("human_redoubt", "mara_venn", "identity_redoubt_arsenal"),

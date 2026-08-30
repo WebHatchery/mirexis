@@ -15,8 +15,10 @@ The first route-exclusive outsider slice now covers both ends of the early campa
 Directorate Requisition can build a Waystation, recruit Veya Orn, and carry her origin,
 equipment action, relationships, disagreements, and closing choice through saves, while
 Adaptation can recruit Sedge, a Mireborn courier, for biomass. Sedge brings a distinct
-MAP HAZARD action, Gene Lab presence, Brood attention consequence, and ending voice. The
-remaining origins and equivalent faction routes stay future work.
+MAP HAZARD action, Gene Lab presence, Brood attention consequence, and ending voice. Each
+Contact protocol now also carries a three-stage witness, contradiction, and aftermath thread
+through the starting colonists. The remaining origins and equivalent faction routes stay
+future work.
 
 The Commons is also now a working home-space slice: a powered settlement can host one
 shared meal per operation, spend food, and turn the active squad's table into persistent
@@ -472,7 +474,8 @@ differences alter both preparation and a colony assault.
 
 Goal: make the implemented five-phase foundation narratively complete.
 
-- Expand each Contact route with its witness, contradiction, and aftermath.
+- Implemented: expand each Contact route with a persistent witness, contradiction, and
+  aftermath field note keyed to the selected protocol and campaign completion flags.
 - Add recurring evidence across Adaptation and Escalation instead of a finale lore dump.
 - Pay off all five starting arcs and the route-exclusive outsider.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a

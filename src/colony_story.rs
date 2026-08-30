@@ -302,6 +302,79 @@ pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBea
     Some(ColonyBeat { id, title, text })
 }
 
+pub(crate) fn contact_route_beat(
+    protocol_id: &str,
+    character_id: &str,
+    trace_completed: bool,
+    contact_complete: bool,
+) -> Option<ColonyBeat> {
+    let stage = if contact_complete {
+        2
+    } else if trace_completed {
+        1
+    } else {
+        0
+    };
+    let (expected_character, id, title, text) = match (protocol_id, stage) {
+        ("directorate_requisition", 0) => (
+            "kira_voss",
+            "contact_directorate_witness",
+            "THE BLACK CHANNEL HAS A WITNESS",
+            "The Directorate calls this a requisition because a clean word can make a dirty demand sound lawful. Kira copied the transmission into the colony ledger so nobody has to trust the signal alone.",
+        ),
+        ("directorate_requisition", 1) => (
+            "sol_cairn",
+            "contact_directorate_contradiction",
+            "THE CODE DISAGREES WITH THE MAP",
+            "The stolen code opens a route, but its map still assumes the colony is an asset. Sol can make the machine obey; the harder question is whether we should let an old command decide where we stand.",
+        ),
+        ("directorate_requisition", 2) => (
+            "mara_venn",
+            "contact_directorate_aftermath",
+            "THE GATE IS NOT A RETURN ADDRESS",
+            "The Directorate can still find the gate, but it no longer owns what happens behind it. Mara marks the route as ours and leaves the old command language outside the wall.",
+        ),
+        ("brood_cultivation", 0) => (
+            "nadi_vale",
+            "contact_brood_witness",
+            "THE CHORUS HAS A PULSE",
+            "The contained culture answers when Nadi speaks, but an answer is not consent. She keeps the glass open long enough for the colony to hear a living thing without pretending it belongs to us.",
+        ),
+        ("brood_cultivation", 1) => (
+            "ilya_reed",
+            "contact_brood_contradiction",
+            "A DOCILE THING STILL CHOOSES",
+            "The Brood echo is calm under observation and still changes when the room changes. Ilya refuses to call that obedience; medicine begins where the subject is allowed to remain unpredictable.",
+        ),
+        ("brood_cultivation", 2) => (
+            "mara_venn",
+            "contact_brood_aftermath",
+            "THE GLASS DOES NOT MAKE US SAFE",
+            "The colony learned to keep the chorus alive without making it a tool. Mara records the danger beside the benefit, because a shelter that hides its cost is only another kind of cage.",
+        ),
+        ("ascendant_capacitor", 0) => (
+            "sol_cairn",
+            "contact_ascendant_witness",
+            "A CIRCUIT LOOKS BACK",
+            "The Ascendant lattice woke before Sol closed the circuit. It did not transmit a message so much as notice the colony, and now every repair has to account for being observed.",
+        ),
+        ("ascendant_capacitor", 1) => (
+            "kira_voss",
+            "contact_ascendant_contradiction",
+            "THE ROUTE REMEMBERS US",
+            "Kira's map shows a path the Ascendants insist was sealed. The route remembers our movement anyway, which means the lattice is not only a road; it is a witness with a history of its own.",
+        ),
+        ("ascendant_capacitor", 2) => (
+            "nadi_vale",
+            "contact_ascendant_aftermath",
+            "THE LIGHT IS NOT AN ANSWER",
+            "The capacitor gives the colony power and asks for a future it cannot explain. Nadi leaves the question written beside the switch: access is useful, but usefulness is not permission.",
+        ),
+        _ => return None,
+    };
+    (expected_character == character_id).then_some(ColonyBeat { id, title, text })
+}
+
 pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
     match path_id {
         "human_redoubt" => Some("mara_venn"),

@@ -40,6 +40,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface a phase-specific colony field note through a
   named colonist voice and persistent acknowledgement.
+- Each Contact protocol now carries a three-stage witness, contradiction, and aftermath thread
+  through distinct colonist voices before Adaptation begins.
 - Completed ending dossiers add an authored identity-contact voice that reflects the named
   survivor's readiness or recovery.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,

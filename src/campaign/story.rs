@@ -9,6 +9,14 @@ impl CampaignState {
             self.strategy.campaign_complete,
             &self.colony_story,
         )
+        .or_else(|| {
+            crate::colony_story::contact_route_beat(
+                &self.strategy.contact_protocol_id,
+                character_id,
+                self.strategy.contact_trace_completed,
+                self.strategy.contact_complete,
+            )
+        })
         .or_else(|| crate::colony_story::phase_beat(&self.strategy.phase_id, character_id))
         .or_else(|| {
             self.last_operation_had_commons_meal()
