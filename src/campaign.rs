@@ -99,6 +99,8 @@ pub struct CampaignState {
     pub relationships: Vec<RelationshipRecord>,
     #[serde(default)]
     pub first_hour: crate::first_hour::FirstHourProgress,
+    #[serde(default)]
+    pub colony_story: crate::colony_story::ColonyStoryState,
 }
 
 impl CampaignState {
@@ -122,7 +124,21 @@ impl CampaignState {
             operations_completed: 0,
             relationships: Vec::new(),
             first_hour: crate::first_hour::FirstHourProgress::default(),
+            colony_story: crate::colony_story::ColonyStoryState::default(),
         }
+    }
+
+    pub fn acknowledge_colonist(&mut self, character_id: &str) {
+        self.first_hour.acknowledge_colonist(character_id);
+        let Some(beat) = crate::colony_story::current_beat(
+            character_id,
+            self.operations_completed,
+            self.first_hour.first_outcome_won,
+            self.first_hour.second_outcome_won,
+        ) else {
+            return;
+        };
+        self.colony_story.acknowledge(beat.id);
     }
 
     pub fn ensure_roster_characters(&mut self, data: &GameData) -> usize {

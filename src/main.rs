@@ -20,6 +20,7 @@ mod colony_decision_ui;
 mod colony_exploration;
 mod colony_header_ui;
 mod colony_map_ui;
+mod colony_story;
 mod colony_ui;
 mod combat_feedback;
 mod cover_actions;

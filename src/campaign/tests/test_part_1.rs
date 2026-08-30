@@ -422,6 +422,21 @@ fn character_event_choice_puts_the_legacy_on_the_selected_participant() {
 }
 
 #[test]
+fn colony_conversations_remember_each_heard_story_beat() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+
+    campaign.acknowledge_colonist("mara_venn");
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign.colony_story.has_heard("mara_arrival"));
+
+    campaign.operations_completed = 1;
+    campaign.first_hour.first_outcome_won = Some(true);
+    campaign.acknowledge_colonist("mara_venn");
+    assert!(campaign.colony_story.has_heard("mara_first_victory"));
+}
+
+#[test]
 fn successful_operations_apply_all_recovered_resources() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);

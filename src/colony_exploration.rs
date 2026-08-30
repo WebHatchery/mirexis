@@ -3,6 +3,7 @@
 use crate::campaign::{Availability, CampaignState, CharacterRecord};
 use crate::colony::{ColonyState, COLONY_HEIGHT, COLONY_WIDTH};
 use crate::colony_map_ui::view::ColonyView;
+use crate::colony_story;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
@@ -230,7 +231,7 @@ impl ColonyExplorer {
         let Some(character) = self.talking_to.as_deref().and_then(|id| npc(campaign, id)) else {
             return false;
         };
-        let panel = Rect::new(66.0, 410.0, 722.0, 154.0);
+        let panel = Rect::new(66.0, 400.0, 722.0, 170.0);
         draw_rectangle(
             panel.x,
             panel.y,
@@ -247,22 +248,56 @@ impl ColonyExplorer {
             Color::new(0.32, 0.86, 0.72, 0.92),
         );
         draw_text(
-            &character.name.to_uppercase(),
+            character.name.to_uppercase(),
             84.0,
-            438.0,
+            428.0,
             20.0,
             Color::new(0.76, 1.0, 0.88, 1.0),
         );
         draw_text(
-            &npc_status(character),
+            npc_status(character),
             84.0,
-            458.0,
+            448.0,
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        draw_wrapped(&dialogue_text(campaign, character), 84.0, 481.0, 660.0);
+        let beat = colony_story::current_beat(
+            &character.id,
+            campaign.operations_completed,
+            campaign.first_hour.first_outcome_won,
+            campaign.first_hour.second_outcome_won,
+        );
+        let (title, text, heard) = beat.map_or(
+            ("COLONY BIOGRAPHY", character.biography.as_str(), true),
+            |beat| {
+                (
+                    beat.title,
+                    beat.text,
+                    campaign.colony_story.has_heard(beat.id),
+                )
+            },
+        );
+        draw_text(
+            format!("FIELD NOTE // {title}"),
+            84.0,
+            470.0,
+            12.0,
+            Color::new(0.95, 0.78, 0.30, 1.0),
+        );
+        draw_text(
+            if heard { "ARCHIVED" } else { "NEW FIELD NOTE" },
+            668.0,
+            470.0,
+            11.0,
+            if heard {
+                Color::new(0.45, 0.72, 0.66, 1.0)
+            } else {
+                Color::new(0.95, 0.78, 0.30, 1.0)
+            },
+        );
+        draw_wrapped(text, 84.0, 491.0, 660.0);
         if button(
-            Rect::new(84.0, 520.0, 176.0, 30.0),
+            Rect::new(84.0, 532.0, 176.0, 30.0),
             npc_action_label(character),
             true,
             mouse,
@@ -272,7 +307,7 @@ impl ColonyExplorer {
             self.close_dialogue();
         }
         if button(
-            Rect::new(632.0, 520.0, 136.0, 30.0),
+            Rect::new(632.0, 532.0, 136.0, 30.0),
             "CONTINUE",
             true,
             mouse,
@@ -413,30 +448,6 @@ fn draw_character(
             Color::new(0.76, 1.0, 0.88, 1.0),
         );
     }
-}
-
-fn dialogue_text(campaign: &CampaignState, character: &CharacterRecord) -> String {
-    if character.id == "mara_venn" && campaign.operations_completed == 0 {
-        return "Kira. The west refuge is failing and the mire is moving around it. Ilya and Sol are ready. Tap OPERATIONS, read GLASSROOT, and choose who we risk.".to_owned();
-    }
-    if character.id == "mara_venn" && campaign.operations_completed == 1 {
-        return if campaign.first_hour.first_outcome_won == Some(true) {
-            "The refuge lights are back on. Good. Spend the recovery where it changes the next fight; the Directorate clock did not stop for us.".to_owned()
-        } else {
-            "We lost the refuge, not the colony. Treat the wounded or strengthen the next squad, then we move before the Directorate closes the road.".to_owned()
-        };
-    }
-    if character.id == "ilya_reed" && campaign.operations_completed == 1 {
-        return if campaign.first_hour.first_outcome_won == Some(true) {
-            "Everyone who returned is accounted for. Mara calls that readiness. I call it a chance to avoid spending people like spare parts.".to_owned()
-        } else {
-            "Failure is a condition, not a verdict. Tap REQUEST TREATMENT if someone is recovering; I can get a viable squad back into the field.".to_owned()
-        };
-    }
-    if campaign.operations_completed >= 2 && character.id == "sol_cairn" {
-        return "Two field routes are holding, which means the Directorate has started measuring them. The assault clock is our next broken machine.".to_owned();
-    }
-    character.biography.clone()
 }
 
 fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {

@@ -102,6 +102,7 @@ Important transition payloads:
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
+| `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
 | `objective_ui.rs` | Objective progress, description, and live wave forecast panel | Objective mutation |

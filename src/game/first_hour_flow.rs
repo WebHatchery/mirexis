@@ -25,7 +25,7 @@ impl Game {
                 "First-hour goal autosaved"
             }
             UiAction::AcknowledgeColonist(character_id) => {
-                self.campaign.first_hour.acknowledge_colonist(character_id);
+                self.campaign.acknowledge_colonist(character_id);
                 "Colony introduction autosaved"
             }
             UiAction::ToggleFirstHourHelp => {
