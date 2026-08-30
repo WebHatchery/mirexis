@@ -1,6 +1,7 @@
 //! Persistent character identity, progression, and deployment derivation.
 
 mod commons;
+mod construction;
 mod deployment;
 mod derivation;
 mod evolution;

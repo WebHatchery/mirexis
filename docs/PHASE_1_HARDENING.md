@@ -31,8 +31,9 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 425 Mirexis unit tests pass, including deployment-row affordance coverage for full,
-  minimum, and recovering squads.
+- 427 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+  minimum, and recovering squads plus construction availability coverage for unlocks,
+  materials, and unique projects.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 95 audited 1280×720 scenes, including the first-hour

@@ -18,10 +18,7 @@ pub(super) fn draw_hover_card(
     let project = campaign.colony.project_at(position);
     let site_unavailable = building.is_none()
         && project.is_none()
-        && campaign
-            .colony
-            .validate_construction_site(position)
-            .is_err();
+        && !campaign.can_construct_building(campaign.colony.planned_construction, position);
     let text = if let Some(building) = building {
         if building.kind.is_identity() {
             campaign
@@ -124,8 +121,15 @@ pub(super) fn draw_hover_card(
         )
     } else {
         match campaign.colony.validate_construction_site(position) {
+            Ok(()) if campaign.construction_available(campaign.colony.planned_construction) => {
+                format!(
+                    "OPEN PLOT // BUILD {} // {} MAT",
+                    campaign.colony.planned_construction.name().to_uppercase(),
+                    campaign.colony.planned_construction.material_cost()
+                )
+            }
             Ok(()) => format!(
-                "OPEN PLOT // BUILD {} // {} MAT",
+                "OPEN PLOT // BUILD {} UNAVAILABLE // {} MAT",
                 campaign.colony.planned_construction.name().to_uppercase(),
                 campaign.colony.planned_construction.material_cost()
             ),
@@ -246,7 +250,9 @@ pub(super) fn handle_plot_click(
         } else if building.kind.is_identity() && campaign.identity_stewardship_available() {
             actions.push(UiAction::RunIdentityStewardship);
         }
-    } else if campaign.colony.project_at(position).is_none() {
+    } else if campaign.colony.project_at(position).is_none()
+        && campaign.can_construct_building(campaign.colony.planned_construction, position)
+    {
         actions.push(UiAction::ConstructBuilding(
             campaign.colony.planned_construction,
             position,

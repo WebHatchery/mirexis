@@ -1,4 +1,5 @@
 use super::*;
+use crate::colony::BuildingKind;
 
 #[test]
 fn all_five_mutations_produce_gift_and_complication_traits() {
@@ -11,6 +12,17 @@ fn all_five_mutations_produce_gift_and_complication_traits() {
         apply_mutation(mutation, &mut traits);
         assert!(traits.len() >= 2);
     }
+}
+
+#[test]
+fn campaign_construction_affordance_tracks_unlocks_and_materials() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    assert!(!campaign.construction_available(BuildingKind::GeneLab));
+    campaign.strategy.contact_complete = true;
+    assert!(campaign.construction_available(BuildingKind::GeneLab));
+    campaign.colony.resources.materials = 0;
+    assert!(!campaign.construction_available(BuildingKind::GeneLab));
 }
 #[test]
 fn aptitude_changes_base_class_training_cost() {

@@ -64,7 +64,7 @@ pub(super) fn draw_build_controls(
                 kind.name().to_uppercase(),
                 kind.material_cost()
             ),
-            true,
+            campaign.construction_available(kind),
             mouse,
         ) {
             actions.push(UiAction::SelectConstruction(kind));

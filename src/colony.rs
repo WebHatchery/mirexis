@@ -3,6 +3,7 @@
 use macroquad_toolkit::grid::TilePos;
 use serde::{Deserialize, Serialize};
 
+mod construction;
 mod defense;
 mod identity;
 mod upgrades;
@@ -324,26 +325,28 @@ impl ColonyState {
         Ok(())
     }
 
+    pub(crate) fn can_start_construction(&self, kind: BuildingKind) -> bool {
+        (!construction::is_unique_kind(kind)
+            || (!self.buildings.iter().any(|building| building.kind == kind)
+                && !self
+                    .construction_queue
+                    .iter()
+                    .any(|project| project.kind == kind)))
+            && self.resources.materials >= kind.material_cost()
+    }
+
     pub fn place_construction(
         &mut self,
         kind: BuildingKind,
         position: [i32; 2],
     ) -> Result<String, String> {
         self.validate_construction_site(position)?;
-        if matches!(
-            kind,
-            BuildingKind::GeneLab
-                | BuildingKind::ResearchAnnex
-                | BuildingKind::SalvageYard
-                | BuildingKind::Waystation
-                | BuildingKind::Commons
-                | BuildingKind::RelayMast
-                | BuildingKind::Watchtower
-        ) && (self.buildings.iter().any(|building| building.kind == kind)
-            || self
-                .construction_queue
-                .iter()
-                .any(|project| project.kind == kind))
+        if construction::is_unique_kind(kind)
+            && (self.buildings.iter().any(|building| building.kind == kind)
+                || self
+                    .construction_queue
+                    .iter()
+                    .any(|project| project.kind == kind))
         {
             return Err(format!("The colony can support only one {}", kind.name()));
         }

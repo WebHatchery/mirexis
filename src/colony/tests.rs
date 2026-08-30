@@ -17,6 +17,21 @@ fn construction_reserves_resources_and_completes_after_an_operation() {
 }
 
 #[test]
+fn construction_affordance_closes_for_materials_and_unique_projects() {
+    let mut colony = ColonyState::new();
+    assert!(colony.can_start_construction(BuildingKind::Barricade));
+    colony.resources.materials = BuildingKind::Barricade.material_cost() - 1;
+    assert!(!colony.can_start_construction(BuildingKind::Barricade));
+
+    colony.resources.materials = 120;
+    assert!(colony.can_start_construction(BuildingKind::ResearchAnnex));
+    colony
+        .place_construction(BuildingKind::ResearchAnnex, [1, 1])
+        .unwrap();
+    assert!(!colony.can_start_construction(BuildingKind::ResearchAnnex));
+}
+
+#[test]
 fn research_annex_is_unique_online_and_a_defense_objective() {
     let mut colony = ColonyState::new();
     let id = colony
