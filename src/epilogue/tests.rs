@@ -15,6 +15,15 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     let mut campaign = CampaignState::new(&data);
     campaign.strategy.campaign_complete = true;
     campaign.strategy.mirexis_path_id = "human_redoubt".to_owned();
+    campaign.strategy.escalation_response_id = "bastion_beacon".to_owned();
+    campaign.strategy.character_events[0].resolved = true;
+    campaign
+        .strategy
+        .factions
+        .iter_mut()
+        .find(|faction| faction.id == "directorate")
+        .unwrap()
+        .attention = 29;
     campaign
         .colony
         .ensure_identity_building("human_redoubt")
@@ -43,42 +52,71 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(lines[2].contains("+") && !lines[2].contains("NO TRUSTED"));
     assert!(lines[3].contains("CARRIED"));
     assert!(lines[4].contains("EVOLUTION"));
+    assert!(lines[6].contains("ENGINE // HUMAN BOUNDARY / ARMOURED"));
+    assert!(lines[6].contains("DIRECTORATE 29"));
+    assert!(lines[6].contains("MERCY 1"));
     assert!(dossier.debrief_line().contains("COLONY LEGACY"));
+    assert!(dossier
+        .debrief_line()
+        .contains("ENGINE HUMAN BOUNDARY / ARMOURED"));
 }
 
 #[test]
 fn epilogue_adds_an_authored_voice_for_each_identity_path() {
-    for (path_id, character_id, character_name, ready_line, recovering_line) in [
+    for (
+        path_id,
+        response_id,
+        character_id,
+        character_name,
+        ready_line,
+        recovering_line,
+        engine_relationship,
+        engine_response,
+    ) in [
         (
             "human_redoubt",
+            "bastion_beacon",
             "mara_venn",
             "Mara Venn",
             "THE ARSENAL OPENS FROM THE INSIDE.",
             "THE ARSENAL KEEPS THE INJURED WITHIN ITS LIGHT.",
+            "HUMAN BOUNDARY",
+            "ARMOURED",
         ),
         (
             "living_commonwealth",
+            "living_decoy",
             "nadi_vale",
             "Nadi Vale",
             "WE DID NOT BECOME ONE BODY; WE MADE ROOM FOR DIFFERENCE.",
             "THE GARDEN HAS ROOM FOR THE BODY THAT NEEDS TIME.",
+            "LIVING ACCORD",
+            "SHELTERED",
         ),
         (
             "open_threshold",
+            "weaponized_lattice",
             "sol_cairn",
             "Sol Cairn",
             "EVERY OPEN ROUTE NEEDS A WAY HOME.",
             "THE THRESHOLD WAITS; RETURN IS PART OF THE JOURNEY.",
+            "OPEN RECIPROCITY",
+            "DIRECTED",
         ),
     ] {
         let data = crate::data::GameData::load().unwrap();
         let mut campaign = CampaignState::new(&data);
         campaign.strategy.campaign_complete = true;
         campaign.strategy.mirexis_path_id = path_id.to_owned();
+        campaign.strategy.escalation_response_id = response_id.to_owned();
+        campaign.strategy.character_events[0].resolved = true;
 
         let ready = derive(&campaign).unwrap().lines();
         assert!(ready[5].contains(character_name));
         assert!(ready[5].contains(ready_line));
+        assert!(ready[6].contains(engine_relationship));
+        assert!(ready[6].contains(engine_response));
+        assert!(ready[6].contains("MERCY 1"));
 
         campaign
             .roster

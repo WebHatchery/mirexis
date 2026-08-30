@@ -13,10 +13,14 @@ pub(crate) struct EpilogueDossier {
     scars: String,
     evolutions: String,
     character_voice: String,
+    engine_relationship: &'static str,
+    engine_response: &'static str,
+    faction_pressure: String,
+    mercy_count: usize,
 }
 
 impl EpilogueDossier {
-    pub(crate) fn lines(&self) -> [String; 6] {
+    pub(crate) fn lines(&self) -> [String; 7] {
         [
             format!(
                 "CIVIC // {} // {}",
@@ -31,18 +35,28 @@ impl EpilogueDossier {
             format!("SCARS // {}", self.scars),
             format!("EVOLUTION // {}", self.evolutions),
             format!("VOICE // {}", self.character_voice),
+            format!(
+                "ENGINE // {} / {} // {} // MERCY {}",
+                self.engine_relationship,
+                self.engine_response,
+                self.faction_pressure,
+                self.mercy_count
+            ),
         ]
     }
 
     pub(crate) fn debrief_line(&self) -> String {
         format!(
-            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {}",
+            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {}",
             self.institution.to_uppercase(),
             self.institution_status,
             self.people,
             self.trusted_bonds,
             self.scars,
-            self.evolutions
+            self.evolutions,
+            self.engine_relationship,
+            self.engine_response,
+            self.mercy_count
         )
     }
 }
@@ -138,6 +152,15 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         format!("{} COLONISTS // {}", evolved.len(), evolved.join(", "))
     };
     let character_voice = character_voice(campaign);
+    let engine_relationship = engine_relationship(&campaign.strategy.mirexis_path_id);
+    let engine_response = engine_response(&campaign.strategy.escalation_response_id);
+    let faction_pressure = faction_pressure(campaign);
+    let mercy_count = campaign
+        .strategy
+        .character_events
+        .iter()
+        .filter(|event| event.resolved && event.attention_change < 0)
+        .count();
 
     Some(EpilogueDossier {
         institution,
@@ -148,7 +171,41 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         scars,
         evolutions,
         character_voice,
+        engine_relationship,
+        engine_response,
+        faction_pressure,
+        mercy_count,
     })
+}
+
+fn engine_relationship(path_id: &str) -> &'static str {
+    match path_id {
+        "human_redoubt" => "HUMAN BOUNDARY",
+        "living_commonwealth" => "LIVING ACCORD",
+        "open_threshold" => "OPEN RECIPROCITY",
+        _ => "UNRECORDED RELATION",
+    }
+}
+
+fn engine_response(response_id: &str) -> &'static str {
+    match response_id {
+        "bastion_beacon" => "ARMOURED",
+        "living_decoy" => "SHELTERED",
+        "weaponized_lattice" => "DIRECTED",
+        _ => "UNANSWERED",
+    }
+}
+
+fn faction_pressure(campaign: &CampaignState) -> String {
+    campaign
+        .strategy
+        .factions
+        .iter()
+        .max_by_key(|faction| (faction.attention, faction.id.clone()))
+        .map_or_else(
+            || "NO FACTION PRESSURE".to_owned(),
+            |faction| format!("{} {}", faction.name.to_uppercase(), faction.attention),
+        )
 }
 
 fn character_voice(campaign: &CampaignState) -> String {

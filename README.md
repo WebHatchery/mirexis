@@ -35,7 +35,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - Phase Five path choices establish one physical identity building: Redoubt Arsenal, Choir
   Garden, or Threshold Spire, each changing colony defence and preparation.
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,
-  people, trusted bonds, scars, and mutation evolutions.
+  people, trusted bonds, scars, mutation evolutions, engine relationship, faction pressure,
+  and witnessed mercy.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface phase-specific colony field notes through

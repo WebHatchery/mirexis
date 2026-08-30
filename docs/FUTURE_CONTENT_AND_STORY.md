@@ -423,6 +423,8 @@ Goal: deepen the existing people and city without new tactical systems.
   including the completed-path reflection.
 - Implemented: the ending dossier includes an authored, readiness-aware voice variation from the
   identity contact for each path.
+- Implemented: the ending dossier adds an engine register assembled from the chosen relationship,
+  Escalation response, highest faction pressure, and resolved protective events.
 - Implemented: each identity path unlocks a third, character-specific post-ending scene after its
   final reflection is acknowledged.
 
@@ -495,7 +497,8 @@ Goal: make the implemented five-phase foundation narratively complete.
 - Pay off all five starting arcs and the route-exclusive outsider.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
-- Add concise epilogues assembled from character, facility, faction, and mercy flags.
+- Implemented: add a concise finale dossier assembled from character, facility, faction, and
+  witnessed-mercy flags.
 
 Exit test: players can explain what Mirexis is, why each power wanted it, what their
 colony chose, and what happened to the people they cared about.

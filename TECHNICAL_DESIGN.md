@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.92.0
+Save/content version: 1.93.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -641,6 +641,10 @@ colony legacy dossier from the chosen institution, ready and recovering people, 
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
 The identity contact's final field note changes with the completed path, giving the dossier a
 character voice instead of only a summary ledger.
+The dossier also derives an `ENGINE` register line from the path's relationship, the Escalation
+response, the faction with the highest current attention, and resolved protective events. This
+keeps faction pressure and earlier mercy visible in the finale without turning either into a
+single morality score or adding another save field.
 Contact, Adaptation, and Escalation also expose phase-specific colony field notes through named
 voices. Contact gives Kira the signal's first answer; Adaptation gives Mara, Ilya, Sol, Nadi,
 and Sedge perspectives on deliberate change; Escalation lets Mara, Ilya, Sol, Nadi, Veya, and
@@ -793,6 +797,7 @@ Migration coverage:
 | 1.90.0 | Adaptation route access to the Waystation so Sedge is reachable on every Contact protocol |
 | 1.91.0 | Unchosen route outsiders appear as Waystation guests with field notes and recruitment handoff |
 | 1.92.0 | Expanded Adaptation and Escalation field notes across active colony voices |
+| 1.93.0 | Finale dossier engine relationship, faction-pressure, and witnessed-mercy register |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
