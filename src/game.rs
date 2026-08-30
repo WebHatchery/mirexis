@@ -1,6 +1,7 @@
 //! Application state machine, persistence, and toolkit integration.
 
 mod audio_flow;
+mod bootstrap;
 mod capture_colony;
 mod capture_debrief;
 mod capture_first_hour;
@@ -38,7 +39,7 @@ use macroquad_toolkit::events::EventBus;
 use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
-use macroquad_toolkit::persistence::{slot_exists, AutoSaveManager};
+use macroquad_toolkit::persistence::AutoSaveManager;
 use macroquad_toolkit::prelude::{
     begin_virtual_ui_frame, dark, end_virtual_ui_frame, GamepadInput,
 };
@@ -84,88 +85,6 @@ pub struct Game {
 }
 
 impl Game {
-    pub async fn new() -> Self {
-        let data = GameData::load()
-            .unwrap_or_else(|err| panic!("Mirexis embedded data failed to load: {}", err));
-        let audio = crate::audio::AudioSystem::new(&data.config.game_name).await;
-        let mut assets = AssetManager::new();
-        let placeholder = crate::visual_assets::diagnostic_placeholder_image(32);
-        assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
-        if let Err(error) = assets.load_asset_pack("assets.zip").await {
-            println!(
-                "Mirexis runtime asset pack unavailable ({error}); loading loose assets for native development."
-            );
-        }
-        let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
-        let visuals = VisualCatalog::load();
-        let missing_visuals = visuals.validate_loaded(&assets);
-        let visual_summary = visuals.diagnostic_summary(&assets);
-        println!("Mirexis visual catalog: {visual_summary}");
-        let campaign = CampaignState::new(&data);
-        let active_mission = campaign
-            .strategy
-            .materialize_selected(&data, &campaign.colony);
-        let session = GameSession::new(
-            &data.config,
-            &active_mission,
-            &campaign.deployment_roster(&data, &active_mission),
-        );
-        let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
-        let mut notifications = NotificationManager::new();
-        audio.report_failures(&mut notifications);
-        notifications.info(format!(
-            "Visual pipeline online; {} textures; {} sprite definitions",
-            loaded_assets,
-            visuals.units.len()
-        ));
-        if !missing_visuals.is_empty() {
-            notifications.danger(format!(
-                "MISSING VISUAL ASSETS: {}",
-                missing_visuals.join(", ")
-            ));
-        }
-
-        let tactical_camera = WorldCamera::tactical_start(session.tactical.selected_tile);
-        let colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
-        Self {
-            data,
-            session,
-            campaign,
-            active_mission,
-            state: AppState::Title,
-            assets,
-            visuals,
-            notifications,
-            events: EventBus::new(),
-            save_exists,
-            last_outcome: None,
-            autosave: AutoSaveManager::default(),
-            targeting: None,
-            show_tactical_help: false,
-            show_battle_log: false,
-            combat_feedback: CombatFeedback::default(),
-            observed_event_count: 0,
-            phase_replay: PhaseReplay::default(),
-            deployment_formation: FormationKind::default(),
-            end_phase_armed: false,
-            gamepad: GamepadInput::new(),
-            gamepad_connected: false,
-            title_focus_continue: false,
-            title_focus_active: false,
-            title_hover_preview: false,
-            new_campaign_armed: false,
-            delete_save_armed: false,
-            tactical_camera,
-            colony_camera,
-            colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
-            colony_operations_open: false,
-            facility_upgrade_open: false,
-            salvage_open: false,
-            audio,
-            show_settings: false,
-        }
-    }
-
     pub fn update(&mut self, dt: f32) {
         if self.colony_explorer_can_update() {
             self.colony_explorer.update(dt, &self.campaign.colony);
