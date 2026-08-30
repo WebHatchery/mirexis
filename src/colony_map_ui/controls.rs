@@ -15,6 +15,7 @@ pub(super) fn draw_build_controls(
     let mut kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
     kinds.push(BuildingKind::Commons);
     kinds.push(BuildingKind::RelayMast);
+    kinds.push(BuildingKind::Watchtower);
     if campaign.strategy.contact_complete
         && !campaign
             .colony
@@ -45,8 +46,8 @@ pub(super) fn draw_build_controls(
     }
     for (index, kind) in kinds.into_iter().enumerate() {
         let selected = campaign.colony.planned_construction == kind;
-        let column = index % 3;
-        let row = index / 3;
+        let column = index % 4;
+        let row = index / 4;
         if button(
             Rect::new(
                 20.0 + column as f32 * 170.0,

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.74.0
+Save/content version: 1.75.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -402,7 +402,10 @@ Initial facilities have stable coordinates:
 - Hydroponics: three food after each resolved operation while powered.
 - Power Plant: four power supply and a critical defense objective.
 
-The colony grid always offers a 20-material Barricade or a 45-material Power Plant.
+The colony grid always offers a 20-material Barricade, a 35-material powered Watchtower,
+or a 45-material Power Plant. A powered Watchtower contributes 45-strength directional
+cover to colony defence; if it is damaged or offline, its tile remains blocked but it no
+longer contributes cover.
 Adaptation adds one unique 50-material Gene Lab. Every building and queued project owns
 only its anchor plot. Planning also requires the complete 3x3 area centred on that anchor
 to be inside the colony boundary and free: the anchor plus all eight directly or diagonally
@@ -424,9 +427,10 @@ Powered Hydroponics returns three food after an operation, sustaining the standa
 three-person squad. If Hydroponics is offline, a powered Command Centre recovers one
 emergency ration so a smaller squad can keep the campaign moving.
 
-`ColonyState::defense_map()` derives blocked tiles, cover tiles, and critical
-objectives from completed buildings. An expired assault materializes those values
-into the tactical mission, so colony placement and defense geometry share one source.
+`ColonyState::defense_map()` derives blocked tiles, cover tiles, powered Watchtower tiles,
+and critical objectives from completed buildings. An expired assault materializes those
+values into the tactical mission, so colony placement and defense geometry share one
+source.
 
 A failed colony-defense outcome deterministically damages one saved operational
 facility, falling back to other structures only when every facility is already down.
@@ -703,6 +707,7 @@ Migration coverage:
 | 1.72.0 | Waystation construction, Directorate Exile recruitment, origin-derived profiles, Exile Cipher action, and outsider-arc migration defaults |
 | 1.73.0 | Commons construction, once-per-operation shared meals, relationship progression, and Commons migration defaults |
 | 1.74.0 | Relay Mast construction, once-per-operation route scans, mission refresh, attention exposure, and relay migration defaults |
+| 1.75.0 | Watchtower construction, power-dependent directional cover in colony defence, and Watchtower migration compatibility |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -754,7 +759,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (287 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (290 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

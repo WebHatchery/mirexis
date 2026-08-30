@@ -57,6 +57,8 @@ pub(super) fn draw_hover_card(
                     crate::campaign::RELAY_SCAN_POWER_COST
                 )
             }
+        } else if building.kind == BuildingKind::Watchtower {
+            "WATCHTOWER // ONLINE // STRONG WESTERN COVER".to_owned()
         } else if building.kind == BuildingKind::Waystation {
             if !campaign
                 .roster

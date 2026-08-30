@@ -22,6 +22,7 @@ pub enum BuildingKind {
     Waystation,
     Commons,
     RelayMast,
+    Watchtower,
 }
 
 impl BuildingKind {
@@ -38,6 +39,7 @@ impl BuildingKind {
             Self::Waystation => "Waystation",
             Self::Commons => "Commons",
             Self::RelayMast => "Relay Mast",
+            Self::Watchtower => "Watchtower",
         }
     }
 
@@ -49,6 +51,7 @@ impl BuildingKind {
             Self::Waystation => 55,
             Self::Commons => 40,
             Self::RelayMast => 45,
+            Self::Watchtower => 35,
             _ => 0,
         }
     }
@@ -61,6 +64,7 @@ impl BuildingKind {
             Self::Waystation => 1,
             Self::Commons => 1,
             Self::RelayMast => 1,
+            Self::Watchtower => 1,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -119,6 +123,7 @@ pub struct ConstructionProject {
 pub struct ColonyDefenseMap {
     pub blocked_tiles: Vec<TilePos>,
     pub cover_tiles: Vec<TilePos>,
+    pub watchtower_tiles: Vec<TilePos>,
     pub critical_objectives: Vec<TilePos>,
 }
 
@@ -238,6 +243,7 @@ impl ColonyState {
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast
+                | BuildingKind::Watchtower
         ) {
             return Err(format!("{} cannot be planned here", kind.name()));
         }
@@ -257,6 +263,7 @@ impl ColonyState {
                 | BuildingKind::Waystation
                 | BuildingKind::Commons
                 | BuildingKind::RelayMast
+                | BuildingKind::Watchtower
         ) && (self.buildings.iter().any(|building| building.kind == kind)
             || self
                 .construction_queue
@@ -360,6 +367,7 @@ impl ColonyState {
     pub fn defense_map(&self) -> ColonyDefenseMap {
         let mut blocked_tiles = Vec::new();
         let mut cover_tiles = Vec::new();
+        let mut watchtower_tiles = Vec::new();
         let mut critical_objectives = Vec::new();
         for building in &self.buildings {
             for offset in building.kind.footprint() {
@@ -372,6 +380,13 @@ impl ColonyState {
                     BuildingKind::Barricade | BuildingKind::Barracks | BuildingKind::Workshop => {
                         cover_tiles.push(position)
                     }
+                    BuildingKind::Watchtower
+                        if !building.damaged && self.building_is_powered(&building.id) =>
+                    {
+                        cover_tiles.push(position);
+                        watchtower_tiles.push(position);
+                    }
+                    BuildingKind::Watchtower => {}
                     BuildingKind::CommandCentre
                     | BuildingKind::Infirmary
                     | BuildingKind::Hydroponics
@@ -386,6 +401,7 @@ impl ColonyState {
         ColonyDefenseMap {
             blocked_tiles,
             cover_tiles,
+            watchtower_tiles,
             critical_objectives,
         }
     }

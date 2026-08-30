@@ -1033,6 +1033,10 @@ Different power technologies may eventually become available.
 
 ## Defensive Structures
 
+The first implemented defensive structure is the powered watchtower: its placement
+becomes stronger directional cover in a colony assault, but a failed grid leaves only
+the tower's physical obstruction.
+
 Examples:
 
 - barricades

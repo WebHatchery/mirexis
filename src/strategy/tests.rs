@@ -222,6 +222,26 @@ fn expired_threat_generates_a_defense_mission_from_colony_placement() {
 }
 
 #[test]
+fn powered_watchtower_materializes_as_stronger_directional_cover() {
+    let data = GameData::load().unwrap();
+    let mut strategy = StrategyState::new(&data);
+    strategy.mission_offers[0].map_recipe = "colony_defense".to_owned();
+    let mut colony = ColonyState::new();
+    colony
+        .place_construction(crate::colony::BuildingKind::Watchtower, [1, 1])
+        .unwrap();
+    colony.advance_operation();
+
+    let mission = strategy.materialize_selected(&data, &colony);
+    let tower_edge = mission
+        .cover_edges
+        .iter()
+        .find(|edge| edge.position == [3, 2])
+        .expect("the placed watchtower should map to a tactical cover edge");
+    assert_eq!(tower_edge.strength, 45);
+}
+
+#[test]
 fn completed_research_changes_future_mission_materialization() {
     let data = GameData::load().unwrap();
     let colony = ColonyState::new();

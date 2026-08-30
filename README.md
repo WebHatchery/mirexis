@@ -24,6 +24,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   persistent relationship progression with visible debrief and colony-story feedback.
 - A powered Relay Mast with one risky route scan per operation: mission offers refresh,
   but the faction already watching hardest gains attention.
+- A placeable powered Watchtower that becomes strong directional cover in colony-defense
+  operations while remaining a physical obstacle when its grid goes dark.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

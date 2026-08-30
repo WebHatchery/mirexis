@@ -31,6 +31,34 @@ fn physical_placement_generates_the_colony_defense_map() {
 }
 
 #[test]
+fn powered_watchtower_adds_strong_cover_until_the_grid_fails() {
+    let mut colony = ColonyState::new();
+    colony
+        .place_construction(BuildingKind::Watchtower, [1, 1])
+        .unwrap();
+    colony.advance_operation();
+
+    let tower_tile = TilePos::new(3, 2);
+    let map = colony.defense_map();
+    assert!(map.blocked_tiles.contains(&tower_tile));
+    assert!(map.cover_tiles.contains(&tower_tile));
+    assert!(map.watchtower_tiles.contains(&tower_tile));
+    assert!(!map.critical_objectives.contains(&tower_tile));
+
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.kind == BuildingKind::PowerPlant)
+        .unwrap()
+        .damaged = true;
+    colony.resources.power = 0;
+    let offline_map = colony.defense_map();
+    assert!(offline_map.blocked_tiles.contains(&tower_tile));
+    assert!(!offline_map.cover_tiles.contains(&tower_tile));
+    assert!(!offline_map.watchtower_tiles.contains(&tower_tile));
+}
+
+#[test]
 fn failed_defense_damage_disables_a_facility_until_repaired() {
     let mut colony = ColonyState::new();
     let name = colony.damage_for_failed_defense(1).unwrap();
@@ -94,6 +122,7 @@ fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() 
         BuildingKind::Waystation,
         BuildingKind::Commons,
         BuildingKind::RelayMast,
+        BuildingKind::Watchtower,
     ] {
         let mut colony = ColonyState::new();
         colony.place_construction(kind, [3, 3]).unwrap();
@@ -140,6 +169,10 @@ fn every_building_kind_owns_only_its_anchor_tile() {
         BuildingKind::Hydroponics,
         BuildingKind::PowerPlant,
         BuildingKind::GeneLab,
+        BuildingKind::Waystation,
+        BuildingKind::Commons,
+        BuildingKind::RelayMast,
+        BuildingKind::Watchtower,
     ] {
         let mut colony = ColonyState::new();
         colony.buildings.clear();

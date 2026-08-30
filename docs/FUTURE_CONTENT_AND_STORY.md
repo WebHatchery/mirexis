@@ -31,6 +31,11 @@ complete. All fourteen base-class techniques are now implemented as a deliberate
 bounded tactical slice; mastery forks, new peoples, and later story work
   remain planning direction beyond the implemented Directorate Exile slice.
 
+The first new defence structure is now playable: a powered Watchtower can be placed in
+the colony and becomes stronger directional cover during a colony assault. Its coverage
+fails when the tower is damaged or the settlement grid cannot supply it, keeping the
+structure useful without making it a free permanent advantage.
+
 ## 2. Expansion rules
 
 Every future feature should satisfy at least three of these tests:
@@ -333,7 +338,9 @@ all acknowledge the chosen project.
 
 ### 8.4 Defence structures
 
-Barricades remain the basic option. Later construction may add Watchtowers, Shield Nodes,
+Barricades remain the basic option. The powered **Watchtower** is now implemented: its
+placed tile becomes 45-strength directional cover in colony defence, while an unpowered or
+damaged tower remains an obstacle without contributing cover. Later construction may add Shield Nodes,
 Mine Strips, Living Walls, and Field Clinics. Each needs a visible tactical rule and a
 counterplay risk: towers can be isolated, shields depend on power, mines constrain friendly
 routes, living walls may spread, and clinics attract attackers. Placement should matter
@@ -415,7 +422,8 @@ Goal: make building and upgrade choices visible in city life and defence.
 
 - Add level-2 branch upgrades to three existing facilities first.
 - Implemented: build a Relay Mast and use its once-per-operation route scan.
-- Build one new defence structure.
+- Implemented: build a powered Watchtower whose placement adds stronger directional cover
+  to colony defence and loses that benefit when the grid fails.
 - Implement the three identity buildings and their defence-map consequences.
 - Connect power failure, damage, repair, and NPC scenes to every new facility.
 
