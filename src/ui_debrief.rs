@@ -11,6 +11,17 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::VirtualUi;
 
+#[cfg(test)]
+mod tests;
+
+fn experience_summary(outcome: &MissionOutcome) -> String {
+    format!(
+        "Field experience: +{} XP each // {} deployed colonists",
+        crate::campaign::operation_experience(outcome.result),
+        outcome.colonists_deployed
+    )
+}
+
 pub fn draw_debrief(
     mission: &MissionDef,
     outcome: &MissionOutcome,
@@ -111,6 +122,7 @@ pub fn draw_debrief(
             "Recovered: {} materials · {} biomass · {} power",
             outcome.materials_awarded, outcome.biomass_awarded, outcome.power_awarded
         ),
+        experience_summary(outcome),
     ];
     if won && outcome.colonists_deployed > 1 {
         report.push("Shared victory strengthened squad relationships".to_owned());
@@ -126,7 +138,7 @@ pub fn draw_debrief(
         report.push("Incapacitation left a lasting tradeoff scar".to_owned());
     }
     for (index, line) in report.iter().enumerate() {
-        draw_text(line, 200.0, 258.0 + index as f32 * 27.0, 19.0, dark::TEXT);
+        draw_text(line, 200.0, 258.0 + index as f32 * 23.0, 17.0, dark::TEXT);
     }
     draw_field_record(mission, outcome, assets, visuals, won);
     draw_squad_tableau(campaign, outcome, assets, visuals, won);

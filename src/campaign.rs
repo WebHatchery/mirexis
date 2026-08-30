@@ -33,6 +33,16 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 pub const SQUAD_LIMIT: usize = 3;
+pub const VICTORY_OPERATION_XP: u32 = 20;
+pub const FAILED_OPERATION_XP: u32 = 8;
+
+pub fn operation_experience(result: ObjectiveState) -> u32 {
+    match result {
+        ObjectiveState::Victory => VICTORY_OPERATION_XP,
+        ObjectiveState::Failed => FAILED_OPERATION_XP,
+        ObjectiveState::Active | ObjectiveState::Secured => 0,
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -469,14 +479,16 @@ impl CampaignState {
         if outcome.result == ObjectiveState::Victory {
             self.strengthen_shared_victory(&deployed_ids);
         }
-        let xp = if outcome.result == ObjectiveState::Victory {
-            20
-        } else {
-            8
-        };
-        for character in &mut self.roster {
-            character.experience += xp;
-            character.level = 1 + (character.experience / 100).min(9) as u8;
+        let xp = operation_experience(outcome.result);
+        for character_id in &deployed_ids {
+            if let Some(character) = self
+                .roster
+                .iter_mut()
+                .find(|character| character.id == *character_id)
+            {
+                character.experience += xp;
+                character.level = 1 + (character.experience / 100).min(9) as u8;
+            }
         }
         crate::skill_training::learn_after_operation(self, &deployed_ids, data);
         self.apply_injury_consequences(outcome, data);

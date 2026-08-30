@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.123.0
+Save/content version: 1.124.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -410,9 +410,9 @@ saves without disturbing their three-colonist deployment choice.
 Trait hooks whose owning combat or economy system does not yet exist remain derived
 values; extend the owning system rather than adding mutation-specific switches.
 
-Mission completion grants XP. Incapacitated colonists receive an operation-counted
-injury and cannot deploy until recovery completes. The infirmary can accelerate the
-first active recovery.
+Mission completion grants XP to deployed colonists: 20 for victory and 8 for defeat.
+Incapacitated colonists receive an operation-counted injury and cannot deploy until
+recovery completes. The infirmary can accelerate the first active recovery.
 
 ## 7. Colony Contract
 
@@ -898,6 +898,7 @@ Migration coverage:
 | 1.121.0 | First return separates debrief travel from the pending Ilya conversation so each screen names its visible next action |
 | 1.122.0 | Active first-hour preparation remains visible beside the second-operation mission offer; no new save fields |
 | 1.123.0 | Active first-hour preparation remains visible in the second-operation tactical header; no new save fields |
+| 1.124.0 | Operation XP follows the deployed squad and is disclosed in the debrief; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -949,7 +950,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (383 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (386 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 92-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

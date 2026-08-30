@@ -276,6 +276,58 @@ fn squad_selection_enforces_reserves_and_a_three_colonist_limit() {
         .iter()
         .any(|unit| unit.id == "kira_voss"));
 }
+
+#[test]
+fn operation_xp_follows_the_deployed_squad() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let deployed_id = campaign
+        .roster
+        .iter()
+        .find(|character| character.deployment_selected)
+        .unwrap()
+        .id
+        .clone();
+    let reserve_id = campaign
+        .roster
+        .iter()
+        .find(|character| !character.deployment_selected)
+        .unwrap()
+        .id
+        .clone();
+    let mission = campaign.strategy.selected_mission().unwrap().clone();
+    let outcome = MissionOutcome {
+        result: ObjectiveState::Victory,
+        colonists_deployed: SQUAD_LIMIT,
+        colonists_incapacitated: Vec::new(),
+        hostiles_neutralised: 2,
+        materials_awarded: 7,
+        biomass_awarded: 0,
+        power_awarded: 0,
+    };
+
+    campaign.apply_mission_outcome(&outcome, &mission, &data);
+
+    assert_eq!(
+        campaign
+            .roster
+            .iter()
+            .find(|character| character.id == deployed_id)
+            .unwrap()
+            .experience,
+        VICTORY_OPERATION_XP
+    );
+    assert_eq!(
+        campaign
+            .roster
+            .iter()
+            .find(|character| character.id == reserve_id)
+            .unwrap()
+            .experience,
+        0
+    );
+}
+
 #[test]
 fn injury_blocks_deployment_until_operations_recover_it() {
     let data = GameData::load().unwrap();
