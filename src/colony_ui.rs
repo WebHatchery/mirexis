@@ -500,7 +500,7 @@ pub(super) fn draw_operations(
                     research.name,
                     campaign.research_material_cost(research.materials_cost)
                 ),
-                true,
+                campaign.can_complete_research(&research.id),
                 mouse,
             ) {
                 actions.push(UiAction::CompleteResearch(research.id.clone()));

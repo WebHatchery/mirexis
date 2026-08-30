@@ -15,6 +15,18 @@ impl CampaignState {
         (base_cost - annex_discount - self.research_insight.max(0)).max(5)
     }
 
+    pub fn can_complete_research(&self, research_id: &str) -> bool {
+        self.strategy
+            .research
+            .iter()
+            .find(|research| research.id == research_id)
+            .is_some_and(|research| {
+                !research.completed
+                    && self.colony.resources.materials
+                        >= self.research_material_cost(research.materials_cost)
+            })
+    }
+
     pub fn complete_research(&mut self, research_id: &str) -> Result<String, String> {
         let annex_discount = if self.colony.has_facility(BuildingKind::ResearchAnnex) {
             RESEARCH_ANNEX_DISCOUNT
