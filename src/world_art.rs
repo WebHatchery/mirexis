@@ -33,25 +33,26 @@ pub(crate) fn draw_title_dressing(assets: &AssetManager, visuals: &VisualCatalog
     );
 }
 
+pub(crate) struct TacticalDressingContext<'a> {
+    pub(crate) assets: &'a AssetManager,
+    pub(crate) visuals: &'a VisualCatalog,
+    pub(crate) view: GridView,
+    pub(crate) position: TilePos,
+}
+
 pub(crate) fn draw_tactical_dressing(
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    view: GridView,
-    position: TilePos,
+    context: TacticalDressingContext<'_>,
     blocked: bool,
     occupied: bool,
     cluttered: bool,
     hostile_faction: &str,
 ) {
-    let signature = tile_signature(position);
+    let signature = tile_signature(context.position);
     if blocked {
         if signature.is_multiple_of(3) {
             let cell = faction_emplacement_cell(hostile_faction, signature);
             draw_tile_cell(
-                assets,
-                visuals,
-                view,
-                position,
+                &context,
                 "emplacements",
                 cell,
                 1.04,
@@ -60,10 +61,7 @@ pub(crate) fn draw_tactical_dressing(
             );
         } else {
             draw_tile_cell(
-                assets,
-                visuals,
-                view,
-                position,
+                &context,
                 "passage_wreckage",
                 (signature % 12) as usize,
                 1.00,
@@ -79,10 +77,7 @@ pub(crate) fn draw_tactical_dressing(
 
     match signature % 23 {
         0 | 1 => draw_tile_cell(
-            assets,
-            visuals,
-            view,
-            position,
+            &context,
             "flora",
             flora_cell(signature),
             0.78,
@@ -90,10 +85,7 @@ pub(crate) fn draw_tactical_dressing(
             Color::new(0.78, 0.94, 0.88, 0.52),
         ),
         2 => draw_tile_cell(
-            assets,
-            visuals,
-            view,
-            position,
+            &context,
             "brood_fauna",
             (signature % 8) as usize,
             0.84,
@@ -101,10 +93,7 @@ pub(crate) fn draw_tactical_dressing(
             Color::new(1.0, 0.90, 0.90, 0.58),
         ),
         3 | 4 => draw_tile_cell(
-            assets,
-            visuals,
-            view,
-            position,
+            &context,
             "terrain_dressing",
             terrain_dressing_cell(signature),
             0.86,
@@ -163,22 +152,19 @@ pub(crate) fn draw_colony_dressing(
 }
 
 fn draw_tile_cell(
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    view: GridView,
-    position: TilePos,
+    context: &TacticalDressingContext<'_>,
     atlas_id: &str,
     index: usize,
     scale: f32,
     pivot: [f32; 2],
     tint: Color,
 ) {
-    let tile = view.tile_rect(position);
+    let tile = context.view.tile_rect(context.position);
     let size = tile.w * scale;
-    let center = view.ground_anchor(position);
+    let center = context.view.ground_anchor(context.position);
     draw_concept_cell(
-        assets,
-        visuals,
+        context.assets,
+        context.visuals,
         atlas_id,
         index,
         square_bounds(center, size, pivot),

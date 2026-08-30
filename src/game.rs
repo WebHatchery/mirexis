@@ -186,26 +186,28 @@ impl Game {
         clear_background(dark::BACKGROUND);
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
         let mut actions = match self.state {
-            AppState::Title => ui::draw_title(
-                &self.data,
-                self.save_exists,
-                &self.assets,
-                &self.visuals,
-                &virtual_ui,
-                self.title_focus_active.then_some(self.title_focus_continue),
-                self.title_hover_preview,
-                self.new_campaign_armed,
-            ),
-            AppState::Colony => colony_ui::draw_colony(
-                &self.campaign,
-                &self.data,
-                &self.assets,
-                &self.visuals,
-                &virtual_ui,
-                &mut self.colony_camera,
-                &mut self.colony_explorer,
-                &mut self.colony_operations_open,
-            ),
+            AppState::Title => ui::draw_title(ui::TitleDrawContext {
+                data: &self.data,
+                save_exists: self.save_exists,
+                assets: &self.assets,
+                visuals: &self.visuals,
+                ui: &virtual_ui,
+                controller_focus_continue: self
+                    .title_focus_active
+                    .then_some(self.title_focus_continue),
+                hover_preview: self.title_hover_preview,
+                new_campaign_armed: self.new_campaign_armed,
+            }),
+            AppState::Colony => colony_ui::draw_colony(colony_ui::ColonyDrawContext {
+                campaign: &self.campaign,
+                data: &self.data,
+                assets: &self.assets,
+                visuals: &self.visuals,
+                ui: &virtual_ui,
+                camera: &mut self.colony_camera,
+                explorer: &mut self.colony_explorer,
+                operations_open: &mut self.colony_operations_open,
+            }),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
                 &self.data,

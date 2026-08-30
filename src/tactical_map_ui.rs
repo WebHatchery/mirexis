@@ -372,8 +372,6 @@ fn terrain_art_index(
             ctx.visuals
                 .faction_terrain_cell(&ctx.mission.hostile_faction),
         )
-    } else if pattern.is_multiple_of(13) {
-        Some(0)
     } else {
         Some(0)
     }
@@ -402,10 +400,12 @@ fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {
             .any(|cover| cover.position == position)
         || is_objective(ctx, position);
     crate::world_art::draw_tactical_dressing(
-        ctx.assets,
-        ctx.visuals,
-        view,
-        position,
+        crate::world_art::TacticalDressingContext {
+            assets: ctx.assets,
+            visuals: ctx.visuals,
+            view,
+            position,
+        },
         blocked,
         occupied,
         cluttered,

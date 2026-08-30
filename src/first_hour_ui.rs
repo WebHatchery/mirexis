@@ -37,24 +37,28 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
     if button(Rect::new(426.0, 84.0, 98.0, 24.0), "HELP", true, mouse) {
         actions.push(UiAction::ToggleFirstHourHelp);
     }
-    if progress.stage == FirstHourStage::Arrival
-        && button(
-            Rect::new(342.0, 114.0, 182.0, 26.0),
-            "BEGIN ARRIVAL",
-            true,
-            mouse,
-        )
-    {
-        actions.push(UiAction::AdvanceFirstHour);
-    } else if progress.stage == FirstHourStage::Promise
-        && button(
-            Rect::new(330.0, 114.0, 194.0, 26.0),
-            "CONTINUE CAMPAIGN",
-            true,
-            mouse,
-        )
-    {
-        actions.push(UiAction::AdvanceFirstHour);
+    match progress.stage {
+        FirstHourStage::Arrival
+            if button(
+                Rect::new(342.0, 114.0, 182.0, 26.0),
+                "BEGIN ARRIVAL",
+                true,
+                mouse,
+            ) =>
+        {
+            actions.push(UiAction::AdvanceFirstHour);
+        }
+        FirstHourStage::Promise
+            if button(
+                Rect::new(330.0, 114.0, 194.0, 26.0),
+                "CONTINUE CAMPAIGN",
+                true,
+                mouse,
+            ) =>
+        {
+            actions.push(UiAction::AdvanceFirstHour);
+        }
+        _ => {}
     }
 }
 

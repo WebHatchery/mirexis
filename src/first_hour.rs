@@ -2,9 +2,10 @@
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum FirstHourStage {
+    #[default]
     Arrival,
     MeetCoordinator,
     PrepareFirstOperation,
@@ -18,15 +19,10 @@ pub(crate) enum FirstHourStage {
     Complete,
 }
 
-impl Default for FirstHourStage {
-    fn default() -> Self {
-        Self::Arrival
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum TacticalLesson {
+    #[default]
     Select,
     MoveToCover,
     Attack,
@@ -34,12 +30,6 @@ pub(crate) enum TacticalLesson {
     Objective,
     Ability,
     ApplyLearning,
-}
-
-impl Default for TacticalLesson {
-    fn default() -> Self {
-        Self::Select
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

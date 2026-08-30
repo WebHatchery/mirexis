@@ -20,17 +20,30 @@ mod terrain;
 pub(crate) mod view;
 use view::ColonyView;
 
-pub(crate) fn draw(
-    campaign: &CampaignState,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    ui: &VirtualUi,
-    camera: &mut WorldCamera,
-    explorer: &mut crate::colony_exploration::ColonyExplorer,
-    mouse: Vec2,
-    operations_open: bool,
-    actions: &mut Vec<UiAction>,
-) -> bool {
+pub(crate) struct ColonyMapContext<'a> {
+    pub(crate) campaign: &'a CampaignState,
+    pub(crate) assets: &'a AssetManager,
+    pub(crate) visuals: &'a VisualCatalog,
+    pub(crate) ui: &'a VirtualUi,
+    pub(crate) camera: &'a mut WorldCamera,
+    pub(crate) explorer: &'a mut crate::colony_exploration::ColonyExplorer,
+    pub(crate) mouse: Vec2,
+    pub(crate) operations_open: bool,
+    pub(crate) actions: &'a mut Vec<UiAction>,
+}
+
+pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
+    let ColonyMapContext {
+        campaign,
+        assets,
+        visuals,
+        ui,
+        camera,
+        explorer,
+        mouse,
+        operations_open,
+        actions,
+    } = context;
     let panel = panel_bounds(operations_open);
     draw_surface(
         panel,

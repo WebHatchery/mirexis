@@ -120,26 +120,19 @@ pub struct UiContext<'a> {
     pub show_battle_log: bool,
 }
 
-pub fn draw_title(
-    data: &GameData,
-    save_exists: bool,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    ui: &VirtualUi,
-    controller_focus_continue: Option<bool>,
-    hover_preview: bool,
-    new_campaign_armed: bool,
-) -> Vec<UiAction> {
-    crate::title_scene_ui::draw(
-        data,
-        save_exists,
-        assets,
-        visuals,
-        ui,
-        controller_focus_continue,
-        hover_preview,
-        new_campaign_armed,
-    )
+pub struct TitleDrawContext<'a> {
+    pub(crate) data: &'a GameData,
+    pub(crate) save_exists: bool,
+    pub(crate) assets: &'a AssetManager,
+    pub(crate) visuals: &'a VisualCatalog,
+    pub(crate) ui: &'a VirtualUi,
+    pub(crate) controller_focus_continue: Option<bool>,
+    pub(crate) hover_preview: bool,
+    pub(crate) new_campaign_armed: bool,
+}
+
+pub(crate) fn draw_title(context: TitleDrawContext<'_>) -> Vec<UiAction> {
+    crate::title_scene_ui::draw(context)
 }
 
 pub fn draw_mission_briefing(

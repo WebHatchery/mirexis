@@ -1,24 +1,24 @@
 //! Portrait-led title tableau and launch controls.
 
 use crate::data::GameData;
-use crate::ui::{draw_ui_text_ex, UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
+use crate::ui::{draw_ui_text_ex, TitleDrawContext, UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_text_block_ex, TextStyle};
-use macroquad_toolkit::ui::VirtualUi;
 
-pub(crate) fn draw(
-    data: &GameData,
-    save_exists: bool,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    ui: &VirtualUi,
-    controller_focus_continue: Option<bool>,
-    hover_preview: bool,
-    new_campaign_armed: bool,
-) -> Vec<UiAction> {
+pub(crate) fn draw(context: TitleDrawContext<'_>) -> Vec<UiAction> {
+    let TitleDrawContext {
+        data,
+        save_exists,
+        assets,
+        visuals,
+        ui,
+        controller_focus_continue,
+        hover_preview,
+        new_campaign_armed,
+    } = context;
     let mut actions = Vec::new();
     let mouse = if hover_preview {
         vec2(198.0, 512.0)

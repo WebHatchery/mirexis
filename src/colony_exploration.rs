@@ -180,18 +180,18 @@ impl ColonyExplorer {
             let highlighted = campaign.first_hour.stage
                 == crate::first_hour::FirstHourStage::MeetCoordinator
                 && character.id == "mara_venn";
-            draw_character(
+            draw_character(CharacterDrawContext {
                 character,
                 center,
-                index % 2 == 0,
-                false,
-                true,
+                facing_right: index % 2 == 0,
+                moving: false,
+                interactable: true,
                 hovered,
                 highlighted,
                 assets,
                 visuals,
-                view.zoom,
-            );
+                zoom: view.zoom,
+            });
             if hovered && is_mouse_button_released(MouseButton::Left) {
                 clicked = Some(character.id.clone());
             }
@@ -199,18 +199,21 @@ impl ColonyExplorer {
         if (self.position.x + self.position.y).round() as i32 == depth {
             if let Some(player) = campaign.roster.first() {
                 let center = view.world_center(self.position) + vec2(0.0, 7.0 * view.zoom);
-                draw_character(
-                    player,
+                draw_character(CharacterDrawContext {
+                    character: player,
                     center,
-                    matches!(self.facing, UnitFacing::SouthEast | UnitFacing::NorthEast),
-                    self.is_moving(),
-                    false,
-                    false,
-                    false,
+                    facing_right: matches!(
+                        self.facing,
+                        UnitFacing::SouthEast | UnitFacing::NorthEast
+                    ),
+                    moving: self.is_moving(),
+                    interactable: false,
+                    hovered: false,
+                    highlighted: false,
                     assets,
                     visuals,
-                    view.zoom,
-                );
+                    zoom: view.zoom,
+                });
                 draw_circle_lines(
                     center.x,
                     center.y + 5.0,
@@ -358,18 +361,32 @@ impl ColonyExplorer {
     }
 }
 
-fn draw_character(
-    character: &CharacterRecord,
+struct CharacterDrawContext<'a> {
+    character: &'a CharacterRecord,
     center: Vec2,
     facing_right: bool,
     moving: bool,
     interactable: bool,
     hovered: bool,
     highlighted: bool,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
+    assets: &'a AssetManager,
+    visuals: &'a VisualCatalog,
     zoom: f32,
-) {
+}
+
+fn draw_character(context: CharacterDrawContext<'_>) {
+    let CharacterDrawContext {
+        character,
+        center,
+        facing_right,
+        moving,
+        interactable,
+        hovered,
+        highlighted,
+        assets,
+        visuals,
+        zoom,
+    } = context;
     draw_ellipse(
         center.x,
         center.y + 5.0,

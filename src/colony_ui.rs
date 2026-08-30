@@ -8,10 +8,11 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
-use macroquad_toolkit::ui::VirtualUi;
 
 mod commons;
+mod context;
 mod relay;
+pub(crate) use context::ColonyDrawContext;
 
 // Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
 // when every label shares the toolkit font. The hub's buttons and map labels
@@ -21,16 +22,17 @@ fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -
     draw_text_ex(text, x, y, params)
 }
 
-pub fn draw_colony(
-    campaign: &CampaignState,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    ui: &VirtualUi,
-    camera: &mut crate::grid_ui::WorldCamera,
-    explorer: &mut crate::colony_exploration::ColonyExplorer,
-    operations_open: &mut bool,
-) -> Vec<UiAction> {
+pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
+    let ColonyDrawContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        ui,
+        camera,
+        explorer,
+        operations_open,
+    } = context;
     let mut actions = Vec::new();
     let mouse = crate::ui::pointer_position(ui);
     draw_rectangle(
@@ -40,7 +42,7 @@ pub fn draw_colony(
         LOGICAL_HEIGHT,
         Color::new(0.025, 0.04, 0.055, 1.0),
     );
-    let suppress_actions = crate::colony_map_ui::draw(
+    let suppress_actions = crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
         campaign,
         assets,
         visuals,
@@ -48,9 +50,9 @@ pub fn draw_colony(
         camera,
         explorer,
         mouse,
-        *operations_open,
-        &mut actions,
-    );
+        operations_open: *operations_open,
+        actions: &mut actions,
+    });
     crate::colony_header_ui::draw(campaign, mouse, operations_open, &mut actions);
     if *operations_open {
         draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
