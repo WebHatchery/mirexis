@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.83.0
+Save/content version: 1.84.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -611,6 +611,10 @@ colony legacy dossier from the chosen institution, ready and recovering people, 
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
 The identity contact's final field note changes with the completed path, giving the dossier a
 character voice instead of only a summary ledger.
+Contact, Adaptation, and Escalation also expose one phase-specific colony field note through a
+named voice: Kira reads the answer under the signal, Nadi interprets the evolving body-map, and
+Mara names the visible convergence. These notes use the same persistent story ledger and do not
+add another save schema.
 
 ## 9. Content Registry
 
@@ -743,6 +747,7 @@ Migration coverage:
 | 1.81.0 | Derived ending dossiers acknowledging the chosen civic institution, people, bonds, scars, and evolutions |
 | 1.82.0 | Completed-path identity contact reflections that extend each civic institution into a two-beat arc |
 | 1.83.0 | Persisted acknowledgement of identity establishment and completed-finale field notes |
+| 1.84.0 | Phase-specific Contact, Adaptation, and Escalation colony field notes with persisted acknowledgement |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -794,7 +799,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (305 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (307 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

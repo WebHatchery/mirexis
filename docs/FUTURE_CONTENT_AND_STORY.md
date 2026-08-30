@@ -392,7 +392,8 @@ Goal: deepen the existing people and city without new tactical systems.
 - Add three-beat arcs for Kira, Mara, Ilya, Sol, and Nadi.
 - Implemented: build the Commons and connect one shared meal to persistent squad bonds,
   the next debrief, and authored post-operation field notes.
-- Add at least one phase-specific colony scene per campaign phase.
+- Implemented: Contact, Adaptation, and Escalation each expose a phase-specific colony field note
+  through a named voice and the persistent story ledger.
 - Establish the unified refuge-engine truth in internal narrative references.
 - Implemented: ending acknowledgement now derives a colony legacy dossier from bonds, scars,
   evolution, people, and the chosen civic institution.

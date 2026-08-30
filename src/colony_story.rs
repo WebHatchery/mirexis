@@ -245,6 +245,31 @@ pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
     Some(ColonyBeat { id, title, text })
 }
 
+pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBeat> {
+    let (expected_character, id, title, text) = match phase_id {
+        "contact" => (
+            "kira_voss",
+            "phase_contact_kira",
+            "THE ANSWER UNDER THE SIGNAL",
+            "The Black Channel answered from below the colony, and the Living Chorus answered from within it. The signal is not a faction's property anymore; it is a question we have to carry together.",
+        ),
+        "adaptation" => (
+            "nadi_vale",
+            "phase_adaptation_nadi",
+            "THE BODY MAPS THE ROOM",
+            "The Gene Lab keeps asking what a body can become, but the answer cannot belong to the instrument alone. Neural Bloom gives us new senses only if the person inside them remains the author.",
+        ),
+        "escalation" => (
+            "mara_venn",
+            "phase_escalation_mara",
+            "THEY CAN SEE THE LIGHTS",
+            "Three powers are converging on the same patch of dark, and now they can see our lights. The colony cannot survive as an invisible camp; it needs a defence that the people behind it can name and direct.",
+        ),
+        _ => return None,
+    };
+    (expected_character == character_id).then_some(ColonyBeat { id, title, text })
+}
+
 pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
     match path_id {
         "human_redoubt" => Some("mara_venn"),

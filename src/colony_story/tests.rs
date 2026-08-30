@@ -78,6 +78,23 @@ fn unknown_colony_voice_has_no_commons_meal_note() {
 }
 
 #[test]
+fn phase_beats_give_each_middle_campaign_phase_a_specific_voice() {
+    for (phase_id, character_id, beat_id) in [
+        ("contact", "kira_voss", "phase_contact_kira"),
+        ("adaptation", "nadi_vale", "phase_adaptation_nadi"),
+        ("escalation", "mara_venn", "phase_escalation_mara"),
+    ] {
+        let beat = phase_beat(phase_id, character_id).unwrap();
+        assert_eq!(beat.id, beat_id);
+        assert!(!beat.title.is_empty());
+        assert!(!beat.text.is_empty());
+        assert!(phase_beat(phase_id, "ilya_reed").is_none());
+    }
+    assert!(phase_beat("isolation", "kira_voss").is_none());
+    assert!(phase_beat("unknown_phase", "kira_voss").is_none());
+}
+
+#[test]
 fn each_identity_building_has_one_path_specific_colony_voice() {
     for (path_id, character_id, beat_id) in [
         ("human_redoubt", "mara_venn", "identity_redoubt_arsenal"),

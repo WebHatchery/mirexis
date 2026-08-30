@@ -270,6 +270,7 @@ impl ColonyExplorer {
             &character.id,
             campaign.strategy.campaign_complete,
         )
+        .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
         .or_else(|| {
             campaign
                 .last_operation_had_commons_meal()

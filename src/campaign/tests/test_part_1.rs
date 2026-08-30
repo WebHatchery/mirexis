@@ -634,3 +634,14 @@ fn contact_aftermath_event_changes_its_faction_and_character() {
     assert!(campaign.strategy.contact_complete);
     assert_eq!(campaign.strategy.phase_id, "adaptation");
 }
+
+#[test]
+fn phase_conversations_archive_the_current_phase_beat() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.phase_id = "adaptation".to_owned();
+
+    campaign.acknowledge_colonist("nadi_vale");
+
+    assert!(campaign.colony_story.has_heard("phase_adaptation_nadi"));
+}
