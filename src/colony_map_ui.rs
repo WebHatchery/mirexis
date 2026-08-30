@@ -634,12 +634,10 @@ fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
 }
 
 fn first_hour_destination(campaign: &CampaignState) -> Option<Vec2> {
-    if !campaign.first_hour.guidance_enabled
-        || campaign.first_hour.stage != crate::first_hour::FirstHourStage::MeetCoordinator
-    {
-        return None;
-    }
-    crate::colony_exploration::npc_position(campaign, "mara_venn")
+    campaign
+        .first_hour
+        .colony_guidance_target()
+        .and_then(|id| crate::colony_exploration::npc_position(campaign, id))
 }
 
 fn draw_first_hour_route(

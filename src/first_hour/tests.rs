@@ -12,6 +12,22 @@ fn opening_advances_only_after_mara_is_acknowledged() {
 }
 
 #[test]
+fn colony_guidance_targets_arrival_and_first_return_conversations() {
+    let mut progress = FirstHourProgress::default();
+    assert_eq!(progress.colony_guidance_target(), None);
+
+    progress.advance_arrival();
+    assert_eq!(progress.colony_guidance_target(), Some("mara_venn"));
+    progress.acknowledge_colonist("mara_venn");
+    progress.operation_resolved(1, true, 4);
+    assert_eq!(progress.stage, FirstHourStage::FirstReturn);
+    assert_eq!(progress.colony_guidance_target(), Some("ilya_reed"));
+
+    progress.guidance_enabled = false;
+    assert_eq!(progress.colony_guidance_target(), None);
+}
+
+#[test]
 fn tactical_lessons_follow_the_authored_order() {
     let mut progress = FirstHourProgress::default();
     progress.deployed(0);
@@ -34,6 +50,9 @@ fn defeat_still_reaches_return_and_promise_beats() {
     progress.operation_resolved(1, false, 5);
     assert_eq!(progress.stage, FirstHourStage::FirstReturn);
     progress.returned_to_colony();
+    assert_eq!(progress.stage, FirstHourStage::FirstReturn);
+    progress.acknowledge_colonist("ilya_reed");
+    assert_eq!(progress.stage, FirstHourStage::MakeInvestment);
     progress.invested("priority treatment");
     progress.operation_resolved(2, false, 6);
     assert_eq!(progress.stage, FirstHourStage::SecondReturn);

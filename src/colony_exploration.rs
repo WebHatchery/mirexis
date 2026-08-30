@@ -195,9 +195,8 @@ impl ColonyExplorer {
             let center = view.plot_center(position) + vec2(0.0, 7.0 * view.zoom);
             let hit = Rect::new(center.x - 22.0, center.y - 35.0, 44.0, 48.0);
             let hovered = hit.contains(mouse);
-            let highlighted = campaign.first_hour.stage
-                == crate::first_hour::FirstHourStage::MeetCoordinator
-                && character.id == "mara_venn";
+            let highlighted =
+                campaign.first_hour.colony_guidance_target() == Some(character.id.as_str());
             draw_character(CharacterDrawContext {
                 character,
                 center,

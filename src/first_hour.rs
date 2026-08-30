@@ -86,9 +86,7 @@ impl FirstHourProgress {
             FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical => {
                 lesson_prompt(self.lesson)
             }
-            FirstHourStage::FirstReturn => {
-                "Tap RETURN TO COLONY, then speak with the highlighted colonist."
-            }
+            FirstHourStage::FirstReturn => "Tap Ilya Reed's speech marker, then tap CONTINUE.",
             FirstHourStage::MakeInvestment => {
                 "Tap OPERATIONS and choose one affordable preparation investment."
             }
@@ -120,6 +118,17 @@ impl FirstHourProgress {
         }
     }
 
+    pub(crate) fn colony_guidance_target(&self) -> Option<&'static str> {
+        if !self.guidance_enabled {
+            return None;
+        }
+        match self.stage {
+            FirstHourStage::MeetCoordinator => Some("mara_venn"),
+            FirstHourStage::FirstReturn => Some("ilya_reed"),
+            _ => None,
+        }
+    }
+
     pub(crate) fn advance_arrival(&mut self) {
         if self.stage == FirstHourStage::Arrival {
             self.stage = FirstHourStage::MeetCoordinator;
@@ -133,6 +142,8 @@ impl FirstHourProgress {
         self.metrics.city_interacted();
         if self.stage == FirstHourStage::MeetCoordinator && id == "mara_venn" {
             self.stage = FirstHourStage::PrepareFirstOperation;
+        } else if self.stage == FirstHourStage::FirstReturn && id == "ilya_reed" {
+            self.stage = FirstHourStage::MakeInvestment;
         }
     }
 
@@ -209,9 +220,7 @@ impl FirstHourProgress {
     }
 
     pub(crate) fn returned_to_colony(&mut self) {
-        if self.stage == FirstHourStage::FirstReturn {
-            self.stage = FirstHourStage::MakeInvestment;
-        } else if self.stage == FirstHourStage::SecondReturn {
+        if self.stage == FirstHourStage::SecondReturn {
             self.stage = FirstHourStage::Promise;
         }
     }

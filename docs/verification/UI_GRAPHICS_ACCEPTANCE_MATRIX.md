@@ -131,6 +131,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | danger_reach | Tactical/overlay | Rectangular danger overlay | `ui_danger_reach.png` | PASS |
 | help | Help | Dense small-text modal | `ui_help.png` | PASS |
 | first_hour_guide | First-hour guide and playtest metrics | No canonical evidence for the observer-facing session readout | `ui_first_hour_guide.png` | PASS |
+| first_hour_return | First-hour return/recovery handoff | First return names a colonist but does not visibly route or highlight the conversation target | `ui_first_hour_return.png` | PASS |
 | first_hour_operations | First-hour colony handoff | Operations drawer does not make the next briefing action obvious | `ui_first_hour_operations.png` | PASS |
 | battle_log | Battle log | Plain chronological text | `ui_battle_log.png` | PASS |
 | combat_feedback | Tactical/feedback | Impact/recoil/critical and miss treatment | `ui_combat_feedback.png` | PASS |

@@ -6,7 +6,7 @@ Manifest: `scripts/capture_ui.ps1`
 
 ## Integrity summary
 
-- 90 manifest scenes and 90 canonical root PNG files; no scene is stored in a capture subfolder.
+- 91 manifest scenes and 91 canonical root PNG files; no scene is stored in a capture subfolder.
 - Every capture uses the standard 1280 x 720 logical target.
 - The harness overwrites each canonical `ui_<scene>.png` file in place.
 - Tactical inspection covers default gameplay, movement routes, class targeting, valid shots, hazards, and the off-center zoom variant.
@@ -24,6 +24,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_tactical.png`: guided tactical lesson marks a legal move target without blocking the battlefield inspection.
 - `ui_first_hour_ability.png`: guided ability lesson focuses a currently actionable mutation, class action, or field item.
 - `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the ApplyLearning hostile focus and forecast prompt active after deployment.
+- `ui_first_hour_return.png`: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing visible inside the open Operations drawer.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -100,24 +101,25 @@ Manifest: `scripts/capture_ui.ps1`
 | 67 | danger_reach | `ui_danger_reach.png` | 612994 | `bea205b685717599c3cc455640e3231da0514b273adfcde3ca241a12a35ac55f` |
 | 68 | help | `ui_help.png` | 332701 | `a1e0f3b1cca548d6bf1425a40587e26d6f098fb1fdbf094365ef89f97a65fe4e` |
 | 69 | first_hour_guide | `ui_first_hour_guide.png` | 211550 | `4ec8274af4c4b4b2c88ec224ad1a5b6bf4eec8a74e796824c0a271e970c3a20d` |
-| 70 | first_hour_operations | `ui_first_hour_operations.png` | 917501 | `3d66851e84d7255e029a0c6a12befeeda093bef857f0ba7fbbc23cde45247604` |
-| 71 | battle_log | `ui_battle_log.png` | 372152 | `f70c358f9d6ad10037fab7f49bf77daa03d4a7dc21d706b58e6240fc399d152d` |
-| 72 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |
-| 73 | phase_replay | `ui_phase_replay.png` | 559533 | `c8eace3ed8ec5c0736af49d223accd1021977243b20876553edd0b389c9dcf53` |
-| 74 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |
-| 75 | readiness_markers | `ui_readiness_markers.png` | 593135 | `90486f3d5aeba58d4cec38751bfd775d4ec29e5a74b8c91230b57c887fe0cf48` |
-| 76 | vitality_markers | `ui_vitality_markers.png` | 593589 | `730eac87effecdfcc2bffb9eb1a12a548955744c49474ea8ef207ff335570d4b` |
-| 77 | extraction | `ui_extraction.png` | 727213 | `0afcf722a4e0814e3b8778de1758bf03945b06f545aa846fa29112690062b61e` |
-| 78 | variant | `ui_variant.png` | 705792 | `2b2462e3b0f39dcea2a8e17e988af3bc55d813f5ec9e56c36a7af02d85aaa6e9` |
-| 79 | sporefield | `ui_sporefield.png` | 594401 | `21f9c6d36b47719e0efeadfa9d5b262fc898f294177768a73f48d76810896c64` |
-| 80 | vault | `ui_vault.png` | 591250 | `fd063591d11ba7a91cd902e1e7fe9bdda82fb77a71a100d201695da77e2ac9d4` |
-| 81 | black_channel | `ui_black_channel.png` | 597678 | `2737a53b3b0f6b226e46603849cd8f4e7f6ab8e1707042a7ff66096129f994b5` |
-| 82 | living_chorus | `ui_living_chorus.png` | 609095 | `f51f8624d2256f78be20c83a8c43fe4638d0be018f7f862ad1ddccf75eaca304` |
-| 83 | open_circuit | `ui_open_circuit.png` | 601930 | `af4238e5c217832a146ec788ca5b83a7b621d11fe0da4c041122cbf3132f5619` |
-| 84 | trace_active | `ui_trace_active.png` | 587206 | `874acdc593f1b132d46f71707decac3148270554a2d98bd68b688a7ba72330e6` |
-| 85 | equipment | `ui_equipment.png` | 538359 | `1b0a8b56125e3ff610ae88c8e3bc8ffc433cb1af6a99b83a38bd9c3de8ff4a0b` |
-| 86 | weapon_profile | `ui_weapon_profile.png` | 590465 | `c5e6dd50e15942449ebc53432628c432974601dbb16d25b049f6f953bd9002d2` |
-| 87 | class_target | `ui_class_target.png` | 545325 | `3c2c5ffa5d23f38e9232227e6487d012ccba5312c8d70f46b79ccd961c3b5fe7` |
-| 88 | breach | `ui_breach.png` | 686023 | `c7342bce74a9e6ec5fc09d70b0502404ed33d9fb15ee63b6a9e8f29958850e37` |
-| 89 | debrief | `ui_debrief.png` | 191580 | `d6ee367247a56dec453b3de76914f3f15ecb6673bb7987583fdcba8687b84f4a` |
-| 90 | trauma_debrief | `ui_trauma_debrief.png` | 203134 | `8f79c52fc2bcc5fd150d3fb074f674849e25bb84ddfb1cf33d30c5756585751c` |
+| 70 | first_hour_return | `ui_first_hour_return.png` | 878729 | `7298f2b6c3530423e31288fb6846397ea23070efa7a722d5938e246236727fd1` |
+| 71 | first_hour_operations | `ui_first_hour_operations.png` | 917501 | `3d66851e84d7255e029a0c6a12befeeda093bef857f0ba7fbbc23cde45247604` |
+| 72 | battle_log | `ui_battle_log.png` | 372152 | `f70c358f9d6ad10037fab7f49bf77daa03d4a7dc21d706b58e6240fc399d152d` |
+| 73 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |
+| 74 | phase_replay | `ui_phase_replay.png` | 559533 | `c8eace3ed8ec5c0736af49d223accd1021977243b20876553edd0b389c9dcf53` |
+| 75 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |
+| 76 | readiness_markers | `ui_readiness_markers.png` | 593135 | `90486f3d5aeba58d4cec38751bfd775d4ec29e5a74b8c91230b57c887fe0cf48` |
+| 77 | vitality_markers | `ui_vitality_markers.png` | 593589 | `730eac87effecdfcc2bffb9eb1a12a548955744c49474ea8ef207ff335570d4b` |
+| 78 | extraction | `ui_extraction.png` | 727213 | `0afcf722a4e0814e3b8778de1758bf03945b06f545aa846fa29112690062b61e` |
+| 79 | variant | `ui_variant.png` | 705792 | `2b2462e3b0f39dcea2a8e17e988af3bc55d813f5ec9e56c36a7af02d85aaa6e9` |
+| 80 | sporefield | `ui_sporefield.png` | 594401 | `21f9c6d36b47719e0efeadfa9d5b262fc898f294177768a73f48d76810896c64` |
+| 81 | vault | `ui_vault.png` | 591250 | `fd063591d11ba7a91cd902e1e7fe9bdda82fb77a71a100d201695da77e2ac9d4` |
+| 82 | black_channel | `ui_black_channel.png` | 597678 | `2737a53b3b0f6b226e46603849cd8f4e7f6ab8e1707042a7ff66096129f994b5` |
+| 83 | living_chorus | `ui_living_chorus.png` | 609095 | `f51f8624d2256f78be20c83a8c43fe4638d0be018f7f862ad1ddccf75eaca304` |
+| 84 | open_circuit | `ui_open_circuit.png` | 601930 | `af4238e5c217832a146ec788ca5b83a7b621d11fe0da4c041122cbf3132f5619` |
+| 85 | trace_active | `ui_trace_active.png` | 587206 | `874acdc593f1b132d46f71707decac3148270554a2d98bd68b688a7ba72330e6` |
+| 86 | equipment | `ui_equipment.png` | 538359 | `1b0a8b56125e3ff610ae88c8e3bc8ffc433cb1af6a99b83a38bd9c3de8ff4a0b` |
+| 87 | weapon_profile | `ui_weapon_profile.png` | 590465 | `c5e6dd50e15942449ebc53432628c432974601dbb16d25b049f6f953bd9002d2` |
+| 88 | class_target | `ui_class_target.png` | 545325 | `3c2c5ffa5d23f38e9232227e6487d012ccba5312c8d70f46b79ccd961c3b5fe7` |
+| 89 | breach | `ui_breach.png` | 686023 | `c7342bce74a9e6ec5fc09d70b0502404ed33d9fb15ee63b6a9e8f29958850e37` |
+| 90 | debrief | `ui_debrief.png` | 191580 | `d6ee367247a56dec453b3de76914f3f15ecb6673bb7987583fdcba8687b84f4a` |
+| 91 | trauma_debrief | `ui_trauma_debrief.png` | 203134 | `8f79c52fc2bcc5fd150d3fb074f674849e25bb84ddfb1cf33d30c5756585751c` |

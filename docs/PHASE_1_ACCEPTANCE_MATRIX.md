@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.118.0, validated and committed with this matrix
+Audit baseline: save/content 1.119.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -22,7 +22,7 @@ developer are not substitutes for that evidence.
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests, and the recorded WebGL operator pass | VERIFIED |
 | D08 | Audio/settings exist and critical information remains visual | `audio.rs`, audio tests, settings UI, event prose/markers, and browser persistence pass; fatigue remains an observation target | VERIFIED / HUMAN PENDING |
 | D09 | No severity 1 or 2 first-hour issue remains | No implementation-known severity 1/2 issue; five-session issue discovery and triage have not occurred | HUMAN PENDING |
-| D10 | Documentation and verification captures match the build | 90-scene manifest, acceptance matrix test, `capture_audit.json`, `ui_first_hour_guide.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, and `ui_first_hour_tactical.png` | VERIFIED |
+| D10 | Documentation and verification captures match the build | 91-scene manifest, acceptance matrix test, `capture_audit.json`, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, and `ui_first_hour_tactical.png` | VERIFIED |
 | D11 | Parameterless publisher passes and changes use project commit conventions | Recorded in `PHASE_1_HARDENING.md`; rerun and commit required after each audit fix | VERIFIED AT LAST CHECKPOINT |
 
 ## Workstream audit
@@ -31,10 +31,10 @@ developer are not substitutes for that evidence.
 
 | Required work | Evidence | Status |
 |---|---|---|
-| Opening situation, immediate goal, and destination | Arrival goal, Mara marker/landmark, and first-hour route trace | VERIFIED |
+| Opening situation, immediate goal, and destination | Arrival goal, Mara marker/landmark, first-return Ilya marker, and route traces | VERIFIED |
 | Introduce only the next meaningful control | Stage-owned `primary_goal` and ordered tactical lesson | VERIFIED |
 | Exact visible-control or gesture language | Prompts consistently name Tap, Drag, CONTINUE, OPERATIONS, DEPLOY, ATTACK, END PHASE, HELP, and visible targets | VERIFIED |
-| Highlight relevant target without blocking inspection | Non-blocking goal banner, Mara marker and route trace, colony Operations/briefing/preparation focus, tactical overlays, and lesson-specific map/command focus | VERIFIED |
+| Highlight relevant target without blocking inspection | Non-blocking goal banner, Mara/Ilya markers and route traces, colony Operations/briefing/preparation focus, tactical overlays, and lesson-specific map/command focus | VERIFIED |
 | Visible revisitable help | FIRST-HOUR FIELD GUIDE and tactical HELP | VERIFIED |
 | Restartable and skippable prompts without removing goals | `restart`, `guidance_enabled`, and first-hour tests | VERIFIED |
 | Persist progress and migrate saves with no tutorial fields | Save schema 1.65 and migration fixtures for 1.63 and 1.64 | VERIFIED |
@@ -47,7 +47,7 @@ the right understood context remains part of H01–H04 below.
 
 | Required work | Evidence | Status |
 |---|---|---|
-| Strong first-NPC landmark, readable approach, short interaction | Mara landmark, approach path, interaction distance, and exact city goal | VERIFIED |
+| Strong first-NPC landmark, readable approach, short interaction | Mara landmark, Ilya recovery marker, approach paths, interaction distance, and exact city goals | VERIFIED |
 | Concise introductions for coordinator and starting squad | Authored speaker table and colony dialogue | VERIFIED |
 | Environmental and HUD primary goal | Goal banner plus highlighted world/control targets | VERIFIED |
 | Readable colonists and facilities without permanent labels | Speech markers, proximity dialogue, building art/state | VERIFIED |
@@ -125,7 +125,7 @@ Clipping, stacking, fatigue, and muted comprehension require listening sessions.
 | Text, contrast, colour redundancy, and motion/readability | Graphics acceptance matrix and reduced-motion setting | VERIFIED / HUMAN PENDING |
 | Overlay/focus/resize input safety | Modal input clearing and map-release tests | VERIFIED |
 | Explicit save migrations | Schema table and immediate-previous-version fixture | VERIFIED |
-| Canonical captures replaced rather than duplicated | Flat 90-scene capture inventory and audit | VERIFIED |
+| Canonical captures replaced rather than duplicated | Flat 91-scene capture inventory and audit | VERIFIED |
 
 ## Delivery-checkpoint audit
 
