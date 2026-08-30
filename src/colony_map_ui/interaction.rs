@@ -19,18 +19,34 @@ pub(super) fn draw_hover_card(
     let site_unavailable = building.is_none()
         && project.is_none()
         && !campaign.can_construct_building(campaign.colony.planned_construction, position);
+    let action_unavailable = building.is_some_and(|building| {
+        building.damaged && !campaign.colony.can_repair_building(&building.id)
+    });
     let text = if let Some(building) = building {
-        if building.kind.is_identity() {
+        if building.damaged {
+            let cost = campaign
+                .colony
+                .repair_cost_for(&building.id)
+                .unwrap_or_else(|| building.kind.repair_cost());
+            if campaign.colony.resources.materials >= cost {
+                format!(
+                    "{} // DAMAGED // REPAIR {} MAT",
+                    building.kind.name().to_uppercase(),
+                    cost
+                )
+            } else {
+                format!(
+                    "{} // DAMAGED // NEED {} MAT // {} MORE REQUIRED",
+                    building.kind.name().to_uppercase(),
+                    cost,
+                    cost - campaign.colony.resources.materials
+                )
+            }
+        } else if building.kind.is_identity() {
             campaign
                 .identity_preparation_copy()
                 .or_else(|| campaign.identity_stewardship_copy())
                 .unwrap_or_else(|| identity_building_copy(campaign, building))
-        } else if building.damaged {
-            format!(
-                "{} // DAMAGED // REPAIR {} MAT",
-                building.kind.name().to_uppercase(),
-                building.kind.repair_cost()
-            )
         } else if !campaign.colony.building_is_powered(&building.id) {
             format!(
                 "{} // OFFLINE: INSUFFICIENT POWER",
@@ -136,7 +152,7 @@ pub(super) fn draw_hover_card(
             Err(error) => format!("CLEARANCE REQUIRED // {}", error.to_uppercase()),
         }
     };
-    let text = if site_unavailable {
+    let text = if site_unavailable || action_unavailable {
         text
     } else if pending == Some(position) {
         format!("TAP AGAIN TO CONFIRM // {text}")
@@ -158,32 +174,23 @@ fn identity_building_copy(
     building: &crate::colony::BuildingState,
 ) -> String {
     let power = campaign.colony.building_is_powered(&building.id);
-    match (building.kind, building.damaged, power) {
-        (BuildingKind::RedoubtArsenal, true, _) => {
-            "REDOUBT ARSENAL // DAMAGED // REPAIR 35 MAT // PHYSICAL COVER HOLDS".to_owned()
-        }
-        (BuildingKind::RedoubtArsenal, false, true) => {
+    match (building.kind, power) {
+        (BuildingKind::RedoubtArsenal, true) => {
             "REDOUBT ARSENAL // ONLINE // RESILIENT COVER // PRIORITY OBJECTIVE".to_owned()
         }
-        (BuildingKind::RedoubtArsenal, false, false) => {
+        (BuildingKind::RedoubtArsenal, false) => {
             "REDOUBT ARSENAL // OFFLINE // PHYSICAL COVER // PRIORITY OBJECTIVE".to_owned()
         }
-        (BuildingKind::ChoirGarden, true, _) => {
-            "CHOIR GARDEN // DAMAGED // REPAIR 35 MAT // BIOMASS CYCLE PAUSED".to_owned()
-        }
-        (BuildingKind::ChoirGarden, false, true) => {
+        (BuildingKind::ChoirGarden, true) => {
             "CHOIR GARDEN // ONLINE // +1 BIOMASS / OPERATION // LIVING COVER".to_owned()
         }
-        (BuildingKind::ChoirGarden, false, false) => {
+        (BuildingKind::ChoirGarden, false) => {
             "CHOIR GARDEN // OFFLINE // BIOMASS PAUSED // LIVING COVER OFFLINE".to_owned()
         }
-        (BuildingKind::ThresholdSpire, true, _) => {
-            "THRESHOLD SPIRE // DAMAGED // REPAIR 35 MAT // SHIELD OFFLINE".to_owned()
-        }
-        (BuildingKind::ThresholdSpire, false, true) => {
+        (BuildingKind::ThresholdSpire, true) => {
             "THRESHOLD SPIRE // ONLINE // SHIELD COVER // PRIORITY OBJECTIVE".to_owned()
         }
-        (BuildingKind::ThresholdSpire, false, false) => {
+        (BuildingKind::ThresholdSpire, false) => {
             "THRESHOLD SPIRE // OFFLINE // NEEDS 2 POWER // SHIELD OFFLINE".to_owned()
         }
         _ => format!(
@@ -219,7 +226,7 @@ pub(super) fn handle_plot_click(
         return;
     }
     if let Some(building) = campaign.colony.building_at(position) {
-        if building.damaged {
+        if building.damaged && campaign.colony.can_repair_building(&building.id) {
             actions.push(UiAction::RepairBuilding(building.id.clone()));
         } else if building.kind == BuildingKind::GeneLab
             && campaign.colony.building_is_powered(&building.id)

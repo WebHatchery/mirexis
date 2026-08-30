@@ -208,6 +208,29 @@ fn failed_defense_damage_disables_a_facility_until_repaired() {
 }
 
 #[test]
+fn repair_affordance_closes_when_materials_cannot_cover_the_effective_cost() {
+    let mut colony = ColonyState::new();
+    let id = colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Hydroponics)
+        .unwrap()
+        .id
+        .clone();
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == id)
+        .unwrap()
+        .damaged = true;
+    assert_eq!(colony.repair_cost_for(&id), Some(25));
+    colony.resources.materials = 24;
+    assert!(!colony.can_repair_building(&id));
+    colony.resources.materials = 25;
+    assert!(colony.can_repair_building(&id));
+}
+
+#[test]
 fn hydroponics_production_and_power_load_are_derived_from_buildings() {
     let mut colony = ColonyState::new();
     assert_eq!(colony.power_supply(), 8);

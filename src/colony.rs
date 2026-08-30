@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 mod construction;
 mod defense;
 mod identity;
+mod repairs;
 mod upgrades;
 
 pub use upgrades::*;
@@ -536,13 +537,9 @@ impl ColonyState {
         if !damaged {
             return Err(format!("{} does not need repair", kind.name()));
         }
-        let repair_discount = if self.has_active_upgrade(BuildingKind::Workshop, DRONE_BAY_UPGRADE)
-        {
-            10
-        } else {
-            0
-        };
-        let cost = (kind.repair_cost() - repair_discount).max(5);
+        let cost = self
+            .repair_cost_for(building_id)
+            .expect("damaged building has a repair cost");
         if self.resources.materials < cost {
             return Err(format!("Repair requires {} materials", cost));
         }

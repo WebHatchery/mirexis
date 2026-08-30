@@ -156,6 +156,8 @@ fn drone_bay_reduces_repairs_while_the_workshop_is_online() {
         .damaged = true;
     campaign.colony.resources.materials = 20;
 
+    assert_eq!(campaign.colony.repair_cost_for("hydroponics"), Some(15));
+    assert!(campaign.colony.can_repair_building("hydroponics"));
     let (_, cost) = campaign.colony.repair_building("hydroponics").unwrap();
     assert_eq!(cost, 15);
     assert!(campaign
