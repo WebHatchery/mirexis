@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.138.0
+Save/content version: 1.139.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -914,6 +914,7 @@ Migration coverage:
 | 1.136.0 | Loading a save clears transient overlays, end-phase confirmation, combat feedback, and aligns the audio event cursor with restored tactical history; no new save fields |
 | 1.137.0 | Battle history adds touch-visible ALL, COMBAT, GROUND, and SYSTEM filters while preserving original event numbering; no new save fields |
 | 1.138.0 | Enemy-phase first-hour guidance explains the conditional end-phase confirmation control instead of requiring an unnecessary second tap; no new save fields |
+| 1.139.0 | First-hour help, tactical help, and battle history close competing modal layers so only one blocking reference surface remains active; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

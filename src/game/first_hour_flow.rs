@@ -83,7 +83,15 @@ impl Game {
                 if !self.campaign.first_hour.help_open {
                     self.campaign.first_hour.metrics.opened_guide();
                 }
-                self.campaign.first_hour.help_open = !self.campaign.first_hour.help_open;
+                let (help_open, tactical_help_open, battle_log_open) =
+                    first_hour_help_overlay_state(
+                        self.campaign.first_hour.help_open,
+                        self.show_tactical_help,
+                        self.show_battle_log,
+                    );
+                self.campaign.first_hour.help_open = help_open;
+                self.show_tactical_help = tactical_help_open;
+                self.show_battle_log = battle_log_open;
                 self.clear_colony_explorer_motion();
                 "Field-guide state and session metrics autosaved"
             }
@@ -171,6 +179,14 @@ impl Game {
                 .unwrap_or_else(|| fallback.to_owned()),
         );
     }
+}
+
+fn first_hour_help_overlay_state(
+    help_open: bool,
+    _tactical_help_open: bool,
+    _battle_log_open: bool,
+) -> (bool, bool, bool) {
+    (!help_open, false, false)
 }
 
 pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mission: &MissionDef) {

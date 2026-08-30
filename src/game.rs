@@ -701,11 +701,13 @@ impl Game {
             UiAction::ToggleTacticalHelp => {
                 self.show_tactical_help = !self.show_tactical_help;
                 self.show_battle_log = false;
+                self.campaign.first_hour.help_open = false;
                 self.targeting = None;
             }
             UiAction::ToggleBattleLog => {
                 self.show_battle_log = !self.show_battle_log;
                 self.show_tactical_help = false;
+                self.campaign.first_hour.help_open = false;
                 self.targeting = None;
             }
             UiAction::SetBattleLogFilter(filter) => self.battle_log_filter = filter,

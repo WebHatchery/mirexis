@@ -69,3 +69,15 @@ fn first_hour_ability_step_reselects_a_colonist_with_a_visible_action() {
         session.unit("kira_voss").unwrap().position
     );
 }
+
+#[test]
+fn first_hour_help_closes_other_tactical_modal_layers() {
+    assert_eq!(
+        first_hour_help_overlay_state(false, true, true),
+        (true, false, false)
+    );
+    assert_eq!(
+        first_hour_help_overlay_state(true, true, true),
+        (false, false, false)
+    );
+}
