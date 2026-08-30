@@ -282,6 +282,21 @@ pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBea
             "THE ANSWER UNDER THE SIGNAL",
             "The Black Channel answered from below the colony, and the Living Chorus answered from within it. The signal is not a faction's property anymore; it is a question we have to carry together.",
         ),
+        ("adaptation", "mara_venn") => (
+            "phase_adaptation_mara",
+            "THE COLONY MAKES ROOM",
+            "The Gene Lab can change what enters the colony, but a door is not a verdict. If we ask the adapted to become useful before we ask what they want, we have built another Directorate with better lighting.",
+        ),
+        ("adaptation", "ilya_reed") => (
+            "phase_adaptation_ilya",
+            "CONSENT HAS A PULSE",
+            "The clinic can record a changed body without claiming it. Every treatment in Adaptation begins with the same question: is the person asking for help, or are we asking the person to become easier to keep?",
+        ),
+        ("adaptation", "sol_cairn") => (
+            "phase_adaptation_sol",
+            "POWER FOR THE UNKNOWN",
+            "The Gene Lab draws power from a grid built for pumps and doors. I can keep it online, but I will not pretend current makes an experiment ethical.",
+        ),
         ("adaptation", "nadi_vale") => (
             "phase_adaptation_nadi",
             "THE BODY MAPS THE ROOM",
@@ -296,6 +311,31 @@ pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBea
             "phase_escalation_mara",
             "THEY CAN SEE THE LIGHTS",
             "Three powers are converging on the same patch of dark, and now they can see our lights. The colony cannot survive as an invisible camp; it needs a defence that the people behind it can name and direct.",
+        ),
+        ("escalation", "ilya_reed") => (
+            "phase_escalation_ilya",
+            "THE WOUND IS A MESSAGE",
+            "Three powers on one horizon turn every injury into a decision. I can close the wound, but the colony has to decide what kind of future it is willing to send people back into.",
+        ),
+        ("escalation", "sol_cairn") => (
+            "phase_escalation_sol",
+            "THE GRID UNDER PRESSURE",
+            "The colony's power is visible from every approach now. I can reinforce the circuit, but a strong grid is not a command structure; someone still has to decide what it is protecting.",
+        ),
+        ("escalation", "nadi_vale") => (
+            "phase_escalation_nadi",
+            "THE SIGNAL HAS A BODY",
+            "The thing below Mirexis is no longer content to be a pattern in the instruments. It is reaching through the pressure between factions, and I need the colony to hear the person inside the warning.",
+        ),
+        ("escalation", "veya_orn") => (
+            "phase_escalation_veya",
+            "A CIPHER IN THE CROSSFIRE",
+            "The Directorate taught Veya to read a battlefield as a set of assets. Three powers have made that lesson useless; the colony must decide whether a map can protect people without turning them into positions.",
+        ),
+        ("escalation", "sedge") => (
+            "phase_escalation_sedge",
+            "THE ROUTE HAS WITNESSES",
+            "Sedge's map was private when it was only a way home. With three powers converging, every route becomes public the moment someone survives it; the colony must learn how to witness without taking ownership.",
         ),
         _ => return None,
     };

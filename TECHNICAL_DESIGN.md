@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.91.0
+Save/content version: 1.92.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -307,6 +307,11 @@ Contact route field notes are keyed by the selected protocol and three authorita
 flags: before trace completion, after the trace but before Contact completion, and after Contact
 completion. Each stage names one starting colonist, so all three routes retain visible witness,
 contradiction, and aftermath voices without requiring a route-specific recruit.
+
+Adaptation and Escalation also expose phase-specific notes through the active colony voices:
+defence, clinic, engineering, xenobiology, and any route outsider present at the Waystation.
+The same acknowledgement path records these notes in the persistent story ledger, so the
+engine mystery accumulates through play instead of arriving only in the finale.
 
 The colony roster screen persists a selected colonist and exposes every base class with
 aptitude-priced material costs. Workshop choices cover starter equipment plus three
@@ -636,10 +641,11 @@ colony legacy dossier from the chosen institution, ready and recovering people, 
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
 The identity contact's final field note changes with the completed path, giving the dossier a
 character voice instead of only a summary ledger.
-Contact, Adaptation, and Escalation also expose one phase-specific colony field note through a
-named voice: Kira reads the answer under the signal, Nadi interprets the evolving body-map, and
-Mara names the visible convergence. These notes use the same persistent story ledger and do not
-add another save schema.
+Contact, Adaptation, and Escalation also expose phase-specific colony field notes through named
+voices. Contact gives Kira the signal's first answer; Adaptation gives Mara, Ilya, Sol, Nadi,
+and Sedge perspectives on deliberate change; Escalation lets Mara, Ilya, Sol, Nadi, Veya, and
+Sedge respond as the powers converge. These notes use the same persistent story ledger and do
+not add another save schema.
 The completed-campaign dossier adds an authored voice line from the identity contact for each
 path. Its wording reflects whether that person is ready or recovering, so the ending acknowledges
 the lived condition of the named survivor without storing another derived field.
@@ -786,6 +792,7 @@ Migration coverage:
 | 1.89.0 | Independent route-specific outsider arcs for Sedge with Brood attention, resource choices, and persisted legacies |
 | 1.90.0 | Adaptation route access to the Waystation so Sedge is reachable on every Contact protocol |
 | 1.91.0 | Unchosen route outsiders appear as Waystation guests with field notes and recruitment handoff |
+| 1.92.0 | Expanded Adaptation and Escalation field notes across active colony voices |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

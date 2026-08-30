@@ -642,12 +642,21 @@ fn contact_aftermath_event_changes_its_faction_and_character() {
 #[test]
 fn phase_conversations_archive_the_current_phase_beat() {
     let data = GameData::load().unwrap();
-    let mut campaign = CampaignState::new(&data);
-    campaign.strategy.phase_id = "adaptation".to_owned();
-
-    campaign.acknowledge_colonist("nadi_vale");
-
-    assert!(campaign.colony_story.has_heard("phase_adaptation_nadi"));
+    for (phase_id, character_id, beat_id) in [
+        ("adaptation", "mara_venn", "phase_adaptation_mara"),
+        ("adaptation", "ilya_reed", "phase_adaptation_ilya"),
+        ("adaptation", "sol_cairn", "phase_adaptation_sol"),
+        ("adaptation", "nadi_vale", "phase_adaptation_nadi"),
+        ("escalation", "mara_venn", "phase_escalation_mara"),
+        ("escalation", "ilya_reed", "phase_escalation_ilya"),
+        ("escalation", "sol_cairn", "phase_escalation_sol"),
+        ("escalation", "nadi_vale", "phase_escalation_nadi"),
+    ] {
+        let mut campaign = CampaignState::new(&data);
+        campaign.strategy.phase_id = phase_id.to_owned();
+        campaign.acknowledge_colonist(character_id);
+        assert!(campaign.colony_story.has_heard(beat_id));
+    }
 }
 
 #[test]

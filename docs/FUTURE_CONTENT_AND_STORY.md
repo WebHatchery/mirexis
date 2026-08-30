@@ -26,6 +26,10 @@ visible on the colony map, can be approached through touch-first walking, and pr
 authored arrival note plus the normal recruitment handoff without becoming a roster member
 until recruitment succeeds.
 
+Adaptation and Escalation now carry that continuity through multiple colony voices: defence,
+clinic, engineering, xenobiology, and any route outsider present at the Waystation each leave
+an authored phase note before the finale.
+
 The Commons is also now a working home-space slice: a powered settlement can host one
 shared meal per operation, spend food, and turn the active squad's table into persistent
 relationship progress.
@@ -486,7 +490,8 @@ Goal: make the implemented five-phase foundation narratively complete.
 
 - Implemented: expand each Contact route with a persistent witness, contradiction, and
   aftermath field note keyed to the selected protocol and campaign completion flags.
-- Add recurring evidence across Adaptation and Escalation instead of a finale lore dump.
+- Implemented: add recurring evidence across Adaptation and Escalation through multiple active
+  colony voices instead of a finale-only lore dump.
 - Pay off all five starting arcs and the route-exclusive outsider.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.

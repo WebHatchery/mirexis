@@ -38,8 +38,10 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   people, trusted bonds, scars, and mutation evolutions.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
-- Contact, Adaptation, and Escalation each surface a phase-specific colony field note through a
-  named colonist voice and persistent acknowledgement.
+- Contact, Adaptation, and Escalation each surface phase-specific colony field notes through
+  named colonist voices and persistent acknowledgement.
+- Adaptation and Escalation now carry recurring field notes through the defence, clinic,
+  engineering, xenobiology, and active outsider voices.
 - Each Contact protocol now carries a three-stage witness, contradiction, and aftermath thread
   through distinct colonist voices before Adaptation begins.
 - Completed ending dossiers add an authored identity-contact voice that reflects the named
