@@ -1,9 +1,11 @@
 //! Persistent character identity, progression, and deployment derivation.
 
+mod commons;
 mod deployment;
 mod derivation;
 mod outsider;
 
+pub(crate) use commons::COMMONS_MEAL_FOOD_COST;
 pub(super) use derivation::derive_unit;
 pub(crate) use outsider::{outsider_beat, OutsiderChoice};
 
@@ -118,6 +120,10 @@ pub struct CampaignState {
     pub outsider_disagreements: u8,
     #[serde(default)]
     pub outsider_final_choice: String,
+    #[serde(default)]
+    pub commons_meals_hosted: u32,
+    #[serde(default)]
+    pub commons_meal_operation: Option<u32>,
 }
 
 impl CampaignState {
@@ -146,6 +152,8 @@ impl CampaignState {
             outsider_arc_stage: 0,
             outsider_disagreements: 0,
             outsider_final_choice: String::new(),
+            commons_meals_hosted: 0,
+            commons_meal_operation: None,
         }
     }
 

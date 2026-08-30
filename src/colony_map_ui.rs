@@ -13,6 +13,7 @@ use macroquad_toolkit::ui::VirtualUi;
 pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
 pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
 
+mod building_art;
 mod controls;
 mod terrain;
 pub(crate) mod view;
@@ -121,6 +122,11 @@ pub(crate) fn draw(
     }
     controls::draw_exploration_controls(campaign, explorer, mouse, actions);
     explorer.draw_dialogue(campaign, mouse, actions);
+    let instruction_y = if explorer.build_mode() {
+        panel.y + 42.0
+    } else {
+        panel.bottom() - 76.0
+    };
     draw_text(
         if explorer.build_mode() {
             format!(
@@ -134,7 +140,7 @@ pub(crate) fn draw(
             )
         },
         panel.x + 14.0,
-        panel.bottom() - 76.0,
+        instruction_y,
         11.0,
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
@@ -436,8 +442,14 @@ fn draw_plot(
             ),
             tint,
         );
-        if building.kind == BuildingKind::Waystation {
-            draw_waystation_art(center, view.zoom, powered, building.damaged);
+        match building.kind {
+            BuildingKind::Waystation => {
+                building_art::draw_waystation(center, view.zoom, powered, building.damaged)
+            }
+            BuildingKind::Commons => {
+                building_art::draw_commons(center, view.zoom, powered, building.damaged)
+            }
+            _ => {}
         }
         draw_building_state(center, building.damaged, powered);
     } else if let Some(project) = project.filter(|project| project.position == position) {
@@ -474,45 +486,8 @@ fn building_index(kind: BuildingKind) -> usize {
         BuildingKind::PowerPlant => 6,
         BuildingKind::GeneLab => 7,
         BuildingKind::Waystation => 7,
+        BuildingKind::Commons => 1,
     }
-}
-
-fn draw_waystation_art(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
-    let accent = if damaged {
-        Color::new(1.0, 0.28, 0.20, 0.92)
-    } else if powered {
-        Color::new(0.40, 0.82, 1.0, 0.92)
-    } else {
-        Color::new(0.92, 0.60, 0.20, 0.80)
-    };
-    draw_line(
-        center.x,
-        center.y - 52.0 * zoom,
-        center.x,
-        center.y - 18.0 * zoom,
-        2.0 * zoom,
-        accent,
-    );
-    draw_circle(
-        center.x,
-        center.y - 55.0 * zoom,
-        5.0 * zoom,
-        Color::new(accent.r, accent.g, accent.b, 0.22),
-    );
-    draw_circle_lines(
-        center.x,
-        center.y - 55.0 * zoom,
-        11.0 * zoom,
-        1.5 * zoom,
-        Color::new(accent.r, accent.g, accent.b, 0.64),
-    );
-    draw_circle_lines(
-        center.x,
-        center.y - 55.0 * zoom,
-        18.0 * zoom,
-        1.0 * zoom,
-        Color::new(accent.r, accent.g, accent.b, 0.34),
-    );
 }
 
 fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
@@ -687,6 +662,14 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending:
             )
         } else if building.kind == BuildingKind::GeneLab {
             "GENE LAB // TAP TO OPEN EVOLUTION CHAMBER".to_owned()
+        } else if building.kind == BuildingKind::Commons {
+            if campaign.commons_meal_available() {
+                "COMMONS // TAP TO HOST SHARED MEAL // 4 FOOD".to_owned()
+            } else if campaign.commons_meal_operation == Some(campaign.operations_completed) {
+                "COMMONS // SHARED MEAL ALREADY HOSTED THIS OPERATION".to_owned()
+            } else {
+                "COMMONS // NEEDS 4 FOOD + 2 READY SQUAD MEMBERS".to_owned()
+            }
         } else if building.kind == BuildingKind::Waystation {
             if !campaign
                 .roster
@@ -776,6 +759,11 @@ fn handle_plot_click(
                 .any(|character| character.id == "veya_orn")
         {
             actions.push(UiAction::RecruitOutsider);
+        } else if building.kind == BuildingKind::Commons
+            && campaign.colony.building_is_powered(&building.id)
+            && campaign.commons_meal_available()
+        {
+            actions.push(UiAction::HostCommonsMeal);
         }
     } else if campaign.colony.project_at(position).is_none() {
         actions.push(UiAction::ConstructBuilding(

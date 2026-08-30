@@ -92,6 +92,7 @@ fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() 
         BuildingKind::PowerPlant,
         BuildingKind::GeneLab,
         BuildingKind::Waystation,
+        BuildingKind::Commons,
     ] {
         let mut colony = ColonyState::new();
         colony.place_construction(kind, [3, 3]).unwrap();
@@ -345,5 +346,19 @@ fn waystation_is_unique_and_online_on_the_redundant_starting_grid() {
         .is_err());
     colony.advance_operation();
     assert!(colony.has_facility(BuildingKind::Waystation));
+    assert_eq!(colony.power_demand(), 8);
+}
+
+#[test]
+fn commons_is_unique_and_online_on_the_redundant_starting_grid() {
+    let mut colony = ColonyState::new();
+    colony
+        .place_construction(BuildingKind::Commons, [2, 10])
+        .unwrap();
+    assert!(colony
+        .place_construction(BuildingKind::Commons, [2, 14])
+        .is_err());
+    colony.advance_operation();
+    assert!(colony.has_facility(BuildingKind::Commons));
     assert_eq!(colony.power_demand(), 8);
 }

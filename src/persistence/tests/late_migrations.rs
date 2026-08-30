@@ -254,6 +254,8 @@ fn version_171_save_gains_outsider_runtime_defaults() {
     campaign.remove("outsider_arc_stage");
     campaign.remove("outsider_disagreements");
     campaign.remove("outsider_final_choice");
+    campaign.remove("commons_meals_hosted");
+    campaign.remove("commons_meal_operation");
     for character in campaign["roster"].as_array_mut().unwrap() {
         let character = character.as_object_mut().unwrap();
         character.remove("origin");
@@ -266,11 +268,30 @@ fn version_171_save_gains_outsider_runtime_defaults() {
     assert_eq!(migrated.campaign.outsider_arc_stage, 0);
     assert_eq!(migrated.campaign.outsider_disagreements, 0);
     assert!(migrated.campaign.outsider_final_choice.is_empty());
+    assert_eq!(migrated.campaign.commons_meals_hosted, 0);
+    assert_eq!(migrated.campaign.commons_meal_operation, None);
     assert!(migrated
         .campaign
         .roster
         .iter()
         .all(|character| character.origin.is_empty() && character.origin_description.is_empty()));
+}
+
+#[test]
+fn version_172_save_gains_commons_runtime_defaults() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut legacy = serde_json::to_value(session.to_save("1.72.0", &campaign)).unwrap();
+    let campaign = legacy["campaign"].as_object_mut().unwrap();
+    campaign.remove("commons_meals_hosted");
+    campaign.remove("commons_meal_operation");
+
+    let migrated = migrate_save_value(Some("1.72.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(migrated.campaign.commons_meals_hosted, 0);
+    assert_eq!(migrated.campaign.commons_meal_operation, None);
 }
 
 #[test]

@@ -7,6 +7,8 @@ mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;
 mod class_action_flow;
+mod colony_flow;
+mod debrief_flow;
 mod destructive_flow;
 mod first_hour_flow;
 mod input;
@@ -449,6 +451,7 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::HostCommonsMeal => self.handle_commons_meal(),
             UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
                 Ok(food_cost) => {
                     self.campaign
@@ -772,29 +775,5 @@ impl Game {
         }
         self.finish_action_audio(&audio_action, audio_event_count);
         self.enter_debrief_if_finished();
-    }
-
-    fn enter_debrief_if_finished(&mut self) {
-        if self.state != AppState::Tactical {
-            return;
-        }
-        if let Some(outcome) = self.session.mission_outcome(&self.active_mission) {
-            self.last_outcome = Some(outcome);
-            self.campaign.advance_recovery();
-            let mission = self
-                .campaign
-                .strategy
-                .selected_mission()
-                .expect("a deployed mission remains selected")
-                .clone();
-            self.campaign.apply_mission_outcome(
-                self.last_outcome.as_ref().expect("outcome was just stored"),
-                &mission,
-                &self.data,
-            );
-            self.record_first_hour_outcome();
-            self.state = AppState::Debrief;
-            self.autosave_current("Debrief autosaved");
-        }
     }
 }

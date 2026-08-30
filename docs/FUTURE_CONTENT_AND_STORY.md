@@ -16,6 +16,10 @@ Directorate Requisition can build a Waystation, recruit Veya Orn, and carry her 
 equipment action, relationships, disagreements, and closing choice through saves. The
 remaining origins and equivalent faction routes stay future work.
 
+The Commons is also now a working home-space slice: a powered settlement can host one
+shared meal per operation, spend food, and turn the active squad's table into persistent
+relationship progress.
+
 This document plans the next content horizon: playable peoples and origins, classes,
 skills, buildings, upgrades, recruits, and the story that connects them. It is subordinate
 to `PLAYABLE_GAME_PHASE_1.md` until the required uncoached first-hour playtests are
@@ -289,9 +293,9 @@ reserved for the late-game colony identity, not a generic numeric improvement.
 
 Build these in priority order:
 
-1. **Commons.** A high-value story building for shared meals, relationship scenes,
-   arguments, celebrations, and post-operation recovery. Its defence version shelters
-   civilians and turns emotional attachment into a tactical objective.
+1. **Commons.** Implemented as a powered, once-per-operation shared meal that spends food
+   and advances bonds among the active squad. Future work can add relationship scenes,
+   arguments, celebrations, post-operation recovery, and a fuller civilian defence role.
 2. **Relay Mast.** Expands operation intelligence and communication choices while making
    the colony easier to locate. It creates a clean risk/reward loop with faction attention.
 3. **Research Annex.** Gives research a physical home, displays recovered artefacts, and
@@ -363,7 +367,8 @@ mission length, and investment behaviour as the balance baseline for every later
 Goal: deepen the existing people and city without new tactical systems.
 
 - Add three-beat arcs for Kira, Mara, Ilya, Sol, and Nadi.
-- Build the Commons and connect it to debrief consequences.
+- Implemented: build the Commons and connect one shared meal to persistent squad bonds.
+- Connect Commons meals to debrief consequences and authored relationship scenes.
 - Add at least one phase-specific colony scene per campaign phase.
 - Establish the unified refuge-engine truth in internal narrative references.
 - Expand ending acknowledgement for bonds, scars, evolution, and one civic choice.

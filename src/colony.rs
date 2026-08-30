@@ -20,6 +20,7 @@ pub enum BuildingKind {
     PowerPlant,
     GeneLab,
     Waystation,
+    Commons,
 }
 
 impl BuildingKind {
@@ -34,6 +35,7 @@ impl BuildingKind {
             Self::PowerPlant => "Power Plant",
             Self::GeneLab => "Gene Lab",
             Self::Waystation => "Waystation",
+            Self::Commons => "Commons",
         }
     }
 
@@ -43,6 +45,7 @@ impl BuildingKind {
             Self::PowerPlant => 45,
             Self::GeneLab => 50,
             Self::Waystation => 55,
+            Self::Commons => 40,
             _ => 0,
         }
     }
@@ -53,6 +56,7 @@ impl BuildingKind {
             Self::Workshop | Self::Hydroponics => 2,
             Self::GeneLab => 3,
             Self::Waystation => 1,
+            Self::Commons => 1,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -228,6 +232,7 @@ impl ColonyState {
                 | BuildingKind::PowerPlant
                 | BuildingKind::GeneLab
                 | BuildingKind::Waystation
+                | BuildingKind::Commons
         ) {
             return Err(format!("{} cannot be planned here", kind.name()));
         }
@@ -241,12 +246,14 @@ impl ColonyState {
         position: [i32; 2],
     ) -> Result<String, String> {
         self.validate_construction_site(position)?;
-        if matches!(kind, BuildingKind::GeneLab | BuildingKind::Waystation)
-            && (self.buildings.iter().any(|building| building.kind == kind)
-                || self
-                    .construction_queue
-                    .iter()
-                    .any(|project| project.kind == kind))
+        if matches!(
+            kind,
+            BuildingKind::GeneLab | BuildingKind::Waystation | BuildingKind::Commons
+        ) && (self.buildings.iter().any(|building| building.kind == kind)
+            || self
+                .construction_queue
+                .iter()
+                .any(|project| project.kind == kind))
         {
             return Err(format!("The colony can support only one {}", kind.name()));
         }
@@ -362,7 +369,8 @@ impl ColonyState {
                     | BuildingKind::Hydroponics
                     | BuildingKind::PowerPlant
                     | BuildingKind::GeneLab
-                    | BuildingKind::Waystation => critical_objectives.push(position),
+                    | BuildingKind::Waystation
+                    | BuildingKind::Commons => critical_objectives.push(position),
                 }
             }
         }

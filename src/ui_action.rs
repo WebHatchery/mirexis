@@ -16,6 +16,7 @@ pub enum UiAction {
     ResolveCharacterEvent(String),
     RecruitOutsider,
     ResolveOutsiderBeat(u8, String),
+    HostCommonsMeal,
     DeployMission,
     CycleFormation,
     ToggleDeployment(String),

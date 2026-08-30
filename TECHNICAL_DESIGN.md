@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.72.0
+Save/content version: 1.73.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -18,7 +18,8 @@ The implemented slice proves all roadmap systems together:
 1. Start or continue a persistent colony.
 2. Inspect resources, faction attention, an assault countdown, research, events,
    recruitable outsiders, facilities, and mission offers.
-3. Place construction, train a colonist, treat injuries, and craft equipment.
+3. Place construction, host a Commons meal, train a colonist, treat injuries, and craft
+   equipment.
 4. Select an authored or seeded generated mission and choose three ready recruits.
 5. Resolve deterministic movement, attacks, an interactive objective, enemy AI,
    victory, or failure.
@@ -108,6 +109,7 @@ Important transition payloads:
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
+| `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and Contact-era outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
@@ -698,6 +700,7 @@ Migration coverage:
 | 1.70.0 | Breacher and Fortifier hybrid class actions, tile-targeted class-action input, and advanced-class migration defaults |
 | 1.71.0 | Rescue Specialist and Chorus Warden hybrid class actions, hazard conversion events, and advanced-class migration defaults |
 | 1.72.0 | Waystation construction, Directorate Exile recruitment, origin-derived profiles, Exile Cipher action, and outsider-arc migration defaults |
+| 1.73.0 | Commons construction, once-per-operation shared meals, relationship progression, and Commons migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -749,7 +752,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (276 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (280 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
@@ -787,8 +790,9 @@ these explicit boundaries when continuing:
 - The eighteen current map recipes support authored and safe mirrored layouts; nine
   early and Contact battlefields now carry faction hazards. Additional transforms,
   elevation, spawn recipes, and battlefield families remain future work.
-- The colony has fixed core facilities and placeable Barricades, Power Plants, and one
-  Adaptation-gated Gene Lab; population and free placement for every building remain.
+- The colony has fixed core facilities and placeable Barricades, Power Plants, one
+  Adaptation-gated Gene Lab, one Contact-gated Waystation, and a Commons; population
+  and free placement for every building remain.
 - Pair relationships now grow from shared victories and character events, and trusted
   deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,
   romances, bespoke relationship scenes, permanent death, and broader armour/tool
