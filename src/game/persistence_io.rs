@@ -1,6 +1,6 @@
 //! Save-slot operations owned by the application state machine.
 
-use super::{AppState, Game, TacticalTargeting};
+use super::{AppState, Game};
 use crate::persistence::migrate_save_value;
 use crate::state::{GameSession, SaveData};
 use macroquad_toolkit::persistence::{
@@ -124,15 +124,7 @@ impl Game {
 
     fn reset_transient_state_after_load(&mut self) {
         clear_first_hour_help(&mut self.campaign.first_hour);
-        self.targeting = None::<TacticalTargeting>;
-        self.show_tactical_help = false;
-        self.show_battle_log = false;
-        self.battle_log_filter = crate::ui_action::BattleLogFilter::default();
-        self.show_settings = false;
-        self.phase_replay.clear();
-        self.end_phase_armed = false;
-        self.combat_feedback = crate::combat_feedback::CombatFeedback::default();
-        self.observed_event_count = self.session.tactical.event_log.len();
+        self.reset_tactical_transients(false);
         self.new_campaign_armed = false;
         self.delete_save_armed = false;
     }

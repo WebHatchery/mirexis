@@ -20,6 +20,7 @@ mod input;
 mod persistence_io;
 mod playtest_flow;
 mod salvage_flow;
+mod session_flow;
 mod skill_flow;
 mod types;
 
@@ -258,8 +259,7 @@ impl Game {
         }
         match action {
             UiAction::StartMission => {
-                self.targeting = None;
-                self.battle_log_filter = BattleLogFilter::default();
+                self.reset_tactical_transients(false);
                 self.campaign = CampaignState::new(&self.data);
                 self.active_mission = self
                     .campaign
@@ -404,10 +404,6 @@ impl Game {
                     self.campaign
                         .first_hour
                         .deployed(self.campaign.operations_completed);
-                    self.targeting = None;
-                    self.show_tactical_help = false;
-                    self.show_battle_log = false;
-                    self.battle_log_filter = BattleLogFilter::default();
                     self.normalize_deployment_formation();
                     let mut roster = self
                         .campaign
@@ -419,6 +415,7 @@ impl Game {
                         self.deployment_formation,
                     );
                     self.session = self.create_first_hour_session(&roster);
+                    self.reset_tactical_transients(true);
                     self.tactical_camera =
                         WorldCamera::tactical_start(self.session.tactical.selected_tile);
                     self.state = AppState::Tactical;
@@ -447,15 +444,13 @@ impl Game {
             }
             UiAction::Continue => self.load_game(),
             UiAction::ReturnToTitle => {
-                self.targeting = None;
-                self.show_tactical_help = false;
-                self.show_battle_log = false;
+                self.reset_tactical_transients(false);
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
-                self.targeting = None;
+                self.reset_tactical_transients(false);
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.state = AppState::Colony;

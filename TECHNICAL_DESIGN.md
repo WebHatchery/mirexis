@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.145.0
+Save/content version: 1.146.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -921,6 +921,7 @@ Migration coverage:
 | 1.143.0 | NEXT READY clears stale tactical targeting before changing unit focus; no new save fields |
 | 1.144.0 | Save restore closes the persisted first-hour field guide along with other transient overlays; no new save fields |
 | 1.145.0 | First-hour guide actions preserve the full tactical save while an operation or debrief is active; no new save fields |
+| 1.146.0 | Tactical session transitions clear replay, combat feedback, targeting, confirmation, overlays, and stale audio cursors while preserving fresh-session opening audio; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

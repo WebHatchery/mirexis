@@ -55,6 +55,10 @@ impl CombatFeedback {
         self.impacts.clear();
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.callouts.is_empty() && self.impacts.is_empty()
+    }
+
     pub fn sync(&mut self, events: Option<&[BattleEvent]>, observed_count: &mut usize) -> bool {
         let Some(events) = events else {
             self.clear();
@@ -150,6 +154,9 @@ impl CombatFeedback {
         assets: &AssetManager,
         visuals: &VisualCatalog,
     ) {
+        if self.is_empty() {
+            return;
+        }
         for impact in &self.impacts {
             draw_impact(session, view, impact, assets, visuals);
         }
