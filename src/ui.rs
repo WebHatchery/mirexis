@@ -376,6 +376,10 @@ fn draw_header(ctx: &UiContext<'_>) {
         rect.y + 46.0,
         TextStyle::new(10.0, Color::new(0.34, 0.58, 0.57, 1.0)).params(),
     );
+    crate::first_hour_investment_ui::draw_tactical_summary(
+        ctx.first_hour,
+        vec2(rect.x + 415.0, rect.y + 31.0),
+    );
     draw_badge(
         Rect::new(rect.right() - 280.0, rect.y + 11.0, 116.0, 28.0),
         &format!("ROUND {}", ctx.session.tactical.round),

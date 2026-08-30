@@ -1,6 +1,7 @@
 //! Three legible and equally priced preparations for the second operation.
 
 use crate::campaign::CampaignState;
+use crate::first_hour::{FirstHourProgress, FirstHourStage};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
@@ -33,6 +34,24 @@ pub(crate) fn active_summary(id: &str) -> Option<&'static str> {
         "rapid_injectors" => Some("PREP // RAPID INJECTORS // SQUAD +1 MOV"),
         _ => None,
     }
+}
+
+pub(crate) fn tactical_summary(progress: &FirstHourProgress) -> Option<&'static str> {
+    (progress.stage == FirstHourStage::SecondOperationTactical)
+        .then(|| active_summary(&progress.investment_name))
+        .flatten()
+}
+
+pub(crate) fn draw_tactical_summary(progress: &FirstHourProgress, origin: Vec2) {
+    let Some(summary) = tactical_summary(progress) else {
+        return;
+    };
+    draw_text_ex(
+        summary,
+        origin.x,
+        origin.y,
+        TextStyle::new(10.0, dark::POSITIVE).params(),
+    );
 }
 
 pub(crate) fn draw_active_summary(campaign: &CampaignState, origin: Vec2) {

@@ -20,3 +20,24 @@ fn active_summary_names_each_preparation_and_squad_effect() {
 fn active_summary_rejects_unknown_preparations() {
     assert_eq!(active_summary("unknown"), None);
 }
+
+#[test]
+fn tactical_summary_only_surfaces_the_active_second_operation_preparation() {
+    let mut progress = FirstHourProgress {
+        investment_name: "survey_uplink".to_owned(),
+        ..FirstHourProgress::default()
+    };
+    assert_eq!(tactical_summary(&progress), None);
+
+    progress.stage = FirstHourStage::SecondOperation;
+    assert_eq!(tactical_summary(&progress), None);
+
+    progress.stage = FirstHourStage::SecondOperationTactical;
+    assert_eq!(
+        tactical_summary(&progress),
+        Some("PREP // SURVEY UPLINK // SQUAD +8 ACC")
+    );
+
+    progress.stage = FirstHourStage::SecondReturn;
+    assert_eq!(tactical_summary(&progress), None);
+}

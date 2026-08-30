@@ -23,7 +23,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_colony.png`: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.
 - `ui_first_hour_tactical.png`: guided tactical lesson marks a legal move target without blocking the battlefield inspection.
 - `ui_first_hour_ability.png`: guided ability lesson focuses a currently actionable mutation, class action, or field item.
-- `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the ApplyLearning hostile focus and forecast prompt active after deployment.
+- `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the active preparation, ApplyLearning hostile focus, and forecast prompt visible after deployment.
 - `ui_first_hour_return.png`: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
@@ -86,7 +86,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 51 | gameplay | `ui_gameplay.png` | 1116849 | `5b0f4b92e251a3b2dbef4a227178330a1a0c8edf16b4014e4058048454b034bb` |
 | 52 | first_hour_tactical | `ui_first_hour_tactical.png` | 1187342 | `95b5726b90aa74289382def4a072d0510ae784bc27fa6e3aba470241633858f8` |
 | 53 | first_hour_ability | `ui_first_hour_ability.png` | 1186451 | `f8a59f9c1e1eb0614466deffc7c43d5fc5d3d9337654f8ac43a8fcde4edfcf9d` |
-| 54 | second_operation_tactical | `ui_second_operation_tactical.png` | 1104588 | `330ce69bff4c1ccb711168a3678ba751b4b93a37f3733e394bf0a2bb14523155` |
+| 54 | second_operation_tactical | `ui_second_operation_tactical.png` | 1108321 | `b0ff8f0fa125b16accf6cbac613986471c1ef250eab6287e58b36a587f8dcd43` |
 | 55 | overwatch | `ui_overwatch.png` | 594734 | `0aec17aac4f14e91e889fc544ee3ab4fa0665d8a049b0ce92543869d2502fc29` |
 | 56 | brood_ability | `ui_brood_ability.png` | 629299 | `e40545431cb68f7139989524ba8a8fee9e1a85c7740a14c6dfd5123745531553` |
 | 57 | directorate_ability | `ui_directorate_ability.png` | 1177444 | `f5c428358d44019d8f150535d24ba92fe1a79c0dbba5e926ba52ef137c9e7a23` |

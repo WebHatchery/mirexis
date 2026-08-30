@@ -178,6 +178,7 @@ impl Game {
                 self.campaign.first_hour.stage =
                     crate::first_hour::FirstHourStage::SecondOperationTactical;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::ApplyLearning;
+                self.campaign.first_hour.investment_name = "survey_uplink".to_owned();
             }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
