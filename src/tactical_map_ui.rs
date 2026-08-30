@@ -620,6 +620,49 @@ fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
     }
 }
 
+fn targeting_action(
+    session: &GameSession,
+    targeting: TargetingView<'_>,
+    tile: TilePos,
+) -> Option<UiAction> {
+    let target = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == tile);
+    match targeting {
+        TargetingView::Equipment {
+            unit_id,
+            equipment_id,
+        } => target.and_then(|target| {
+            session
+                .can_use_equipment(unit_id, equipment_id, &target.id)
+                .then(|| UiAction::UseEquipmentOn(target.id.clone()))
+        }),
+        TargetingView::ClassAction {
+            unit_id,
+            target_kind: crate::data::TechniqueTarget::Tile,
+        } => session
+            .can_target_class_action_tile(unit_id, tile)
+            .then_some(UiAction::UseClassActionOnTile(tile)),
+        TargetingView::ClassAction { unit_id, .. } => target.and_then(|target| {
+            session
+                .can_target_class_action(unit_id, &target.id)
+                .then(|| UiAction::UseClassActionOn(target.id.clone()))
+        }),
+        TargetingView::Skill { unit_id, skill_id }
+            if crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile) =>
+        {
+            crate::skills::can_target_tile(session, unit_id, skill_id, tile)
+                .then_some(UiAction::UseSkillOnTile(tile))
+        }
+        TargetingView::Skill { unit_id, skill_id } => target.and_then(|target| {
+            crate::skills::can_target_unit(session, unit_id, skill_id, &target.id)
+                .then(|| UiAction::UseSkillOn(target.id.clone()))
+        }),
+    }
+}
+
 fn handle_click(
     ctx: &UiContext<'_>,
     view: GridView,
@@ -638,46 +681,9 @@ fn handle_click(
         return;
     };
     if let Some(targeting) = ctx.targeting {
-        let target = ctx
-            .session
-            .tactical
-            .units
-            .iter()
-            .find(|unit| unit.position == tile);
-        let action = match targeting {
-            TargetingView::Equipment {
-                unit_id,
-                equipment_id,
-            } => target.and_then(|target| {
-                ctx.session
-                    .can_use_equipment(unit_id, equipment_id, &target.id)
-                    .then(|| UiAction::UseEquipmentOn(target.id.clone()))
-            }),
-            TargetingView::ClassAction {
-                unit_id,
-                target_kind: crate::data::TechniqueTarget::Tile,
-            } => ctx
-                .session
-                .can_target_class_action_tile(unit_id, tile)
-                .then_some(UiAction::UseClassActionOnTile(tile)),
-            TargetingView::ClassAction { unit_id, .. } => target.and_then(|target| {
-                ctx.session
-                    .can_target_class_action(unit_id, &target.id)
-                    .then(|| UiAction::UseClassActionOn(target.id.clone()))
-            }),
-            TargetingView::Skill { unit_id, skill_id }
-                if crate::skills::target_kind(skill_id)
-                    == Some(crate::data::TechniqueTarget::Tile) =>
-            {
-                crate::skills::can_target_tile(ctx.session, unit_id, skill_id, tile)
-                    .then_some(UiAction::UseSkillOnTile(tile))
-            }
-            TargetingView::Skill { unit_id, skill_id } => target.and_then(|target| {
-                crate::skills::can_target_unit(ctx.session, unit_id, skill_id, &target.id)
-                    .then(|| UiAction::UseSkillOn(target.id.clone()))
-            }),
-        };
-        actions.push(action.unwrap_or(UiAction::CancelTargeting));
+        if let Some(action) = targeting_action(ctx.session, targeting, tile) {
+            actions.push(action);
+        }
         return;
     }
     actions.push(normal_tile_action(ctx.session, ctx.first_hour, tile));

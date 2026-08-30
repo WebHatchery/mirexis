@@ -2,8 +2,10 @@
 
 use super::{AppState, Game};
 use crate::data::Team;
+use crate::state::GameSession;
 use crate::ui::{self, UiAction};
 use macroquad::prelude::{is_key_down, is_key_pressed, vec2, KeyCode};
+use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::InputState;
 
 impl Game {
@@ -236,66 +238,9 @@ impl Game {
     fn controller_confirm_tactical(&mut self) {
         let tile = self.session.tactical.selected_tile;
         if let Some(targeting) = &self.targeting {
-            let target = self
-                .session
-                .tactical
-                .units
-                .iter()
-                .find(|unit| unit.position == tile);
-            let action = target.and_then(|target| match targeting {
-                super::TacticalTargeting::Equipment {
-                    unit_id,
-                    equipment_id,
-                } if self
-                    .session
-                    .can_use_equipment(unit_id, equipment_id, &target.id) =>
-                {
-                    Some(UiAction::UseEquipmentOn(target.id.clone()))
-                }
-                super::TacticalTargeting::ClassAction {
-                    unit_id,
-                    target_kind,
-                } if *target_kind != crate::data::TechniqueTarget::Tile
-                    && self.session.can_target_class_action(unit_id, &target.id) =>
-                {
-                    Some(UiAction::UseClassActionOn(target.id.clone()))
-                }
-                super::TacticalTargeting::Skill { unit_id, skill_id }
-                    if crate::skills::can_target_unit(
-                        &self.session,
-                        unit_id,
-                        skill_id,
-                        &target.id,
-                    ) =>
-                {
-                    Some(UiAction::UseSkillOn(target.id.clone()))
-                }
-                _ => None,
-            });
-            let action = match targeting {
-                super::TacticalTargeting::ClassAction {
-                    unit_id,
-                    target_kind,
-                } if *target_kind == crate::data::TechniqueTarget::Tile
-                    && self.session.can_target_class_action_tile(unit_id, tile) =>
-                {
-                    UiAction::UseClassActionOnTile(tile)
-                }
-                super::TacticalTargeting::Skill { unit_id, skill_id }
-                    if crate::skills::target_kind(skill_id)
-                        == Some(crate::data::TechniqueTarget::Tile)
-                        && crate::skills::can_target_tile(
-                            &self.session,
-                            unit_id,
-                            skill_id,
-                            tile,
-                        ) =>
-                {
-                    UiAction::UseSkillOnTile(tile)
-                }
-                _ => action.unwrap_or(UiAction::CancelTargeting),
-            };
-            self.events.push(action);
+            if let Some(action) = targeted_confirm_action(&self.session, targeting, tile) {
+                self.events.push(action);
+            }
             return;
         }
 
@@ -315,6 +260,49 @@ impl Game {
         } else {
             self.events.push(UiAction::SelectTile(tile));
         }
+    }
+}
+
+fn targeted_confirm_action(
+    session: &GameSession,
+    targeting: &super::TacticalTargeting,
+    tile: TilePos,
+) -> Option<UiAction> {
+    let target = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == tile);
+    match targeting {
+        super::TacticalTargeting::Equipment {
+            unit_id,
+            equipment_id,
+        } => target.and_then(|target| {
+            session
+                .can_use_equipment(unit_id, equipment_id, &target.id)
+                .then(|| UiAction::UseEquipmentOn(target.id.clone()))
+        }),
+        super::TacticalTargeting::ClassAction {
+            unit_id,
+            target_kind: crate::data::TechniqueTarget::Tile,
+        } => session
+            .can_target_class_action_tile(unit_id, tile)
+            .then_some(UiAction::UseClassActionOnTile(tile)),
+        super::TacticalTargeting::ClassAction { unit_id, .. } => target.and_then(|target| {
+            session
+                .can_target_class_action(unit_id, &target.id)
+                .then(|| UiAction::UseClassActionOn(target.id.clone()))
+        }),
+        super::TacticalTargeting::Skill { unit_id, skill_id }
+            if crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile) =>
+        {
+            crate::skills::can_target_tile(session, unit_id, skill_id, tile)
+                .then_some(UiAction::UseSkillOnTile(tile))
+        }
+        super::TacticalTargeting::Skill { unit_id, skill_id } => target.and_then(|target| {
+            crate::skills::can_target_unit(session, unit_id, skill_id, &target.id)
+                .then(|| UiAction::UseSkillOn(target.id.clone()))
+        }),
     }
 }
 

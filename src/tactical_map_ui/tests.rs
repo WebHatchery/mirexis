@@ -92,6 +92,68 @@ fn unguided_attack_keeps_the_direct_hostile_intent() {
 }
 
 #[test]
+fn invalid_map_target_does_not_cancel_targeting() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = crate::campaign::CampaignState::new(&data);
+    let roster = campaign.deployment_roster(&data, &data.mission);
+    let session = GameSession::new(&data.config, &data.mission, &roster);
+    let empty_tile = session
+        .tactical
+        .fog
+        .iter_with_pos()
+        .map(|(tile, _)| tile)
+        .find(|tile| {
+            !session
+                .tactical
+                .units
+                .iter()
+                .any(|unit| unit.position == *tile)
+        })
+        .unwrap();
+
+    assert_eq!(
+        targeting_action(
+            &session,
+            TargetingView::Equipment {
+                unit_id: "ilya_reed",
+                equipment_id: "field_medkit",
+            },
+            empty_tile,
+        ),
+        None
+    );
+}
+
+#[test]
+fn valid_map_target_keeps_the_equipment_intent() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = crate::campaign::CampaignState::new(&data);
+    let roster = campaign.deployment_roster(&data, &data.mission);
+    let mut session = GameSession::new(&data.config, &data.mission, &roster);
+    let kira_position = session.unit("kira_voss").unwrap().position;
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "brood_stalker_a")
+        .unwrap()
+        .position = TilePos::new(kira_position.x + 1, kira_position.y);
+    let target_tile = session.unit("brood_stalker_a").unwrap().position;
+
+    assert_eq!(
+        targeting_action(
+            &session,
+            TargetingView::Equipment {
+                unit_id: "kira_voss",
+                equipment_id: "survey_harness",
+            },
+            target_tile,
+        ),
+        Some(UiAction::UseEquipmentOn("brood_stalker_a".to_owned()))
+    );
+}
+
+#[test]
 fn attack_confirmation_card_stays_inside_the_tactical_panel() {
     let panel = tactical_panel();
     let card = crate::action_preview_ui::attack_card_bounds(panel);
