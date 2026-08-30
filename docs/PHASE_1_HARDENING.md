@@ -7,7 +7,7 @@ Status: automated and internal verification complete; external playtests pending
 | Path | Evidence | Result |
 |---|---|---|
 | New game | Touch-visible **NEW OPERATION**, two-step replacement confirmation when a save exists, immediate autosave | pass |
-| Continue | Browser refresh followed by **CONTINUE** restored the serialized city goal | pass |
+| Continue | Browser refresh followed by **CONTINUE** restores the serialized city goal; finished tactical saves reopen the debrief with its reconstructed outcome | pass |
 | Tactical save/load | Existing persistence tests and visible battle **SAVE** / **LOAD** controls | pass |
 | Victory and defeat | Deterministic outcome tests plus first-hour tests for both outcome values | pass |
 | Recovery | Failure advances to debrief and city; Ilya's routed recovery conversation precedes preparation; emergency stores guarantee one 24-material preparation | pass |
@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 396 Mirexis unit tests pass.
+- 398 Mirexis unit tests pass.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 95 audited 1280×720 scenes, including the first-hour

@@ -79,11 +79,7 @@ impl Game {
                     .materialize_selected(&self.data, &self.campaign.colony);
                 if let Some(tactical) = save.tactical {
                     self.session = GameSession::from_tactical(tactical);
-                    self.state = if self.session.battle_is_over() {
-                        AppState::Colony
-                    } else {
-                        AppState::Tactical
-                    };
+                    self.state = resume_state(&self.session);
                 } else {
                     self.session = GameSession::new(
                         &self.data.config,
@@ -94,6 +90,7 @@ impl Game {
                     );
                     self.state = AppState::Colony;
                 }
+                self.last_outcome = restored_outcome(&self.session, &self.active_mission);
                 self.tactical_camera = crate::grid_ui::WorldCamera::tactical_start(
                     self.session.tactical.selected_tile,
                 );
@@ -103,8 +100,12 @@ impl Game {
                 self.colony_operations_open = false;
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
-                self.last_outcome = None;
-                self.notifications.success("Tactical state restored");
+                self.notifications.success(match self.state {
+                    AppState::Debrief => "Debrief restored",
+                    AppState::Tactical => "Tactical state restored",
+                    AppState::Colony => "Campaign restored",
+                    _ => "Campaign state restored",
+                });
             }
             Err(err) => self.notifications.warning(format!("Load failed: {err}")),
         }
@@ -120,3 +121,23 @@ impl Game {
         }
     }
 }
+
+fn resume_state(session: &GameSession) -> AppState {
+    if session.battle_is_over() {
+        AppState::Debrief
+    } else {
+        AppState::Tactical
+    }
+}
+
+fn restored_outcome(
+    session: &GameSession,
+    mission: &crate::data::MissionDef,
+) -> Option<crate::state::MissionOutcome> {
+    (resume_state(session) == AppState::Debrief)
+        .then(|| session.mission_outcome(mission))
+        .flatten()
+}
+
+#[cfg(test)]
+mod tests;
