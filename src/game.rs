@@ -278,6 +278,7 @@ impl Game {
                     }),
                     show_help: self.show_tactical_help,
                     show_battle_log: self.show_battle_log,
+                    show_settings: self.show_settings,
                 },
                 &mut self.tactical_camera,
             ),

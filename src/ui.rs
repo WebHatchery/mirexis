@@ -118,6 +118,7 @@ pub struct UiContext<'a> {
     pub targeting: Option<TargetingView<'a>>,
     pub show_help: bool,
     pub show_battle_log: bool,
+    pub show_settings: bool,
 }
 
 pub struct TitleDrawContext<'a> {
@@ -318,6 +319,8 @@ pub fn draw_tactical(
         ctx.show_help,
         ctx.show_battle_log,
         ctx.phase_replay.is_active(),
+        ctx.first_hour.help_open,
+        ctx.show_settings,
     );
     let suppress_actions =
         crate::tactical_map_ui::draw(&ctx, camera, mouse, input_enabled, &mut actions);
@@ -340,8 +343,14 @@ pub fn draw_tactical(
     actions
 }
 
-fn tactical_world_input_enabled(show_help: bool, show_log: bool, replay_active: bool) -> bool {
-    !show_help && !show_log && !replay_active
+fn tactical_world_input_enabled(
+    show_help: bool,
+    show_log: bool,
+    replay_active: bool,
+    first_hour_help_open: bool,
+    settings_open: bool,
+) -> bool {
+    !show_help && !show_log && !replay_active && !first_hour_help_open && !settings_open
 }
 
 pub(crate) fn suppress_map_release_actions(actions: &mut Vec<UiAction>, suppress: bool) {

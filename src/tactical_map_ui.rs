@@ -70,8 +70,15 @@ pub(crate) fn draw(
         camera_controls_origin(panel),
         input_enabled && !camera.primary_gesture_active(),
     );
-    camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
-    let camera_dragged = input_enabled && camera.update(grid_rect, mouse);
+    if input_enabled {
+        camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
+    }
+    let camera_dragged = if input_enabled {
+        camera.update(grid_rect, mouse)
+    } else {
+        camera.clear_pointer_interaction();
+        false
+    };
     if camera_control_clicked {
         camera.guard_next_primary_release();
     }

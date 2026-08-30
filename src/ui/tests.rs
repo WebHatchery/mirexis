@@ -25,14 +25,20 @@ fn map_drag_release_discards_actions_from_controls_under_the_pointer() {
 
 #[test]
 fn modal_tactical_layers_disable_world_input() {
-    assert!(tactical_world_input_enabled(false, false, false));
+    assert!(tactical_world_input_enabled(
+        false, false, false, false, false
+    ));
     for state in [
-        (true, false, false),
-        (false, true, false),
-        (false, false, true),
-        (true, true, true),
+        (true, false, false, false, false),
+        (false, true, false, false, false),
+        (false, false, true, false, false),
+        (false, false, false, true, false),
+        (false, false, false, false, true),
+        (true, true, true, true, true),
     ] {
-        assert!(!tactical_world_input_enabled(state.0, state.1, state.2));
+        assert!(!tactical_world_input_enabled(
+            state.0, state.1, state.2, state.3, state.4
+        ));
     }
 }
 
