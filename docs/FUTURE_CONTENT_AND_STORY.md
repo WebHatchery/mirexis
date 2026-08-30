@@ -36,6 +36,14 @@ the colony and becomes stronger directional cover during a colony assault. Its c
 fails when the tower is damaged or the settlement grid cannot supply it, keeping the
 structure useful without making it a free permanent advantage.
 
+The first facility branch is now playable as well. An operational Power Plant can spend
+55 materials to queue one of two mutually exclusive level-2 choices, completed after the
+next operation: Redundant Grid preserves two power through plant damage, while an
+operational Hot Core adds three supply and makes the most visible faction more attentive
+after each operation.
+The choice is touch-visible and save-backed; the remaining facility branches still need
+their own tactical, social, and narrative contracts.
+
 ## 2. Expansion rules
 
 Every future feature should satisfy at least three of these tests:
@@ -285,7 +293,8 @@ The current fixed facilities already cover command, training, medicine, crafting
 power, and mutation evolution. Future work should give those places upgrades, inhabitants,
 and events before adding many new structures.
 
-Each core facility may reach level 2 and choose one visible branch. Level 3 should be
+Each core facility may reach level 2 and choose one visible branch. The Power Plant's
+first branch pair is implemented as the initial vertical slice of this system. Level 3 should be
 reserved for the late-game colony identity, not a generic numeric improvement.
 
 | Facility | Branch A | Branch B | Defence consequence |
@@ -295,7 +304,7 @@ reserved for the late-game colony identity, not a generic numeric improvement.
 | Infirmary | **Trauma Ward:** better scar and recovery choices | **Adaptation Clinic:** safer mutation complications and biological treatment | Can stabilise one nearby defender or become an urgent casualty objective. |
 | Workshop | **Precision Bench:** weapon and armour modification | **Drone Bay:** reusable deployables and repairs | Adds a friendly emplacement but stores volatile components. |
 | Hydroponics | **Community Kitchen:** food efficiency and relationship events | **Culture Beds:** biomass cultivation and biotech ingredients | Creates soft cover and a fragile food objective. |
-| Power Plant | **Redundant Grid:** damage tolerance and reliable supply | **Hot Core:** higher supply with a hazard or attention cost | Changes which systems fail first during an assault. |
+| Power Plant | **Redundant Grid:** damage tolerance and reliable supply *(implemented)* | **Hot Core:** higher supply with an attention cost *(implemented)* | Changes which systems fail first during an assault. |
 | Gene Lab | **Stabilisation Wing:** manage complications and reversals | **Evolution Chamber:** stronger or earlier mutation evolution | Provides bio-cover but risks a hostile growth if breached. |
 
 ### 8.2 New general buildings
@@ -424,6 +433,8 @@ Goal: make building and upgrade choices visible in city life and defence.
 - Implemented: build a Relay Mast and use its once-per-operation route scan.
 - Implemented: build a powered Watchtower whose placement adds stronger directional cover
   to colony defence and loses that benefit when the grid fails.
+- Implemented: queue the first level-2 Power Plant branch, complete it after an operation,
+  and carry its supply or faction-attention consequence through saves and mission outcomes.
 - Implement the three identity buildings and their defence-map consequences.
 - Connect power failure, damage, repair, and NPC scenes to every new facility.
 

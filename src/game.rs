@@ -10,6 +10,7 @@ mod class_action_flow;
 mod colony_flow;
 mod debrief_flow;
 mod destructive_flow;
+mod facility_upgrade_flow;
 mod first_hour_flow;
 mod input;
 mod persistence_io;
@@ -72,6 +73,7 @@ pub struct Game {
     colony_camera: WorldCamera,
     colony_explorer: crate::colony_exploration::ColonyExplorer,
     colony_operations_open: bool,
+    facility_upgrade_open: bool,
     audio: crate::audio::AudioSystem,
     show_settings: bool,
 }
@@ -152,6 +154,7 @@ impl Game {
             colony_camera,
             colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
             colony_operations_open: false,
+            facility_upgrade_open: false,
             audio,
             show_settings: false,
         }
@@ -207,6 +210,7 @@ impl Game {
                 camera: &mut self.colony_camera,
                 explorer: &mut self.colony_explorer,
                 operations_open: &mut self.colony_operations_open,
+                facility_upgrade_open: &mut self.facility_upgrade_open,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -314,6 +318,9 @@ impl Game {
         if self.apply_class_action(&action, audio_event_count) {
             return;
         }
+        if self.apply_facility_upgrade_action(&action) {
+            return;
+        }
         match action {
             UiAction::StartMission => {
                 self.targeting = None;
@@ -325,6 +332,7 @@ impl Game {
                 self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
                 self.colony_explorer.reset();
                 self.colony_operations_open = false;
+                self.facility_upgrade_open = false;
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
@@ -511,10 +519,12 @@ impl Game {
                 self.targeting = None;
                 self.show_tactical_help = false;
                 self.show_battle_log = false;
+                self.facility_upgrade_open = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
                 self.targeting = None;
+                self.facility_upgrade_open = false;
                 self.state = AppState::Colony;
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();

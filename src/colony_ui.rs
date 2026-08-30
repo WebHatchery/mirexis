@@ -3,7 +3,7 @@
 use crate::campaign::{Availability, CampaignState};
 use crate::colony::BuildingKind;
 use crate::data::GameData;
-use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
+use crate::ui::UiAction;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -12,7 +12,10 @@ use macroquad_toolkit::prelude::*;
 mod commons;
 mod context;
 mod relay;
+mod scene;
+mod upgrades;
 pub(crate) use context::ColonyDrawContext;
+pub(crate) use scene::draw_colony;
 
 // Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
 // when every label shares the toolkit font. The hub's buttons and map labels
@@ -22,53 +25,20 @@ fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -
     draw_text_ex(text, x, y, params)
 }
 
-pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
-    let ColonyDrawContext {
-        campaign,
-        data,
-        assets,
-        visuals,
-        ui,
-        camera,
-        explorer,
-        operations_open,
-    } = context;
-    let mut actions = Vec::new();
-    let mouse = crate::ui::pointer_position(ui);
-    draw_rectangle(
-        0.0,
-        0.0,
-        LOGICAL_WIDTH,
-        LOGICAL_HEIGHT,
-        Color::new(0.025, 0.04, 0.055, 1.0),
-    );
-    let suppress_actions = crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
-        campaign,
-        assets,
-        visuals,
-        ui,
-        camera,
-        explorer,
-        mouse,
-        operations_open: *operations_open,
-        actions: &mut actions,
-    });
-    crate::colony_header_ui::draw(campaign, mouse, operations_open, &mut actions);
-    if *operations_open {
-        draw_operations(campaign, data, assets, visuals, mouse, &mut actions);
-    }
-    crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
-    actions
-}
-
-fn draw_operations(
+pub(super) fn draw_operations(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
     visuals: &VisualCatalog,
     mouse: Vec2,
+    facility_upgrade_open: &mut bool,
     actions: &mut Vec<UiAction>,
 ) {
+    if *facility_upgrade_open {
+        actions.clear();
+        upgrades::draw_modal(campaign, mouse, actions);
+        return;
+    }
     let panel = Rect::new(862.0, 74.0, 408.0, 608.0);
     draw_surface_with_title(
         panel,
@@ -270,13 +240,14 @@ fn draw_operations(
         actions.push(UiAction::OpenRoster);
     }
     if colony_button(
-        Rect::new(878.0, 312.0, 362.0, 32.0),
-        "INFIRMARY: PRIORITY TREATMENT",
+        Rect::new(878.0, 312.0, 176.0, 32.0),
+        "TREAT // INFIRMARY",
         recovering > 0,
         mouse,
     ) {
         actions.push(UiAction::TreatInjury);
     }
+    upgrades::draw_launcher(campaign, mouse, actions);
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
     let choosing_escalation = campaign.strategy.escalation_operation_completed

@@ -101,6 +101,7 @@ impl Game {
                     crate::grid_ui::WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
                 self.colony_explorer.reset();
                 self.colony_operations_open = false;
+                self.facility_upgrade_open = false;
                 self.last_outcome = None;
                 self.notifications.success("Tactical state restored");
             }

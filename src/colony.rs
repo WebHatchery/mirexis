@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 pub const COLONY_WIDTH: i32 = 20;
 pub const COLONY_HEIGHT: i32 = 20;
 pub const SETTLEMENT_CENTER: [i32; 2] = [10, 10];
+pub const REDUNDANT_GRID_UPGRADE: &str = "redundant_grid";
+pub const HOT_CORE_UPGRADE: &str = "hot_core";
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -73,6 +75,32 @@ impl BuildingKind {
         i32::from(self == Self::PowerPlant) * 4
     }
 
+    pub fn upgrade_options(self) -> &'static [FacilityUpgradeOption] {
+        match self {
+            Self::PowerPlant => &[
+                FacilityUpgradeOption {
+                    id: REDUNDANT_GRID_UPGRADE,
+                    name: "Redundant Grid",
+                    description: "A damaged plant still routes two power through the colony.",
+                },
+                FacilityUpgradeOption {
+                    id: HOT_CORE_UPGRADE,
+                    name: "Hot Core",
+                    description: "The plant feeds three extra power, but draws more attention.",
+                },
+            ],
+            _ => &[],
+        }
+    }
+
+    pub fn upgrade_cost(self) -> i32 {
+        if self.upgrade_options().is_empty() {
+            0
+        } else {
+            55
+        }
+    }
+
     pub fn repair_cost(self) -> i32 {
         match self {
             Self::Barricade => 10,
@@ -91,6 +119,13 @@ impl BuildingKind {
             .iter()
             .any(|offset| [anchor[0] + offset[0], anchor[1] + offset[1]] == position)
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FacilityUpgradeOption {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub description: &'static str,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -119,6 +154,19 @@ pub struct ConstructionProject {
     pub operations_remaining: u8,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FacilityUpgradeProject {
+    pub building_id: String,
+    pub upgrade_id: String,
+    pub operations_remaining: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FacilityUpgradeState {
+    pub building_id: String,
+    pub upgrade_id: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ColonyDefenseMap {
     pub blocked_tiles: Vec<TilePos>,
@@ -132,6 +180,10 @@ pub struct ColonyState {
     pub resources: Resources,
     pub buildings: Vec<BuildingState>,
     pub construction_queue: Vec<ConstructionProject>,
+    #[serde(default)]
+    pub facility_upgrade_queue: Vec<FacilityUpgradeProject>,
+    #[serde(default)]
+    pub facility_upgrades: Vec<FacilityUpgradeState>,
     #[serde(default)]
     pub planned_construction: BuildingKind,
     next_building_serial: u32,
@@ -160,6 +212,8 @@ impl ColonyState {
                 building("power_plant", BuildingKind::PowerPlant, [13, 13]),
             ],
             construction_queue: Vec::new(),
+            facility_upgrade_queue: Vec::new(),
+            facility_upgrades: Vec::new(),
             planned_construction: BuildingKind::Barricade,
             next_building_serial: 1,
         }
@@ -202,12 +256,29 @@ impl ColonyState {
     }
 
     pub fn power_supply(&self) -> i32 {
+        let upgrades = &self.facility_upgrades;
         self.resources.power
             + self
                 .buildings
                 .iter()
-                .filter(|building| !building.damaged)
-                .map(|building| building.kind.power_output())
+                .filter_map(|building| {
+                    if !building.damaged {
+                        let hot_core = upgrades.iter().any(|upgrade| {
+                            upgrade.building_id == building.id
+                                && upgrade.upgrade_id == HOT_CORE_UPGRADE
+                        });
+                        Some(building.kind.power_output() + i32::from(hot_core) * 3)
+                    } else if building.kind == BuildingKind::PowerPlant
+                        && upgrades.iter().any(|upgrade| {
+                            upgrade.building_id == building.id
+                                && upgrade.upgrade_id == REDUNDANT_GRID_UPGRADE
+                        })
+                    {
+                        Some(2)
+                    } else {
+                        None
+                    }
+                })
                 .sum::<i32>()
     }
 
@@ -308,6 +379,30 @@ impl ColonyState {
                 level: 1,
                 damaged: false,
             }));
+        for project in &mut self.facility_upgrade_queue {
+            project.operations_remaining = project.operations_remaining.saturating_sub(1);
+        }
+        let completed_upgrades = self
+            .facility_upgrade_queue
+            .iter()
+            .filter(|project| project.operations_remaining == 0)
+            .cloned()
+            .collect::<Vec<_>>();
+        self.facility_upgrade_queue
+            .retain(|project| project.operations_remaining > 0);
+        for project in completed_upgrades {
+            if let Some(building) = self
+                .buildings
+                .iter_mut()
+                .find(|building| building.id == project.building_id)
+            {
+                building.level = 2;
+                self.facility_upgrades.push(FacilityUpgradeState {
+                    building_id: project.building_id,
+                    upgrade_id: project.upgrade_id,
+                });
+            }
+        }
         self.resources.food += if self.has_facility(BuildingKind::Hydroponics) {
             3
         } else if self.has_facility(BuildingKind::CommandCentre) {
@@ -315,6 +410,64 @@ impl ColonyState {
         } else {
             0
         };
+    }
+
+    pub fn has_upgrade(&self, building_id: &str, upgrade_id: &str) -> bool {
+        self.facility_upgrades
+            .iter()
+            .any(|upgrade| upgrade.building_id == building_id && upgrade.upgrade_id == upgrade_id)
+    }
+
+    pub fn queue_facility_upgrade(
+        &mut self,
+        building_id: &str,
+        upgrade_id: &str,
+    ) -> Result<String, String> {
+        let (kind, level, damaged, id) = self
+            .buildings
+            .iter()
+            .find(|building| building.id == building_id)
+            .map(|building| {
+                (
+                    building.kind,
+                    building.level,
+                    building.damaged,
+                    building.id.clone(),
+                )
+            })
+            .ok_or_else(|| format!("Unknown colony building: {building_id}"))?;
+        let option = kind
+            .upgrade_options()
+            .iter()
+            .find(|option| option.id == upgrade_id)
+            .ok_or_else(|| format!("{} has no {} upgrade", kind.name(), upgrade_id))?;
+        if level >= 2 || self.has_upgrade(building_id, upgrade_id) {
+            return Err(format!("{} is already upgraded", kind.name()));
+        }
+        if self
+            .facility_upgrade_queue
+            .iter()
+            .any(|project| project.building_id == building_id)
+        {
+            return Err(format!(
+                "{} already has an upgrade in progress",
+                kind.name()
+            ));
+        }
+        if damaged || !self.building_is_powered(building_id) {
+            return Err(format!("An operational {} is required", kind.name()));
+        }
+        let cost = kind.upgrade_cost();
+        if self.resources.materials < cost {
+            return Err(format!("Upgrade requires {} materials", cost));
+        }
+        self.resources.materials -= cost;
+        self.facility_upgrade_queue.push(FacilityUpgradeProject {
+            building_id: id,
+            upgrade_id: option.id.to_owned(),
+            operations_remaining: 1,
+        });
+        Ok(format!("{} upgrade queued // {}", kind.name(), option.name))
     }
 
     pub fn damage_for_failed_defense(&mut self, seed: u64) -> Option<String> {

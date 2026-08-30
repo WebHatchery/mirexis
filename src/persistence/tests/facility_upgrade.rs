@@ -1,0 +1,47 @@
+use super::*;
+use crate::colony::{BuildingKind, HOT_CORE_UPGRADE};
+use crate::state::GameSession;
+
+#[test]
+fn legacy_save_without_facility_upgrade_fields_defaults_to_empty_state() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let plant_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::PowerPlant)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&plant_id, HOT_CORE_UPGRADE)
+        .unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut legacy = serde_json::to_value(session.to_save("1.75.0", &campaign)).unwrap();
+    let current =
+        migrate_save_value(Some(data.config.version.clone()), legacy.clone(), &data).unwrap();
+    assert_eq!(
+        current.campaign.colony.facility_upgrade_queue[0].upgrade_id,
+        HOT_CORE_UPGRADE
+    );
+    assert_eq!(
+        current.campaign.colony.facility_upgrade_queue[0].operations_remaining,
+        1
+    );
+    let colony = legacy
+        .get_mut("campaign")
+        .and_then(serde_json::Value::as_object_mut)
+        .and_then(|campaign| campaign.get_mut("colony"))
+        .and_then(serde_json::Value::as_object_mut)
+        .unwrap();
+    colony.remove("facility_upgrade_queue");
+    colony.remove("facility_upgrades");
+
+    let migrated = migrate_save_value(Some("1.75.0".to_owned()), legacy, &data).unwrap();
+
+    assert!(migrated.campaign.colony.facility_upgrade_queue.is_empty());
+    assert!(migrated.campaign.colony.facility_upgrades.is_empty());
+    assert_eq!(migrated.version, data.config.version);
+}

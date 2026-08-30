@@ -26,6 +26,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   but the faction already watching hardest gains attention.
 - A placeable powered Watchtower that becomes strong directional cover in colony-defense
   operations while remaining a physical obstacle when its grid goes dark.
+- A level-2 Power Plant branch choice: Redundant Grid preserves damaged-plant supply, or
+  Hot Core raises output while increasing the most visible faction's attention per operation.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

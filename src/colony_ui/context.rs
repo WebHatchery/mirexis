@@ -13,4 +13,5 @@ pub(crate) struct ColonyDrawContext<'a> {
     pub(crate) camera: &'a mut crate::grid_ui::WorldCamera,
     pub(crate) explorer: &'a mut crate::colony_exploration::ColonyExplorer,
     pub(crate) operations_open: &'a mut bool,
+    pub(crate) facility_upgrade_open: &'a mut bool,
 }

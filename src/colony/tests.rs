@@ -114,6 +114,59 @@ fn power_plant_construction_adds_redundant_grid_capacity() {
 }
 
 #[test]
+fn power_plant_level_two_branches_queue_complete_and_change_the_grid() {
+    let mut redundant = ColonyState::new();
+    let plant_id = redundant
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::PowerPlant)
+        .unwrap()
+        .id
+        .clone();
+    let materials = redundant.resources.materials;
+    redundant
+        .queue_facility_upgrade(&plant_id, REDUNDANT_GRID_UPGRADE)
+        .unwrap();
+    assert_eq!(redundant.resources.materials, materials - 55);
+    assert!(redundant
+        .queue_facility_upgrade(&plant_id, HOT_CORE_UPGRADE)
+        .is_err());
+    redundant.advance_operation();
+    assert_eq!(
+        redundant
+            .buildings
+            .iter()
+            .find(|building| building.id == plant_id)
+            .unwrap()
+            .level,
+        2
+    );
+    assert!(redundant.has_upgrade(&plant_id, REDUNDANT_GRID_UPGRADE));
+    redundant
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == plant_id)
+        .unwrap()
+        .damaged = true;
+    assert_eq!(redundant.power_supply(), 6);
+
+    let mut hot_core = ColonyState::new();
+    let plant_id = hot_core
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::PowerPlant)
+        .unwrap()
+        .id
+        .clone();
+    hot_core
+        .queue_facility_upgrade(&plant_id, HOT_CORE_UPGRADE)
+        .unwrap();
+    hot_core.advance_operation();
+    assert!(hot_core.has_upgrade(&plant_id, HOT_CORE_UPGRADE));
+    assert_eq!(hot_core.power_supply(), 11);
+}
+
+#[test]
 fn buildable_projects_own_only_their_anchor_but_require_surrounding_clearance() {
     for kind in [
         BuildingKind::Barricade,

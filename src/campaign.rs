@@ -11,7 +11,7 @@ pub(super) use derivation::derive_unit;
 pub(crate) use outsider::{outsider_beat, OutsiderChoice};
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
-use crate::colony::{BuildingKind, ColonyState};
+use crate::colony::{BuildingKind, ColonyState, HOT_CORE_UPGRADE};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
@@ -380,6 +380,21 @@ impl CampaignState {
         self.colony.resources.power += outcome.power_awarded;
         if mission.map_recipe == "colony_defense" && outcome.result == ObjectiveState::Failed {
             self.colony.damage_for_failed_defense(mission.seed);
+        }
+        let hot_core_active = self.colony.buildings.iter().any(|building| {
+            building.kind == BuildingKind::PowerPlant
+                && !building.damaged
+                && self.colony.has_upgrade(&building.id, HOT_CORE_UPGRADE)
+        });
+        if hot_core_active {
+            if let Some(faction) = self
+                .strategy
+                .factions
+                .iter_mut()
+                .max_by_key(|faction| (faction.attention, faction.id.clone()))
+            {
+                faction.attention = (faction.attention + 1).min(100);
+            }
         }
         self.strategy.resolve_mission(outcome, mission, data);
         self.strategy.refresh_isolation_completion(&mut self.colony);
