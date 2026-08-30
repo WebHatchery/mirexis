@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.126.0
+Save/content version: 1.127.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -901,6 +901,7 @@ Migration coverage:
 | 1.124.0 | Operation XP follows the deployed squad and is disclosed in the debrief; no new save fields |
 | 1.125.0 | First-hour debrief goals move into a clear top strip so operation results remain readable; no new save fields |
 | 1.126.0 | Debrief squad tableau distinguishes the fielded squad from reserves using the live tactical deployment; no new save fields |
+| 1.127.0 | Debrief tableau prioritizes fielded recruits before reserve fill slots so every deployed colonist remains visible; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -952,7 +953,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (390 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (391 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 92-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

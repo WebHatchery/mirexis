@@ -50,3 +50,32 @@ fn squad_status_distinguishes_fielded_reserve_and_incapacitated_colonists() {
         SquadStatus::Scar
     );
 }
+
+#[test]
+fn debrief_roster_prioritizes_fielded_recruits_before_reserves() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = crate::campaign::CampaignState::new(&data);
+    let mut roster = campaign.roster.clone();
+    let mut recruit = roster[0].clone();
+    recruit.id = "sedge_drift".to_owned();
+    recruit.name = "Sedge Drift".to_owned();
+    roster.push(recruit);
+
+    let deployed_ids = vec!["sedge_drift".to_owned()];
+    let indices = debrief_roster_indices(&roster, &deployed_ids);
+
+    assert_eq!(indices.first(), Some(&(roster.len() - 1)));
+    assert_eq!(indices.len(), 5);
+    assert_eq!(
+        debrief_roster_indices(
+            &campaign.roster,
+            &campaign
+                .roster
+                .iter()
+                .take(3)
+                .map(|character| character.id.clone())
+                .collect::<Vec<_>>()
+        ),
+        vec![0, 1, 2, 3, 4]
+    );
+}

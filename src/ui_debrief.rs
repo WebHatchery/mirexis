@@ -43,6 +43,30 @@ fn squad_status(
     }
 }
 
+fn debrief_roster_indices(
+    roster: &[crate::campaign::CharacterRecord],
+    deployed_ids: &[String],
+) -> Vec<usize> {
+    let mut indices = Vec::new();
+    for (index, character) in roster.iter().enumerate() {
+        if indices.len() == 5 {
+            break;
+        }
+        if deployed_ids.iter().any(|id| id == &character.id) {
+            indices.push(index);
+        }
+    }
+    for index in 0..roster.len() {
+        if indices.len() == 5 {
+            break;
+        }
+        if !indices.contains(&index) {
+            indices.push(index);
+        }
+    }
+    indices
+}
+
 pub fn draw_debrief(
     mission: &MissionDef,
     outcome: &MissionOutcome,
@@ -301,7 +325,9 @@ fn draw_squad_tableau(
         15.0,
         dark::ACCENT,
     );
-    for (index, character) in campaign.roster.iter().take(5).enumerate() {
+    let roster_indices = debrief_roster_indices(&campaign.roster, deployed_ids);
+    for (index, roster_index) in roster_indices.into_iter().enumerate() {
+        let character = &campaign.roster[roster_index];
         let status = squad_status(
             &character.id,
             deployed_ids,
