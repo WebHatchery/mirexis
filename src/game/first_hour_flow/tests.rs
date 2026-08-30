@@ -31,4 +31,19 @@ fn first_hour_teaching_lane_is_attackable_after_the_cover_move() {
         .unwrap();
     assert_eq!(target.position, first_hour_attack_position());
     assert!(session.can_attack_selected(&target.id));
+    assert_eq!(
+        session.tactical.objective_tile,
+        first_hour_objective_position()
+    );
+    let objective_approach = TilePos::new(
+        session.tactical.objective_tile.x - 1,
+        session.tactical.objective_tile.y,
+    );
+    let route = session
+        .movement_path("kira_voss", objective_approach)
+        .unwrap();
+    assert_eq!(
+        crate::tactical::path_cost(&route, &session.tactical.terrain_costs),
+        15
+    );
 }

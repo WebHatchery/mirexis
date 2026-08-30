@@ -9,9 +9,17 @@ use macroquad_toolkit::ui::VirtualUi;
 
 const FIRST_HOUR_COVER_POSITION: [i32; 2] = [6, 18];
 const FIRST_HOUR_ATTACK_POSITION: [i32; 2] = [12, 18];
+const FIRST_HOUR_OBJECTIVE_POSITION: [i32; 2] = [18, 22];
 
 fn first_hour_attack_position() -> TilePos {
     TilePos::new(FIRST_HOUR_ATTACK_POSITION[0], FIRST_HOUR_ATTACK_POSITION[1])
+}
+
+fn first_hour_objective_position() -> TilePos {
+    TilePos::new(
+        FIRST_HOUR_OBJECTIVE_POSITION[0],
+        FIRST_HOUR_OBJECTIVE_POSITION[1],
+    )
 }
 
 impl Game {
@@ -197,6 +205,23 @@ pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mis
         .find(|unit| unit.id == hostile_id)
     {
         hostile.position = first_hour_attack_position();
+    }
+
+    let objective = first_hour_objective_position();
+    if session.tactical.fog.is_valid(objective)
+        && !session.tactical.blocked.contains(&objective)
+        && !session
+            .tactical
+            .hazards
+            .iter()
+            .any(|hazard| hazard.position == objective)
+        && !session
+            .tactical
+            .units
+            .iter()
+            .any(|unit| unit.position == objective)
+    {
+        session.tactical.objective_tile = objective;
     }
 }
 
