@@ -1,7 +1,7 @@
 use super::*;
 use crate::colony::{
-    BuildingKind, DOCTRINE_YARD_UPGRADE, EVOLUTION_CHAMBER_UPGRADE, HOT_CORE_UPGRADE,
-    SIGNAL_CARTOGRAPHY_UPGRADE,
+    BuildingKind, ADAPTATION_CLINIC_UPGRADE, DOCTRINE_YARD_UPGRADE, EVOLUTION_CHAMBER_UPGRADE,
+    HOT_CORE_UPGRADE, SIGNAL_CARTOGRAPHY_UPGRADE,
 };
 use crate::state::GameSession;
 
@@ -160,5 +160,33 @@ fn version_103_save_preserves_barracks_upgrade_queue() {
     assert_eq!(
         migrated.campaign.colony.facility_upgrade_queue[0].upgrade_id,
         DOCTRINE_YARD_UPGRADE
+    );
+}
+
+#[test]
+fn version_104_save_preserves_infirmary_upgrade_queue() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let infirmary_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&infirmary_id, ADAPTATION_CLINIC_UPGRADE)
+        .unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let legacy = serde_json::to_value(session.to_save("1.104.0", &campaign)).unwrap();
+
+    let migrated = migrate_save_value(Some("1.104.0".to_owned()), legacy, &data).unwrap();
+
+    assert_eq!(migrated.version, data.config.version);
+    assert_eq!(
+        migrated.campaign.colony.facility_upgrade_queue[0].upgrade_id,
+        ADAPTATION_CLINIC_UPGRADE
     );
 }

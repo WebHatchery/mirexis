@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.104.0
+Save/content version: 1.105.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -110,6 +110,7 @@ Important transition payloads:
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
 | `campaign/evolution.rs` | Mutation evolution costs, choices, completion gates, and Gene Lab effects | Rendering or save migration |
+| `campaign/medical.rs` | Infirmary recovery, treatment, and mutation-aware injury consequences | Colony rendering or tactical mutation |
 | `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
 | `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
@@ -432,7 +433,10 @@ Initial facilities have stable coordinates:
   and completes after one operation: Simulation Hall reduces retraining costs by 20 and
   technique-trial thresholds by 10 XP, while Doctrine Yard unlocks Rally formation and
   two training barricades in colony defence.
-- Infirmary: injury treatment.
+- Infirmary: injury treatment. Its level-2 branch choice costs 55 materials and completes
+  after one operation: Trauma Ward shortens recovery, softens persistent scar tradeoffs, and
+  adds a stabilization barricade to colony defence, while Adaptation Clinic suppresses
+  mutation-delayed healing and lowers treatment to three biomass.
 - Workshop: equipment crafting.
 - Hydroponics: three food after each resolved operation while powered. Its level-2 branch
   choice costs 55 materials and completes after one operation: Community Kitchen adds two
@@ -463,7 +467,7 @@ The Gene Lab adds three demand, intentionally requiring recovered power or anoth
 Power Plant before its evolution chamber operates.
 
 Facility upgrades are queued strategic projects rather than instant toggles. The Command Centre,
-Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab present their mutually exclusive level-2 branches in a
+Barracks, Infirmary, Power Plant, Hydroponics, Workshop, and Gene Lab present their mutually exclusive level-2 branches in a
 touch-visible colony operations panel; completion raises the building level and records the
 stable branch ID.
 Hot Core's attention cost is applied while the plant is operational, during mission-outcome
@@ -478,6 +482,10 @@ Simulation Hall reduces class retraining costs by 20 and technique-trial experie
 by 10 while the Barracks is operational and powered. Doctrine Yard adds a Rally deployment
 formation and two destructible training barricades to colony-defence maps while the Barracks is
 operational and powered.
+Trauma Ward shortens new injury recovery by one operation, softens the deployment tradeoffs of
+persistent scars, and adds one stabilization barricade to colony-defence maps while the
+Infirmary is operational and powered. Adaptation Clinic ignores mutation-delayed healing and
+reduces treatment from five to three biomass while the Infirmary is operational and powered.
 Stabilisation Wing suppresses mutation-evolution complications while the Gene Lab is operational
 and powered. Evolution Chamber reduces each mutation-evolution biomass cost by four, with a
 minimum cost of one, while the Gene Lab is operational and powered.
@@ -854,6 +862,7 @@ Migration coverage:
 | 1.102.0 | Gene Lab level-two Stabilisation Wing and Evolution Chamber branches with operational evolution effects |
 | 1.103.0 | Command Centre level-two Signal Cartography and Counterintelligence Cell branches with route and pressure effects |
 | 1.104.0 | Barracks level-two Simulation Hall and Doctrine Yard branches with training and defence-preparation effects |
+| 1.105.0 | Infirmary level-two Trauma Ward and Adaptation Clinic branches with recovery, scar, treatment, and defence effects |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -945,11 +954,11 @@ these explicit boundaries when continuing:
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
-  the Command Centre, Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
+  the Command Centre, Barracks, Infirmary, Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
-  population, free placement for every building, and the remaining facility branches remain future
-  work. Completed campaigns now also expose a derived legacy dossier that acknowledges the
+  population, free placement for every building, and additional facilities remain future work.
+  Completed campaigns now also expose a derived legacy dossier that acknowledges the
   institution, people, bonds, scars, and evolutions carried through the ending.
 - Pair relationships now grow from shared victories and character events, and trusted
   deployed partners grant bounded, non-stacking accuracy and armour bonuses. Rivalries,

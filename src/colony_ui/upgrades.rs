@@ -8,9 +8,10 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
 const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
-const UPGRADEABLE_FACILITIES: [BuildingKind; 6] = [
+const UPGRADEABLE_FACILITIES: [BuildingKind; 7] = [
     BuildingKind::CommandCentre,
     BuildingKind::Barracks,
+    BuildingKind::Infirmary,
     BuildingKind::PowerPlant,
     BuildingKind::Hydroponics,
     BuildingKind::Workshop,
@@ -85,7 +86,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         else {
             continue;
         };
-        let y = 130.0 + index as f32 * 74.0;
+        let y = 124.0 + index as f32 * 70.0;
         draw_text_ex(
             kind.name().to_uppercase(),
             886.0,
@@ -113,12 +114,12 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             && !queued
             && campaign.colony.resources.materials >= kind.upgrade_cost();
         for (option_index, option) in kind.upgrade_options().iter().enumerate() {
-            let card_y = y + 18.0 + option_index as f32 * 28.0;
+            let card_y = y + 16.0 + option_index as f32 * 26.0;
             draw_rectangle(
                 886.0,
                 card_y,
                 360.0,
-                26.0,
+                24.0,
                 Color::new(0.025, 0.055, 0.060, 1.0),
             );
             draw_text_ex(

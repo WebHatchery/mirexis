@@ -55,12 +55,15 @@ The first facility branch is now playable as well. An operational Power Plant ca
 next operation: Redundant Grid preserves two power through plant damage, while an
 operational Hot Core adds three supply and makes the most visible faction more attentive
 after each operation.
-The choice is touch-visible and save-backed; the remaining facility branches still need
-their own tactical, social, and narrative contracts. The Command Centre now also offers
+The choice is touch-visible and save-backed; the facility branches now carry tactical,
+social, and narrative contracts. The Command Centre now also offers
 Signal Cartography, which reveals a third mission route, or Counterintelligence Cell, which
 reduces mission pressure while the centre remains online. The Barracks now offers Simulation
 Hall, which makes retraining and technique trials cheaper, or Doctrine Yard, which adds a Rally
 formation and training barricades to colony defence while the barracks remains online.
+The Infirmary now offers Trauma Ward, which shortens recovery, softens persistent scar
+tradeoffs, and protects one adjacent stabilization position in colony defence, or Adaptation
+Clinic, which makes mutation-delayed healing safer and lowers direct treatment to three biomass.
 
 ## 2. Expansion rules
 
@@ -318,7 +321,7 @@ power, and mutation evolution. Future work should give those places upgrades, in
 and events before adding many new structures.
 
 Each core facility may reach level 2 and choose one visible branch. The Command Centre,
-Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab branch pairs are now implemented in this
+Barracks, Infirmary, Power Plant, Hydroponics, Workshop, and Gene Lab branch pairs are now implemented in this
 system.
 Level 3 should be reserved for the late-game colony identity, not a generic numeric improvement.
 
@@ -326,7 +329,7 @@ Level 3 should be reserved for the late-game colony identity, not a generic nume
 |---|---|---|---|
 | Command Centre | **Signal Cartography:** a third operation route and clearer reinforcement forecasts *(implemented)* | **Counterintelligence Cell:** reduced mission pressure and faction attention *(implemented)* | A damaged branch removes its strategic benefit until repaired. |
 | Barracks | **Simulation Hall:** cheaper retraining and technique trials *(implemented)* | **Doctrine Yard:** Rally formation and training barricades *(implemented)* | Adds a rally zone and two destructible training barricades in colony defence. |
-| Infirmary | **Trauma Ward:** better scar and recovery choices | **Adaptation Clinic:** safer mutation complications and biological treatment | Can stabilise one nearby defender or become an urgent casualty objective. |
+| Infirmary | **Trauma Ward:** shorter recovery, softened scars, and a stabilization barricade *(implemented)* | **Adaptation Clinic:** safer mutation complications and three-biomass treatment *(implemented)* | Adds a stabilization position near the infirmary; the infirmary remains an urgent casualty objective. |
 | Workshop | **Precision Bench:** weapon and armour modification *(implemented)* | **Drone Bay:** reusable deployables and repairs *(implemented)* | Adds a friendly emplacement but stores volatile components. |
 | Hydroponics | **Community Kitchen:** food efficiency and relationship events *(implemented)* | **Culture Beds:** biomass cultivation and biotech ingredients *(implemented)* | Creates soft cover and a fragile food objective. |
 | Power Plant | **Redundant Grid:** damage tolerance and reliable supply *(implemented)* | **Hot Core:** higher supply with an attention cost *(implemented)* | Changes which systems fail first during an assault. |
@@ -476,8 +479,8 @@ presence provokes at least two disagreements that do not reduce to approval poin
 
 Goal: make building and upgrade choices visible in city life and defence.
 
-- Add level-2 branch upgrades to six existing facilities *(implemented for Command Centre,
-  Barracks, Power Plant, Hydroponics, Workshop, and Gene Lab)*.
+- Add level-2 branch upgrades to seven existing facilities *(implemented for Command Centre,
+  Barracks, Infirmary, Power Plant, Hydroponics, Workshop, and Gene Lab)*.
 - Implemented: build a Relay Mast and use its once-per-operation route scan.
 - Implemented: build a powered Watchtower whose placement adds stronger directional cover
   to colony defence and loses that benefit when the grid fails.
@@ -495,6 +498,9 @@ Goal: make building and upgrade choices visible in city life and defence.
 - Implemented: queue a level-2 Barracks branch, with Simulation Hall reducing retraining and
   technique-trial thresholds or Doctrine Yard unlocking Rally formation and training barricades
   while the Barracks is online.
+- Implemented: queue a level-2 Infirmary branch, with Trauma Ward shortening recovery, softening
+  persistent scar tradeoffs, and adding a stabilization barricade, or Adaptation Clinic making
+  mutation complications safer and direct treatment cheaper while the Infirmary is online.
 - Implemented: establish one physical identity building for the chosen Mirexis path, with
   path-specific map cover, objective priority, power, and biomass consequences.
 - Implemented: move the associated colony voice to each identity building, add a persistent

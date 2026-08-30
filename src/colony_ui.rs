@@ -1,7 +1,7 @@
 //! Colony hub presentation and strategic intent production.
 
 use crate::campaign::{Availability, CampaignState};
-use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};
+use crate::colony::{BuildingKind, ADAPTATION_CLINIC_UPGRADE, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::visual_assets::VisualCatalog;
@@ -242,7 +242,17 @@ pub(super) fn draw_operations(
     }
     if colony_button(
         Rect::new(878.0, 312.0, 176.0, 32.0),
-        "TREAT // INFIRMARY",
+        &format!(
+            "TREAT // {} BIO",
+            if campaign
+                .colony
+                .has_active_upgrade(BuildingKind::Infirmary, ADAPTATION_CLINIC_UPGRADE)
+            {
+                3
+            } else {
+                5
+            }
+        ),
         recovering > 0,
         mouse,
     ) {

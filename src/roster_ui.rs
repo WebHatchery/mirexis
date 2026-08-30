@@ -1,7 +1,7 @@
 //! Colony roster, training, and equipment presentation.
 
 use crate::campaign::{equipment_cost, CampaignState};
-use crate::colony::{BuildingKind, SIMULATION_HALL_UPGRADE};
+use crate::colony::{BuildingKind, SIMULATION_HALL_UPGRADE, TRAUMA_WARD_UPGRADE};
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::ui_widgets::{button, button_with_state};
@@ -289,11 +289,20 @@ fn draw_selected_character(
         );
     }
     if !character.traumas.is_empty() {
+        let trauma_ward_active = campaign
+            .colony
+            .has_active_upgrade(BuildingKind::Infirmary, TRAUMA_WARD_UPGRADE);
         history.push(
             character
                 .traumas
                 .iter()
-                .map(|trauma| format!("{} ({})", trauma.name, trauma.effect))
+                .map(|trauma| {
+                    format!(
+                        "{} ({})",
+                        trauma.name,
+                        crate::trauma::effective_effect(trauma, trauma_ward_active)
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(" · "),
         );

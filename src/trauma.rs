@@ -65,22 +65,44 @@ pub(crate) fn record_incapacitation(character: &mut CharacterRecord, operation: 
 }
 
 pub(crate) fn apply_deployment_traits(unit: &mut UnitDef, traumas: &[TraumaRecord]) {
+    apply_deployment_traits_with_options(unit, traumas, false);
+}
+
+pub(crate) fn apply_deployment_traits_with_options(
+    unit: &mut UnitDef,
+    traumas: &[TraumaRecord],
+    soften_tradeoffs: bool,
+) {
     for trauma in traumas {
         match trauma.id.as_str() {
             "clouded_eye" => {
-                unit.accuracy -= 8;
+                unit.accuracy -= if soften_tradeoffs { 4 } else { 8 };
                 unit.weapon_damage += 1;
             }
             "reinforced_ribs" => {
                 unit.armour += 1;
-                unit.move_range = unit.move_range.saturating_sub(1).max(1);
+                if !soften_tradeoffs {
+                    unit.move_range = unit.move_range.saturating_sub(1).max(1);
+                }
             }
             "mire_reflex" => {
                 unit.move_range = unit.move_range.saturating_add(1);
-                unit.max_health = (unit.max_health - 2).max(1);
+                unit.max_health = (unit.max_health - if soften_tradeoffs { 1 } else { 2 }).max(1);
             }
             _ => {}
         }
+    }
+}
+
+pub(crate) fn effective_effect(trauma: &TraumaRecord, soften_tradeoffs: bool) -> String {
+    if !soften_tradeoffs {
+        return trauma.effect.clone();
+    }
+    match trauma.id.as_str() {
+        "clouded_eye" => "-4 ACC · +1 DMG".to_owned(),
+        "reinforced_ribs" => "+1 ARMOUR · NO MOVE LOSS".to_owned(),
+        "mire_reflex" => "+1 MOVE · -1 VITALS".to_owned(),
+        _ => trauma.effect.clone(),
     }
 }
 

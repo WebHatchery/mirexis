@@ -1,6 +1,8 @@
 //! Derive the physical colony layout used by settlement defence missions.
 
-use super::{BuildingKind, ColonyDefenseMap, ColonyState, DOCTRINE_YARD_UPGRADE};
+use super::{
+    BuildingKind, ColonyDefenseMap, ColonyState, DOCTRINE_YARD_UPGRADE, TRAUMA_WARD_UPGRADE,
+};
 use macroquad_toolkit::grid::TilePos;
 
 impl ColonyState {
@@ -69,6 +71,18 @@ impl ColonyState {
                     blocked_tiles.push(position);
                     cover_tiles.push(position);
                 }
+            }
+        }
+        if let Some(infirmary) = self.buildings.iter().find(|building| {
+            building.kind == BuildingKind::Infirmary
+                && !building.damaged
+                && self.has_active_upgrade(BuildingKind::Infirmary, TRAUMA_WARD_UPGRADE)
+        }) {
+            let stabilization_tile =
+                TilePos::new(infirmary.position[0] + 3, infirmary.position[1] + 2);
+            if !blocked_tiles.contains(&stabilization_tile) {
+                blocked_tiles.push(stabilization_tile);
+                cover_tiles.push(stabilization_tile);
             }
         }
         ColonyDefenseMap {

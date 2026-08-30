@@ -14,6 +14,8 @@ pub const SIGNAL_CARTOGRAPHY_UPGRADE: &str = "signal_cartography";
 pub const COUNTERINTELLIGENCE_CELL_UPGRADE: &str = "counterintelligence_cell";
 pub const SIMULATION_HALL_UPGRADE: &str = "simulation_hall";
 pub const DOCTRINE_YARD_UPGRADE: &str = "doctrine_yard";
+pub const TRAUMA_WARD_UPGRADE: &str = "trauma_ward";
+pub const ADAPTATION_CLINIC_UPGRADE: &str = "adaptation_clinic";
 
 impl BuildingKind {
     pub fn upgrade_options(self) -> &'static [FacilityUpgradeOption] {
@@ -89,6 +91,18 @@ impl BuildingKind {
                     id: DOCTRINE_YARD_UPGRADE,
                     name: "Doctrine Yard",
                     description: "Unlocks Rally formation and training barricades in defence.",
+                },
+            ],
+            Self::Infirmary => &[
+                FacilityUpgradeOption {
+                    id: TRAUMA_WARD_UPGRADE,
+                    name: "Trauma Ward",
+                    description: "Softens persistent scars and shortens injury recovery.",
+                },
+                FacilityUpgradeOption {
+                    id: ADAPTATION_CLINIC_UPGRADE,
+                    name: "Adaptation Clinic",
+                    description: "Makes mutation complications safer and treatment cheaper.",
                 },
             ],
             _ => &[],

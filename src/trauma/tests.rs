@@ -48,3 +48,38 @@ fn scar_effects_change_later_deployment_without_blocking_it() {
     assert_eq!(deployed.armour, before.armour + 1);
     assert_eq!(deployed.move_range + 1, before.move_range);
 }
+
+#[test]
+fn trauma_ward_softens_persistent_scar_tradeoffs() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign
+        .roster
+        .iter_mut()
+        .find(|character| character.id == "kira_voss")
+        .unwrap()
+        .traumas
+        .push(TraumaRecord {
+            id: "reinforced_ribs".to_owned(),
+            name: "Reinforced Ribs".to_owned(),
+            effect: "+1 ARMOUR · -1 MOVE".to_owned(),
+        });
+    let baseline = campaign.derived_character_unit("kira_voss", &data).unwrap();
+    let infirmary_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == crate::colony::BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&infirmary_id, crate::colony::TRAUMA_WARD_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    let softened = campaign.derived_character_unit("kira_voss", &data).unwrap();
+    assert_eq!(softened.armour, baseline.armour);
+    assert_eq!(softened.move_range, baseline.move_range + 1);
+}

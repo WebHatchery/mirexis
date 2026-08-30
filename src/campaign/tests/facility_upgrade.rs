@@ -1,8 +1,9 @@
 use super::*;
 use crate::colony::{
-    BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, COUNTERINTELLIGENCE_CELL_UPGRADE,
-    DRONE_BAY_UPGRADE, EVOLUTION_CHAMBER_UPGRADE, PRECISION_BENCH_UPGRADE,
-    SIGNAL_CARTOGRAPHY_UPGRADE, SIMULATION_HALL_UPGRADE, STABILISATION_WING_UPGRADE,
+    BuildingKind, BuildingState, ADAPTATION_CLINIC_UPGRADE, COMMUNITY_KITCHEN_UPGRADE,
+    COUNTERINTELLIGENCE_CELL_UPGRADE, DRONE_BAY_UPGRADE, EVOLUTION_CHAMBER_UPGRADE,
+    PRECISION_BENCH_UPGRADE, SIGNAL_CARTOGRAPHY_UPGRADE, SIMULATION_HALL_UPGRADE,
+    STABILISATION_WING_UPGRADE, TRAUMA_WARD_UPGRADE,
 };
 
 fn campaign_with_online_gene_lab(data: &GameData) -> CampaignState {
@@ -334,4 +335,89 @@ fn simulation_hall_reduces_retraining_cost_while_online() {
         campaign.training_cost("kira_voss", class),
         Some(normal_cost - 20)
     );
+}
+
+#[test]
+fn trauma_ward_shortens_injury_recovery_while_online() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let infirmary_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&infirmary_id, TRAUMA_WARD_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    let outcome = MissionOutcome {
+        result: ObjectiveState::Failed,
+        colonists_deployed: 3,
+        colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
+        hostiles_neutralised: 0,
+        materials_awarded: 0,
+        biomass_awarded: 0,
+        power_awarded: 0,
+    };
+    let mission = campaign.strategy.selected_mission().unwrap().clone();
+    campaign.apply_mission_outcome(&outcome, &mission, &data);
+
+    let ilya = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "ilya_reed")
+        .unwrap();
+    assert_eq!(ilya.injuries[0].recovery_operations, 2);
+    assert_eq!(ilya.traumas.len(), 1);
+}
+
+#[test]
+fn adaptation_clinic_makes_mutation_recovery_and_treatment_safer() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let infirmary_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&infirmary_id, ADAPTATION_CLINIC_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    let outcome = MissionOutcome {
+        result: ObjectiveState::Failed,
+        colonists_deployed: 3,
+        colonists_incapacitated: vec![consequence("ilya_reed", "Ilya Reed")],
+        hostiles_neutralised: 0,
+        materials_awarded: 0,
+        biomass_awarded: 0,
+        power_awarded: 0,
+    };
+    let mission = campaign.strategy.selected_mission().unwrap().clone();
+    campaign.apply_mission_outcome(&outcome, &mission, &data);
+    assert_eq!(
+        campaign
+            .roster
+            .iter()
+            .find(|character| character.id == "ilya_reed")
+            .unwrap()
+            .injuries[0]
+            .recovery_operations,
+        2
+    );
+
+    campaign.colony.resources.biomass = 3;
+    let treated = campaign.treat_first_injury().unwrap();
+    assert_eq!(treated, "Ilya Reed");
+    assert_eq!(campaign.colony.resources.biomass, 0);
 }

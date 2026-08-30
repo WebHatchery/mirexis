@@ -5,6 +5,7 @@ mod deployment;
 mod derivation;
 mod evolution;
 mod identity;
+mod medical;
 mod mission;
 mod outsider;
 mod relay;
@@ -18,7 +19,7 @@ pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
 use crate::colony::{
     BuildingKind, ColonyState, COUNTERINTELLIGENCE_CELL_UPGRADE, HOT_CORE_UPGRADE,
-    PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE,
+    PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE, TRAUMA_WARD_UPGRADE,
 };
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
@@ -243,6 +244,8 @@ impl CampaignState {
                                 BuildingKind::GeneLab,
                                 STABILISATION_WING_UPGRADE,
                             ),
+                            self.colony
+                                .has_active_upgrade(BuildingKind::Infirmary, TRAUMA_WARD_UPGRADE),
                         )
                     })
             })
@@ -291,6 +294,8 @@ impl CampaignState {
             data,
             self.colony
                 .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE),
+            self.colony
+                .has_active_upgrade(BuildingKind::Infirmary, TRAUMA_WARD_UPGRADE),
         ))
     }
 
@@ -456,31 +461,7 @@ impl CampaignState {
             character.level = 1 + (character.experience / 100).min(9) as u8;
         }
         crate::skill_training::learn_after_operation(self, &deployed_ids, data);
-        for consequence in &outcome.colonists_incapacitated {
-            if let Some(character) = self
-                .roster
-                .iter_mut()
-                .find(|record| record.id == consequence.id)
-            {
-                let traits = derived_mutation_traits_with_options(
-                    character,
-                    data,
-                    self.colony
-                        .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE),
-                );
-                let delayed_healing = traits.get("medical_healing").copied().unwrap_or(0) < 0;
-                let triage_bonus = u8::from(self.strategy.research_completed("xeno_triage"));
-                let recovery_operations =
-                    (if delayed_healing { 3 } else { 2 } - triage_bonus).max(1);
-                character.injuries.push(InjuryRecord {
-                    id: format!("operation_{}_trauma", self.operations_completed),
-                    name: "Mire exposure trauma".to_owned(),
-                    recovery_operations,
-                });
-                crate::trauma::record_incapacitation(character, self.operations_completed);
-                character.availability = Availability::Recovering;
-            }
-        }
+        self.apply_injury_consequences(outcome, data);
         self.refresh_contact_completion(data);
         self.refresh_adaptation_completion(data);
         self.refresh_escalation_completion(data);
@@ -577,47 +558,6 @@ impl CampaignState {
         }
         self.refresh_contact_completion(data);
         Ok(title)
-    }
-
-    pub fn advance_recovery(&mut self) {
-        for character in &mut self.roster {
-            for injury in &mut character.injuries {
-                injury.recovery_operations = injury.recovery_operations.saturating_sub(1);
-            }
-            character
-                .injuries
-                .retain(|injury| injury.recovery_operations > 0);
-            character.availability = if character.injuries.is_empty() {
-                Availability::Ready
-            } else {
-                Availability::Recovering
-            };
-        }
-    }
-
-    pub fn treat_first_injury(&mut self) -> Result<String, String> {
-        if !self.colony.has_facility(BuildingKind::Infirmary) {
-            return Err("An operational infirmary is required".to_owned());
-        }
-        if self.colony.resources.biomass < 5 {
-            return Err("Treatment requires 5 biomass".to_owned());
-        }
-        let character = self
-            .roster
-            .iter_mut()
-            .find(|character| !character.injuries.is_empty())
-            .ok_or_else(|| "No colonist currently needs treatment".to_owned())?;
-        self.colony.resources.biomass -= 5;
-        for injury in &mut character.injuries {
-            injury.recovery_operations = injury.recovery_operations.saturating_sub(1);
-        }
-        character
-            .injuries
-            .retain(|injury| injury.recovery_operations > 0);
-        if character.injuries.is_empty() {
-            character.availability = Availability::Ready;
-        }
-        Ok(character.name.clone())
     }
 
     pub fn craft_equipment(

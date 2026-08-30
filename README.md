@@ -30,6 +30,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   clearer reinforcement intelligence, or Counterintelligence Cell reduces mission pressure.
 - Level-2 Barracks branches: Simulation Hall lowers retraining and technique-trial thresholds,
   or Doctrine Yard unlocks Rally formation and training barricades in colony defence.
+- Level-2 Infirmary branches: Trauma Ward shortens recovery, softens persistent scars, and adds
+  a stabilization barricade, or Adaptation Clinic makes mutation complications safer and treatment cheaper.
 - A level-2 Power Plant branch choice: Redundant Grid preserves damaged-plant supply, or
   Hot Core raises output while increasing the most visible faction's attention per operation.
 - Level-2 Hydroponics branches: Community Kitchen improves food and Commons efficiency, or

@@ -5,7 +5,7 @@ use crate::data::{GameData, UnitDef};
 
 #[allow(dead_code)]
 pub(crate) fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
-    derive_unit_with_evolution_options(base, character, data, false)
+    derive_unit_with_evolution_options(base, character, data, false, false)
 }
 
 pub(crate) fn derive_unit_with_evolution_options(
@@ -13,6 +13,7 @@ pub(crate) fn derive_unit_with_evolution_options(
     character: &CharacterRecord,
     data: &GameData,
     suppress_evolution_complications: bool,
+    soften_trauma_tradeoffs: bool,
 ) -> UnitDef {
     let mut unit = base.clone();
     unit.equipment_ids = character.equipment_ids.clone();
@@ -84,7 +85,11 @@ pub(crate) fn derive_unit_with_evolution_options(
             _ => {}
         }
     }
-    crate::trauma::apply_deployment_traits(&mut unit, &character.traumas);
+    if soften_trauma_tradeoffs {
+        crate::trauma::apply_deployment_traits_with_options(&mut unit, &character.traumas, true);
+    } else {
+        crate::trauma::apply_deployment_traits(&mut unit, &character.traumas);
+    }
     unit
 }
 

@@ -93,6 +93,36 @@ fn doctrine_yard_adds_training_barricades_only_while_online() {
 }
 
 #[test]
+fn trauma_ward_adds_a_stabilization_barricade_only_while_online() {
+    let mut colony = ColonyState::new();
+    let infirmary_id = colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Infirmary)
+        .unwrap()
+        .id
+        .clone();
+    colony
+        .queue_facility_upgrade(&infirmary_id, TRAUMA_WARD_UPGRADE)
+        .unwrap();
+    colony.advance_operation();
+
+    let stabilization_tile = TilePos::new(13, 8);
+    let map = colony.defense_map();
+    assert!(map.blocked_tiles.contains(&stabilization_tile));
+    assert!(map.cover_tiles.contains(&stabilization_tile));
+
+    colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.id == infirmary_id)
+        .unwrap()
+        .damaged = true;
+    let offline_map = colony.defense_map();
+    assert!(!offline_map.cover_tiles.contains(&stabilization_tile));
+}
+
+#[test]
 fn failed_defense_damage_disables_a_facility_until_repaired() {
     let mut colony = ColonyState::new();
     let name = colony.damage_for_failed_defense(1).unwrap();
