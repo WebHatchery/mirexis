@@ -367,8 +367,8 @@ mission length, and investment behaviour as the balance baseline for every later
 Goal: deepen the existing people and city without new tactical systems.
 
 - Add three-beat arcs for Kira, Mara, Ilya, Sol, and Nadi.
-- Implemented: build the Commons and connect one shared meal to persistent squad bonds.
-- Connect Commons meals to debrief consequences and authored relationship scenes.
+- Implemented: build the Commons and connect one shared meal to persistent squad bonds,
+  the next debrief, and authored post-operation field notes.
 - Add at least one phase-specific colony scene per campaign phase.
 - Establish the unified refuge-engine truth in internal narrative references.
 - Expand ending acknowledgement for bonds, scars, evolution, and one civic choice.

@@ -112,6 +112,13 @@ pub fn draw_debrief(
     if won && outcome.colonists_deployed > 1 {
         report.push("Shared victory strengthened squad relationships".to_owned());
     }
+    if campaign.last_operation_had_commons_meal() {
+        report.push(if won {
+            "Commons meal carried the squad's bond into the field".to_owned()
+        } else {
+            "Commons meal gave the squad a table to return to".to_owned()
+        });
+    }
     if !outcome.colonists_incapacitated.is_empty() {
         report.push("Incapacitation left a lasting tradeoff scar".to_owned());
     }

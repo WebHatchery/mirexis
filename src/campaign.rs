@@ -159,12 +159,19 @@ impl CampaignState {
 
     pub fn acknowledge_colonist(&mut self, character_id: &str) {
         self.first_hour.acknowledge_colonist(character_id);
-        let Some(beat) = crate::colony_story::current_beat(
-            character_id,
-            self.operations_completed,
-            self.first_hour.first_outcome_won,
-            self.first_hour.second_outcome_won,
-        ) else {
+        let beat = self
+            .last_operation_had_commons_meal()
+            .then(|| crate::colony_story::commons_meal_beat(character_id))
+            .flatten()
+            .or_else(|| {
+                crate::colony_story::current_beat(
+                    character_id,
+                    self.operations_completed,
+                    self.first_hour.first_outcome_won,
+                    self.first_hour.second_outcome_won,
+                )
+            });
+        let Some(beat) = beat else {
             return;
         };
         self.colony_story.acknowledge(beat.id);

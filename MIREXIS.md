@@ -1162,9 +1162,10 @@ Events may involve:
 - trauma
 - faction history
 
-The implemented pair-bond layer grows through shared victories and character events.
-Roster inspection names each known bond, mission briefing identifies deployed trusted
-partners, and debrief reports when a victory strengthens the squad's history.
+The implemented pair-bond layer grows through shared victories, Commons meals, and
+character events. Roster inspection names each known bond, mission briefing identifies
+deployed trusted partners, debrief reports meal and victory consequences, and the colony
+can answer a shared meal with authored post-operation field notes.
 
 At bond 3, a deployed pair becomes **Trusted** and each partner gains +2 accuracy. At
 bond 5, the pair becomes **Bonded** and each partner also gains +1 armour. Only a

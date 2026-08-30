@@ -21,7 +21,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
   resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - A powered Commons with one shared meal per operation, turning squad preparation into
-  persistent relationship progression.
+  persistent relationship progression with visible debrief and colony-story feedback.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

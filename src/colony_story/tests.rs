@@ -54,3 +54,25 @@ fn missing_serialized_story_uses_an_empty_ledger() {
     let story: ColonyStoryState = serde_json::from_str("{}").unwrap();
     assert_eq!(story, ColonyStoryState::default());
 }
+
+#[test]
+fn commons_meal_unlocks_an_authored_note_for_each_colony_voice() {
+    for character_id in [
+        "kira_voss",
+        "mara_venn",
+        "ilya_reed",
+        "sol_cairn",
+        "nadi_vale",
+        "veya_orn",
+    ] {
+        let beat = commons_meal_beat(character_id).unwrap();
+        assert!(beat.id.starts_with("commons_meal_"));
+        assert!(!beat.title.is_empty());
+        assert!(!beat.text.is_empty());
+    }
+}
+
+#[test]
+fn unknown_colony_voice_has_no_commons_meal_note() {
+    assert!(commons_meal_beat("unknown_colonist").is_none());
+}

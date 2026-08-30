@@ -208,5 +208,42 @@ pub(crate) fn current_beat(
     }
 }
 
+pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
+    let (id, title, text) = match character_id {
+        "kira_voss" => (
+            "commons_meal_kira",
+            "THE TABLE IS A FORMATION",
+            "The meal was not a briefing, but everyone left it knowing where the others would stand. The field does not get to decide what holds us together.",
+        ),
+        "mara_venn" => (
+            "commons_meal_mara",
+            "A PLACE TO RETURN",
+            "The meal gave the squad somewhere to return to before the operation gave us another reason to leave. That is a kind of preparation the Directorate cannot measure.",
+        ),
+        "ilya_reed" => (
+            "commons_meal_ilya",
+            "NO ONE EATS ALONE",
+            "Three people sharing food is not a medical protocol. It is still evidence that the colony knows the difference between a body and a person.",
+        ),
+        "sol_cairn" => (
+            "commons_meal_sol",
+            "A CIRCUIT OF HANDS",
+            "The Commons ran on one small circuit and a lot of hands passing bowls. That is how the grid survives too: not because it is strong, but because someone keeps closing the loop.",
+        ),
+        "nadi_vale" => (
+            "commons_meal_nadi",
+            "THE QUIET BETWEEN BITES",
+            "The symbiote listened while the squad ate. No alarm, no hunger, no signal from below—just a quiet long enough for trust to become something the body could recognise.",
+        ),
+        "veya_orn" => (
+            "commons_meal_veya",
+            "WITNESSES AT THE TABLE",
+            "Veya expected an interrogation and got a meal with too many witnesses to rewrite afterward. The colony is learning that belonging can be recorded without becoming surveillance.",
+        ),
+        _ => return None,
+    };
+    Some(ColonyBeat { id, title, text })
+}
+
 #[cfg(test)]
 mod tests;

@@ -44,8 +44,29 @@ fn commons_meal_can_be_hosted_again_after_the_next_operation() {
     campaign.host_commons_meal().unwrap();
     campaign.operations_completed = 1;
 
+    assert!(campaign.last_operation_had_commons_meal());
     assert!(campaign.commons_meal_available());
     campaign.host_commons_meal().unwrap();
     assert_eq!(campaign.commons_meals_hosted, 2);
     assert_eq!(campaign.commons_meal_operation, Some(1));
+    assert!(!campaign.last_operation_had_commons_meal());
+}
+
+#[test]
+fn the_next_colony_conversation_archives_the_meal_field_note() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.colony.buildings.push(BuildingState {
+        id: "commons_test".to_owned(),
+        kind: BuildingKind::Commons,
+        position: [2, 10],
+        level: 1,
+        damaged: false,
+    });
+
+    campaign.host_commons_meal().unwrap();
+    campaign.operations_completed = 1;
+    campaign.acknowledge_colonist("mara_venn");
+
+    assert!(campaign.colony_story.has_heard("commons_meal_mara"));
 }

@@ -6,6 +6,11 @@ use crate::colony::BuildingKind;
 pub(crate) const COMMONS_MEAL_FOOD_COST: i32 = 4;
 
 impl CampaignState {
+    pub fn last_operation_had_commons_meal(&self) -> bool {
+        self.operations_completed > 0
+            && self.commons_meal_operation == Some(self.operations_completed - 1)
+    }
+
     pub fn commons_meal_available(&self) -> bool {
         self.colony.has_facility(BuildingKind::Commons)
             && self.commons_meal_operation != Some(self.operations_completed)
