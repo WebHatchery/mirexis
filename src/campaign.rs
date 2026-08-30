@@ -10,7 +10,7 @@ pub(super) use derivation::derive_unit;
 pub(crate) use outsider::{outsider_beat, OutsiderChoice};
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
-use crate::colony::{BuildingKind, ColonyState, HOT_CORE_UPGRADE};
+use crate::colony::{BuildingKind, ColonyState, HOT_CORE_UPGRADE, PRECISION_BENCH_UPGRADE};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
@@ -589,7 +589,16 @@ impl CampaignState {
                 equipment.name
             ));
         }
-        let cost = equipment_cost(&equipment.slot);
+        let base_cost = equipment_cost(&equipment.slot);
+        let cost = if self
+            .colony
+            .has_active_upgrade(BuildingKind::Workshop, PRECISION_BENCH_UPGRADE)
+            && matches!(equipment.slot.as_str(), "primary" | "armour")
+        {
+            base_cost.saturating_sub(5)
+        } else {
+            base_cost
+        };
         let character = self
             .roster
             .iter_mut()

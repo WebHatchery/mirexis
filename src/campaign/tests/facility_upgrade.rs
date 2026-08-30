@@ -1,5 +1,8 @@
 use super::*;
-use crate::colony::{BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE};
+use crate::colony::{
+    BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, DRONE_BAY_UPGRADE,
+    PRECISION_BENCH_UPGRADE,
+};
 
 #[test]
 fn community_kitchen_makes_the_commons_meal_more_affordable() {
@@ -89,4 +92,66 @@ fn hot_core_adds_attention_to_the_most_visible_faction_after_an_operation() {
             + i32::from(faction.id == mission_faction) * 8;
         assert_eq!(faction.attention, expected.min(100));
     }
+}
+
+#[test]
+fn precision_bench_reduces_weapon_fabrication_cost() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let workshop_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Workshop)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&workshop_id, PRECISION_BENCH_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    campaign.colony.resources.materials = 30;
+    let cost = campaign
+        .craft_equipment("kira_voss", "service_pistol", &data)
+        .unwrap();
+    assert_eq!(cost, 25);
+    assert_eq!(campaign.colony.resources.materials, 5);
+}
+
+#[test]
+fn drone_bay_reduces_repairs_while_the_workshop_is_online() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let workshop_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Workshop)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&workshop_id, DRONE_BAY_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+    campaign
+        .colony
+        .buildings
+        .iter_mut()
+        .find(|building| building.kind == BuildingKind::Hydroponics)
+        .unwrap()
+        .damaged = true;
+    campaign.colony.resources.materials = 20;
+
+    let (_, cost) = campaign.colony.repair_building("hydroponics").unwrap();
+    assert_eq!(cost, 15);
+    assert!(campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::Hydroponics)
+        .is_some_and(|building| !building.damaged));
 }

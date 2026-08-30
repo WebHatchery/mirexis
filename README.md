@@ -30,6 +30,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Hot Core raises output while increasing the most visible faction's attention per operation.
 - Level-2 Hydroponics branches: Community Kitchen improves food and Commons efficiency, or
   Culture Beds grows extra biomass for adaptation.
+- Level-2 Workshop branches: Precision Bench lowers weapon and armour fabrication costs, or
+  Drone Bay makes facility repairs cheaper.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/

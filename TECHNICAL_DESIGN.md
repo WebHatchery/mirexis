@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.77.0
+Save/content version: 1.78.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -427,12 +427,14 @@ later facilities display `NO POWER` and stop satisfying their gameplay gates.
 The Gene Lab adds three demand, intentionally requiring recovered power or another
 Power Plant before its evolution chamber operates.
 
-Facility upgrades are queued strategic projects rather than instant toggles. The Power Plant
-and Hydroponics present their mutually exclusive level-2 branches in a touch-visible colony
-operations panel; completion raises the building level and records the stable branch ID.
+Facility upgrades are queued strategic projects rather than instant toggles. The Power Plant,
+Hydroponics, and Workshop present their mutually exclusive level-2 branches in a touch-visible
+colony operations panel; completion raises the building level and records the stable branch ID.
 Hot Core's attention cost is applied while the plant is operational, during mission-outcome
 resolution after the upgrade has completed and before normal mission faction pressure is resolved.
 Community Kitchen and Culture Beds apply only while Hydroponics is operational and powered.
+Precision Bench discounts primary and armour equipment while the Workshop is operational and
+powered. Drone Bay discounts facility repairs while its Workshop remains online.
 
 Deployment commits one food per ready squad member plus positive mutation upkeep.
 Powered Hydroponics returns three food after an operation, sustaining the standard
@@ -722,6 +724,7 @@ Migration coverage:
 | 1.75.0 | Watchtower construction, power-dependent directional cover in colony defence, and Watchtower migration compatibility |
 | 1.76.0 | Queued Power Plant level-two branches, derived supply changes, Hot Core attention pressure, and facility-upgrade migration defaults |
 | 1.77.0 | Queued Hydroponics level-two branches, Community Kitchen meal efficiency, Culture Beds biomass yield, and upgrade-panel expansion |
+| 1.78.0 | Queued Workshop level-two branches, Precision Bench fabrication savings, Drone Bay repair savings, and three-facility upgrade layout |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -813,7 +816,7 @@ these explicit boundaries when continuing:
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact-gated Waystation, a Commons, and a Relay Mast;
-  the Power Plant and Hydroponics now have queued level-two branch choices, while
+  the Power Plant, Hydroponics, and Workshop now have queued level-two branch choices, while
   population, free placement for every building, and the remaining facility branches
   remain future work.
 - Pair relationships now grow from shared victories and character events, and trusted

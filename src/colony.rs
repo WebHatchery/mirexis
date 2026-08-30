@@ -10,6 +10,8 @@ pub const REDUNDANT_GRID_UPGRADE: &str = "redundant_grid";
 pub const HOT_CORE_UPGRADE: &str = "hot_core";
 pub const COMMUNITY_KITCHEN_UPGRADE: &str = "community_kitchen";
 pub const CULTURE_BEDS_UPGRADE: &str = "culture_beds";
+pub const PRECISION_BENCH_UPGRADE: &str = "precision_bench";
+pub const DRONE_BAY_UPGRADE: &str = "drone_bay";
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -101,6 +103,18 @@ impl BuildingKind {
                     id: CULTURE_BEDS_UPGRADE,
                     name: "Culture Beds",
                     description: "The beds cultivate two extra biomass after each operation.",
+                },
+            ],
+            Self::Workshop => &[
+                FacilityUpgradeOption {
+                    id: PRECISION_BENCH_UPGRADE,
+                    name: "Precision Bench",
+                    description: "Weapon and armour fabrication costs five fewer materials.",
+                },
+                FacilityUpgradeOption {
+                    id: DRONE_BAY_UPGRADE,
+                    name: "Drone Bay",
+                    description: "Automated repair crews reduce facility repair costs by ten.",
                 },
             ],
             _ => &[],
@@ -531,21 +545,33 @@ impl ColonyState {
     }
 
     pub fn repair_building(&mut self, building_id: &str) -> Result<(String, i32), String> {
+        let (kind, damaged) = self
+            .buildings
+            .iter()
+            .find(|building| building.id == building_id)
+            .map(|building| (building.kind, building.damaged))
+            .ok_or_else(|| format!("Unknown colony building: {}", building_id))?;
+        if !damaged {
+            return Err(format!("{} does not need repair", kind.name()));
+        }
+        let repair_discount = if self.has_active_upgrade(BuildingKind::Workshop, DRONE_BAY_UPGRADE)
+        {
+            10
+        } else {
+            0
+        };
+        let cost = (kind.repair_cost() - repair_discount).max(5);
+        if self.resources.materials < cost {
+            return Err(format!("Repair requires {} materials", cost));
+        }
         let building = self
             .buildings
             .iter_mut()
             .find(|building| building.id == building_id)
-            .ok_or_else(|| format!("Unknown colony building: {}", building_id))?;
-        if !building.damaged {
-            return Err(format!("{} does not need repair", building.kind.name()));
-        }
-        let cost = building.kind.repair_cost();
-        if self.resources.materials < cost {
-            return Err(format!("Repair requires {} materials", cost));
-        }
+            .expect("building was validated before repair mutation");
         self.resources.materials -= cost;
         building.damaged = false;
-        Ok((building.kind.name().to_owned(), cost))
+        Ok((kind.name().to_owned(), cost))
     }
 
     pub fn defense_map(&self) -> ColonyDefenseMap {
