@@ -16,15 +16,7 @@ pub(super) fn draw_hover_card(
     let Some(position) = hovered else { return };
     let building = campaign.colony.building_at(position);
     let project = campaign.colony.project_at(position);
-    let site_unavailable = building.is_none()
-        && project.is_none()
-        && !campaign.can_construct_building(campaign.colony.planned_construction, position);
-    let action_unavailable = building.is_some_and(|building| {
-        (building.damaged && !campaign.colony.can_repair_building(&building.id))
-            || (building.kind == BuildingKind::Waystation
-                && campaign.available_outsider(data).is_some()
-                && !campaign.can_recruit_outsider(data))
-    });
+    let action_available = plot_action(campaign, data, position).is_some();
     let text = if let Some(building) = building {
         if building.damaged {
             let cost = campaign
@@ -171,7 +163,7 @@ pub(super) fn draw_hover_card(
             Err(error) => format!("CLEARANCE REQUIRED // {}", error.to_uppercase()),
         }
     };
-    let text = if site_unavailable || action_unavailable {
+    let text = if !action_available {
         text
     } else if pending == Some(position) {
         format!("TAP AGAIN TO CONFIRM // {text}")
@@ -219,6 +211,70 @@ fn identity_building_copy(
     }
 }
 
+pub(super) fn plot_action(
+    campaign: &CampaignState,
+    data: &GameData,
+    position: [i32; 2],
+) -> Option<UiAction> {
+    if let Some(building) = campaign.colony.building_at(position) {
+        return building_action(campaign, data, building);
+    }
+    if campaign.colony.project_at(position).is_none()
+        && campaign.can_construct_building(campaign.colony.planned_construction, position)
+    {
+        Some(UiAction::ConstructBuilding(
+            campaign.colony.planned_construction,
+            position,
+        ))
+    } else {
+        None
+    }
+}
+
+fn building_action(
+    campaign: &CampaignState,
+    data: &GameData,
+    building: &crate::colony::BuildingState,
+) -> Option<UiAction> {
+    if building.damaged {
+        return campaign
+            .colony
+            .can_repair_building(&building.id)
+            .then(|| UiAction::RepairBuilding(building.id.clone()));
+    }
+    if !campaign.colony.building_is_powered(&building.id) {
+        return None;
+    }
+    match building.kind {
+        BuildingKind::GeneLab => Some(UiAction::OpenGeneLab),
+        BuildingKind::Waystation if campaign.can_recruit_outsider(data) => {
+            Some(UiAction::RecruitOutsider)
+        }
+        BuildingKind::Commons if campaign.commons_meal_available() => {
+            Some(UiAction::HostCommonsMeal)
+        }
+        BuildingKind::RelayMast if campaign.relay_scan_available() => Some(UiAction::RunRelayScan),
+        BuildingKind::SalvageYard if campaign.salvage_available() => Some(UiAction::OpenSalvage),
+        kind if kind.is_identity()
+            && campaign
+                .identity_preparation_definition()
+                .is_some_and(|definition| definition.building == kind)
+            && campaign.identity_preparation_available() =>
+        {
+            Some(UiAction::PrepareIdentityBuilding)
+        }
+        kind if kind.is_identity()
+            && campaign
+                .identity_stewardship_definition()
+                .is_some_and(|definition| definition.building == kind)
+            && campaign.identity_stewardship_available() =>
+        {
+            Some(UiAction::RunIdentityStewardship)
+        }
+        _ => None,
+    }
+}
+
 pub(super) fn handle_plot_click(
     campaign: &CampaignState,
     data: &GameData,
@@ -231,57 +287,12 @@ pub(super) fn handle_plot_click(
         return;
     }
     let Some(position) = hovered else { return };
-    if campaign.colony.building_at(position).is_none()
-        && campaign.colony.project_at(position).is_none()
-        && campaign
-            .colony
-            .validate_construction_site(position)
-            .is_err()
-    {
+    let Some(action) = plot_action(campaign, data, position) else {
         camera.clear_pending_colony_plot();
         return;
-    }
+    };
     if !camera.confirm_colony_plot(position) {
         return;
     }
-    if let Some(building) = campaign.colony.building_at(position) {
-        if building.damaged && campaign.colony.can_repair_building(&building.id) {
-            actions.push(UiAction::RepairBuilding(building.id.clone()));
-        } else if building.kind == BuildingKind::GeneLab
-            && campaign.colony.building_is_powered(&building.id)
-        {
-            actions.push(UiAction::OpenGeneLab);
-        } else if building.kind == BuildingKind::Waystation
-            && campaign.colony.building_is_powered(&building.id)
-            && campaign.can_recruit_outsider(data)
-        {
-            actions.push(UiAction::RecruitOutsider);
-        } else if building.kind == BuildingKind::Commons
-            && campaign.colony.building_is_powered(&building.id)
-            && campaign.commons_meal_available()
-        {
-            actions.push(UiAction::HostCommonsMeal);
-        } else if building.kind == BuildingKind::RelayMast
-            && campaign.colony.building_is_powered(&building.id)
-            && campaign.relay_scan_available()
-        {
-            actions.push(UiAction::RunRelayScan);
-        } else if building.kind == BuildingKind::SalvageYard
-            && campaign.colony.building_is_powered(&building.id)
-            && campaign.salvage_available()
-        {
-            actions.push(UiAction::OpenSalvage);
-        } else if building.kind.is_identity() && campaign.identity_preparation_available() {
-            actions.push(UiAction::PrepareIdentityBuilding);
-        } else if building.kind.is_identity() && campaign.identity_stewardship_available() {
-            actions.push(UiAction::RunIdentityStewardship);
-        }
-    } else if campaign.colony.project_at(position).is_none()
-        && campaign.can_construct_building(campaign.colony.planned_construction, position)
-    {
-        actions.push(UiAction::ConstructBuilding(
-            campaign.colony.planned_construction,
-            position,
-        ));
-    }
+    actions.push(action);
 }

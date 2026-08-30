@@ -291,3 +291,57 @@ fn collapsed_operations_gives_the_settlement_the_full_screen_width() {
     assert_eq!(open.right(), 852.0);
     assert!(viewport_bounds(collapsed).w > viewport_bounds(open).w + 400.0);
 }
+
+#[test]
+fn colony_map_only_arms_plots_with_a_real_action() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+
+    assert_eq!(
+        interaction::plot_action(&campaign, &data, SETTLEMENT_CENTER),
+        None
+    );
+
+    let position = (0..COLONY_HEIGHT)
+        .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
+        .find(|position| campaign.can_construct_building(BuildingKind::Barricade, *position))
+        .expect("new colony has an open construction plot");
+    assert!(matches!(
+        interaction::plot_action(&campaign, &data, position),
+        Some(UiAction::ConstructBuilding(BuildingKind::Barricade, actual)) if actual == position
+    ));
+}
+
+#[test]
+fn colony_map_keeps_completed_projects_and_offline_facilities_non_actionable() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    let position = (0..COLONY_HEIGHT)
+        .flat_map(|y| (0..COLONY_WIDTH).map(move |x| [x, y]))
+        .find(|position| campaign.can_construct_building(BuildingKind::Barricade, *position))
+        .expect("new colony has an open construction plot");
+    campaign
+        .colony
+        .place_construction(BuildingKind::Barricade, position)
+        .unwrap();
+    assert_eq!(interaction::plot_action(&campaign, &data, position), None);
+
+    campaign.strategy.contact_complete = true;
+    campaign.colony.resources.power = 10;
+    campaign.colony.ensure_gene_lab();
+    let gene_lab = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::GeneLab)
+        .expect("contact unlocks the Gene Lab facility");
+    assert_eq!(
+        interaction::plot_action(&campaign, &data, gene_lab.position),
+        Some(UiAction::OpenGeneLab)
+    );
+    campaign.colony.resources.power = 0;
+    assert_eq!(
+        interaction::plot_action(&campaign, &data, gene_lab.position),
+        None
+    );
+}

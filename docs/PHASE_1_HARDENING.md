@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 429 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 431 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, plus effective repair-cost affordability coverage.
 - External asset-registry and Rust source-size gates pass.
