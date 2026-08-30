@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.127.0
+Save/content version: 1.128.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -902,6 +902,7 @@ Migration coverage:
 | 1.125.0 | First-hour debrief goals move into a clear top strip so operation results remain readable; no new save fields |
 | 1.126.0 | Debrief squad tableau distinguishes the fielded squad from reserves using the live tactical deployment; no new save fields |
 | 1.127.0 | Debrief tableau prioritizes fielded recruits before reserve fill slots so every deployed colonist remains visible; no new save fields |
+| 1.128.0 | Recruited colonists remain inside the visible briefing, roster, and Gene Lab lists; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -942,7 +943,8 @@ units use labels as well as faction color, and colony buildings use text labels.
 `briefing`, `threat_briefing`, `loadout_briefing`, `pressure`, `gameplay`, `first_hour_tactical`, `first_hour_ability`, `second_operation_tactical`, `first_hour_return`, `first_hour_promise`, `first_hour_operations`, `brood_ability`, `directorate_ability`, `ascendant_ability`, `hazard`, `intent`, `action_preview`, `movement_route`, `cover_edges`, `invalid_command`, `valid_shot`, `threat_range`, `danger_reach`, `help`, `battle_log`, `combat_feedback`, `phase_replay`, `end_phase_guard`,
 `extraction`, `variant`, `sporefield`, `vault`, `three_knives`, `reinforcement_warning`, `line_formation`, `black_channel`, `living_chorus`,
 `open_circuit`, `trace_active`, `readiness_markers`, `vitality_markers`,
-`equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, and `trauma_debrief` by default. Capture setup seeds
+`equipment`, `weapon_profile`, `overwatch`, `class_target`, `breach`, `debrief`, `trauma_debrief`,
+`recruited_briefing`, `recruited_roster`, and `recruited_gene_lab` by default. Capture setup seeds
 each scene deterministically, including objective, doctrine, legacy, pressure-modifier,
 new-operation battlefield, and targeting states.
 Committed captures under `docs/verification/` are the visual regression references.
@@ -953,8 +955,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (391 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic 92-scene capture with visual inspection
+- `cargo test` (394 Mirexis unit tests plus asset-registry and source-size gates)
+- deterministic 95-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 

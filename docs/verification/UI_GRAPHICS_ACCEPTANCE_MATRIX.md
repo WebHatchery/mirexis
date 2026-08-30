@@ -103,12 +103,15 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | construction | Colony | Construction state lacks authored staging | `ui_construction.png` | PASS |
 | research | Research | Weak technology art and hierarchy | `ui_research.png` | PASS |
 | roster | Roster | Procedural portrait and dense controls | `ui_roster.png` | PASS |
+| recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
+| recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |
 | advanced_roster | Roster | Class change lacks silhouette transformation | `ui_advanced_roster.png` | PASS |
 | relationships | Relationships | Bonds are text-led | `ui_relationships.png` | PASS |
 | trauma | Roster | Injury is text-led | `ui_trauma.png` | PASS |
 | bonded_briefing | Briefing/relationships | No portrait-led relationship cue | `ui_bonded_briefing.png` | PASS |
 | legacy | Roster | Legacy state lacks visual identity | `ui_legacy.png` | PASS |
 | briefing | Briefing | Text-heavy with little mission art | `ui_briefing.png` | PASS |
+| recruited_briefing | Briefing | Recruited colonists overlap the action controls | `ui_recruited_briefing.png` | PASS |
 | threat_briefing | Briefing | Threat hierarchy and faction art weak | `ui_threat_briefing.png` | PASS |
 | loadout_briefing | Briefing/loadout | Equipment is text-only | `ui_loadout_briefing.png` | PASS |
 | pressure | Colony | Pressure state primarily textual | `ui_pressure.png` | PASS |

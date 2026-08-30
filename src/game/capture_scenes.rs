@@ -136,6 +136,8 @@ impl Game {
             "research" => self.capture_research(),
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
+            "recruited_roster" => self.capture_recruited_roster_screen(),
+            "recruited_gene_lab" => self.capture_recruited_gene_lab(),
             "advanced_roster" => self.capture_advanced_roster(),
             "relationships" => self.capture_relationships(AppState::Roster),
             "trauma" => self.capture_trauma(),
@@ -144,6 +146,7 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstBriefing;
                 self.state = AppState::MissionBriefing;
             }
+            "recruited_briefing" => self.capture_recruited_briefing(),
             "threat_briefing" => {
                 self.capture_template_operation(
                     "sporefield_extraction",

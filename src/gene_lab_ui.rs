@@ -11,6 +11,14 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
+fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
+    if roster_len <= 5 {
+        return (88.0, 72.0);
+    }
+    let row_step = (414.0 / roster_len as f32).min(88.0);
+    (row_step, (row_step - 4.0).max(50.0))
+}
+
 pub(crate) fn draw_gene_lab(
     campaign: &CampaignState,
     data: &GameData,
@@ -88,6 +96,8 @@ fn draw_character_list(
             .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
         TextStyle::new(17.0, dark::TEXT),
     );
+    let (row_step, row_height) = character_list_row_layout(campaign.roster.len());
+    let compact = campaign.roster.len() > 5;
     for (index, character) in campaign.roster.iter().enumerate() {
         let mutation = data
             .mutations
@@ -104,7 +114,7 @@ fn draw_character_list(
         } else {
             "EVOLVED"
         };
-        let row = Rect::new(36.0, 154.0 + index as f32 * 88.0, 264.0, 72.0);
+        let row = Rect::new(36.0, 154.0 + index as f32 * row_step, 264.0, row_height);
         if button_with_state(
             row,
             "",
@@ -117,7 +127,11 @@ fn draw_character_list(
         crate::portrait_ui::draw_character_portrait(
             assets,
             visuals,
-            Rect::new(42.0, 160.0 + index as f32 * 88.0, 54.0, 60.0),
+            if compact {
+                Rect::new(42.0, row.y + 3.0, 48.0, row_height - 6.0)
+            } else {
+                Rect::new(42.0, row.y + 6.0, 54.0, 60.0)
+            },
             &character.id,
             &character.name,
             if character.id == campaign.selected_character_id {
@@ -137,13 +151,13 @@ fn draw_character_list(
                 character.name.to_uppercase()
             ),
             row.x + 70.0,
-            row.y + 28.0,
+            row.y + if compact { 20.0 } else { 28.0 },
             TextStyle::new(14.0, dark::TEXT_BRIGHT).params(),
         );
         draw_ui_text_ex(
             &format!("{} // {}", mutation_name.to_uppercase(), status),
             row.x + 70.0,
-            row.y + 51.0,
+            row.y + if compact { 39.0 } else { 51.0 },
             TextStyle::new(11.0, dark::TEXT_DIM).params(),
         );
     }
@@ -334,3 +348,6 @@ fn draw_anatomy_scan(rect: Rect, mutation: &str) {
         TextStyle::new(11.0, scan).params(),
     );
 }
+
+#[cfg(test)]
+mod tests;

@@ -11,6 +11,14 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
+fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
+    if roster_len <= 5 {
+        return (60.0, 54.0);
+    }
+    let row_step = (374.0 / roster_len as f32).min(60.0);
+    (row_step, (row_step - 4.0).max(44.0))
+}
+
 pub(crate) fn draw_roster(
     campaign: &CampaignState,
     data: &GameData,
@@ -77,6 +85,7 @@ fn draw_character_list(
             .with_header(42.0, Color::new(0.06, 0.10, 0.11, 1.0)),
         TextStyle::new(17.0, dark::TEXT),
     );
+    let (row_step, row_height) = character_list_row_layout(campaign.roster.len());
     for (index, character) in campaign.roster.iter().enumerate() {
         let selected = character.id == campaign.selected_character_id;
         let deployment = if character.deployment_selected {
@@ -89,7 +98,7 @@ fn draw_character_list(
         } else {
             " · LEGACY"
         };
-        let row = Rect::new(36.0, 150.0 + index as f32 * 60.0, 244.0, 54.0);
+        let row = Rect::new(36.0, 150.0 + index as f32 * row_step, 244.0, row_height);
         if button_with_state(row, "", true, selected, mouse) {
             actions.push(UiAction::SelectColonist(character.id.clone()));
         }
@@ -560,3 +569,6 @@ fn draw_selected_character(
         actions.push(UiAction::ReturnToColony);
     }
 }
+
+#[cfg(test)]
+mod tests;

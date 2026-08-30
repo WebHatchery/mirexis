@@ -10,6 +10,14 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
+fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
+    if roster_len <= 5 {
+        return (32.0, 29.0);
+    }
+    let row_step = 191.0 / roster_len as f32;
+    (row_step, (row_step - 2.0).max(20.0))
+}
+
 pub(crate) fn draw(
     campaign: &CampaignState,
     data: &GameData,
@@ -30,6 +38,7 @@ pub(crate) fn draw(
         356.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
+    let (row_step, row_height) = deployment_row_layout(campaign.roster.len());
     for (index, character) in campaign.roster.iter().enumerate() {
         let class_name = data
             .classes
@@ -50,7 +59,7 @@ pub(crate) fn draw(
             "{} // {} · LV{} · XP{}{}",
             state, class_name, character.level, character.experience, bond
         );
-        let row = Rect::new(200.0, 366.0 + index as f32 * 32.0, 650.0, 29.0);
+        let row = Rect::new(200.0, 366.0 + index as f32 * row_step, 650.0, row_height);
         if button_with_state(
             row,
             &label,
@@ -108,3 +117,6 @@ pub(crate) fn draw(
         actions.push(UiAction::ReturnToColony);
     }
 }
+
+#[cfg(test)]
+mod tests;
