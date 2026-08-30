@@ -1,9 +1,19 @@
 //! Build a tactical unit from persistent character state and authored data.
 
-use super::{derived_mutation_traits, CharacterRecord};
+use super::{derived_mutation_traits_with_options, CharacterRecord};
 use crate::data::{GameData, UnitDef};
 
+#[allow(dead_code)]
 pub(crate) fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
+    derive_unit_with_evolution_options(base, character, data, false)
+}
+
+pub(crate) fn derive_unit_with_evolution_options(
+    base: &UnitDef,
+    character: &CharacterRecord,
+    data: &GameData,
+    suppress_evolution_complications: bool,
+) -> UnitDef {
     let mut unit = base.clone();
     unit.equipment_ids = character.equipment_ids.clone();
     unit.learned_skills = character.learned_skills.clone();
@@ -27,7 +37,8 @@ pub(crate) fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &Ga
         unit.accuracy += definition.origin_accuracy_bonus;
         unit.move_range = add_signed(unit.move_range, definition.origin_move_bonus);
     }
-    let traits = derived_mutation_traits(character, data);
+    let traits =
+        derived_mutation_traits_with_options(character, data, suppress_evolution_complications);
     unit.armour += traits.get("armour").copied().unwrap_or(0);
     unit.move_range = add_signed(
         unit.move_range,

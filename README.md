@@ -32,6 +32,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Culture Beds grows extra biomass for adaptation.
 - Level-2 Workshop branches: Precision Bench lowers weapon and armour fabrication costs, or
   Drone Bay makes facility repairs cheaper.
+- Level-2 Gene Lab branches: Stabilisation Wing suppresses evolution complications while
+  online, or Evolution Chamber reduces mutation evolution biomass costs.
 - Phase Five path choices establish one physical identity building: Redoubt Arsenal, Choir
   Garden, or Threshold Spire, each changing colony defence and preparation.
 - Completed campaigns record a derived colony legacy dossier covering the chosen institution,

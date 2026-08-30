@@ -314,8 +314,7 @@ power, and mutation evolution. Future work should give those places upgrades, in
 and events before adding many new structures.
 
 Each core facility may reach level 2 and choose one visible branch. The Power Plant,
-Hydroponics, and Workshop branch pairs are implemented as the first three facilities in this
-system.
+Hydroponics, Workshop, and Gene Lab branch pairs are now implemented in this system.
 Level 3 should be reserved for the late-game colony identity, not a generic numeric improvement.
 
 | Facility | Branch A | Branch B | Defence consequence |
@@ -326,7 +325,7 @@ Level 3 should be reserved for the late-game colony identity, not a generic nume
 | Workshop | **Precision Bench:** weapon and armour modification *(implemented)* | **Drone Bay:** reusable deployables and repairs *(implemented)* | Adds a friendly emplacement but stores volatile components. |
 | Hydroponics | **Community Kitchen:** food efficiency and relationship events *(implemented)* | **Culture Beds:** biomass cultivation and biotech ingredients *(implemented)* | Creates soft cover and a fragile food objective. |
 | Power Plant | **Redundant Grid:** damage tolerance and reliable supply *(implemented)* | **Hot Core:** higher supply with an attention cost *(implemented)* | Changes which systems fail first during an assault. |
-| Gene Lab | **Stabilisation Wing:** manage complications and reversals | **Evolution Chamber:** stronger or earlier mutation evolution | Provides bio-cover but risks a hostile growth if breached. |
+| Gene Lab | **Stabilisation Wing:** suppress chosen evolution complications while online *(implemented)* | **Evolution Chamber:** reduce mutation evolution biomass costs *(implemented)* | Provides bio-cover but risks a hostile growth if breached. |
 
 ### 8.2 New general buildings
 
@@ -472,8 +471,8 @@ presence provokes at least two disagreements that do not reduce to approval poin
 
 Goal: make building and upgrade choices visible in city life and defence.
 
-- Add level-2 branch upgrades to three existing facilities first *(implemented for Power Plant,
-  Hydroponics, and Workshop)*.
+- Add level-2 branch upgrades to four existing facilities *(implemented for Power Plant,
+  Hydroponics, Workshop, and Gene Lab)*.
 - Implemented: build a Relay Mast and use its once-per-operation route scan.
 - Implemented: build a powered Watchtower whose placement adds stronger directional cover
   to colony defence and loses that benefit when the grid fails.
@@ -483,6 +482,9 @@ Goal: make building and upgrade choices visible in city life and defence.
   and Commons efficiency or Culture Beds growing biomass while the facility is online.
 - Implemented: queue a level-2 Workshop branch, with Precision Bench reducing weapon and armour
   fabrication costs or Drone Bay reducing facility repair costs while the Workshop is online.
+- Implemented: queue a level-2 Gene Lab branch, with Stabilisation Wing suppressing chosen
+  evolution complications or Evolution Chamber reducing mutation evolution biomass costs while
+  the Gene Lab is online.
 - Implemented: establish one physical identity building for the chosen Mirexis path, with
   path-specific map cover, objective priority, power, and biomass consequences.
 - Implemented: move the associated colony voice to each identity building, add a persistent

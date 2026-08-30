@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.101.0
+Save/content version: 1.102.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -109,6 +109,7 @@ Important transition payloads:
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
 | `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
+| `campaign/evolution.rs` | Mutation evolution costs, choices, completion gates, and Gene Lab effects | Rendering or save migration |
 | `campaign/commons.rs` | Once-per-operation Commons meals and relationship progression | Colony rendering or tactical mutation |
 | `campaign/relay.rs` | Once-per-operation route scans, mission refresh, and attention exposure | Colony rendering or tactical mutation |
 | `campaign/outsider.rs` | Waystation recruitment gates and route-specific outsider conversations | Rendering or raw input |
@@ -459,13 +460,17 @@ The Gene Lab adds three demand, intentionally requiring recovered power or anoth
 Power Plant before its evolution chamber operates.
 
 Facility upgrades are queued strategic projects rather than instant toggles. The Power Plant,
-Hydroponics, and Workshop present their mutually exclusive level-2 branches in a touch-visible
-colony operations panel; completion raises the building level and records the stable branch ID.
+Hydroponics, Workshop, and Gene Lab present their mutually exclusive level-2 branches in a
+touch-visible colony operations panel; completion raises the building level and records the
+stable branch ID.
 Hot Core's attention cost is applied while the plant is operational, during mission-outcome
 resolution after the upgrade has completed and before normal mission faction pressure is resolved.
 Community Kitchen and Culture Beds apply only while Hydroponics is operational and powered.
 Precision Bench discounts primary and armour equipment while the Workshop is operational and
 powered. Drone Bay discounts facility repairs while its Workshop remains online.
+Stabilisation Wing suppresses mutation-evolution complications while the Gene Lab is operational
+and powered. Evolution Chamber reduces each mutation-evolution biomass cost by four, with a
+minimum cost of one, while the Gene Lab is operational and powered.
 
 Choosing a Phase Five Mirexis path establishes exactly one corresponding identity building:
 Redoubt Arsenal, Choir Garden, or Threshold Spire. Redoubt Arsenal contributes physical cover
@@ -836,6 +841,7 @@ Migration coverage:
 | 1.99.0 | Engine-facing finale objective contracts for the Redoubt, Commonwealth, and Threshold |
 | 1.100.0 | Persistent identity-building damage, repair, power-failure, and restoration civic arcs |
 | 1.101.0 | Pre-finale identity-building preparation actions, faction-pressure relief, and contact reflections |
+| 1.102.0 | Gene Lab level-two Stabilisation Wing and Evolution Chamber branches with operational evolution effects |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -927,7 +933,7 @@ these explicit boundaries when continuing:
   elevation, spawn recipes, and battlefield families remain future work.
 - The colony has fixed core facilities and placeable Barricades, Power Plants, one
   Adaptation-gated Gene Lab, one Contact/Adaptation-gated Waystation, a Commons, and a Relay Mast;
-  the Power Plant, Hydroponics, and Workshop now have queued level-two branch choices, and
+  the Power Plant, Hydroponics, Workshop, and Gene Lab now have queued level-two branch choices, and
   each Phase Five path establishes its corresponding physical identity building, relocates its
   associated colony voice, and exposes a persistent field note and ambient identity signal, while
   population, free placement for every building, and the remaining facility branches remain future

@@ -1,6 +1,7 @@
 //! Gene Lab mutation research and evolution presentation.
 
 use crate::campaign::CampaignState;
+use crate::colony::{BuildingKind, STABILISATION_WING_UPGRADE};
 use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use crate::ui_widgets::{button, button_with_state};
@@ -146,8 +147,16 @@ fn draw_character_list(
             TextStyle::new(11.0, dark::TEXT_DIM).params(),
         );
     }
+    let evolution_note = if campaign
+        .colony
+        .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE)
+    {
+        "Evolution is irreversible. Stabilisation Wing suppresses this expression's complications while the lab is online."
+    } else {
+        "Evolution is irreversible. Every gift carries a complication into later deployments."
+    };
     draw_text_block(
-        "Evolution is irreversible. Every gift carries a complication into later deployments.",
+        evolution_note,
         40.0,
         574.0,
         252.0,
@@ -259,6 +268,7 @@ fn draw_evolution_panel(
         );
         for (index, evolution) in mutation.evolutions.iter().enumerate() {
             let y = 324.0 + index as f32 * 118.0;
+            let biomass_cost = campaign.mutation_evolution_cost(evolution);
             draw_surface(
                 Rect::new(366.0, y, 840.0, 100.0),
                 &SurfaceStyle::new(Color::new(0.06, 0.11, 0.11, 1.0))
@@ -282,8 +292,8 @@ fn draw_evolution_panel(
             );
             if button(
                 Rect::new(930.0, y + 30.0, 250.0, 48.0),
-                &format!("EVOLVE // {} BIOMASS", evolution.biomass_cost),
-                campaign.colony.resources.biomass >= evolution.biomass_cost,
+                &format!("EVOLVE // {} BIOMASS", biomass_cost),
+                campaign.colony.resources.biomass >= biomass_cost,
                 mouse,
             ) {
                 actions.push(UiAction::ChooseMutationEvolution(

@@ -3,16 +3,22 @@
 mod commons;
 mod deployment;
 mod derivation;
+mod evolution;
 mod identity;
 mod outsider;
 mod relay;
 mod story;
 
+#[allow(unused_imports)]
 pub(super) use derivation::derive_unit;
+pub(super) use derivation::derive_unit_with_evolution_options;
 pub(crate) use outsider::OutsiderChoice;
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 
-use crate::colony::{BuildingKind, ColonyState, HOT_CORE_UPGRADE, PRECISION_BENCH_UPGRADE};
+use crate::colony::{
+    BuildingKind, ColonyState, HOT_CORE_UPGRADE, PRECISION_BENCH_UPGRADE,
+    STABILISATION_WING_UPGRADE,
+};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
@@ -227,7 +233,17 @@ impl CampaignState {
                 }
                 let character = self.roster.iter().find(|record| record.id == base.id)?;
                 (character.availability == Availability::Ready && character.deployment_selected)
-                    .then(|| derive_unit(base, character, data))
+                    .then(|| {
+                        derive_unit_with_evolution_options(
+                            base,
+                            character,
+                            data,
+                            self.colony.has_active_upgrade(
+                                BuildingKind::GeneLab,
+                                STABILISATION_WING_UPGRADE,
+                            ),
+                        )
+                    })
             })
             .take(SQUAD_LIMIT)
             .collect::<Vec<_>>();
@@ -268,7 +284,13 @@ impl CampaignState {
             .iter()
             .chain(data.recruitable_roster.iter())
             .find(|unit| unit.team == Team::Colony && unit.id == character_id)?;
-        Some(derive_unit(base, character, data))
+        Some(derive_unit_with_evolution_options(
+            base,
+            character,
+            data,
+            self.colony
+                .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE),
+        ))
     }
 
     pub fn selected_squad_count(&self) -> usize {
@@ -290,11 +312,16 @@ impl CampaignState {
             })
             .take(SQUAD_LIMIT)
             .map(|character| {
-                1 + derived_mutation_traits(character, data)
-                    .get("food_upkeep")
-                    .copied()
-                    .unwrap_or(0)
-                    .max(0)
+                1 + derived_mutation_traits_with_options(
+                    character,
+                    data,
+                    self.colony
+                        .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE),
+                )
+                .get("food_upkeep")
+                .copied()
+                .unwrap_or(0)
+                .max(0)
             })
             .sum::<i32>();
         if base == 0 {
@@ -423,7 +450,12 @@ impl CampaignState {
                 .iter_mut()
                 .find(|record| record.id == consequence.id)
             {
-                let traits = derived_mutation_traits(character, data);
+                let traits = derived_mutation_traits_with_options(
+                    character,
+                    data,
+                    self.colony
+                        .has_active_upgrade(BuildingKind::GeneLab, STABILISATION_WING_UPGRADE),
+                );
                 let delayed_healing = traits.get("medical_healing").copied().unwrap_or(0) < 0;
                 let triage_bonus = u8::from(self.strategy.research_completed("xeno_triage"));
                 let recovery_operations =
@@ -673,76 +705,6 @@ impl CampaignState {
                 && (!equipment.requires_contact_trace || self.strategy.contact_trace_completed))
     }
 
-    pub fn choose_mutation_evolution(
-        &mut self,
-        character_id: &str,
-        evolution_id: &str,
-        data: &GameData,
-    ) -> Result<String, String> {
-        if !self.strategy.contact_complete {
-            return Err("Mutation evolution unlocks in Adaptation".to_owned());
-        }
-        if !self.colony.has_facility(BuildingKind::GeneLab) {
-            return Err("A powered Gene Lab is required for mutation evolution".to_owned());
-        }
-        let character = self
-            .roster
-            .iter()
-            .find(|character| character.id == character_id)
-            .ok_or_else(|| format!("Unknown character: {}", character_id))?;
-        if !character.mutation_evolution_id.is_empty() {
-            return Err(format!("{}'s mutation has already evolved", character.name));
-        }
-        let mutation = data
-            .mutations
-            .iter()
-            .find(|mutation| mutation.id == character.mutation_id)
-            .ok_or_else(|| format!("Unknown mutation: {}", character.mutation_id))?;
-        let evolution = mutation
-            .evolutions
-            .iter()
-            .find(|evolution| evolution.id == evolution_id)
-            .ok_or_else(|| format!("Unknown mutation evolution: {}", evolution_id))?;
-        if self.colony.resources.biomass < evolution.biomass_cost {
-            return Err(format!(
-                "{} requires {} biomass",
-                evolution.name, evolution.biomass_cost
-            ));
-        }
-        self.colony.resources.biomass -= evolution.biomass_cost;
-        self.roster
-            .iter_mut()
-            .find(|character| character.id == character_id)
-            .expect("evolution character was validated")
-            .mutation_evolution_id = evolution.id.clone();
-        if !self.refresh_adaptation_completion(data) {
-            self.strategy.regenerate_missions(data);
-        }
-        Ok(evolution.name.clone())
-    }
-
-    pub fn adaptation_completion_progress(&self) -> (bool, usize, bool) {
-        (
-            self.strategy.adaptation_operation_completed,
-            self.roster
-                .iter()
-                .filter(|character| !character.mutation_evolution_id.is_empty())
-                .count(),
-            self.colony.has_facility(BuildingKind::GeneLab),
-        )
-    }
-
-    pub fn refresh_adaptation_completion(&mut self, data: &GameData) -> bool {
-        let (_, evolved, lab) = self.adaptation_completion_progress();
-        let changed = self
-            .strategy
-            .refresh_adaptation_completion(evolved >= 2, lab);
-        if changed {
-            self.strategy.regenerate_missions(data);
-        }
-        changed
-    }
-
     pub fn refresh_escalation_completion(&mut self, data: &GameData) -> bool {
         let changed = self.strategy.refresh_escalation_completion();
         if changed {
@@ -765,9 +727,18 @@ pub fn equipment_cost(slot: &str) -> u32 {
     }
 }
 
+#[allow(dead_code)]
 pub fn derived_mutation_traits(
     character: &CharacterRecord,
     data: &GameData,
+) -> BTreeMap<String, i32> {
+    derived_mutation_traits_with_options(character, data, false)
+}
+
+pub(crate) fn derived_mutation_traits_with_options(
+    character: &CharacterRecord,
+    data: &GameData,
+    suppress_evolution_complications: bool,
 ) -> BTreeMap<String, i32> {
     let mut traits = BTreeMap::new();
     if let Some(mutation) = data
@@ -781,7 +752,12 @@ pub fn derived_mutation_traits(
             .iter()
             .find(|evolution| evolution.id == character.mutation_evolution_id)
         {
-            for modifier in evolution.gift.iter().chain(&evolution.complication) {
+            for modifier in evolution.gift.iter().chain(
+                evolution
+                    .complication
+                    .iter()
+                    .filter(|_| !suppress_evolution_complications),
+            ) {
                 *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
             }
         }

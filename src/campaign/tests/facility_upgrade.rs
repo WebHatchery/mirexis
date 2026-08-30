@@ -1,8 +1,16 @@
 use super::*;
 use crate::colony::{
     BuildingKind, BuildingState, COMMUNITY_KITCHEN_UPGRADE, DRONE_BAY_UPGRADE,
-    PRECISION_BENCH_UPGRADE,
+    EVOLUTION_CHAMBER_UPGRADE, PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE,
 };
+
+fn campaign_with_online_gene_lab(data: &GameData) -> CampaignState {
+    let mut campaign = CampaignState::new(data);
+    campaign.strategy.contact_complete = true;
+    campaign.colony.ensure_gene_lab();
+    campaign.colony.resources.power += 2;
+    campaign
+}
 
 #[test]
 fn community_kitchen_makes_the_commons_meal_more_affordable() {
@@ -154,4 +162,71 @@ fn drone_bay_reduces_repairs_while_the_workshop_is_online() {
         .iter()
         .find(|building| building.kind == BuildingKind::Hydroponics)
         .is_some_and(|building| !building.damaged));
+}
+
+#[test]
+fn stabilisation_wing_suppresses_evolution_complications_while_online() {
+    let data = GameData::load().unwrap();
+    let mut campaign = campaign_with_online_gene_lab(&data);
+    let gene_lab_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::GeneLab)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&gene_lab_id, STABILISATION_WING_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+
+    let accuracy_before = campaign
+        .derived_character_unit("kira_voss", &data)
+        .unwrap()
+        .accuracy;
+    let food_before = campaign.deployment_food_cost(&data);
+    campaign
+        .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
+        .unwrap();
+
+    let kira = campaign.derived_character_unit("kira_voss", &data).unwrap();
+    assert_eq!(kira.accuracy, accuracy_before + 10);
+    assert_eq!(campaign.deployment_food_cost(&data), food_before);
+}
+
+#[test]
+fn evolution_chamber_reduces_mutation_evolution_biomass_cost() {
+    let data = GameData::load().unwrap();
+    let mut campaign = campaign_with_online_gene_lab(&data);
+    let gene_lab_id = campaign
+        .colony
+        .buildings
+        .iter()
+        .find(|building| building.kind == BuildingKind::GeneLab)
+        .unwrap()
+        .id
+        .clone();
+    campaign
+        .colony
+        .queue_facility_upgrade(&gene_lab_id, EVOLUTION_CHAMBER_UPGRADE)
+        .unwrap();
+    campaign.colony.advance_operation();
+    campaign.colony.resources.biomass = 4;
+
+    let evolution = data
+        .mutations
+        .iter()
+        .find(|mutation| mutation.id == "neural_bloom")
+        .unwrap()
+        .evolutions
+        .iter()
+        .find(|evolution| evolution.id == "expanded_cortex")
+        .unwrap();
+    assert_eq!(campaign.mutation_evolution_cost(evolution), 4);
+    campaign
+        .choose_mutation_evolution("kira_voss", "expanded_cortex", &data)
+        .unwrap();
+    assert_eq!(campaign.colony.resources.biomass, 0);
 }
