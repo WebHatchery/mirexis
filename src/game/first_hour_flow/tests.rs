@@ -47,3 +47,25 @@ fn first_hour_teaching_lane_is_attackable_after_the_cover_move() {
         15
     );
 }
+
+#[test]
+fn first_hour_ability_step_reselects_a_colonist_with_a_visible_action() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let mission = campaign
+        .strategy
+        .materialize_selected(&data, &campaign.colony);
+    let mut session = GameSession::new(&data.config, &mission, &data.roster);
+    let ilya_position = session.unit("ilya_reed").unwrap().position;
+    session.tactical.selected_unit = Some("ilya_reed".to_owned());
+    session.tactical.selected_tile = ilya_position;
+
+    prepare_first_hour_ability_selection(&mut session);
+
+    assert_eq!(session.tactical.selected_unit.as_deref(), Some("kira_voss"));
+    assert!(session.can_activate_selected_mutation());
+    assert_eq!(
+        session.tactical.selected_tile,
+        session.unit("kira_voss").unwrap().position
+    );
+}

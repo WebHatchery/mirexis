@@ -2,7 +2,7 @@
 
 use super::{AppState, Game};
 use crate::data::{MissionDef, Team};
-use crate::state::GameSession;
+use crate::state::{Command, GameSession};
 use crate::ui::{self, UiAction};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::ui::VirtualUi;
@@ -23,6 +23,21 @@ fn first_hour_objective_position() -> TilePos {
 }
 
 impl Game {
+    pub(super) fn handle_objective_interaction(&mut self) {
+        match self.session.interact_selected() {
+            Ok(_) => {
+                self.campaign.first_hour.touched_objective();
+                if self.campaign.first_hour.lesson == crate::first_hour::TacticalLesson::Ability {
+                    prepare_first_hour_ability_selection(&mut self.session);
+                }
+                self.notifications.success("Mission objective secured");
+            }
+            Err(_) => self
+                .notifications
+                .warning("A colonist must reach the objective"),
+        }
+    }
+
     pub(super) fn create_first_hour_session(
         &self,
         roster: &[crate::data::UnitDef],
@@ -223,6 +238,66 @@ pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mis
     {
         session.tactical.objective_tile = objective;
     }
+}
+
+pub(super) fn prepare_first_hour_ability_selection(session: &mut GameSession) {
+    let selected_has_ability = session
+        .tactical
+        .selected_unit
+        .as_deref()
+        .is_some_and(|unit_id| first_hour_ability_available(session, unit_id));
+    if selected_has_ability {
+        return;
+    }
+
+    let candidates = session
+        .tactical
+        .units
+        .iter()
+        .filter(|unit| unit.team == Team::Colony && !unit.incapacitated)
+        .map(|unit| (unit.id.clone(), unit.position))
+        .collect::<Vec<_>>();
+    if let Some((unit_id, position)) = candidates
+        .into_iter()
+        .find(|(unit_id, _)| first_hour_ability_available(session, unit_id))
+    {
+        session.tactical.selected_unit = Some(unit_id);
+        session.tactical.selected_tile = position;
+    }
+}
+
+fn first_hour_ability_available(session: &GameSession, unit_id: &str) -> bool {
+    let Some(unit) = session.unit(unit_id) else {
+        return false;
+    };
+    if unit.team != Team::Colony || unit.incapacitated {
+        return false;
+    }
+    if session
+        .validate(&Command::ActivateMutation {
+            unit_id: unit_id.to_owned(),
+        })
+        .is_ok()
+    {
+        return true;
+    }
+    let class_action_available = if crate::class_actions::requires_target(&unit.class_id) {
+        crate::class_actions::has_valid_target(session, unit_id)
+    } else {
+        session
+            .validate(&Command::ActivateClassAction {
+                unit_id: unit_id.to_owned(),
+                target_id: None,
+                target_tile: None,
+            })
+            .is_ok()
+    };
+    if class_action_available {
+        return true;
+    }
+    crate::equipment_actions::available_action(session, unit_id).is_some_and(|equipment_id| {
+        crate::equipment_actions::has_valid_target(session, unit_id, &equipment_id)
+    })
 }
 
 #[cfg(test)]

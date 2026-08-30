@@ -694,15 +694,7 @@ impl Game {
                     .notifications
                     .warning("Cover is outside the firing solution"),
             },
-            UiAction::InteractObjective => match self.session.interact_selected() {
-                Ok(_) => {
-                    self.campaign.first_hour.touched_objective();
-                    self.notifications.success("Mission objective secured");
-                }
-                Err(_) => self
-                    .notifications
-                    .warning("A colonist must reach the objective"),
-            },
+            UiAction::InteractObjective => self.handle_objective_interaction(),
             UiAction::ActivateMutation => match self.session.activate_selected_mutation() {
                 Ok(events) => {
                     self.campaign.first_hour.used_ability();

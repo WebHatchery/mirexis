@@ -10,6 +10,13 @@ use macroquad_toolkit::prelude::TextStyle;
 
 const TACTICAL_PANEL: Rect = Rect::new(920.0, 74.0, 350.0, 608.0);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum AbilityFocusSlot {
+    Mutation,
+    ClassAction,
+    Equipment,
+}
+
 pub(crate) fn map_focus_tile(
     progress: &FirstHourProgress,
     session: &GameSession,
@@ -101,12 +108,12 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
                 44.0,
             )
         }
-        TacticalLesson::Ability => Rect::new(
-            x,
-            TACTICAL_PANEL.bottom() - 148.0,
-            TACTICAL_PANEL.w - 36.0,
-            34.0,
-        ),
+        TacticalLesson::Ability => {
+            let Some(slot) = ability_focus_slot(ctx.session) else {
+                return;
+            };
+            ability_focus_rect(x, TACTICAL_PANEL.bottom() - 148.0, slot)
+        }
         TacticalLesson::ApplyLearning => Rect::new(390.0, 686.0, 82.0, 28.0),
         TacticalLesson::Select
         | TacticalLesson::MoveToCover
@@ -136,6 +143,35 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
         rect.y - 7.0,
         TextStyle::new(10.0, color).params(),
     );
+}
+
+fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
+    if session.can_activate_selected_mutation() {
+        return Some(AbilityFocusSlot::Mutation);
+    }
+    let unit = session.selected_unit()?;
+    let class_action_available = if crate::class_actions::requires_target(&unit.class_id) {
+        crate::class_actions::has_valid_target(session, &unit.id)
+    } else {
+        session.can_activate_selected_class_action()
+    };
+    if class_action_available {
+        return Some(AbilityFocusSlot::ClassAction);
+    }
+    crate::equipment_actions::available_action(session, &unit.id).and_then(|equipment_id| {
+        crate::equipment_actions::has_valid_target(session, &unit.id, &equipment_id)
+            .then_some(AbilityFocusSlot::Equipment)
+    })
+}
+
+fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
+    let action_width = (TACTICAL_PANEL.w - 52.0) / 3.0;
+    let offset = match slot {
+        AbilityFocusSlot::Mutation => 0.0,
+        AbilityFocusSlot::ClassAction => action_width + 8.0,
+        AbilityFocusSlot::Equipment => (action_width + 8.0) * 2.0,
+    };
+    Rect::new(x + offset, y, action_width, 34.0)
 }
 
 fn guidance_is_active(ctx: &UiContext<'_>) -> bool {

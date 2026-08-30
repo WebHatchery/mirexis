@@ -182,6 +182,12 @@ impl Game {
                     &self.active_mission,
                 );
             }
+            "first_hour_ability" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+                self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Ability;
+                super::first_hour_flow::prepare_first_hour_ability_selection(&mut self.session);
+            }
             "pressure" => self.capture_pressure(),
             "sporefield" => self.capture_template_operation(
                 "sporefield_extraction",

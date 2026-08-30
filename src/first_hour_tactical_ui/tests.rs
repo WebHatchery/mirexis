@@ -62,3 +62,31 @@ fn tactical_focus_tracks_cover_objective_and_hostile_targets() {
         .iter()
         .any(|unit| unit.team == Team::Hostile && unit.position == attack_target));
 }
+
+#[test]
+fn ability_focus_chooses_the_first_visible_action_that_can_resolve() {
+    let mut session = session();
+    assert_eq!(
+        ability_focus_slot(&session),
+        Some(AbilityFocusSlot::Mutation)
+    );
+
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "kira_voss")
+        .unwrap()
+        .mutation_gift_used = true;
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "kira_voss")
+        .unwrap()
+        .class_id = "scout".to_owned();
+    assert_eq!(
+        ability_focus_slot(&session),
+        Some(AbilityFocusSlot::ClassAction)
+    );
+}

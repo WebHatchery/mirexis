@@ -114,6 +114,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | pressure | Colony | Pressure state primarily textual | `ui_pressure.png` | PASS |
 | gameplay | Tactical | Flat rectangular board / procedural units | `ui_gameplay.png` | PASS |
 | first_hour_tactical | Tactical/first-hour lesson | Next action is text-only and does not point at the battlefield or command rail | `ui_first_hour_tactical.png` | PASS |
+| first_hour_ability | Tactical/first-hour ability lesson | Ability prompt does not identify one currently actionable command | `ui_first_hour_ability.png` | PASS |
 | overwatch | Tactical | State cue small and static | `ui_overwatch.png` | PASS |
 | brood_ability | Tactical/effect | No production Brood effect language | `ui_brood_ability.png` | PASS |
 | directorate_ability | Tactical/effect | No production Directorate effect language | `ui_directorate_ability.png` | PASS |
