@@ -79,7 +79,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 49 | loadout_briefing | `ui_loadout_briefing.png` | 204768 | `8c88ac12741bb5a5393a3007b08aa192cad1759b33a79a73a815226f79de55a3` |
 | 50 | pressure | `ui_pressure.png` | 213058 | `0064f4053ba56ef8d6220e74609add729c8b7779a6e2423a9952cdf821bf08e4` |
 | 51 | gameplay | `ui_gameplay.png` | 1116849 | `5b0f4b92e251a3b2dbef4a227178330a1a0c8edf16b4014e4058048454b034bb` |
-| 52 | first_hour_tactical | `ui_first_hour_tactical.png` | 1186530 | `877a8a37bf71821d14bfaa2ff151597572a540e53191fdd2ab8d295b2cbf2d25` |
+| 52 | first_hour_tactical | `ui_first_hour_tactical.png` | 1186967 | `ae5d23967dda4fa5c6c17598fca3107c51bdd44db062c4f083dab093a3d93abf` |
 | 53 | overwatch | `ui_overwatch.png` | 594734 | `0aec17aac4f14e91e889fc544ee3ab4fa0665d8a049b0ce92543869d2502fc29` |
 | 54 | brood_ability | `ui_brood_ability.png` | 629299 | `e40545431cb68f7139989524ba8a8fee9e1a85c7740a14c6dfd5123745531553` |
 | 55 | directorate_ability | `ui_directorate_ability.png` | 1177444 | `f5c428358d44019d8f150535d24ba92fe1a79c0dbba5e926ba52ef137c9e7a23` |

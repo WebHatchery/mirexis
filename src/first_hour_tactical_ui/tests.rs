@@ -45,7 +45,7 @@ fn tactical_focus_tracks_cover_objective_and_hostile_targets() {
     let move_target = map_focus_tile(&progress(TacticalLesson::MoveToCover), &session).unwrap();
     assert_ne!(move_target, selected);
     assert!(session.can_move_selected_to(move_target));
-    assert!(crate::cover_rules::is_adjacent_to_edge(
+    assert!(crate::cover_rules::is_cover_position(
         &session.tactical.cover_edges,
         move_target
     ));

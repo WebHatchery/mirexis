@@ -32,9 +32,9 @@ impl Game {
     }
 
     pub(super) fn record_first_hour_move(&mut self, tile: TilePos) {
-        let beside_cover =
-            crate::cover_rules::is_adjacent_to_edge(&self.session.tactical.cover_edges, tile);
-        self.campaign.first_hour.moved(beside_cover);
+        let on_cover =
+            crate::cover_rules::is_cover_position(&self.session.tactical.cover_edges, tile);
+        self.campaign.first_hour.moved(on_cover);
     }
 
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {

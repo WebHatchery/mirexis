@@ -20,7 +20,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - A title-to-city-to-operation-to-debrief loop with native and browser saves, including a
   visible first-hour route trace to the coordinator's speech marker.
 - A first-operation tactical lesson that marks the next map target or command-rail control,
-  requires the cover step to be real, and never blocks battlefield inspection.
+  requires the squad to enter a real cover tile, and never blocks battlefield inspection.
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
   resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - A powered Commons with one shared meal per operation, turning squad preparation into

@@ -160,10 +160,7 @@ fn move_focus_tile(session: &GameSession) -> Option<TilePos> {
     for y in selected.position.y - radius..=selected.position.y + radius {
         for x in selected.position.x - radius..=selected.position.x + radius {
             let tile = TilePos::new(x, y);
-            if tile != selected.position
-                && !cover_tiles.contains(&tile)
-                && session.can_move_selected_to(tile)
-            {
+            if tile != selected.position && session.can_move_selected_to(tile) {
                 candidates.push(tile);
             }
         }

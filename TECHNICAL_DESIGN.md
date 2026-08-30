@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.110.0
+Save/content version: 1.111.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -880,6 +880,7 @@ Migration coverage:
 | 1.108.0 | First-hour coordinator destination trace and capture-state coverage |
 | 1.109.0 | First-operation tactical focus targets, command-rail emphasis, and guided capture evidence |
 | 1.110.0 | First-operation cover lesson requires an adjacent cover edge and gains reachable teaching geometry |
+| 1.111.0 | First-operation cover lesson enters the cover-edge tile used by deterministic forecasts |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

@@ -151,8 +151,8 @@ impl FirstHourProgress {
         self.advance_lesson(TacticalLesson::Select, TacticalLesson::MoveToCover);
     }
 
-    pub(crate) fn moved(&mut self, beside_cover: bool) {
-        if beside_cover {
+    pub(crate) fn moved(&mut self, on_cover: bool) {
+        if on_cover {
             self.advance_lesson(TacticalLesson::MoveToCover, TacticalLesson::Attack);
         }
     }
@@ -257,7 +257,7 @@ impl FirstHourProgress {
 fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
     match lesson {
         TacticalLesson::Select => "Tap a colonist to select them.",
-        TacticalLesson::MoveToCover => "Tap a green tile beside a cover edge to move.",
+        TacticalLesson::MoveToCover => "Tap the gold-marked cover tile to move into cover.",
         TacticalLesson::Attack => "Tap a hostile, review the forecast, then tap ATTACK.",
         TacticalLesson::EnemyPhase => "Tap END PHASE twice to watch the hostile response.",
         TacticalLesson::Objective => "Move onto the gold objective and tap SECURE OBJECTIVE.",
