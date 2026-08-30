@@ -11,6 +11,7 @@ pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
         "field_medkit" => Some("FIELD PATCH"),
         "field_toolkit" => Some("FIELD FORTIFY"),
         "survey_harness" => Some("MARK HOSTILE"),
+        "directorate_cipher" => Some("BREAK TARGETING NET"),
         _ => None,
     }
 }
@@ -96,6 +97,11 @@ pub(crate) fn validate(
                 && !target.has_status(StatusKind::Disrupted)
                 && distance <= 6
         }
+        "directorate_cipher" => {
+            target.team == Team::Hostile
+                && !target.has_status(StatusKind::Hindered)
+                && distance <= 6
+        }
         _ => false,
     };
     valid_target
@@ -152,6 +158,13 @@ pub(crate) fn execute(
             session,
             target_id,
             StatusKind::Disrupted,
+            if overcharged { 3 } else { 2 },
+            &mut events,
+        ),
+        "directorate_cipher" => crate::class_actions::apply_status(
+            session,
+            target_id,
+            StatusKind::Hindered,
             if overcharged { 3 } else { 2 },
             &mut events,
         ),

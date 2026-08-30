@@ -15,7 +15,7 @@ fn production_catalog_has_every_required_asset_family() {
     let catalog = VisualCatalog::load();
     assert_eq!(catalog.unit_columns, 6);
     assert_eq!(catalog.facing_rows, 4);
-    assert_eq!(catalog.units.len(), 11);
+    assert_eq!(catalog.units.len(), 12);
     assert_eq!(catalog.terrain.columns * catalog.terrain.rows, 12);
     assert_eq!(catalog.colony.columns * catalog.colony.rows, 16);
     assert_eq!(catalog.equipment.columns * catalog.equipment.rows, 12);
@@ -82,7 +82,7 @@ fn faction_channels_are_complete_distinct_and_within_their_atlases() {
 fn every_recruit_and_hostile_record_resolves_to_authored_unit_and_portrait_art() {
     let catalog = VisualCatalog::load();
     let data = crate::data::GameData::load().expect("embedded game data loads");
-    for unit in &data.roster {
+    for unit in data.roster.iter().chain(data.recruitable_roster.iter()) {
         let definition = catalog
             .unit_definition_for(&unit.id, &unit.name)
             .unwrap_or_else(|| panic!("{} ({}) has no authored art", unit.name, unit.id));

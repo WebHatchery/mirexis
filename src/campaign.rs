@@ -1,6 +1,11 @@
 //! Persistent character identity, progression, and deployment derivation.
 
 mod deployment;
+mod derivation;
+mod outsider;
+
+pub(super) use derivation::derive_unit;
+pub(crate) use outsider::{outsider_beat, OutsiderChoice};
 
 use crate::colony::{BuildingKind, ColonyState};
 use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
@@ -49,6 +54,10 @@ pub struct CharacterRecord {
     pub active_skills: Vec<String>,
     pub mutation_id: String,
     #[serde(default)]
+    pub origin: String,
+    #[serde(default)]
+    pub origin_description: String,
+    #[serde(default)]
     pub mutation_evolution_id: String,
     pub injuries: Vec<InjuryRecord>,
     pub availability: Availability,
@@ -76,6 +85,8 @@ impl CharacterRecord {
             learned_skills: vec![starter_skill.clone()],
             active_skills: vec![starter_skill],
             mutation_id: def.mutation.clone(),
+            origin: def.origin.clone(),
+            origin_description: def.origin_description.clone(),
             mutation_evolution_id: String::new(),
             injuries: Vec::new(),
             availability: Availability::Ready,
@@ -101,6 +112,12 @@ pub struct CampaignState {
     pub first_hour: crate::first_hour::FirstHourProgress,
     #[serde(default)]
     pub colony_story: crate::colony_story::ColonyStoryState,
+    #[serde(default)]
+    pub outsider_arc_stage: u8,
+    #[serde(default)]
+    pub outsider_disagreements: u8,
+    #[serde(default)]
+    pub outsider_final_choice: String,
 }
 
 impl CampaignState {
@@ -108,6 +125,7 @@ impl CampaignState {
         let mut roster = data
             .characters
             .iter()
+            .filter(|character| character.recruitment_protocol.is_empty())
             .map(CharacterRecord::from_def)
             .collect::<Vec<_>>();
         for (index, character) in roster.iter_mut().enumerate() {
@@ -125,6 +143,9 @@ impl CampaignState {
             relationships: Vec::new(),
             first_hour: crate::first_hour::FirstHourProgress::default(),
             colony_story: crate::colony_story::ColonyStoryState::default(),
+            outsider_arc_stage: 0,
+            outsider_disagreements: 0,
+            outsider_final_choice: String::new(),
         }
     }
 
@@ -144,6 +165,9 @@ impl CampaignState {
     pub fn ensure_roster_characters(&mut self, data: &GameData) -> usize {
         let mut added = 0;
         for definition in &data.characters {
+            if !definition.recruitment_protocol.is_empty() {
+                continue;
+            }
             if self
                 .roster
                 .iter()
@@ -167,6 +191,7 @@ impl CampaignState {
         let mut deployment = data
             .roster
             .iter()
+            .chain(data.recruitable_roster.iter())
             .filter_map(|base| {
                 if base.team != Team::Colony {
                     return None;
@@ -212,6 +237,7 @@ impl CampaignState {
         let base = data
             .roster
             .iter()
+            .chain(data.recruitable_roster.iter())
             .find(|unit| unit.team == Team::Colony && unit.id == character_id)?;
         Some(derive_unit(base, character, data))
     }
@@ -714,76 +740,6 @@ fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
     for modifier in mutation.gift.iter().chain(&mutation.complication) {
         *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
     }
-}
-
-fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
-    let mut unit = base.clone();
-    unit.equipment_ids = character.equipment_ids.clone();
-    unit.learned_skills = character.learned_skills.clone();
-    unit.active_skills = character.active_skills.clone();
-    let class = data
-        .classes
-        .iter()
-        .find(|entry| entry.id == character.active_class);
-    if let Some(class) = class {
-        unit.role = class.name.clone();
-        unit.class_id = class.id.clone();
-        unit.max_health += class.health_bonus;
-        unit.accuracy += class.accuracy_bonus;
-        unit.move_range = add_signed(unit.move_range, class.move_bonus);
-    }
-    let traits = derived_mutation_traits(character, data);
-    unit.armour += traits.get("armour").copied().unwrap_or(0);
-    unit.move_range = add_signed(
-        unit.move_range,
-        traits.get("movement").copied().unwrap_or(0) as i8,
-    );
-    unit.round_regeneration = traits.get("round_regeneration").copied().unwrap_or(0);
-    unit.accuracy += traits.get("accuracy").copied().unwrap_or(0);
-    unit.weapon_damage += traits.get("weapon_damage").copied().unwrap_or(0);
-    if let Some(mutation) = data
-        .mutations
-        .iter()
-        .find(|entry| entry.id == character.mutation_id)
-    {
-        unit.mutation = mutation.name.clone();
-    }
-    for equipment_id in &character.equipment_ids {
-        if let Some(item) = data
-            .equipment
-            .iter()
-            .find(|entry| &entry.id == equipment_id)
-        {
-            unit.accuracy += item.accuracy;
-            unit.armour +=
-                (item.armour + traits.get("heavy_armour_efficiency").copied().unwrap_or(0)).max(0);
-            unit.max_health += item.health;
-            unit.weapon_damage += item.damage;
-            unit.move_range = add_signed(unit.move_range, item.move_bonus);
-            if item.weapon_range_override > 0 {
-                unit.weapon_range = item.weapon_range_override;
-            }
-            if item.weapon_ap_cost_override > 0 {
-                unit.weapon_ap_cost = item.weapon_ap_cost_override;
-            }
-        }
-    }
-    for legacy in &character.event_legacies {
-        match legacy.stat.as_str() {
-            "accuracy" => unit.accuracy += legacy.amount,
-            "armour" => unit.armour += legacy.amount,
-            "health" => unit.max_health += legacy.amount,
-            "movement" => unit.move_range = add_signed(unit.move_range, legacy.amount as i8),
-            "damage" => unit.weapon_damage += legacy.amount,
-            _ => {}
-        }
-    }
-    crate::trauma::apply_deployment_traits(&mut unit, &character.traumas);
-    unit
-}
-
-fn add_signed(value: u8, change: i8) -> u8 {
-    (i16::from(value) + i16::from(change)).clamp(1, i16::from(u8::MAX)) as u8
 }
 
 #[cfg(test)]

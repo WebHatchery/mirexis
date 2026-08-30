@@ -19,6 +19,7 @@ pub enum BuildingKind {
     Hydroponics,
     PowerPlant,
     GeneLab,
+    Waystation,
 }
 
 impl BuildingKind {
@@ -32,6 +33,7 @@ impl BuildingKind {
             Self::Hydroponics => "Hydroponics",
             Self::PowerPlant => "Power Plant",
             Self::GeneLab => "Gene Lab",
+            Self::Waystation => "Waystation",
         }
     }
 
@@ -40,6 +42,7 @@ impl BuildingKind {
             Self::Barricade => 20,
             Self::PowerPlant => 45,
             Self::GeneLab => 50,
+            Self::Waystation => 55,
             _ => 0,
         }
     }
@@ -49,6 +52,7 @@ impl BuildingKind {
             Self::CommandCentre | Self::Barracks | Self::Infirmary => 1,
             Self::Workshop | Self::Hydroponics => 2,
             Self::GeneLab => 3,
+            Self::Waystation => 1,
             Self::Barricade | Self::PowerPlant => 0,
         }
     }
@@ -61,7 +65,7 @@ impl BuildingKind {
         match self {
             Self::Barricade => 10,
             Self::CommandCentre => 35,
-            Self::GeneLab => 30,
+            Self::GeneLab | Self::Waystation => 30,
             _ => 25,
         }
     }
@@ -220,7 +224,10 @@ impl ColonyState {
     pub fn select_construction(&mut self, kind: BuildingKind) -> Result<(), String> {
         if !matches!(
             kind,
-            BuildingKind::Barricade | BuildingKind::PowerPlant | BuildingKind::GeneLab
+            BuildingKind::Barricade
+                | BuildingKind::PowerPlant
+                | BuildingKind::GeneLab
+                | BuildingKind::Waystation
         ) {
             return Err(format!("{} cannot be planned here", kind.name()));
         }
@@ -234,17 +241,14 @@ impl ColonyState {
         position: [i32; 2],
     ) -> Result<String, String> {
         self.validate_construction_site(position)?;
-        if kind == BuildingKind::GeneLab
-            && (self
-                .buildings
-                .iter()
-                .any(|building| building.kind == BuildingKind::GeneLab)
+        if matches!(kind, BuildingKind::GeneLab | BuildingKind::Waystation)
+            && (self.buildings.iter().any(|building| building.kind == kind)
                 || self
                     .construction_queue
                     .iter()
-                    .any(|project| project.kind == BuildingKind::GeneLab))
+                    .any(|project| project.kind == kind))
         {
-            return Err("The colony can support only one Gene Lab".to_owned());
+            return Err(format!("The colony can support only one {}", kind.name()));
         }
         let cost = kind.material_cost();
         if self.resources.materials < cost {
@@ -357,7 +361,8 @@ impl ColonyState {
                     | BuildingKind::Infirmary
                     | BuildingKind::Hydroponics
                     | BuildingKind::PowerPlant
-                    | BuildingKind::GeneLab => critical_objectives.push(position),
+                    | BuildingKind::GeneLab
+                    | BuildingKind::Waystation => critical_objectives.push(position),
                 }
             }
         }

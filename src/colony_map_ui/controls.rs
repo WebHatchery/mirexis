@@ -27,6 +27,20 @@ pub(super) fn draw_build_controls(
     {
         kinds.push(BuildingKind::GeneLab);
     }
+    if campaign.strategy.contact_protocol_id == "directorate_requisition"
+        && !campaign
+            .colony
+            .buildings
+            .iter()
+            .any(|building| building.kind == BuildingKind::Waystation)
+        && !campaign
+            .colony
+            .construction_queue
+            .iter()
+            .any(|project| project.kind == BuildingKind::Waystation)
+    {
+        kinds.push(BuildingKind::Waystation);
+    }
     for (index, kind) in kinds.into_iter().enumerate() {
         let selected = campaign.colony.planned_construction == kind;
         if button(

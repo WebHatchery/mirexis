@@ -1,0 +1,18 @@
+[
+  {
+    "id": "veya_orn",
+    "name": "Veya Orn",
+    "role": "Range Officer",
+    "mutation": "Neural Bloom",
+    "team": "colony",
+    "faction": null,
+    "position": [7, 18],
+    "max_health": 10,
+    "move_range": 4,
+    "armour": 1,
+    "accuracy": 70,
+    "weapon_range": 6,
+    "weapon_damage": 4,
+    "weapon_ap_cost": 2
+  }
+]

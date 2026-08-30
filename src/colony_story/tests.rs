@@ -2,7 +2,13 @@ use super::*;
 
 #[test]
 fn each_colony_npc_has_three_progression_beats() {
-    for character_id in ["mara_venn", "ilya_reed", "sol_cairn", "nadi_vale"] {
+    for character_id in [
+        "mara_venn",
+        "ilya_reed",
+        "sol_cairn",
+        "nadi_vale",
+        "veya_orn",
+    ] {
         let arrival = current_beat(character_id, 0, None, None).unwrap();
         let first = current_beat(character_id, 1, Some(true), None).unwrap();
         let second = current_beat(character_id, 2, Some(true), Some(true)).unwrap();

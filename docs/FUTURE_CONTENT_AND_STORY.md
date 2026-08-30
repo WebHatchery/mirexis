@@ -11,12 +11,17 @@ classes, colony construction, mutation evolution, and three ending paths. Future
 should deepen those systems into a memorable campaign rather than merely increasing
 their counts.
 
+The first Contact-era content slice now also proves a route-exclusive outsider loop:
+Directorate Requisition can build a Waystation, recruit Veya Orn, and carry her origin,
+equipment action, relationships, disagreements, and closing choice through saves. The
+remaining origins and equivalent faction routes stay future work.
+
 This document plans the next content horizon: playable peoples and origins, classes,
 skills, buildings, upgrades, recruits, and the story that connects them. It is subordinate
 to `PLAYABLE_GAME_PHASE_1.md` until the required uncoached first-hour playtests are
 complete. All fourteen base-class techniques are now implemented as a deliberately
 bounded tactical slice; mastery forks, new peoples, buildings, and later story work
-remain planning direction.
+  remain planning direction beyond the implemented Directorate Exile slice.
 
 ## 2. Expansion rules
 
@@ -131,19 +136,21 @@ fixed intelligence, morality, or class aptitude modifier.
 | Origin | Campaign entry | Narrative question | Mechanical promise | Production note |
 |---|---|---|---|---|
 | Colony Founder | New game | What does an ordinary person owe a home that may no longer be ordinary? | Flexible class history and the richest network of colony relationships | Already represented by the starting roster; deepen before widening. |
-| Directorate Exile | Contact | Can someone trained to treat colonies as assets learn to belong to one? | Smartlink, drone, suppression, and command interactions with a visible attention cost | Lowest-cost new origin because it can use the human rig and existing gear. |
+| Directorate Exile | Contact | Can someone trained to treat colonies as assets learn to belong to one? | Smartlink, drone, suppression, and command interactions with a visible attention cost | Veya Orn is implemented through the Waystation; expand the route before adding another human rig. |
 | Mireborn Adapted | Adaptation | Is deliberate adaptation inheritance, coercion, or a new culture? | A shaped mutation gift paired with a meaningful complication or upkeep | Uses the human rig but needs strong mutation visuals and bespoke reactions. |
 | Severed Brood | Contact or late Adaptation | Does individuality begin when the chorus is lost, or when another person listens? | Spore-field interaction, biomass recovery, and symbiotic equipment behaviour | Highest art and animation cost; add as one authored recruit before considering a generic pool. |
 | Echo-Bound | Contact or late Adaptation | Is a body carrying an Ascendant echo one person, two people, or a tool being mistaken for both? | Rift navigation, power-fed abilities, and lattice interaction | Begin with a human host or colony-built shell before a wholly new rig. |
 
 ### 5.2 First recruit concepts
 
-Names are working names for a later naming pass.
+Veya Orn is the first implemented origin; the remaining names are working names for a
+later naming pass.
 
-- **Tamsin Rook — Directorate Exile / Soldier.** A fire-control officer who transmitted
-  the quarantine order and then discovered Asset Command had classified the colonists as
-  acceptable losses. Her event chain asks whether confession earns trust and whether the
-  colony will use the targeting codes she stole.
+- **Veya Orn — Directorate Exile / Soldier.** A former Directorate range officer who
+  reaches the colony through Directorate Requisition. Her Waystation arc asks whether a
+  stolen targeting cipher can shelter people without making the refuge another asset.
+  BREAK TARGETING NET gives her origin a tactical verb, while the three conversations
+  track disagreements, relationships, faction attention, and a closing choice.
 - **Sedge — Mireborn Adapted / Scout.** A courier from an unregistered outlying family
   whose body changed long before the official first mutation. Their existence proves the
   colony's timeline is wrong and makes secrecy inside the settlement a concrete issue.
@@ -290,9 +297,10 @@ Build these in priority order:
 3. **Research Annex.** Gives research a physical home, displays recovered artefacts, and
    hosts debates over dangerous discoveries. It should organise branching research, not
    add a second unrelated research currency.
-4. **Waystation.** Adaptable quarters, quarantine, and cultural space for defectors,
-   Mireborn families, Severed Brood, and Echo-Bound visitors. It gates outsider arcs
-   without framing every outsider as a prisoner.
+4. **Waystation.** Implemented for Directorate Requisition as adaptable quarters,
+   quarantine, and cultural space for Veya Orn. Future route variants can extend it to
+   Mireborn families, Severed Brood, and Echo-Bound visitors without framing every
+   outsider as a prisoner.
 5. **Salvage Yard.** Converts specific recovered objects into a disclosed choice between
    materials, research insight, or a prototype. The Workshop remains responsible for
    finished equipment.
@@ -380,9 +388,11 @@ a useful hybrid without creating an obviously optimal skill pile.
 
 Goal: make Contact change who can belong to the colony.
 
-- Add the Waystation.
-- Add one route-exclusive Directorate Exile, Severed Brood, or Echo-Bound recruit.
-- Give each route an equivalent tactical opportunity, colony cost, and three-beat arc.
+- Implemented: add the Waystation as a route-gated, power-aware colony facility.
+- Implemented: recruit Veya Orn as a route-exclusive Directorate Exile with a three-beat
+  arc, persistent origin, and the Exile Cipher action.
+- Give the remaining routes equivalent tactical opportunities, colony costs, and
+  three-beat arcs.
 - Add the Mireborn recruit during Adaptation so every campaign meets that culture.
 - Let unchosen outsiders remain present in non-roster roles.
 
@@ -442,8 +452,8 @@ Resolve these questions in small prototypes or playtests:
    simpler operation-count gate?
 3. Can temporary player-created cover fit deterministic pathing, AI, saves, previews,
    and replay without excessive exception handling?
-4. Does a Severed Brood recruit justify a unique rig, or should the first recruit use a
-   smaller support body with deliberately limited equipment presentation?
+4. Does the next Severed Brood recruit justify a unique rig, or should that recruit use
+   a smaller support body with deliberately limited equipment presentation?
 5. How many facility branches can the colony UI expose before the city begins feeling
    like a management menu?
 6. Which earlier campaign flags are meaningful enough to acknowledge in the finale

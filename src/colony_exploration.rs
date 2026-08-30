@@ -14,7 +14,7 @@ const PLAYER_START: Vec2 = Vec2::new(9.0, 10.0);
 const WALK_SPEED: f32 = 3.6;
 const PLAYER_RADIUS: f32 = 0.22;
 const INTERACTION_DISTANCE: f32 = 1.15;
-const NPC_STATIONS: [[i32; 2]; 5] = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12]];
+const NPC_STATIONS: [[i32; 2]; 6] = [[8, 10], [7, 9], [10, 8], [13, 9], [11, 12], [15, 6]];
 
 #[derive(Debug, Clone)]
 pub(crate) struct ColonyExplorer {
@@ -168,8 +168,9 @@ impl ColonyExplorer {
         mouse: Vec2,
     ) -> Option<String> {
         let mut clicked = None;
-        for (index, character) in campaign.roster.iter().enumerate().skip(1).take(4) {
-            let position = NPC_STATIONS[index];
+        for (index, character) in campaign.roster.iter().enumerate().skip(1).take(5) {
+            let position =
+                npc_grid_position(campaign, &character.id).unwrap_or(NPC_STATIONS[index]);
             if position[0] + position[1] != depth {
                 continue;
             }
@@ -476,6 +477,7 @@ fn npc_status(character: &CharacterRecord) -> String {
         "ilya_reed" => "COLONY CLINICIAN",
         "sol_cairn" => "CHIEF ENGINEER",
         "nadi_vale" => "XENOBIOLOGY LEAD",
+        "veya_orn" => "DIRECTORATE EXILE",
         _ => "COLONIST",
     };
     format!(
@@ -505,12 +507,25 @@ fn npc_action(character: &CharacterRecord) -> UiAction {
 }
 
 pub(crate) fn npc_position(campaign: &CampaignState, id: &str) -> Option<Vec2> {
+    npc_grid_position(campaign, id).map(grid_vec)
+}
+
+fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
+    if id == "veya_orn" {
+        if let Some(waystation) = campaign
+            .colony
+            .buildings
+            .iter()
+            .find(|building| building.kind == crate::colony::BuildingKind::Waystation)
+        {
+            return Some(waystation.position);
+        }
+    }
     campaign
         .roster
         .iter()
         .position(|character| character.id == id)
         .and_then(|index| (index > 0 && index < NPC_STATIONS.len()).then_some(NPC_STATIONS[index]))
-        .map(grid_vec)
 }
 
 fn npc<'a>(campaign: &'a CampaignState, id: &str) -> Option<&'a CharacterRecord> {

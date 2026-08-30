@@ -33,6 +33,10 @@ The player is not building an empire.
 
 They are trying to keep one settlement alive while much larger powers tear the planet apart around them.
 
+The current Contact slice makes that belonging concrete: Directorate Requisition can build
+a Waystation, recruit Veya Orn as a Directorate Exile, and carry her cipher, relationships,
+disagreements, and closing choice into later operations.
+
 ---
 
 # 2. Genre

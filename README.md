@@ -19,14 +19,17 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 
 - A title-to-city-to-operation-to-debrief loop with native and browser saves.
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
-  resources, research, recruitment, and faction pressure.
+  resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - Deterministic grid combat with action points, weighted movement, line of fire, cover,
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Eight hybrid advanced classes with deterministic class actions, including Breacher lunge/
   breach pressure, Fortifier map-deployed bastions, Rescue Specialist extraction, and
   Chorus Warden hazard conversion.
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
-  experience, injury, and recovery.
+  origins, experience, injury, and recovery, including Veya Orn's Directorate Exile
+  recruitment arc.
+- The Contact-era Waystation recruits Veya through Directorate Requisition and gives her
+  the origin-specific BREAK TARGETING NET equipment action.
 - XP-gated techniques for all seven base classes with one-slot loadouts,
   self/unit/tile targeting, deterministic effects, and save-safe phase use tracking.
 - Authored and generated operations against three mechanically distinct factions.

@@ -9,5 +9,6 @@ fn consequence(id: &str, name: &str) -> CharacterConsequence {
 }
 
 mod evolution;
+mod recruitment;
 
 mod test_part_1;

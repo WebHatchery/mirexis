@@ -50,6 +50,7 @@ mod help_ui;
 mod map_variants;
 mod objective_ui;
 mod operation_modifiers;
+mod outsider_ui;
 mod overwatch;
 mod persistence;
 mod phase_readiness;

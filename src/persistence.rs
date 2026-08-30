@@ -45,6 +45,7 @@ pub fn migrate_save_value(
         );
     }
     add_class_action_defaults(&mut payload)?;
+    add_outsider_runtime_defaults(&mut payload)?;
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
     migrate_legacy_tactical_world(&mut save, &data.config)?;
@@ -138,6 +139,7 @@ pub fn migrate_save_value(
                     unit.faction = data
                         .roster
                         .iter()
+                        .chain(data.recruitable_roster.iter())
                         .find(|definition| definition.id == unit.id)
                         .and_then(|definition| definition.faction.clone());
                 }
@@ -377,6 +379,35 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             .or_insert_with(|| serde_json::json!(false));
         unit.entry("next_equipment_overcharged".to_owned())
             .or_insert_with(|| serde_json::json!(false));
+    }
+    Ok(())
+}
+
+fn add_outsider_runtime_defaults(value: &mut Value) -> Result<(), String> {
+    let Some(campaign) = value.get_mut("campaign").and_then(Value::as_object_mut) else {
+        return Ok(());
+    };
+    campaign
+        .entry("outsider_arc_stage".to_owned())
+        .or_insert_with(|| serde_json::json!(0));
+    campaign
+        .entry("outsider_disagreements".to_owned())
+        .or_insert_with(|| serde_json::json!(0));
+    campaign
+        .entry("outsider_final_choice".to_owned())
+        .or_insert_with(|| serde_json::json!(""));
+    if let Some(roster) = campaign.get_mut("roster").and_then(Value::as_array_mut) {
+        for character in roster {
+            let Some(character) = character.as_object_mut() else {
+                continue;
+            };
+            character
+                .entry("origin".to_owned())
+                .or_insert_with(|| serde_json::json!(""));
+            character
+                .entry("origin_description".to_owned())
+                .or_insert_with(|| serde_json::json!(""));
+        }
     }
     Ok(())
 }

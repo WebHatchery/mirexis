@@ -179,6 +179,31 @@ pub(crate) fn current_beat(
             title: "THE ANSWER IS NOT READY",
             text: "The signal is stronger, but the answer is not ready. We need the colony to listen together before one frightened voice decides what Mirexis means.",
         }),
+        ("veya_orn", 0, _) => Some(ColonyBeat {
+            id: "veya_arrival",
+            title: "THE PERSON BEHIND THE CIPHER",
+            text: "The Waystation received a Directorate exile before it received a clean signal. Veya says the codes are stolen; Mara says the danger is still theirs. Tap OPERATIONS to review the first terms.",
+        }),
+        ("veya_orn", 1, Some(true)) => Some(ColonyBeat {
+            id: "veya_first_victory",
+            title: "A RANGE THAT MOVES",
+            text: "Veya came back from the first operation with the target map intact and their story less rehearsed. The colony can use what they know without pretending trust arrived with them.",
+        }),
+        ("veya_orn", 1, Some(false)) => Some(ColonyBeat {
+            id: "veya_first_defeat",
+            title: "NO CLEAN ALIBI",
+            text: "The failed route gave the Directorate a better line on us, and Veya did not look away from the cost. If they stay, the Waystation has to be a place where blame can be spoken aloud.",
+        }),
+        ("veya_orn", 1, _) => Some(ColonyBeat {
+            id: "veya_first_aftermath",
+            title: "THE CIPHER IS NOT A CONFESSION",
+            text: "Veya has a cipher, a uniform, and no clean way to separate the two. The colony will decide what the codes are worth before it decides what their bearer is worth.",
+        }),
+        ("veya_orn", _, _) => Some(ColonyBeat {
+            id: "veya_second_aftermath",
+            title: "A HOME WITH WITNESSES",
+            text: "The Waystation is no longer a stop between Directorate lines. Veya chose to remain where every argument has a witness, and the colony remembers that choice as a person rather than a resource.",
+        }),
         _ => None,
     }
 }

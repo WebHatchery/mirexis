@@ -53,3 +53,50 @@ fn carried_field_items_target_each_team_and_are_spent_once() {
     execute(&mut session, "ilya_reed", "field_medkit", "mara_venn");
     assert_eq!(session.unit("mara_venn").unwrap().health, before + 5);
 }
+
+#[test]
+fn exile_cipher_scrambles_a_hostile_movement_envelope() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "directorate_requisition".to_owned();
+    campaign
+        .colony
+        .buildings
+        .push(crate::colony::BuildingState {
+            id: "waystation_test".to_owned(),
+            kind: crate::colony::BuildingKind::Waystation,
+            position: [2, 10],
+            level: 1,
+            damaged: false,
+        });
+    campaign.recruit_outsider(&data).unwrap();
+    let mut roster = data.roster.clone();
+    roster.push(campaign.derived_character_unit("veya_orn", &data).unwrap());
+    let mut session = GameSession::new(&data.config, &data.mission, &roster);
+    let veya = session.unit("veya_orn").unwrap().position;
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "directorate_rifle_a")
+        .unwrap()
+        .position = TilePos::new(veya.x + 2, veya.y);
+
+    assert!(validate(
+        &session,
+        "veya_orn",
+        "directorate_cipher",
+        "directorate_rifle_a"
+    )
+    .is_ok());
+    execute(
+        &mut session,
+        "veya_orn",
+        "directorate_cipher",
+        "directorate_rifle_a",
+    );
+    assert!(session
+        .unit("directorate_rifle_a")
+        .unwrap()
+        .has_status(StatusKind::Hindered));
+}

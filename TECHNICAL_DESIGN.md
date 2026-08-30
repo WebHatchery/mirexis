@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.71.0
+Save/content version: 1.72.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -17,7 +17,7 @@ The implemented slice proves all roadmap systems together:
 
 1. Start or continue a persistent colony.
 2. Inspect resources, faction attention, an assault countdown, research, events,
-   recruits, facilities, and mission offers.
+   recruitable outsiders, facilities, and mission offers.
 3. Place construction, train a colonist, treat injuries, and craft equipment.
 4. Select an authored or seeded generated mission and choose three ready recruits.
 5. Resolve deterministic movement, attacks, an interactive objective, enemy AI,
@@ -82,7 +82,8 @@ Important transition payloads:
 | `ui_debrief.rs` | Operation results and campaign-finale presentation | Outcome or campaign mutation |
 | `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
-| `data.rs` | Embedded JSON schemas, loading, registry validation | Mutable campaign state |
+| `data.rs` | Embedded JSON schemas and registry validation | Mutable campaign state |
+| `data/loader.rs` | Embedded JSON loading and source-labelled content assembly | Schema definitions or mutable campaign state |
 | `defense_objective.rs` | Vulnerable-asset attacks, integrity, deadline result, and hostile targeting helpers | Rendering or campaign rewards |
 | `state.rs` | Tactical commands, validation, execution, events, outcomes | Drawing, colony mutation |
 | `state/creation.rs` | Fresh tactical-session construction and mission-derived defaults | Runtime command execution |
@@ -106,6 +107,8 @@ Important transition payloads:
 | `equipment_catalog.rs` | Equipment-definition invariants and weapon-profile validation | Runtime state |
 | `cover_actions.rs` | Cover attack validation, integrity damage, and terrain removal | UI state |
 | `campaign.rs` | Persistent recruits, progression, deployment, debrief application | Raw input or drawing |
+| `campaign/derivation.rs` | Derived tactical profiles from class, origin, mutation, gear, legacy, and trauma | Persistent mutation or rendering |
+| `campaign/outsider.rs` | Waystation recruitment gates and Contact-era outsider conversations | Rendering or raw input |
 | `colony_story.rs` | Persistent character-led colony beats and save-safe acknowledgement state | Rendering or tactical mutation |
 | `relationships.rs` | Pair-bond progression, summaries, validation, and derived deployment bonuses | Rendering or save migration |
 | `overwatch.rs` | Prepaid reaction validation, trigger ordering, and reaction damage | Enemy movement policy or rendering |
@@ -584,7 +587,8 @@ Current embedded files under `assets/data/` are:
 | `game_config.json` | Identity, save version, grid, AP budget, root seed |
 | `mission.json` | Authored Glassroot mission and tactical map data |
 | `roster.json` | Tactical baselines and faction-tagged hostile archetypes |
-| `characters.json` | Persistent recruits and aptitude/loadout references |
+| `recruitable_roster.json` | Tactical baselines for route-exclusive recruits |
+| `characters.json` | Persistent recruits, outsider origins, and aptitude/loadout references |
 | `classes.json` | Class families and deployment modifiers |
 | `mutations.json` | Gift and complication hooks |
 | `equipment.json` | Starter and protocol-gated Contact equipment modifiers |
@@ -693,6 +697,7 @@ Migration coverage:
 | 1.69.0 | Psionic and Biotech technique pairs, hazard adaptation, obscuring fields, and tactical runtime migration defaults |
 | 1.70.0 | Breacher and Fortifier hybrid class actions, tile-targeted class-action input, and advanced-class migration defaults |
 | 1.71.0 | Rescue Specialist and Chorus Warden hybrid class actions, hazard conversion events, and advanced-class migration defaults |
+| 1.72.0 | Waystation construction, Directorate Exile recruitment, origin-derived profiles, Exile Cipher action, and outsider-arc migration defaults |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -744,7 +749,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (147 domain/migration tests plus the shared source-size gate)
+- `cargo test` (276 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

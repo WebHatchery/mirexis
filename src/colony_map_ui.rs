@@ -436,6 +436,9 @@ fn draw_plot(
             ),
             tint,
         );
+        if building.kind == BuildingKind::Waystation {
+            draw_waystation_art(center, view.zoom, powered, building.damaged);
+        }
         draw_building_state(center, building.damaged, powered);
     } else if let Some(project) = project.filter(|project| project.position == position) {
         visuals.draw_atlas_cell(
@@ -470,7 +473,46 @@ fn building_index(kind: BuildingKind) -> usize {
         BuildingKind::Hydroponics => 5,
         BuildingKind::PowerPlant => 6,
         BuildingKind::GeneLab => 7,
+        BuildingKind::Waystation => 7,
     }
+}
+
+fn draw_waystation_art(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+    let accent = if damaged {
+        Color::new(1.0, 0.28, 0.20, 0.92)
+    } else if powered {
+        Color::new(0.40, 0.82, 1.0, 0.92)
+    } else {
+        Color::new(0.92, 0.60, 0.20, 0.80)
+    };
+    draw_line(
+        center.x,
+        center.y - 52.0 * zoom,
+        center.x,
+        center.y - 18.0 * zoom,
+        2.0 * zoom,
+        accent,
+    );
+    draw_circle(
+        center.x,
+        center.y - 55.0 * zoom,
+        5.0 * zoom,
+        Color::new(accent.r, accent.g, accent.b, 0.22),
+    );
+    draw_circle_lines(
+        center.x,
+        center.y - 55.0 * zoom,
+        11.0 * zoom,
+        1.5 * zoom,
+        Color::new(accent.r, accent.g, accent.b, 0.64),
+    );
+    draw_circle_lines(
+        center.x,
+        center.y - 55.0 * zoom,
+        18.0 * zoom,
+        1.0 * zoom,
+        Color::new(accent.r, accent.g, accent.b, 0.34),
+    );
 }
 
 fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
@@ -645,6 +687,16 @@ fn draw_hover_card(campaign: &CampaignState, hovered: Option<[i32; 2]>, pending:
             )
         } else if building.kind == BuildingKind::GeneLab {
             "GENE LAB // TAP TO OPEN EVOLUTION CHAMBER".to_owned()
+        } else if building.kind == BuildingKind::Waystation {
+            if !campaign
+                .roster
+                .iter()
+                .any(|character| character.id == "veya_orn")
+            {
+                "WAYSTATION // TAP TO REVIEW DIRECTORATE EXILE".to_owned()
+            } else {
+                "WAYSTATION // CONTACT ROUTE STABLE // ONLINE".to_owned()
+            }
         } else {
             format!(
                 "{} // ONLINE // LEVEL {}",
@@ -716,6 +768,14 @@ fn handle_plot_click(
             && campaign.colony.building_is_powered(&building.id)
         {
             actions.push(UiAction::OpenGeneLab);
+        } else if building.kind == BuildingKind::Waystation
+            && campaign.colony.building_is_powered(&building.id)
+            && !campaign
+                .roster
+                .iter()
+                .any(|character| character.id == "veya_orn")
+        {
+            actions.push(UiAction::RecruitOutsider);
         }
     } else if campaign.colony.project_at(position).is_none() {
         actions.push(UiAction::ConstructBuilding(

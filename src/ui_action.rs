@@ -14,6 +14,8 @@ pub enum UiAction {
     ChooseMirexisPath(String),
     ChooseMutationEvolution(String, String),
     ResolveCharacterEvent(String),
+    RecruitOutsider,
+    ResolveOutsiderBeat(u8, String),
     DeployMission,
     CycleFormation,
     ToggleDeployment(String),

@@ -50,7 +50,7 @@ pub(crate) fn draw(
             "{} // {} · LV{} · XP{}{}",
             state, class_name, character.level, character.experience, bond
         );
-        let row = Rect::new(200.0, 366.0 + index as f32 * 37.0, 650.0, 33.0);
+        let row = Rect::new(200.0, 366.0 + index as f32 * 32.0, 650.0, 29.0);
         if button_with_state(
             row,
             &label,
@@ -63,7 +63,7 @@ pub(crate) fn draw(
         crate::portrait_ui::draw_character_portrait(
             assets,
             visuals,
-            Rect::new(row.x + 4.0, row.y + 3.0, 27.0, 27.0),
+            Rect::new(row.x + 4.0, row.y + 2.0, 25.0, 25.0),
             &character.id,
             &character.name,
             if character.deployment_selected {

@@ -89,14 +89,14 @@ fn draw_character_list(
         } else {
             " · LEGACY"
         };
-        let row = Rect::new(36.0, 154.0 + index as f32 * 72.0, 244.0, 58.0);
+        let row = Rect::new(36.0, 150.0 + index as f32 * 60.0, 244.0, 54.0);
         if button_with_state(row, "", true, selected, mouse) {
             actions.push(UiAction::SelectColonist(character.id.clone()));
         }
         crate::portrait_ui::draw_character_portrait(
             assets,
             visuals,
-            Rect::new(row.x + 5.0, row.y + 5.0, 48.0, 48.0),
+            Rect::new(row.x + 5.0, row.y + 3.0, 44.0, 44.0),
             &character.id,
             &character.name,
             if selected {
@@ -112,13 +112,13 @@ fn draw_character_list(
                 character.name.to_uppercase()
             ),
             row.x + 62.0,
-            row.y + 24.0,
+            row.y + 22.0,
             TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
         );
         draw_ui_text_ex(
             &format!("LV{} // {}{}", character.level, deployment, legacy),
             row.x + 62.0,
-            row.y + 43.0,
+            row.y + 40.0,
             TextStyle::new(10.0, dark::TEXT_DIM).params(),
         );
     }
@@ -249,8 +249,16 @@ fn draw_selected_character(
     );
     draw_ui_text_ex(
         &format!(
-            "LEVEL {} · {} XP · {} · {:?}",
-            character.level, character.experience, mutation, character.availability
+            "LEVEL {} · {} XP · {} · {:?} · ORIGIN {}",
+            character.level,
+            character.experience,
+            mutation,
+            character.availability,
+            if character.origin.is_empty() {
+                "COLONY FOUNDER"
+            } else {
+                character.origin.as_str()
+            }
         ),
         344.0,
         276.0,

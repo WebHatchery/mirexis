@@ -352,6 +352,9 @@ fn aspect_fit(source: Vec2, destination: Rect) -> Rect {
 }
 
 pub(crate) fn equipment_index(id: &str) -> Option<usize> {
+    if id == "directorate_cipher" {
+        return Some(9);
+    }
     [
         "frontier_rifle",
         "mire_lmg",

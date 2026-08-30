@@ -43,5 +43,19 @@
     "initial_class": "biotech",
     "mutation": "symbiotic_organism",
     "equipment": ["service_pistol", "field_medkit"]
+  },
+  {
+    "id": "veya_orn",
+    "name": "Veya Orn",
+    "biography": "A former Directorate range officer who crossed the line carrying the colony's stolen fire-control map.",
+    "aptitudes": { "ballistics": 5, "mobility": 4, "engineering": 3, "leadership": 2 },
+    "initial_class": "soldier",
+    "mutation": "neural_bloom",
+    "equipment": ["service_pistol", "directorate_cipher"],
+    "recruitment_protocol": "directorate_requisition",
+    "recruitment_cost": 30,
+    "origin": "Directorate Exile",
+    "origin_description": "Stolen range telemetry makes Veya unusually accurate when the squad must cross open ground.",
+    "origin_accuracy_bonus": 4
   }
 ]

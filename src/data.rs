@@ -1,24 +1,11 @@
 //! Embedded content schemas and registry validation.
 
 use macroquad_toolkit::assets::TextureConfig;
-use macroquad_toolkit::data_loader::{load_embedded_json, load_embedded_json_labeled};
 use serde::{Deserialize, Serialize};
 
+mod loader;
 mod techniques;
 pub use techniques::{TechniqueDef, TechniqueTarget};
-
-const GAME_CONFIG_JSON: &str =
-    macroquad_toolkit::include_json_str!("../assets/data/game_config.json");
-const MISSION_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/mission.json");
-const ROSTER_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/roster.json");
-const CHARACTERS_JSON: &str =
-    macroquad_toolkit::include_json_str!("../assets/data/characters.json");
-const CLASSES_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/classes.json");
-const MUTATIONS_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/mutations.json");
-const EQUIPMENT_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/equipment.json");
-const CAMPAIGN_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/campaign.json");
-const TEXTURE_MANIFEST_JSON: &str =
-    macroquad_toolkit::include_json_str!("../assets/data/texture_manifest.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
@@ -206,6 +193,18 @@ pub struct CharacterDef {
     pub initial_class: String,
     pub mutation: String,
     pub equipment: Vec<String>,
+    #[serde(default)]
+    pub recruitment_protocol: String,
+    #[serde(default)]
+    pub recruitment_cost: i32,
+    #[serde(default)]
+    pub origin: String,
+    #[serde(default)]
+    pub origin_description: String,
+    #[serde(default)]
+    pub origin_accuracy_bonus: i32,
+    #[serde(default)]
+    pub origin_move_bonus: i8,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -414,6 +413,7 @@ pub struct GameData {
     pub config: GameConfig,
     pub mission: MissionDef,
     pub roster: Vec<UnitDef>,
+    pub recruitable_roster: Vec<UnitDef>,
     pub characters: Vec<CharacterDef>,
     pub classes: Vec<ClassDef>,
     pub mutations: Vec<MutationDef>,
@@ -423,36 +423,17 @@ pub struct GameData {
 }
 
 impl GameData {
-    pub fn load() -> Result<Self, String> {
-        let config = load_embedded_json_labeled("game_config", GAME_CONFIG_JSON)?;
-        let mission = load_embedded_json_labeled("mission", MISSION_JSON)?;
-        let roster = load_embedded_json_labeled("roster", ROSTER_JSON)?;
-        let characters = load_embedded_json_labeled("characters", CHARACTERS_JSON)?;
-        let classes = load_embedded_json_labeled("classes", CLASSES_JSON)?;
-        let mutations = load_embedded_json_labeled("mutations", MUTATIONS_JSON)?;
-        let equipment = load_embedded_json_labeled("equipment", EQUIPMENT_JSON)?;
-        let campaign = load_embedded_json_labeled("campaign", CAMPAIGN_JSON)?;
-        let texture_manifest = load_embedded_json(TEXTURE_MANIFEST_JSON)?;
-
-        let data = Self {
-            config,
-            mission,
-            roster,
-            characters,
-            classes,
-            mutations,
-            equipment,
-            campaign,
-            texture_manifest,
-        };
-        data.validate_registry()?;
-        Ok(data)
-    }
-
     fn validate_registry(&self) -> Result<(), String> {
         ensure_unique(
             "character",
             self.characters.iter().map(|entry| entry.id.as_str()),
+        )?;
+        ensure_unique(
+            "unit",
+            self.roster
+                .iter()
+                .chain(self.recruitable_roster.iter())
+                .map(|entry| entry.id.as_str()),
         )?;
         for template in &self.campaign.mission_templates {
             if !template.required_response.is_empty()
@@ -631,7 +612,12 @@ impl GameData {
                 ));
             }
         }
-        for unit in self.roster.iter().filter(|unit| unit.team == Team::Colony) {
+        for unit in self
+            .roster
+            .iter()
+            .chain(self.recruitable_roster.iter())
+            .filter(|unit| unit.team == Team::Colony)
+        {
             if !self
                 .characters
                 .iter()

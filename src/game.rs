@@ -432,6 +432,23 @@ impl Game {
                     Err(err) => self.notifications.warning(err),
                 }
             }
+            UiAction::RecruitOutsider => match self.campaign.recruit_outsider(&self.data) {
+                Ok(name) => {
+                    self.notifications
+                        .success(format!("{} joined the colony roster", name));
+                    self.autosave_campaign_only("Outsider recruitment autosaved");
+                }
+                Err(err) => self.notifications.warning(err),
+            },
+            UiAction::ResolveOutsiderBeat(stage, choice_id) => {
+                match self.campaign.resolve_outsider_beat(stage, &choice_id) {
+                    Ok(summary) => {
+                        self.notifications.success(summary);
+                        self.autosave_campaign_only("Outsider arc autosaved");
+                    }
+                    Err(err) => self.notifications.warning(err),
+                }
+            }
             UiAction::DeployMission => match self.campaign.prepare_deployment(&self.data) {
                 Ok(food_cost) => {
                     self.campaign
@@ -523,6 +540,13 @@ impl Game {
                         .warning("The Gene Lab unlocks in Adaptation");
                     return;
                 }
+                if kind == crate::colony::BuildingKind::Waystation
+                    && self.campaign.strategy.contact_protocol_id != "directorate_requisition"
+                {
+                    self.notifications
+                        .warning("The Waystation requires Directorate Requisition");
+                    return;
+                }
                 match self.campaign.colony.select_construction(kind) {
                     Ok(()) => self.notifications.info(format!("Planning {}", kind.name())),
                     Err(err) => self.notifications.warning(err),
@@ -534,6 +558,13 @@ impl Game {
                 {
                     self.notifications
                         .warning("The Gene Lab unlocks in Adaptation");
+                    return;
+                }
+                if kind == crate::colony::BuildingKind::Waystation
+                    && self.campaign.strategy.contact_protocol_id != "directorate_requisition"
+                {
+                    self.notifications
+                        .warning("The Waystation requires Directorate Requisition");
                     return;
                 }
                 match self.campaign.colony.place_construction(kind, position) {
