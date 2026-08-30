@@ -26,7 +26,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the ApplyLearning hostile focus and forecast prompt active after deployment.
 - `ui_first_hour_return.png`: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach before continuation.
-- `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing visible inside the open Operations drawer.
+- `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
 ## Files
@@ -104,7 +104,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 69 | first_hour_guide | `ui_first_hour_guide.png` | 211550 | `4ec8274af4c4b4b2c88ec224ad1a5b6bf4eec8a74e796824c0a271e970c3a20d` |
 | 70 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
 | 71 | first_hour_promise | `ui_first_hour_promise.png` | 880688 | `1074d5123a8762eee8c922f4e2efbbd897be1100cb860e2f182e953c7bcf48a5` |
-| 72 | first_hour_operations | `ui_first_hour_operations.png` | 917501 | `3d66851e84d7255e029a0c6a12befeeda093bef857f0ba7fbbc23cde45247604` |
+| 72 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
 | 73 | battle_log | `ui_battle_log.png` | 372152 | `f70c358f9d6ad10037fab7f49bf77daa03d4a7dc21d706b58e6240fc399d152d` |
 | 74 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |
 | 75 | phase_replay | `ui_phase_replay.png` | 559533 | `c8eace3ed8ec5c0736af49d223accd1021977243b20876553edd0b389c9dcf53` |

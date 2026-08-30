@@ -3,6 +3,7 @@
 mod audio_flow;
 mod capture_colony;
 mod capture_debrief;
+mod capture_first_hour;
 mod capture_reset;
 mod capture_scenes;
 mod capture_tactical;

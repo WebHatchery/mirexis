@@ -301,6 +301,7 @@ pub(super) fn draw_operations(
             380.0,
             TextStyle::new(15.0, dark::ACCENT).params(),
         );
+        crate::first_hour_investment_ui::draw_active_summary(campaign, vec2(1002.0, 380.0));
         for (index, mission) in campaign.strategy.mission_offers.iter().take(3).enumerate() {
             let selected = mission.id == campaign.strategy.selected_mission_id;
             let danger = crate::danger_rating::for_instance(mission, data);

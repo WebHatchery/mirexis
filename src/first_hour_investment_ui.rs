@@ -26,6 +26,30 @@ pub(crate) fn effect(id: &str) -> &'static str {
     }
 }
 
+pub(crate) fn active_summary(id: &str) -> Option<&'static str> {
+    match id {
+        "bastion_mesh" => Some("PREP // BASTION MESH // SQUAD +1 ARM"),
+        "survey_uplink" => Some("PREP // SURVEY UPLINK // SQUAD +8 ACC"),
+        "rapid_injectors" => Some("PREP // RAPID INJECTORS // SQUAD +1 MOV"),
+        _ => None,
+    }
+}
+
+pub(crate) fn draw_active_summary(campaign: &CampaignState, origin: Vec2) {
+    if campaign.operations_completed != 1 {
+        return;
+    }
+    let Some(summary) = active_summary(&campaign.first_hour.investment_name) else {
+        return;
+    };
+    draw_text_ex(
+        summary,
+        origin.x,
+        origin.y,
+        TextStyle::new(10.0, dark::POSITIVE).params(),
+    );
+}
+
 pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     text(
         "CHOOSE ONE FIELD PREPARATION",
@@ -75,3 +99,6 @@ pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
 fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
     draw_text_ex(value, x, y, TextStyle::new(size, color).params());
 }
+
+#[cfg(test)]
+mod tests;
