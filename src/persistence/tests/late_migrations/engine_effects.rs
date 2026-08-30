@@ -32,17 +32,25 @@ fn previous_path_save_refreshes_the_engine_effect_on_migration() {
 }
 
 #[test]
-fn previous_save_without_epilogue_work_defaults_to_zero() {
+fn previous_save_without_continuing_work_defaults_to_zero() {
     let data = GameData::load().unwrap();
     let campaign = CampaignState::new(&data);
-    let save = SaveData::campaign_only("1.96.0", &campaign);
+    let save = SaveData::campaign_only("1.97.0", &campaign);
     let mut value = serde_json::to_value(save).unwrap();
     value["campaign"]["strategy"]
         .as_object_mut()
         .unwrap()
         .remove("post_campaign_operations_completed");
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_stewardship_completed");
+    value["campaign"]
+        .as_object_mut()
+        .unwrap()
+        .remove("identity_stewardship_operation");
 
-    let migrated = migrate_save_value(Some("1.96.0".to_owned()), value, &data).unwrap();
+    let migrated = migrate_save_value(Some("1.97.0".to_owned()), value, &data).unwrap();
     assert_eq!(
         migrated
             .campaign
@@ -50,4 +58,6 @@ fn previous_save_without_epilogue_work_defaults_to_zero() {
             .post_campaign_operations_completed,
         0
     );
+    assert_eq!(migrated.campaign.identity_stewardship_completed, 0);
+    assert_eq!(migrated.campaign.identity_stewardship_operation, None);
 }

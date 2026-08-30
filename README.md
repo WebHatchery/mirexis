@@ -44,6 +44,9 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   Redoubt armour, Commonwealth regeneration, or Threshold movement guidance.
 - Victories in the continuing epilogue are recorded in the ending register and unlock a
   path-specific follow-up reflection from the identity contact.
+- After campaign completion, each identity building offers one stewardship action per operation:
+  fortify the Redoubt, answer the Commonwealth, or guide a Threshold return to reduce its linked
+  faction's attention for a disclosed resource cost.
 - The identity contact returns a second, path-specific reflection after the final operation, then
   unlocks a third post-ending scene in the continuing colony.
 - Contact, Adaptation, and Escalation each surface phase-specific colony field notes through

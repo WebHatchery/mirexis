@@ -11,6 +11,7 @@ fn consequence(id: &str, name: &str) -> CharacterConsequence {
 mod commons;
 mod evolution;
 mod facility_upgrade;
+mod identity;
 mod recruitment;
 mod relay;
 

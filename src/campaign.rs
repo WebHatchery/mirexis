@@ -3,6 +3,7 @@
 mod commons;
 mod deployment;
 mod derivation;
+mod identity;
 mod outsider;
 mod relay;
 mod story;
@@ -142,6 +143,10 @@ pub struct CampaignState {
     pub relay_scans_used: u32,
     #[serde(default)]
     pub relay_scan_operation: Option<u32>,
+    #[serde(default)]
+    pub identity_stewardship_completed: u32,
+    #[serde(default)]
+    pub identity_stewardship_operation: Option<u32>,
 }
 
 impl CampaignState {
@@ -175,6 +180,8 @@ impl CampaignState {
             commons_meal_operation: None,
             relay_scans_used: 0,
             relay_scan_operation: None,
+            identity_stewardship_completed: 0,
+            identity_stewardship_operation: None,
         }
     }
 

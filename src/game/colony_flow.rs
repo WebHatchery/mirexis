@@ -22,4 +22,14 @@ impl Game {
             Err(err) => self.notifications.warning(err),
         }
     }
+
+    pub(super) fn handle_identity_stewardship(&mut self) {
+        match self.campaign.run_identity_stewardship() {
+            Ok(summary) => {
+                self.notifications.success(summary);
+                self.autosave_campaign_only("Identity stewardship autosaved");
+            }
+            Err(err) => self.notifications.warning(err),
+        }
+    }
 }

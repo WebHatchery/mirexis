@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.97.0
+Save/content version: 1.98.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -648,6 +648,11 @@ Successful post-campaign operations increment a persistent work count in `Strate
 ending register and debrief expose that count, and the identity contact offers one additional
 path-specific reflection after the first epilogue victory. The post-ending scene is archived
 once so the dialogue path can advance instead of repeating the same beat.
+After campaign completion, the chosen identity building also exposes one stewardship action per
+operation. The Redoubt spends materials to reduce Directorate attention, the Commonwealth spends
+biomass to reduce Brood attention, and the Threshold spends power to reduce Ascendant attention.
+The action marker and total are saved, the map exposes its touch target, and the ending register
+shows the accumulated civic work.
 Those views also derive a
 colony legacy dossier from the chosen institution, ready and recovering people, trusted bonds,
 lasting scars, and mutation evolutions; it is presentation-only and requires no new save field.
@@ -822,6 +827,7 @@ Migration coverage:
 | 1.95.0 | Repeatable path-specific post-campaign epilogue operations |
 | 1.96.0 | Path-specific engine effects in finale and epilogue tactical operations |
 | 1.97.0 | Persistent epilogue-work count and post-operation identity reflections |
+| 1.98.0 | Repeatable post-campaign identity-building stewardship and civic-pressure consequences |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -873,7 +879,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (323 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (326 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic eighty-two-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

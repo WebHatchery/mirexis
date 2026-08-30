@@ -8,6 +8,7 @@ impl CampaignState {
             character_id,
             self.strategy.campaign_complete,
             self.strategy.post_campaign_operations_completed,
+            self.identity_stewardship_completed,
             &self.colony_story,
         )
         .or_else(|| {

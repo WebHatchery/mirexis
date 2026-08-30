@@ -218,19 +218,23 @@ fn post_ending_identity_scene_unlocks_after_the_final_reflection() {
         ),
     ] {
         let story = ColonyStoryState::default();
-        let ending = identity_arc_beat(path_id, character_id, true, 0, &story).unwrap();
+        let ending = identity_arc_beat(path_id, character_id, true, 0, 0, &story).unwrap();
         assert!(ending.id.ends_with("_ending"));
 
         let mut story = story;
         story.acknowledge(ending.id);
-        let post = identity_arc_beat(path_id, character_id, true, 0, &story).unwrap();
+        let post = identity_arc_beat(path_id, character_id, true, 0, 0, &story).unwrap();
         assert_eq!(post.id, post_id);
         assert!(!post.title.is_empty());
         assert!(!post.text.is_empty());
         story.acknowledge(post.id);
-        assert!(identity_arc_beat(path_id, character_id, true, 0, &story).is_none());
-        let operation = identity_arc_beat(path_id, character_id, true, 1, &story).unwrap();
+        assert!(identity_arc_beat(path_id, character_id, true, 0, 0, &story).is_none());
+        let stewardship = identity_arc_beat(path_id, character_id, true, 0, 1, &story).unwrap();
+        assert!(stewardship.id.starts_with("stewardship_"));
+        story.acknowledge(stewardship.id);
+        assert!(identity_arc_beat(path_id, character_id, true, 0, 1, &story).is_none());
+        let operation = identity_arc_beat(path_id, character_id, true, 1, 1, &story).unwrap();
         assert_eq!(operation.id, operation_id);
-        assert!(identity_arc_beat(path_id, "ilya_reed", true, 1, &story).is_none());
+        assert!(identity_arc_beat(path_id, "ilya_reed", true, 1, 1, &story).is_none());
     }
 }

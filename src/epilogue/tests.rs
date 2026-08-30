@@ -18,6 +18,7 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     campaign.strategy.escalation_response_id = "bastion_beacon".to_owned();
     campaign.strategy.character_events[0].resolved = true;
     campaign.strategy.post_campaign_operations_completed = 2;
+    campaign.identity_stewardship_completed = 3;
     campaign
         .strategy
         .factions
@@ -58,11 +59,13 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(lines[7].contains("DIRECTORATE 29"));
     assert!(lines[7].contains("MERCY 1"));
     assert!(lines[7].contains("EPILOGUE WORK 2"));
+    assert!(lines[7].contains("CIVIC WORK 3"));
     assert!(dossier.debrief_line().contains("COLONY LEGACY"));
     assert!(dossier
         .debrief_line()
         .contains("ENGINE HUMAN BOUNDARY / ARMOURED"));
     assert!(dossier.debrief_line().contains("EPILOGUE WORK 2"));
+    assert!(dossier.debrief_line().contains("CIVIC WORK 3"));
 }
 
 #[test]

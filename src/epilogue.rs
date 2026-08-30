@@ -19,6 +19,7 @@ pub(crate) struct EpilogueDossier {
     faction_pressure: String,
     mercy_count: usize,
     post_campaign_operations_completed: u32,
+    identity_stewardship_completed: u32,
 }
 
 impl EpilogueDossier {
@@ -39,19 +40,20 @@ impl EpilogueDossier {
             format!("VOICE // {}", self.character_voice),
             format!("NAVIGATOR // {}", self.navigator_voice),
             format!(
-                "ENGINE // {} / {} // {} // MERCY {} // EPILOGUE WORK {}",
+                "ENGINE // {} / {} // {} // MERCY {} // EPILOGUE WORK {} // CIVIC WORK {}",
                 self.engine_relationship,
                 self.engine_response,
                 self.faction_pressure,
                 self.mercy_count,
-                self.post_campaign_operations_completed
+                self.post_campaign_operations_completed,
+                self.identity_stewardship_completed
             ),
         ]
     }
 
     pub(crate) fn debrief_line(&self) -> String {
         format!(
-            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {} // EPILOGUE WORK {}",
+            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {} // EPILOGUE WORK {} // CIVIC WORK {}",
             self.institution.to_uppercase(),
             self.institution_status,
             self.people,
@@ -61,7 +63,8 @@ impl EpilogueDossier {
             self.engine_relationship,
             self.engine_response,
             self.mercy_count,
-            self.post_campaign_operations_completed
+            self.post_campaign_operations_completed,
+            self.identity_stewardship_completed
         )
     }
 }
@@ -183,6 +186,7 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         faction_pressure,
         mercy_count,
         post_campaign_operations_completed: campaign.strategy.post_campaign_operations_completed,
+        identity_stewardship_completed: campaign.identity_stewardship_completed,
     })
 }
 

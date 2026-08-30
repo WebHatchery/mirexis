@@ -316,6 +316,7 @@ impl ColonyExplorer {
             &character.id,
             campaign.strategy.campaign_complete,
             campaign.strategy.post_campaign_operations_completed,
+            campaign.identity_stewardship_completed,
             &campaign.colony_story,
         )
         .or_else(|| {

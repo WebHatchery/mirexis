@@ -365,8 +365,9 @@ institutions, not superweapons.
   exploration. Its risk is power dependence and attention from beyond Mirexis.
 
 The late-game city art, defence map, epilogue, associated NPC placement, ambient effects, and
-one persistent identity-building field note now acknowledge the chosen project. Multi-scene
-identity arcs and bespoke building interactions remain follow-up work.
+persistent identity-building field notes now acknowledge the chosen project. A completed campaign
+also exposes one touch-accessible stewardship action per operation at the identity building;
+multi-scene identity arcs and bespoke pre-campaign building interactions remain follow-up work.
 
 ### 8.4 Defence structures
 
@@ -507,6 +508,9 @@ Goal: make the implemented five-phase foundation narratively complete.
 - Implemented: record successful epilogue work in the campaign save, surface the count in the
   ending register, and unlock a path-specific identity reflection after the first continuing
   operation.
+- Implemented: add one post-campaign stewardship action per identity building, with a saved
+  per-operation marker, disclosed resource cost, linked faction-pressure reduction, and a
+  path-specific contact reflection.
 - Stage each finale around a relationship with the refuge engine, not simply defeating a
   faction boss.
 - Implemented: add a concise finale dossier assembled from character, facility, faction, and

@@ -593,6 +593,7 @@ pub(crate) fn identity_arc_beat(
     character_id: &str,
     campaign_complete: bool,
     post_campaign_operations_completed: u32,
+    identity_stewardship_completed: u32,
     story: &ColonyStoryState,
 ) -> Option<ColonyBeat> {
     let identity = identity_beat(path_id, character_id, campaign_complete);
@@ -602,6 +603,7 @@ pub(crate) fn identity_arc_beat(
     identity
         .filter(|beat| !story.has_heard(beat.id))
         .or_else(|| post_ending_beat(path_id, character_id, story))
+        .or_else(|| stewardship_beat(path_id, character_id, identity_stewardship_completed, story))
         .or_else(|| {
             post_campaign_operation_beat(
                 path_id,
@@ -610,6 +612,36 @@ pub(crate) fn identity_arc_beat(
                 story,
             )
         })
+}
+
+fn stewardship_beat(
+    path_id: &str,
+    character_id: &str,
+    completed_actions: u32,
+    story: &ColonyStoryState,
+) -> Option<ColonyBeat> {
+    if completed_actions == 0 || identity_npc(path_id) != Some(character_id) {
+        return None;
+    }
+    let (id, title, text) = match path_id {
+        "human_redoubt" => (
+            "stewardship_redoubt_mara",
+            "THE WALL NEEDS HANDS",
+            "The Arsenal is not a threat that happens to belong to us. Every watchline we fortify is a choice to keep the colony's defence answerable to the people who pay for it.",
+        ),
+        "living_commonwealth" => (
+            "stewardship_commonwealth_nadi",
+            "A GARDEN IS A VERB",
+            "The Garden answered because someone made room for the answer. We will keep tending it, not as a voice that speaks for everyone, but as a place where more than one voice can remain alive.",
+        ),
+        "open_threshold" => (
+            "stewardship_threshold_sol",
+            "RETURN IS A SYSTEM",
+            "A route is not open because it can be crossed once. The Spire needs people to guide the return, record what came through, and keep the door from becoming somebody else's command.",
+        ),
+        _ => return None,
+    };
+    (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
 }
 
 fn post_ending_beat(
