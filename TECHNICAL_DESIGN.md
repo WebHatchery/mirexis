@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.120.0
+Save/content version: 1.121.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -895,6 +895,7 @@ Migration coverage:
 | 1.118.0 | Second-operation deployment enters a persisted tactical guidance stage with migrated save recovery and hostile focus |
 | 1.119.0 | First return pauses for Ilya's visible recovery conversation, with a routed colony target and captured handoff |
 | 1.120.0 | Second-operation colony consequence distinguishes a hardened route from a breached route with promise-beat capture evidence |
+| 1.121.0 | First return separates debrief travel from the pending Ilya conversation so each screen names its visible next action |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

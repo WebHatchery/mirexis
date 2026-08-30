@@ -102,7 +102,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 67 | danger_reach | `ui_danger_reach.png` | 612994 | `bea205b685717599c3cc455640e3231da0514b273adfcde3ca241a12a35ac55f` |
 | 68 | help | `ui_help.png` | 332701 | `a1e0f3b1cca548d6bf1425a40587e26d6f098fb1fdbf094365ef89f97a65fe4e` |
 | 69 | first_hour_guide | `ui_first_hour_guide.png` | 211550 | `4ec8274af4c4b4b2c88ec224ad1a5b6bf4eec8a74e796824c0a271e970c3a20d` |
-| 70 | first_hour_return | `ui_first_hour_return.png` | 878729 | `7298f2b6c3530423e31288fb6846397ea23070efa7a722d5938e246236727fd1` |
+| 70 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
 | 71 | first_hour_promise | `ui_first_hour_promise.png` | 880688 | `1074d5123a8762eee8c922f4e2efbbd897be1100cb860e2f182e953c7bcf48a5` |
 | 72 | first_hour_operations | `ui_first_hour_operations.png` | 917501 | `3d66851e84d7255e029a0c6a12befeeda093bef857f0ba7fbbc23cde45247604` |
 | 73 | battle_log | `ui_battle_log.png` | 372152 | `f70c358f9d6ad10037fab7f49bf77daa03d4a7dc21d706b58e6240fc399d152d` |
@@ -123,5 +123,5 @@ Manifest: `scripts/capture_ui.ps1`
 | 88 | weapon_profile | `ui_weapon_profile.png` | 590465 | `c5e6dd50e15942449ebc53432628c432974601dbb16d25b049f6f953bd9002d2` |
 | 89 | class_target | `ui_class_target.png` | 545325 | `3c2c5ffa5d23f38e9232227e6487d012ccba5312c8d70f46b79ccd961c3b5fe7` |
 | 90 | breach | `ui_breach.png` | 686023 | `c7342bce74a9e6ec5fc09d70b0502404ed33d9fb15ee63b6a9e8f29958850e37` |
-| 91 | debrief | `ui_debrief.png` | 186927 | `31d2beba965407adc896fa64cacfd792f5b4c0e206738c32243f7b86f27e6208` |
-| 92 | trauma_debrief | `ui_trauma_debrief.png` | 193961 | `4bcb09898745e774fd247108d8d033cafbb97e7e5211f2ccb74a9f2f2b01aafb` |
+| 91 | debrief | `ui_debrief.png` | 187165 | `7032c09729c0b40c65f2767cb4c78797694265058380acaa4fd409a8aab66068` |
+| 92 | trauma_debrief | `ui_trauma_debrief.png` | 194199 | `7ba07aac76b90ad63403be750157359717b76abfc50d6350714935c862aaa9da` |

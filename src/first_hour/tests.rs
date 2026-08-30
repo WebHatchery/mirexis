@@ -21,7 +21,18 @@ fn colony_guidance_targets_arrival_and_first_return_conversations() {
     progress.acknowledge_colonist("mara_venn");
     progress.operation_resolved(1, true, 4);
     assert_eq!(progress.stage, FirstHourStage::FirstReturn);
+    assert_eq!(progress.colony_guidance_target(), None);
+    assert_eq!(
+        progress.primary_goal(),
+        "Tap RETURN TO COLONY, then tap Ilya Reed's marker."
+    );
+    progress.returned_to_colony();
+    assert_eq!(progress.stage, FirstHourStage::FirstReturnColony);
     assert_eq!(progress.colony_guidance_target(), Some("ilya_reed"));
+    assert_eq!(
+        progress.primary_goal(),
+        "Tap Ilya Reed's speech marker, then tap CONTINUE."
+    );
 
     progress.guidance_enabled = false;
     assert_eq!(progress.colony_guidance_target(), None);
@@ -50,7 +61,7 @@ fn defeat_still_reaches_return_and_promise_beats() {
     progress.operation_resolved(1, false, 5);
     assert_eq!(progress.stage, FirstHourStage::FirstReturn);
     progress.returned_to_colony();
-    assert_eq!(progress.stage, FirstHourStage::FirstReturn);
+    assert_eq!(progress.stage, FirstHourStage::FirstReturnColony);
     progress.acknowledge_colonist("ilya_reed");
     assert_eq!(progress.stage, FirstHourStage::MakeInvestment);
     progress.invested("priority treatment");

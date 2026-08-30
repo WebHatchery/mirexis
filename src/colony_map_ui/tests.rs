@@ -263,6 +263,8 @@ fn first_hour_route_targets_the_current_guided_colonist() {
     assert!(first_hour_destination(&campaign).is_none());
 
     campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstReturn;
+    assert!(first_hour_destination(&campaign).is_none());
+    campaign.first_hour.returned_to_colony();
     assert_eq!(
         first_hour_destination(&campaign),
         crate::colony_exploration::npc_position(&campaign, "ilya_reed")

@@ -12,6 +12,7 @@ pub(crate) enum FirstHourStage {
     FirstBriefing,
     FirstOperation,
     FirstReturn,
+    FirstReturnColony,
     MakeInvestment,
     SecondOperation,
     SecondOperationTactical,
@@ -86,7 +87,10 @@ impl FirstHourProgress {
             FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical => {
                 lesson_prompt(self.lesson)
             }
-            FirstHourStage::FirstReturn => "Tap Ilya Reed's speech marker, then tap CONTINUE.",
+            FirstHourStage::FirstReturn => "Tap RETURN TO COLONY, then tap Ilya Reed's marker.",
+            FirstHourStage::FirstReturnColony => {
+                "Tap Ilya Reed's speech marker, then tap CONTINUE."
+            }
             FirstHourStage::MakeInvestment => {
                 "Tap OPERATIONS and choose one affordable preparation investment."
             }
@@ -124,7 +128,7 @@ impl FirstHourProgress {
         }
         match self.stage {
             FirstHourStage::MeetCoordinator => Some("mara_venn"),
-            FirstHourStage::FirstReturn => Some("ilya_reed"),
+            FirstHourStage::FirstReturnColony => Some("ilya_reed"),
             _ => None,
         }
     }
@@ -142,7 +146,7 @@ impl FirstHourProgress {
         self.metrics.city_interacted();
         if self.stage == FirstHourStage::MeetCoordinator && id == "mara_venn" {
             self.stage = FirstHourStage::PrepareFirstOperation;
-        } else if self.stage == FirstHourStage::FirstReturn && id == "ilya_reed" {
+        } else if self.stage == FirstHourStage::FirstReturnColony && id == "ilya_reed" {
             self.stage = FirstHourStage::MakeInvestment;
         }
     }
@@ -220,7 +224,9 @@ impl FirstHourProgress {
     }
 
     pub(crate) fn returned_to_colony(&mut self) {
-        if self.stage == FirstHourStage::SecondReturn {
+        if self.stage == FirstHourStage::FirstReturn {
+            self.stage = FirstHourStage::FirstReturnColony;
+        } else if self.stage == FirstHourStage::SecondReturn {
             self.stage = FirstHourStage::Promise;
         }
     }

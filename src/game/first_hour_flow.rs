@@ -141,9 +141,12 @@ impl Game {
     }
 
     pub(super) fn ensure_first_hour_recovery_reserve(&mut self) {
-        if self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::FirstReturn
-            && self.campaign.colony.resources.materials
-                < crate::first_hour_investment_ui::INVESTMENT_COST
+        if matches!(
+            self.campaign.first_hour.stage,
+            crate::first_hour::FirstHourStage::FirstReturn
+                | crate::first_hour::FirstHourStage::FirstReturnColony
+        ) && self.campaign.colony.resources.materials
+            < crate::first_hour_investment_ui::INVESTMENT_COST
         {
             self.campaign.colony.resources.materials =
                 crate::first_hour_investment_ui::INVESTMENT_COST;
