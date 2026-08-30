@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.65.0
+Save/content version: 1.67.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -91,7 +91,10 @@ Important transition payloads:
 | `reinforcement_ui.rs` | One-round on-grid preferred insertion-tile warnings | Wave scheduling or mutation |
 | `class_actions.rs` | Class actions, targeting, damage, healing, and status application | UI state |
 | `class_training.rs` | Training costs, advanced-class gates, switching, and class-definition validation | UI state |
+| `skill_training.rs` | XP-gated technique learning, active loadout slots, and loadout normalization | Tactical execution or drawing |
+| `skills.rs` | Deterministic technique validation, targeting, effects, and technique events | Campaign progression or drawing |
 | `class_action_ui.rs` | Immediate or targeted class-action intent | Simulation mutation |
+| `skill_ui.rs` | Touch-first active-technique buttons and targeting intents | Simulation mutation |
 | `equipment_actions.rs` | Field-item validation, targeting rules, and deterministic effects | UI state |
 | `enemy_abilities.rs` | Faction ability validation, target choice, effects, and AI activation | General hostile movement or rendering |
 | `enemy_intent.rs` | Read-only hostile first-action forecasts using live AI selectors | State mutation or drawing |
@@ -137,7 +140,11 @@ multi-objective logic that would push it toward the source limit.
 
 `TacticalState` owns the grid, occupancy, terrain costs, faction hazard tiles, edge cover, units, phase,
 round, objective, seeded RNG, and serializable `BattleEvent` log. The supported
-commands are move, attack, interact, activate mutation, and activate class action.
+commands are move, attack, interact, activate mutation, activate class action, and
+activate technique. Carried field equipment also grants validated target commands whose
+per-mission use is serialized with the unit. Techniques are learned by deployed
+colonists at XP thresholds, equip into a class-defined technique slot, and reset their
+once-per-player-phase use record during phase refresh.
 Carried field equipment also grants validated target commands whose per-mission use is
 serialized with the unit.
 Blocked cover may be attacked with the active weapon through the same command boundary.
@@ -170,6 +177,11 @@ tiles share the same presentation; previewing never mutates state or consumes RN
   Static Rifts Disrupt. Units are immune to hazards authored by their own faction.
 - Hazard geometry is serialized, mirrored with its map recipe, visibly marked, and named
   in both the grid legend and ordered battle events.
+- Soldier, Defender, and Scout each have two data-defined techniques. Controlled Burst
+  fires twice for the weapon cost, Armour Drill halves armour for the next attack,
+  Interpose and Anchor Point apply one-phase Guarded protection, Slipstep crosses a
+  highlighted hazard without landing resolution, and Spotter's Mark grants the next
+  allied attack a cover-breaking accuracy bonus.
 - Colony-defense blocked tiles are derived from saved building coordinates.
 - Destroyed cover is removed from the authoritative blocked set, immediately opening
   that tile to pathfinding and any firing line that crosses it.

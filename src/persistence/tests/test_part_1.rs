@@ -1,10 +1,15 @@
 use super::*;
+use crate::data::Team;
 
 #[test]
 fn phase_one_save_gains_campaign_and_character_runtime_fields() {
     let data = GameData::load().unwrap();
     let campaign = CampaignState::new(&data);
-    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let session = GameSession::new(
+        &data.config,
+        &data.mission,
+        &campaign.deployment_roster(&data, &data.mission),
+    );
     let mut legacy = serde_json::to_value(session.to_save("0.2.0", &campaign)).unwrap();
     legacy.as_object_mut().unwrap().remove("campaign");
     for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
@@ -124,6 +129,47 @@ fn faction_save_gains_class_actions_and_statuses() {
     assert_eq!(kira.class_id, "scout");
     assert!(!kira.class_action_used);
     assert!(kira.statuses.is_empty());
+}
+
+#[test]
+fn tactical_save_gains_technique_runtime_fields() {
+    let data = GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let session = GameSession::new(
+        &data.config,
+        &data.mission,
+        &campaign.deployment_roster(&data, &data.mission),
+    );
+    let mut legacy = serde_json::to_value(session.to_save("1.66.0", &campaign)).unwrap();
+    for unit in legacy["tactical"]["units"].as_array_mut().unwrap() {
+        let unit = unit.as_object_mut().unwrap();
+        for key in [
+            "learned_skills",
+            "active_skills",
+            "used_skill_ids",
+            "next_attack_ignores_armour",
+        ] {
+            unit.remove(key);
+        }
+    }
+    let migrated = migrate_save_value(Some("1.66.0".to_owned()), legacy, &data).unwrap();
+    let colonist = migrated
+        .tactical
+        .unwrap()
+        .units
+        .into_iter()
+        .find(|unit| unit.team == Team::Colony)
+        .unwrap();
+    assert!(colonist
+        .learned_skills
+        .iter()
+        .any(|skill| skill.ends_with("_fundamentals")));
+    assert!(colonist
+        .active_skills
+        .iter()
+        .any(|skill| skill.ends_with("_fundamentals")));
+    assert!(colonist.used_skill_ids.is_empty());
+    assert!(!colonist.next_attack_ignores_armour);
 }
 #[test]
 fn class_action_save_gains_reinforcement_queue() {

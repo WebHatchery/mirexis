@@ -223,10 +223,34 @@ impl Game {
                 {
                     Some(UiAction::UseClassActionOn(target.id.clone()))
                 }
+                super::TacticalTargeting::Skill { unit_id, skill_id }
+                    if crate::skills::can_target_unit(
+                        &self.session,
+                        unit_id,
+                        skill_id,
+                        &target.id,
+                    ) =>
+                {
+                    Some(UiAction::UseSkillOn(target.id.clone()))
+                }
                 _ => None,
             });
-            self.events
-                .push(action.unwrap_or(UiAction::CancelTargeting));
+            let action = match targeting {
+                super::TacticalTargeting::Skill { unit_id, skill_id }
+                    if crate::skills::target_kind(skill_id)
+                        == Some(crate::data::TechniqueTarget::Tile)
+                        && crate::skills::can_target_tile(
+                            &self.session,
+                            unit_id,
+                            skill_id,
+                            tile,
+                        ) =>
+                {
+                    UiAction::UseSkillOnTile(tile)
+                }
+                _ => action.unwrap_or(UiAction::CancelTargeting),
+            };
+            self.events.push(action);
             return;
         }
 

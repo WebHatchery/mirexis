@@ -12,6 +12,8 @@ fn active_statuses_name_their_remaining_phase_duration() {
         role: "Scout".to_owned(),
         class_id: "soldier".to_owned(),
         equipment_ids: Vec::new(),
+        learned_skills: Vec::new(),
+        active_skills: Vec::new(),
         mutation: "None".to_owned(),
         team: Team::Colony,
         faction: None,

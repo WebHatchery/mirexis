@@ -13,6 +13,7 @@ impl GameSession {
                 unit.mutation_gift_used = false;
                 unit.class_action_used = false;
                 unit.enemy_ability_used = false;
+                unit.used_skill_ids.clear();
                 unit.temporary_armour = 0;
                 unit.temporary_accuracy = 0;
                 unit.temporary_move_range = 0;

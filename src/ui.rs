@@ -95,6 +95,10 @@ pub enum TargetingView<'a> {
     ClassAction {
         unit_id: &'a str,
     },
+    Skill {
+        unit_id: &'a str,
+        skill_id: &'a str,
+    },
 }
 
 pub struct UiContext<'a> {
@@ -514,13 +518,20 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         ObjectiveKind::DefendAsset => "PROTECT FIELD ASSET",
     };
     if button(
-        Rect::new(x, panel.bottom() - 188.0, panel.w - 36.0, 38.0),
+        Rect::new(x, panel.bottom() - 232.0, panel.w - 36.0, 34.0),
         objective_action,
         ctx.session.can_interact_selected(),
         mouse,
     ) {
         actions.push(UiAction::InteractObjective);
     }
+    crate::skill_ui::draw_action_buttons(
+        ctx,
+        selected,
+        Rect::new(x, panel.bottom() - 190.0, panel.w - 36.0, 34.0),
+        mouse,
+        actions,
+    );
     let mutation_label = selected.map_or("MUTATION GIFT", |unit| match unit.mutation.as_str() {
         "Neural Bloom" => "NEURAL FOCUS",
         "Chitinous Growth" => "HARDEN CARAPACE",
@@ -531,7 +542,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     });
     let action_width = (panel.w - 52.0) / 3.0;
     if button(
-        Rect::new(x, panel.bottom() - 144.0, action_width, 38.0),
+        Rect::new(x, panel.bottom() - 148.0, action_width, 34.0),
         mutation_label,
         ctx.session.can_activate_selected_mutation(),
         mouse,
@@ -543,9 +554,9 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         selected,
         Rect::new(
             x + action_width + 8.0,
-            panel.bottom() - 144.0,
+            panel.bottom() - 148.0,
             action_width,
-            38.0,
+            34.0,
         ),
         mouse,
         actions,
@@ -555,9 +566,9 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         selected,
         Rect::new(
             x + (action_width + 8.0) * 2.0,
-            panel.bottom() - 144.0,
+            panel.bottom() - 148.0,
             action_width,
-            38.0,
+            34.0,
         ),
         mouse,
         actions,
@@ -572,7 +583,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         "END COLONY PHASE".to_owned()
     };
     if button(
-        Rect::new(x, panel.bottom() - 100.0, phase_width, 44.0),
+        Rect::new(x, panel.bottom() - 104.0, phase_width, 44.0),
         "OVERWATCH",
         ctx.session.can_set_selected_overwatch(),
         mouse,
@@ -582,7 +593,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if button(
         Rect::new(
             x + phase_width + 8.0,
-            panel.bottom() - 100.0,
+            panel.bottom() - 104.0,
             panel.w - 44.0 - phase_width,
             44.0,
         ),

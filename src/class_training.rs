@@ -99,14 +99,7 @@ impl CampaignState {
         if !character.class_history.contains(&class.id) {
             character.class_history.push(class.id.clone());
         }
-        let skill = format!("{}_fundamentals", class.id);
-        if !character.learned_skills.contains(&skill) {
-            character.learned_skills.push(skill.clone());
-        }
-        if !character.active_skills.contains(&skill) {
-            character.active_skills.push(skill);
-        }
-        character.active_skills.truncate(class.skill_slots as usize);
+        crate::skill_training::normalize_loadout(character, class);
         Ok(())
     }
 }

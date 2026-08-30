@@ -29,6 +29,7 @@ pub enum StatusKind {
     Disrupted,
     Hindered,
     Regenerating,
+    Marked,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -97,6 +98,10 @@ pub struct UnitState {
     pub class_id: String,
     #[serde(default)]
     pub equipment_ids: Vec<String>,
+    #[serde(default)]
+    pub learned_skills: Vec<String>,
+    #[serde(default)]
+    pub active_skills: Vec<String>,
     pub mutation: String,
     pub team: Team,
     #[serde(default)]
@@ -126,6 +131,10 @@ pub struct UnitState {
     #[serde(default)]
     pub temporary_weapon_damage: i32,
     #[serde(default)]
+    pub used_skill_ids: Vec<String>,
+    #[serde(default)]
+    pub next_attack_ignores_armour: bool,
+    #[serde(default)]
     pub class_action_used: bool,
     #[serde(default)]
     pub used_equipment_ids: Vec<String>,
@@ -149,6 +158,8 @@ impl UnitState {
             role: def.role.clone(),
             class_id: def.class_id.clone(),
             equipment_ids: def.equipment_ids.clone(),
+            learned_skills: def.learned_skills.clone(),
+            active_skills: def.active_skills.clone(),
             mutation: def.mutation.clone(),
             team: def.team,
             faction: def.faction.clone(),
@@ -174,6 +185,8 @@ impl UnitState {
             temporary_accuracy: 0,
             temporary_move_range: 0,
             temporary_weapon_damage: 0,
+            used_skill_ids: Vec::new(),
+            next_attack_ignores_armour: false,
             class_action_used: false,
             used_equipment_ids: Vec::new(),
             statuses: Vec::new(),
@@ -276,6 +289,12 @@ pub enum Command {
         unit_id: String,
         target_id: Option<String>,
     },
+    ActivateSkill {
+        unit_id: String,
+        skill_id: String,
+        target_id: Option<String>,
+        target_tile: Option<TilePos>,
+    },
     UseEquipment {
         unit_id: String,
         equipment_id: String,
@@ -317,6 +336,7 @@ pub enum RuleError {
     ObjectiveUnavailable,
     MutationUnavailable,
     ClassActionUnavailable,
+    SkillUnavailable,
     EquipmentUnavailable,
     CoverUnavailable,
     OverwatchUnavailable,
@@ -362,6 +382,10 @@ pub enum BattleEvent {
     ClassActionActivated {
         unit_id: String,
         action: String,
+    },
+    SkillActivated {
+        unit_id: String,
+        skill_id: String,
     },
     EquipmentUsed {
         unit_id: String,

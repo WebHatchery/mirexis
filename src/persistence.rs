@@ -151,6 +151,19 @@ pub fn migrate_save_value(
                         unit.equipment_ids = character.equipment_ids.clone();
                     }
                 }
+                if let Some(character) = save
+                    .campaign
+                    .roster
+                    .iter()
+                    .find(|character| character.id == unit.id)
+                {
+                    if unit.learned_skills.is_empty() {
+                        unit.learned_skills = character.learned_skills.clone();
+                    }
+                    if unit.active_skills.is_empty() {
+                        unit.active_skills = character.active_skills.clone();
+                    }
+                }
             }
             if tactical.destructible_cover.is_empty() {
                 tactical.destructible_cover = tactical
@@ -342,6 +355,14 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
             .or_insert_with(|| serde_json::json!(false));
         unit.entry("statuses".to_owned())
             .or_insert_with(|| serde_json::json!([]));
+        unit.entry("learned_skills".to_owned())
+            .or_insert_with(|| serde_json::json!([]));
+        unit.entry("active_skills".to_owned())
+            .or_insert_with(|| serde_json::json!([]));
+        unit.entry("used_skill_ids".to_owned())
+            .or_insert_with(|| serde_json::json!([]));
+        unit.entry("next_attack_ignores_armour".to_owned())
+            .or_insert_with(|| serde_json::json!(false));
     }
     Ok(())
 }

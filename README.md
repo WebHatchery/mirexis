@@ -24,6 +24,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   armour, hazards, statuses, objectives, enemy roles, reinforcements, and overwatch.
 - Persistent named colonists with classes, mutations, equipment, relationships, scars,
   experience, injury, and recovery.
+- XP-gated Soldier, Defender, and Scout techniques with one-slot loadouts, self/unit/tile
+  targeting, deterministic effects, and save-safe phase use tracking.
 - Authored and generated operations against three mechanically distinct factions.
 - A complete prototype campaign-state path through Isolation, Contact, Adaptation,
   Escalation, and three Mirexis identity endings.
@@ -81,7 +83,7 @@ shortcuts.
 - City: tap terrain to walk, hold the movement pad to move freely, tap a colonist to
   approach and talk, and use Build mode for construction and repairs.
 - Tactical missions: select a colonist, then use visible grid and command controls to
-  move, attack, use abilities or equipment, complete objectives, and end the phase.
+  move, attack, use techniques or equipment, complete objectives, and end the phase.
 - `W` / `A` / `S` / `D`: city movement.
 - `E`: talk to an adjacent city NPC.
 - Arrow keys: tactical cursor.

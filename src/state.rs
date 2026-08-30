@@ -185,6 +185,14 @@ impl GameSession {
             Command::ActivateClassAction { unit_id, target_id } => {
                 crate::class_actions::validate(self, unit_id, target_id.as_deref())
             }
+            Command::ActivateSkill {
+                unit_id,
+                skill_id,
+                target_id,
+                target_tile,
+            } => {
+                crate::skills::validate(self, unit_id, skill_id, target_id.as_deref(), *target_tile)
+            }
             Command::UseEquipment {
                 unit_id,
                 equipment_id,
@@ -221,6 +229,14 @@ impl GameSession {
             Command::ActivateMutation { unit_id } => self.execute_mutation(&unit_id),
             Command::ActivateClassAction { unit_id, target_id } => {
                 crate::class_actions::execute(self, &unit_id, target_id.as_deref())
+            }
+            Command::ActivateSkill {
+                unit_id,
+                skill_id,
+                target_id,
+                target_tile,
+            } => {
+                crate::skills::execute(self, &unit_id, &skill_id, target_id.as_deref(), target_tile)
             }
             Command::UseEquipment {
                 unit_id,
@@ -504,7 +520,7 @@ impl GameSession {
         Ok(unit)
     }
 
-    fn execute_move(&mut self, unit_id: &str, to: TilePos) -> Vec<BattleEvent> {
+    pub(crate) fn execute_move(&mut self, unit_id: &str, to: TilePos) -> Vec<BattleEvent> {
         let from = self.unit(unit_id).unwrap().position;
         let path = self.path_for(from, to, Some(unit_id)).unwrap();
         let cost = path_cost(&path, &self.tactical.terrain_costs);
@@ -529,10 +545,16 @@ impl GameSession {
         }]
     }
 
-    fn execute_attack(&mut self, attacker_id: &str, target_id: &str) -> Vec<BattleEvent> {
+    pub(crate) fn execute_attack(
+        &mut self,
+        attacker_id: &str,
+        target_id: &str,
+    ) -> Vec<BattleEvent> {
         let attacker = self.unit(attacker_id).unwrap().clone();
         let target = self.unit(target_id).unwrap().clone();
-        let hit_chance = self.hit_chance(&attacker, &target);
+        let marked = attacker.team == Team::Colony && target.has_status(StatusKind::Marked);
+        let hit_chance = (i32::from(self.hit_chance(&attacker, &target)) + i32::from(marked) * 20)
+            .clamp(5, 95) as u8;
         let roll = self.tactical.rng.range_i32(1, 101) as u8;
         let attacking_unit = self
             .tactical
@@ -541,6 +563,8 @@ impl GameSession {
             .find(|unit| unit.id == attacker_id)
             .unwrap();
         attacking_unit.action_points -= attacker.weapon_ap_cost;
+        let ignores_armour = attacking_unit.next_attack_ignores_armour;
+        attacking_unit.next_attack_ignores_armour = false;
         attacking_unit.facing = UnitFacing::toward(attacker.position, target.position);
         attacking_unit.presentation_state = UnitAnimationState::AttackRelease;
         attacking_unit.presentation_seconds = 0.52;
@@ -552,9 +576,13 @@ impl GameSession {
         }];
         if roll <= hit_chance {
             let critical = roll <= 10;
-            let damage = (attacker.effective_weapon_damage() + i32::from(critical) * 2
-                - target.effective_armour())
-            .max(1);
+            let armour = if ignores_armour {
+                target.effective_armour() / 2
+            } else {
+                target.effective_armour()
+            };
+            let damage =
+                (attacker.effective_weapon_damage() + i32::from(critical) * 2 - armour).max(1);
             let target = self
                 .tactical
                 .units
@@ -585,6 +613,18 @@ impl GameSession {
                 if let Some(status) = status {
                     crate::class_actions::apply_status(self, target_id, status, 1, &mut events);
                 }
+            }
+        }
+        if marked {
+            if let Some(target) = self
+                .tactical
+                .units
+                .iter_mut()
+                .find(|unit| unit.id == target_id)
+            {
+                target
+                    .statuses
+                    .retain(|status| status.kind != StatusKind::Marked);
             }
         }
         self.check_outcome(&mut events);

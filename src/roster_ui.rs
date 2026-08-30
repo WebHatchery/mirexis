@@ -341,12 +341,83 @@ fn draw_selected_character(
             actions.push(UiAction::TrainSelected(class.id.clone()));
         }
     }
+    let active_class = data
+        .classes
+        .iter()
+        .find(|class| class.id == character.active_class);
+    let mut inspected_technique = None;
+    draw_ui_text_ex(
+        &format!(
+            "TECHNIQUES // {} SLOT{} · OPERATION XP UNLOCKS NEW TECHNIQUES",
+            active_class.map_or(0, |class| class.technique_slots),
+            if active_class.is_some_and(|class| class.technique_slots == 1) {
+                ""
+            } else {
+                "S"
+            }
+        ),
+        344.0,
+        478.0,
+        TextStyle::new(12.0, dark::ACCENT).params(),
+    );
+    if let Some(class) = active_class {
+        for (index, technique) in class.techniques.iter().enumerate() {
+            let rect = Rect::new(344.0 + index as f32 * 434.0, 486.0, 426.0, 28.0);
+            if rect.contains(mouse) {
+                inspected_technique = Some(technique);
+            }
+            let learned = character.learned_skills.contains(&technique.id);
+            let active = character.active_skills.contains(&technique.id);
+            let equipped_count = character
+                .active_skills
+                .iter()
+                .filter(|skill| class.techniques.iter().any(|entry| &entry.id == *skill))
+                .count();
+            let enabled = if learned {
+                active || equipped_count < class.technique_slots as usize
+            } else {
+                campaign.colony.has_facility(BuildingKind::Barracks)
+                    && character.experience >= technique.experience_required
+            };
+            let label = if active {
+                format!("EQUIPPED: {}", technique.name)
+            } else if learned {
+                format!("EQUIP: {}", technique.name)
+            } else {
+                format!(
+                    "LEARN: {} · {} XP",
+                    technique.name, technique.experience_required
+                )
+            };
+            if button(rect, "", enabled, mouse) {
+                actions.push(if learned {
+                    UiAction::ToggleSelectedSkill(technique.id.clone())
+                } else {
+                    UiAction::LearnSelectedSkill(technique.id.clone())
+                });
+            }
+            draw_ui_text_ex(
+                &label.to_uppercase(),
+                rect.x + 10.0,
+                rect.y + 19.0,
+                TextStyle::new(
+                    11.0,
+                    if enabled || active {
+                        dark::TEXT
+                    } else {
+                        dark::TEXT_DIM
+                    },
+                )
+                .params(),
+            );
+        }
+    }
     let inspected_equipment = data.equipment.iter().enumerate().find_map(|(index, item)| {
         let column = index % 3;
         let row = index / 3;
         Rect::new(
             344.0 + column as f32 * 296.0,
-            518.0 + row as f32 * 36.0,
+            548.0 + row as f32 * 32.0,
             282.0,
             30.0,
         )
@@ -357,9 +428,25 @@ fn draw_selected_character(
         draw_text_block(
             &format!("{} // {}", item.name.to_uppercase(), item.description),
             344.0,
-            474.0,
+            516.0,
             870.0,
             28.0,
+            11.0,
+            2.0,
+            dark::TEXT_DIM,
+        );
+    } else if let Some(technique) = inspected_technique {
+        draw_text_block(
+            &format!(
+                "{} // {} // REQUIRES {} XP",
+                technique.name.to_uppercase(),
+                technique.description,
+                technique.experience_required
+            ),
+            344.0,
+            516.0,
+            870.0,
+            20.0,
             11.0,
             2.0,
             dark::TEXT_DIM,
@@ -368,7 +455,7 @@ fn draw_selected_character(
         draw_text_block(
             &format!("{} // {}", class.name.to_uppercase(), class.description),
             344.0,
-            474.0,
+            516.0,
             870.0,
             28.0,
             11.0,
@@ -379,7 +466,7 @@ fn draw_selected_character(
     draw_ui_text_ex(
         "WORKSHOP // EQUIPMENT",
         344.0,
-        506.0,
+        540.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     for (index, item) in data.equipment.iter().enumerate() {
@@ -394,7 +481,7 @@ fn draw_selected_character(
         let row = index / 3;
         let rect = Rect::new(
             344.0 + column as f32 * 296.0,
-            518.0 + row as f32 * 36.0,
+            548.0 + row as f32 * 32.0,
             282.0,
             30.0,
         );

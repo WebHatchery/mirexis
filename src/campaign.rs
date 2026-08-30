@@ -346,6 +346,7 @@ impl CampaignState {
             character.experience += xp;
             character.level = 1 + (character.experience / 100).min(9) as u8;
         }
+        crate::skill_training::learn_after_operation(self, &deployed_ids, data);
         for consequence in &outcome.colonists_incapacitated {
             if let Some(character) = self
                 .roster
@@ -718,6 +719,8 @@ fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
 fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
     let mut unit = base.clone();
     unit.equipment_ids = character.equipment_ids.clone();
+    unit.learned_skills = character.learned_skills.clone();
+    unit.active_skills = character.active_skills.clone();
     let class = data
         .classes
         .iter()

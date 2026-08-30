@@ -4,6 +4,9 @@ use macroquad_toolkit::assets::TextureConfig;
 use macroquad_toolkit::data_loader::{load_embedded_json, load_embedded_json_labeled};
 use serde::{Deserialize, Serialize};
 
+mod techniques;
+pub use techniques::{TechniqueDef, TechniqueTarget};
+
 const GAME_CONFIG_JSON: &str =
     macroquad_toolkit::include_json_str!("../assets/data/game_config.json");
 const MISSION_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/mission.json");
@@ -178,6 +181,10 @@ pub struct UnitDef {
     pub faction: Option<String>,
     #[serde(default)]
     pub equipment_ids: Vec<String>,
+    #[serde(default)]
+    pub learned_skills: Vec<String>,
+    #[serde(default)]
+    pub active_skills: Vec<String>,
     pub position: [i32; 2],
     pub max_health: i32,
     pub move_range: u8,
@@ -211,6 +218,10 @@ pub struct ClassDef {
     pub accuracy_bonus: i32,
     pub move_bonus: i8,
     pub skill_slots: u8,
+    #[serde(default)]
+    pub technique_slots: u8,
+    #[serde(default)]
+    pub techniques: Vec<TechniqueDef>,
     #[serde(default)]
     pub advanced: bool,
     #[serde(default)]
@@ -557,6 +568,7 @@ impl GameData {
         )?;
         ensure_unique("class", self.classes.iter().map(|entry| entry.id.as_str()))?;
         crate::class_training::validate_definitions(&self.classes)?;
+        crate::skill_training::validate_definitions(&self.classes)?;
         ensure_unique(
             "mutation",
             self.mutations.iter().map(|entry| entry.id.as_str()),

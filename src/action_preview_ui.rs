@@ -191,6 +191,7 @@ fn rule_error_label(error: &RuleError) -> &'static str {
         RuleError::ObjectiveUnavailable => "OBJECTIVE UNAVAILABLE",
         RuleError::MutationUnavailable => "MUTATION UNAVAILABLE",
         RuleError::ClassActionUnavailable => "CLASS ACTION UNAVAILABLE",
+        RuleError::SkillUnavailable => "TECHNIQUE UNAVAILABLE",
         RuleError::EquipmentUnavailable => "EQUIPMENT UNAVAILABLE",
         RuleError::CoverUnavailable => "COVER UNAVAILABLE",
         RuleError::OverwatchUnavailable => "OVERWATCH UNAVAILABLE",

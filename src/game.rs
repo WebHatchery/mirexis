@@ -11,6 +11,8 @@ mod first_hour_flow;
 mod input;
 mod persistence_io;
 mod playtest_flow;
+mod skill_flow;
+mod types;
 
 use crate::campaign::CampaignState;
 use crate::colony_ui;
@@ -33,27 +35,7 @@ use macroquad_toolkit::prelude::{
     begin_virtual_ui_frame, dark, end_virtual_ui_frame, GamepadInput,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum AppState {
-    Title,
-    Colony,
-    Roster,
-    GeneLab,
-    MissionBriefing,
-    Tactical,
-    Debrief,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum TacticalTargeting {
-    Equipment {
-        unit_id: String,
-        equipment_id: String,
-    },
-    ClassAction {
-        unit_id: String,
-    },
-}
+use types::{AppState, TacticalTargeting};
 
 pub struct Game {
     data: GameData,
@@ -269,6 +251,9 @@ impl Game {
                         TacticalTargeting::ClassAction { unit_id } => {
                             TargetingView::ClassAction { unit_id }
                         }
+                        TacticalTargeting::Skill { unit_id, skill_id } => {
+                            TargetingView::Skill { unit_id, skill_id }
+                        }
                     }),
                     show_help: self.show_tactical_help,
                     show_battle_log: self.show_battle_log,
@@ -313,6 +298,9 @@ impl Game {
         let audio_action = action.clone();
         if !matches!(&action, UiAction::EndPhase) {
             self.end_phase_armed = false;
+        }
+        if self.apply_skill_action(&action, audio_event_count) {
+            return;
         }
         match action {
             UiAction::StartMission => {

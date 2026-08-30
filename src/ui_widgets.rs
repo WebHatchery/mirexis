@@ -28,6 +28,9 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::ExtractionCompleted { unit_id } => format!("{} reached extraction", unit_id),
         BattleEvent::MutationActivated { gift, .. } => gift.clone(),
         BattleEvent::ClassActionActivated { action, .. } => action.clone(),
+        BattleEvent::SkillActivated { skill_id, .. } => {
+            format!("{} technique activated", skill_id.replace('_', " "))
+        }
         BattleEvent::EquipmentUsed {
             equipment_id,
             target_id,

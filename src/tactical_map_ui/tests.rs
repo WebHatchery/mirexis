@@ -20,8 +20,8 @@ fn visible_tactical_camera_controls_stay_inside_the_header_and_outside_the_map()
 
 #[test]
 fn cancel_targeting_control_is_visible_without_covering_the_target_portrait() {
-    let card = targeting_card_bounds(tactical_panel());
-    let cancel = cancel_targeting_bounds(card);
+    let card = super::targeting_card::card_bounds(tactical_panel());
+    let cancel = super::targeting_card::cancel_bounds(card);
     let target_portrait = Rect::new(card.right() - 72.0, card.y + 8.0, 64.0, 64.0);
     assert!(cancel.x >= card.x);
     assert!(cancel.right() <= card.right());

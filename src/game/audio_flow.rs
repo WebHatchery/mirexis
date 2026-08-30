@@ -78,6 +78,9 @@ fn tactical_command(action: &UiAction) -> bool {
             | UiAction::ActivateMutation
             | UiAction::ActivateClassAction
             | UiAction::UseClassActionOn(_)
+            | UiAction::ActivateSkill(_)
+            | UiAction::UseSkillOn(_)
+            | UiAction::UseSkillOnTile(_)
             | UiAction::UseEquipmentOn(_)
             | UiAction::SetOverwatch
             | UiAction::EndPhase
