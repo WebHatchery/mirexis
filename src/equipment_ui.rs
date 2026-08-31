@@ -2,7 +2,7 @@
 
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
-use crate::ui_widgets::button;
+use crate::ui_widgets::{action_button_label, button};
 use macroquad::prelude::{Color, Rect, Vec2, WHITE};
 
 fn action_button_enabled(targeting: bool, has_valid_target: bool) -> bool {
@@ -34,9 +34,15 @@ pub(crate) fn draw_action_button(
             crate::equipment_actions::has_valid_target(ctx.session, &unit.id, equipment_id)
         })
     });
+    let button_label = action_button_label(
+        equipment_label,
+        targeting,
+        equipment_id.is_some(),
+        has_valid_target,
+    );
     let clicked = button(
         rect,
-        if targeting { "CANCEL" } else { equipment_label },
+        button_label,
         action_button_enabled(targeting, has_valid_target),
         mouse,
     );

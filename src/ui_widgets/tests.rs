@@ -5,6 +5,26 @@ use crate::tactical::StatusEffect;
 use macroquad_toolkit::grid::TilePos;
 
 #[test]
+fn action_button_label_explains_target_gates_without_hiding_cancel() {
+    assert_eq!(
+        action_button_label("FIELD PATCH", false, true, true),
+        "FIELD PATCH"
+    );
+    assert_eq!(
+        action_button_label("FIELD PATCH", false, true, false),
+        "NO TARGET"
+    );
+    assert_eq!(
+        action_button_label("FIELD PATCH", true, true, false),
+        "CANCEL"
+    );
+    assert_eq!(
+        action_button_label("ARMOUR DRILL", false, false, false),
+        "ARMOUR DRILL"
+    );
+}
+
+#[test]
 fn active_statuses_name_their_remaining_phase_duration() {
     let definition = UnitDef {
         id: "status_test".to_owned(),

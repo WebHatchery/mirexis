@@ -110,6 +110,21 @@ pub(crate) fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> boo
     button_with_state(rect, label, enabled, false, mouse)
 }
 
+pub(crate) fn action_button_label(
+    label: &str,
+    targeting: bool,
+    requires_target: bool,
+    enabled: bool,
+) -> &str {
+    if targeting {
+        "CANCEL"
+    } else if requires_target && !enabled {
+        "NO TARGET"
+    } else {
+        label
+    }
+}
+
 pub(crate) fn button_with_state(
     rect: Rect,
     label: &str,

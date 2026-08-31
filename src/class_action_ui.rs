@@ -2,7 +2,7 @@
 
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
-use crate::ui_widgets::button;
+use crate::ui_widgets::{action_button_label, button};
 use macroquad::prelude::{Rect, Vec2};
 
 pub(crate) fn draw_action_button(
@@ -30,12 +30,8 @@ pub(crate) fn draw_action_button(
         } else {
             ctx.session.can_activate_selected_class_action()
         };
-    if !button(
-        rect,
-        if targeting { "CANCEL" } else { label },
-        enabled,
-        mouse,
-    ) {
+    let button_label = action_button_label(label, targeting, requires_target, enabled);
+    if !button(rect, button_label, enabled, mouse) {
         return;
     }
     actions.push(if targeting {

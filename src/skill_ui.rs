@@ -3,7 +3,7 @@
 use crate::data::TechniqueTarget;
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
-use crate::ui_widgets::button;
+use crate::ui_widgets::{action_button_label, button};
 use macroquad::prelude::{Rect, Vec2};
 
 pub(crate) fn draw_action_buttons(
@@ -55,17 +55,15 @@ pub(crate) fn draw_action_buttons(
             Some(TargetingView::Skill { unit_id, skill_id })
                 if unit_id == unit.id && skill_id == technique.id
         );
+        let requires_target = crate::skills::requires_target(&technique.id);
         let enabled = targeting
             || if technique.target == TechniqueTarget::SelfTarget {
                 ctx.session.can_activate_selected_skill(&technique.id)
             } else {
                 crate::skills::has_valid_target(ctx.session, &unit.id, &technique.id)
             };
-        let label = if targeting {
-            "CANCEL"
-        } else {
-            technique.name.as_str()
-        };
+        let label =
+            action_button_label(technique.name.as_str(), targeting, requires_target, enabled);
         if button(
             Rect::new(rect.x + slot as f32 * (width + 8.0), rect.y, width, rect.h),
             label,
