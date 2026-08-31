@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.221.0
+Save/content version: 1.222.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -1000,6 +1000,7 @@ Migration coverage:
 | 1.219.0 | Operations now exposes a touch-visible Memorial Register derived from persistent scars, recovery records, and character legacies, with a deterministic capture scene and no new save fields |
 | 1.220.0 | Failed operations now persist their mission objective in the Memorial Register, with an immediate-version migration default and deterministic capture coverage |
 | 1.221.0 | Memorial Register entries now use touch-visible pagination so long campaign histories remain reachable; no new save fields |
+| 1.222.0 | Memorial Register pagination now treats each scar, recovery, and legacy as an individual reachable record; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

@@ -57,7 +57,7 @@ Completion rule: the overhaul cannot complete while any row is not `PASS`.
 | S25 | Capture harness | Every supported scene emits current PNG to final inventory | 82 baseline PNGs; post-overhaul set pending | PASS |
 | S26 | Settings | Persistent volume, mute, and reduced-motion controls with explicit current level and return path | No dedicated visual reference | PASS |
 | S27 | Field Notes | Chronological archived colony notes with speaker, title, transcript, navigation, and return path | No transcript archive surface | PASS |
-| S28 | Memorial Register | Permanent scars, recovery records, failed objectives, and character legacies need a touch-visible revisit surface with no silent truncation | No colony cost-and-legacy register or long-history paging | PASS |
+| S28 | Memorial Register | Permanent scars, recovery records, failed objectives, and character legacies need a touch-visible revisit surface with every individual record reachable | No colony cost-and-legacy register or long-history paging | PASS |
 
 ## C. Deterministic capture scene inventory
 

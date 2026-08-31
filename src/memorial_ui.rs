@@ -1,6 +1,9 @@
-//! Touch-visible register for the permanent costs and legacies carried by the colony.
+//! Touch-visible register for every permanent cost and legacy carried by the colony.
 
-use crate::campaign::{CampaignState, CharacterRecord, LostObjectiveRecord};
+use crate::campaign::{
+    CampaignState, CharacterLegacy, CharacterRecord, InjuryRecord, LostObjectiveRecord,
+};
+use crate::trauma::TraumaRecord;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
@@ -14,14 +17,7 @@ const PAGE_SIZE: usize = 6;
 mod tests;
 
 pub(crate) fn record_count(campaign: &CampaignState) -> usize {
-    campaign.lost_objectives.len()
-        + campaign
-            .roster
-            .iter()
-            .map(|character| {
-                character.injuries.len() + character.traumas.len() + character.event_legacies.len()
-            })
-            .sum::<usize>()
+    memorial_entries(campaign).len()
 }
 
 pub(crate) fn page_count(campaign: &CampaignState) -> usize {
@@ -95,7 +91,9 @@ pub(crate) fn draw_modal(
     } else {
         for (index, entry) in entries[start..end].iter().enumerate() {
             match entry {
-                MemorialEntry::Character(character) => draw_record_row(character, index),
+                MemorialEntry::Character { character, detail } => {
+                    draw_record_row(character, *detail, index)
+                }
                 MemorialEntry::LostObjective(objective) => {
                     draw_lost_objective_row(objective, index)
                 }
@@ -158,33 +156,62 @@ fn draw_page_controls(
     }
 }
 
+#[derive(Clone, Copy)]
+enum CharacterDetail<'a> {
+    Trauma(&'a TraumaRecord),
+    Injury(&'a InjuryRecord),
+    Legacy(&'a CharacterLegacy),
+}
+
 enum MemorialEntry<'a> {
-    Character(&'a CharacterRecord),
+    Character {
+        character: &'a CharacterRecord,
+        detail: CharacterDetail<'a>,
+    },
     LostObjective(&'a LostObjectiveRecord),
 }
 
 fn memorial_entries(campaign: &CampaignState) -> Vec<MemorialEntry<'_>> {
-    campaign
-        .roster
-        .iter()
-        .filter(|character| character_has_records(character))
-        .map(MemorialEntry::Character)
-        .chain(
-            campaign
-                .lost_objectives
+    let mut entries = Vec::new();
+    for character in &campaign.roster {
+        entries.extend(
+            character
+                .traumas
                 .iter()
-                .map(MemorialEntry::LostObjective),
-        )
-        .collect()
+                .map(|record| MemorialEntry::Character {
+                    character,
+                    detail: CharacterDetail::Trauma(record),
+                }),
+        );
+        entries.extend(
+            character
+                .injuries
+                .iter()
+                .map(|record| MemorialEntry::Character {
+                    character,
+                    detail: CharacterDetail::Injury(record),
+                }),
+        );
+        entries.extend(
+            character
+                .event_legacies
+                .iter()
+                .map(|record| MemorialEntry::Character {
+                    character,
+                    detail: CharacterDetail::Legacy(record),
+                }),
+        );
+    }
+    entries.extend(
+        campaign
+            .lost_objectives
+            .iter()
+            .map(MemorialEntry::LostObjective),
+    );
+    entries
 }
 
-fn character_has_records(character: &CharacterRecord) -> bool {
-    !character.injuries.is_empty()
-        || !character.traumas.is_empty()
-        || !character.event_legacies.is_empty()
-}
-
-fn draw_record_row(character: &CharacterRecord, index: usize) {
+fn draw_record_row(character: &CharacterRecord, detail: CharacterDetail<'_>, index: usize) {
     let row = Rect::new(190.0, 160.0 + index as f32 * 70.0, 860.0, 60.0);
     draw_rectangle(
         row.x,
@@ -207,20 +234,27 @@ fn draw_record_row(character: &CharacterRecord, index: usize) {
         row.y + 23.0,
         TextStyle::new(17.0, dark::TEXT_BRIGHT).params(),
     );
-    draw_text_ex(
-        format!(
-            "SCARS {}  //  RECOVERY {}  //  LEGACIES {}",
-            character.traumas.len(),
-            character.injuries.len(),
-            character.event_legacies.len()
+    let (label, description) = match detail {
+        CharacterDetail::Trauma(trauma) => {
+            (format!("SCAR // {}", trauma.name), trauma.effect.clone())
+        }
+        CharacterDetail::Injury(injury) => (
+            format!("RECOVERY // {}", injury.name),
+            format!("{} OPS REMAIN", injury.recovery_operations),
         ),
+        CharacterDetail::Legacy(legacy) => (
+            format!("LEGACY // {}", legacy.name),
+            format!("+{} {}", legacy.amount, legacy.stat),
+        ),
+    };
+    draw_text_ex(
+        label,
         row.x + 14.0,
         row.y + 44.0,
         TextStyle::new(10.0, Color::new(0.82, 0.66, 0.32, 1.0)).params(),
     );
-    let detail = record_detail(character);
     draw_text_ex(
-        detail,
+        description,
         row.x + 264.0,
         row.y + 34.0,
         TextStyle::new(12.0, dark::TEXT).params(),
@@ -262,29 +296,4 @@ fn draw_lost_objective_row(objective: &LostObjectiveRecord, index: usize) {
         row.y + 34.0,
         TextStyle::new(12.0, dark::TEXT).params(),
     );
-}
-
-fn record_detail(character: &CharacterRecord) -> String {
-    let records = character
-        .traumas
-        .iter()
-        .map(|trauma| format!("SCAR // {} ({})", trauma.name, trauma.effect))
-        .chain(character.injuries.iter().map(|injury| {
-            format!(
-                "RECOVERY // {} ({} OPS)",
-                injury.name, injury.recovery_operations
-            )
-        }))
-        .chain(character.event_legacies.iter().map(|legacy| {
-            format!(
-                "LEGACY // {} (+{} {})",
-                legacy.name, legacy.amount, legacy.stat
-            )
-        }))
-        .collect::<Vec<_>>();
-    match records.len() {
-        0 => "NO RECORD DETAIL".to_owned(),
-        1 | 2 => records.join(" · "),
-        count => format!("{} · +{} MORE", records[..2].join(" · "), count - 2),
-    }
 }
