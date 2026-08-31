@@ -340,6 +340,7 @@ impl Game {
         self.campaign
             .resolve_first_character_event(&self.data)
             .expect("second Isolation capture event resolves");
+        self.colony_operations_open = true;
         self.state = AppState::Colony;
     }
 
@@ -355,6 +356,7 @@ impl Game {
             .colony
             .select_construction(crate::colony::BuildingKind::GeneLab)
             .expect("Adaptation capture can plan the Gene Lab");
+        self.colony_operations_open = false;
         self.state = AppState::Colony;
     }
 

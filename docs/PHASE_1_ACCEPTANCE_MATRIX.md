@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.208.0, validated and committed with this matrix
+Audit baseline: save/content 1.209.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -22,7 +22,7 @@ developer are not substitutes for that evidence.
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests including finished-save debrief restoration, and the recorded WebGL operator pass | VERIFIED |
 | D08 | Audio/settings exist and critical information remains visual | `audio.rs`, audio tests, settings UI, settings-modal input isolation, event prose/markers, and browser persistence pass; fatigue remains an observation target | VERIFIED / HUMAN PENDING |
 | D09 | No severity 1 or 2 first-hour issue remains | No implementation-known severity 1/2 issue; five-session issue discovery and triage have not occurred | HUMAN PENDING |
-| D10 | Documentation and verification captures match the build | 100-scene manifest, acceptance matrix test, `capture_audit.json`, recruited-roster briefing/roster/Gene Lab captures, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_dialogue.png`, `ui_first_hour_promise.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, `ui_first_hour_tactical.png`, `ui_first_hour_attack.png`, `ui_first_hour_enemy_phase.png`, `ui_first_hour_objective.png`, and `ui_first_hour_replay.png` | VERIFIED |
+| D10 | Documentation and verification captures match the build | 100-scene manifest, scene-local capture reset, Contact event Operations reference, acceptance matrix test, `capture_audit.json`, recruited-roster briefing/roster/Gene Lab captures, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_dialogue.png`, `ui_first_hour_promise.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, `ui_first_hour_tactical.png`, `ui_first_hour_attack.png`, `ui_first_hour_enemy_phase.png`, `ui_first_hour_objective.png`, and `ui_first_hour_replay.png` | VERIFIED |
 | D11 | Parameterless publisher passes and changes use project commit conventions | Recorded in `PHASE_1_HARDENING.md`; rerun and commit required after each audit fix | VERIFIED AT LAST CHECKPOINT |
 
 ## Workstream audit

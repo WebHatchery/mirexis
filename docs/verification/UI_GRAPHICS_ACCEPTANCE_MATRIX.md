@@ -68,7 +68,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | colony | Colony | Prototype island lacks full inhabited/state detail | `ui_colony.png` | PASS |
 | contact | Colony event | Text and grid dominate event identity | `ui_contact.png` | PASS |
 | contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
-| contact_event | Colony event | Weak event illustration and hierarchy | `ui_contact_event.png` | PASS |
+| contact_event | Colony event | Active event was not shown because the capture left the Operations drawer closed | `ui_contact_event.png` | PASS |
 | adaptation | Colony | Phase evolution primarily textual | `ui_adaptation.png` | PASS |
 | gene_lab | Gene lab | Evolution card obscured the portrait anatomy scan label | `ui_gene_lab.png` | PASS |
 | evolution | Roster/gene lab | Evolution visible mainly as text | `ui_evolution.png` | PASS |
@@ -141,7 +141,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | first_hour_return | First-hour return/recovery handoff | First return names a colonist but does not visibly route or highlight the conversation target | `ui_first_hour_return.png` | PASS |
 | first_hour_dialogue | First-hour conversation handoff | Required conversation has no focus cue on the visible CONTINUE control | `ui_first_hour_dialogue.png` | PASS |
 | first_hour_promise | First-hour promise consequence | Second-operation consequence and the required CONTINUE CAMPAIGN control lack a guided focus cue | `ui_first_hour_promise.png` | PASS |
-| first_hour_operations | First-hour colony handoff | Operations drawer does not make the next briefing action obvious | `ui_first_hour_operations.png` | PASS |
+| first_hour_operations | First-hour colony handoff | Briefing focus and the active event decision shared a cramped boundary, with the colony plan too close to the lower choice | `ui_first_hour_operations.png` | PASS |
 | battle_log | Battle log | Event rows expose internal identifiers such as `brood_stalker_a` instead of the display names used elsewhere in the UI | `ui_battle_log.png` | PASS |
 | combat_feedback | Tactical/feedback | Dense result labels can overlap nearby event anchors and impact effects, hiding normal HIT feedback | `ui_combat_feedback.png` | PASS |
 | phase_replay | Tactical/replay | Replay beat names the attack outcome but omits the immediate damage or incapacitation consequence | `ui_phase_replay.png` | PASS |

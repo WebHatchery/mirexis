@@ -31,6 +31,27 @@ fn approaching_an_npc_ends_on_an_adjacent_open_plot() {
 }
 
 #[test]
+fn reset_closes_an_open_dialogue_before_the_next_scene() {
+    let data = crate::data::GameData::load().unwrap();
+    let campaign = CampaignState::new(&data);
+    let npc = &campaign.roster[1];
+    let station = npc_position(&campaign, &npc.id).unwrap();
+    let mut explorer = ColonyExplorer::default();
+
+    explorer.request_approach(&npc.id, station, &campaign.colony);
+    for _ in 0..60 {
+        explorer.update(0.05, &campaign.colony);
+        explorer.update_approach(&campaign, &data);
+    }
+    assert!(explorer.is_talking());
+
+    explorer.reset();
+
+    assert!(!explorer.is_talking());
+    assert_eq!(explorer.position(), PLAYER_START);
+}
+
+#[test]
 fn construction_plots_are_not_walkable() {
     let mut colony = ColonyState::new();
     colony

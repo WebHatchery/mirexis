@@ -26,6 +26,7 @@ impl Game {
         self.campaign = campaign;
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::Complete;
         self.active_mission = active_mission;
+        self.save_exists = false;
         self.notifications = NotificationManager::new();
         self.events = EventBus::new();
         self.last_outcome = None;
@@ -39,10 +40,16 @@ impl Game {
         self.phase_replay = PhaseReplay::default();
         self.deployment_formation = FormationKind::default();
         self.end_phase_armed = false;
+        self.title_focus_continue = false;
+        self.title_focus_active = false;
         self.show_settings = false;
         self.title_hover_preview = false;
         self.new_campaign_armed = false;
         self.delete_save_armed = false;
+        self.colony_explorer.reset();
+        self.colony_operations_open = false;
+        self.facility_upgrade_open = false;
+        self.salvage_open = false;
         self.tactical_camera = WorldCamera::tactical_start(self.session.tactical.selected_tile);
         self.colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
     }
