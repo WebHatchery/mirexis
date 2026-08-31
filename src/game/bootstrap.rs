@@ -101,6 +101,7 @@ impl Game {
             show_settings: false,
             show_field_notes: false,
             show_memorial: false,
+            memorial_page: 0,
             selected_field_note: 0,
         }
     }

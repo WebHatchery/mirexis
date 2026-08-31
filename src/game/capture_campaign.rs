@@ -95,12 +95,46 @@ impl Game {
                 objective: "Reach the relay before the signal collapses.".to_owned(),
                 operation: 2,
             });
+        for (id, mission_name, objective, operation) in [
+            (
+                "capture_lost_dead_freight",
+                "Dead Freight",
+                "Recover the survey crate before the route closes.",
+                1,
+            ),
+            (
+                "capture_lost_root_burn",
+                "Root Burn",
+                "Hold the rootline while the colony clears the breach.",
+                3,
+            ),
+            (
+                "capture_lost_mireline",
+                "Mireline",
+                "Escort the repair team through the flooded relay lane.",
+                4,
+            ),
+        ] {
+            self.campaign
+                .lost_objectives
+                .push(crate::campaign::LostObjectiveRecord {
+                    id: id.to_owned(),
+                    mission_name: mission_name.to_owned(),
+                    objective: objective.to_owned(),
+                    operation,
+                });
+        }
 
         self.campaign.operations_completed = 3;
         self.campaign.colony.resources.materials = 84;
         self.colony_operations_open = true;
         self.show_memorial = true;
         self.state = AppState::Colony;
+    }
+
+    pub(super) fn capture_memorial_page_two(&mut self) {
+        self.capture_memorial();
+        self.memorial_page = 1;
     }
 
     pub(super) fn capture_advanced_roster(&mut self) {

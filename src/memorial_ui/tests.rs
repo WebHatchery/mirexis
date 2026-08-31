@@ -58,3 +58,26 @@ fn record_count_includes_lost_objectives() {
 
     assert_eq!(record_count(&campaign), 1);
 }
+
+#[test]
+fn memorial_pages_keep_long_registers_reachable() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    for operation in 1..=7 {
+        campaign
+            .lost_objectives
+            .push(crate::campaign::LostObjectiveRecord {
+                id: format!("lost_route_{operation}"),
+                mission_name: format!("Route {operation}"),
+                objective: format!("Recover route {operation} before the signal collapses."),
+                operation,
+            });
+    }
+
+    assert_eq!(page_count(&campaign), 2);
+    assert_eq!(previous_page(0), 0);
+    assert_eq!(previous_page(1), 0);
+    assert_eq!(next_page(0, 2), 1);
+    assert_eq!(next_page(1, 2), 1);
+    assert_eq!(next_page(99, 2), 1);
+}

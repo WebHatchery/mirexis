@@ -112,6 +112,7 @@ impl Game {
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.show_memorial = false;
+                self.memorial_page = 0;
                 self.notifications.success(match self.state {
                     AppState::Debrief => "Debrief restored",
                     AppState::Tactical => "Tactical state restored",

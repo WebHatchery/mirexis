@@ -17,6 +17,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         settings_open,
         field_notes_open,
         memorial_open,
+        memorial_page,
         selected_field_note,
     } = context;
     let mut actions = Vec::new();
@@ -84,7 +85,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             &mut actions,
         );
     } else if memorial_open {
-        crate::memorial_ui::draw_modal(campaign, mouse, &mut actions);
+        crate::memorial_ui::draw_modal(campaign, memorial_page, mouse, &mut actions);
     }
     actions
 }

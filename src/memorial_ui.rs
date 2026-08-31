@@ -8,6 +8,7 @@ use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, Te
 
 const LAUNCHER_BOUNDS: Rect = Rect::new(1064.0, 130.0, 176.0, 24.0);
 const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
+const PAGE_SIZE: usize = 6;
 
 #[cfg(test)]
 mod tests;
@@ -23,6 +24,23 @@ pub(crate) fn record_count(campaign: &CampaignState) -> usize {
             .sum::<usize>()
 }
 
+pub(crate) fn page_count(campaign: &CampaignState) -> usize {
+    let entry_count = memorial_entries(campaign).len();
+    if entry_count == 0 {
+        1
+    } else {
+        entry_count.div_ceil(PAGE_SIZE)
+    }
+}
+
+pub(crate) fn previous_page(page: usize) -> usize {
+    page.saturating_sub(1)
+}
+
+pub(crate) fn next_page(page: usize, pages: usize) -> usize {
+    page.saturating_add(1).min(pages.saturating_sub(1))
+}
+
 pub(crate) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let count = record_count(campaign);
     let label = if count == 0 {
@@ -35,7 +53,12 @@ pub(crate) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut
     }
 }
 
-pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub(crate) fn draw_modal(
+    campaign: &CampaignState,
+    requested_page: usize,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     actions.clear();
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.88));
     draw_surface_with_title(
@@ -57,12 +80,12 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
 
-    let records = campaign
-        .roster
-        .iter()
-        .filter(|character| character_has_records(character))
-        .collect::<Vec<_>>();
-    if records.is_empty() && campaign.lost_objectives.is_empty() {
+    let entries = memorial_entries(campaign);
+    let pages = page_count(campaign);
+    let page = requested_page.min(pages.saturating_sub(1));
+    let start = page * PAGE_SIZE;
+    let end = (start + PAGE_SIZE).min(entries.len());
+    if entries.is_empty() {
         draw_text_ex(
             "NO PERMANENT RECORDS YET // THE COLONY HAS NOT FORGOTTEN, BUT IT HAS NOT HAD TO MARK THE COST.",
             190.0,
@@ -70,28 +93,60 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
     } else {
-        let character_limit = if campaign.lost_objectives.is_empty() {
-            6
-        } else {
-            4
-        };
-        for (index, character) in records.into_iter().take(character_limit).enumerate() {
-            draw_record_row(character, index);
+        for (index, entry) in entries[start..end].iter().enumerate() {
+            match entry {
+                MemorialEntry::Character(character) => draw_record_row(character, index),
+                MemorialEntry::LostObjective(objective) => {
+                    draw_lost_objective_row(objective, index)
+                }
+            }
         }
-        let character_rows = campaign
-            .roster
-            .iter()
-            .filter(|character| character_has_records(character))
-            .take(character_limit)
-            .count();
-        for (offset, objective) in campaign
-            .lost_objectives
-            .iter()
-            .take(6usize.saturating_sub(character_rows))
-            .enumerate()
-        {
-            draw_lost_objective_row(objective, character_rows + offset);
-        }
+    }
+    draw_page_controls(page, pages, start, end, entries.len(), mouse, actions);
+}
+
+fn draw_page_controls(
+    page: usize,
+    pages: usize,
+    start: usize,
+    end: usize,
+    entry_count: usize,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    let page_status = if entry_count == 0 {
+        "PAGE 1 / 1 // EMPTY REGISTER".to_owned()
+    } else {
+        format!(
+            "PAGE {} / {} // ENTRIES {}-{} OF {}",
+            page + 1,
+            pages,
+            start + 1,
+            end,
+            entry_count
+        )
+    };
+    draw_text_ex(
+        page_status,
+        190.0,
+        582.0,
+        TextStyle::new(11.0, dark::TEXT_DIM).params(),
+    );
+    if button(
+        Rect::new(492.0, 596.0, 138.0, 34.0),
+        "PREVIOUS",
+        page > 0,
+        mouse,
+    ) {
+        actions.push(UiAction::PreviousMemorialPage);
+    }
+    if button(
+        Rect::new(644.0, 596.0, 138.0, 34.0),
+        "NEXT",
+        page + 1 < pages,
+        mouse,
+    ) {
+        actions.push(UiAction::NextMemorialPage);
     }
     if button(
         Rect::new(190.0, 596.0, 286.0, 34.0),
@@ -101,6 +156,26 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
     ) {
         actions.push(UiAction::ToggleMemorial);
     }
+}
+
+enum MemorialEntry<'a> {
+    Character(&'a CharacterRecord),
+    LostObjective(&'a LostObjectiveRecord),
+}
+
+fn memorial_entries(campaign: &CampaignState) -> Vec<MemorialEntry<'_>> {
+    campaign
+        .roster
+        .iter()
+        .filter(|character| character_has_records(character))
+        .map(MemorialEntry::Character)
+        .chain(
+            campaign
+                .lost_objectives
+                .iter()
+                .map(MemorialEntry::LostObjective),
+        )
+        .collect()
 }
 
 fn character_has_records(character: &CharacterRecord) -> bool {

@@ -18,5 +18,6 @@ pub(crate) struct ColonyDrawContext<'a> {
     pub(crate) settings_open: bool,
     pub(crate) field_notes_open: bool,
     pub(crate) memorial_open: bool,
+    pub(crate) memorial_page: usize,
     pub(crate) selected_field_note: usize,
 }

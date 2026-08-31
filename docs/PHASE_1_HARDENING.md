@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 520 Mirexis unit tests pass, including Memorial Register record aggregation, failed-objective migration defaults, and deployment-row affordance coverage for full,
+- 521 Mirexis unit tests pass, including Memorial Register record aggregation, failed-objective migration defaults, long-register pagination, and deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -67,7 +67,7 @@ Status: automated and internal verification complete; external playtests pending
   cues, priority selection for mixed event batches, and settings preview behavior.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 103 audited 1280×720 scenes, including the settings, Field Notes, and Memorial Register
+- The canonical set contains 104 audited 1280×720 scenes, including the settings, Field Notes, and paginated Memorial Register
   overlay and first-hour
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;

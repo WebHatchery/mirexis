@@ -90,6 +90,7 @@ pub struct Game {
     show_settings: bool,
     show_field_notes: bool,
     show_memorial: bool,
+    memorial_page: usize,
     selected_field_note: usize,
 }
 
@@ -149,6 +150,7 @@ impl Game {
                 settings_open: self.show_settings,
                 field_notes_open: self.show_field_notes,
                 memorial_open: self.show_memorial,
+                memorial_page: self.memorial_page,
                 selected_field_note: self.selected_field_note,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
@@ -286,6 +288,7 @@ impl Game {
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.show_memorial = false;
+                self.memorial_page = 0;
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
@@ -464,6 +467,7 @@ impl Game {
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.show_memorial = false;
+                self.memorial_page = 0;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
@@ -471,6 +475,7 @@ impl Game {
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
                 self.show_memorial = false;
+                self.memorial_page = 0;
                 self.state = AppState::Colony;
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();

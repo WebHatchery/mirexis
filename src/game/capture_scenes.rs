@@ -30,6 +30,7 @@ impl Game {
             }
             "field_notes" => self.capture_field_notes(),
             "memorial" => self.capture_memorial(),
+            "memorial_page_two" => self.capture_memorial_page_two(),
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),

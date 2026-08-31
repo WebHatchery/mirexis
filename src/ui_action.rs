@@ -85,6 +85,8 @@ pub enum UiAction {
     ToggleSettings,
     ToggleFieldNotes,
     ToggleMemorial,
+    PreviousMemorialPage,
+    NextMemorialPage,
     SelectFieldNote(usize),
     AudioVolumeDown,
     AudioVolumeUp,

@@ -40,6 +40,10 @@ impl Game {
         if self.show_memorial {
             if input.escape_pressed || pad.cancel {
                 self.events.push(UiAction::ToggleMemorial);
+            } else if pad.previous {
+                self.events.push(UiAction::PreviousMemorialPage);
+            } else if pad.next {
+                self.events.push(UiAction::NextMemorialPage);
             }
             return false;
         }

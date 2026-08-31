@@ -45,6 +45,7 @@ impl Game {
         self.show_settings = false;
         self.show_field_notes = false;
         self.show_memorial = false;
+        self.memorial_page = 0;
         self.selected_field_note = 0;
         self.title_hover_preview = false;
         self.new_campaign_armed = false;
