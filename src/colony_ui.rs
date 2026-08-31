@@ -17,6 +17,7 @@ mod event_affordance;
 mod medical;
 mod recruitment;
 mod relay;
+mod research;
 mod research_affordance;
 mod salvage;
 mod scene;
@@ -108,6 +109,7 @@ pub(super) fn draw_operations(
         .research
         .iter()
         .any(|research| research.completed);
+    let pending_research = research::has_pending(campaign);
     let phase_progress = if campaign.strategy.campaign_complete {
         data.campaign
             .mirexis_paths
@@ -334,6 +336,11 @@ pub(super) fn draw_operations(
                     .find(|mutation| mutation.id == character.mutation_id)
                     .is_some_and(|mutation| !mutation.evolutions.is_empty())
         });
+    let research_surface_visible = pending_research
+        && !evolution_pending
+        && campaign.strategy.available_event().is_none()
+        && !campaign.outsider_recruit_available(data)
+        && decision.is_none();
     if campaign.strategy.campaign_complete {
         if let Some(path) = data
             .campaign
@@ -390,59 +397,8 @@ pub(super) fn draw_operations(
             draw_character_event(campaign, data, assets, visuals, event, mouse, actions);
         } else if campaign.outsider_arc_available() {
             crate::outsider_ui::draw(campaign, assets, visuals, mouse, actions);
-        } else if let Some(research) = campaign
-            .strategy
-            .research
-            .iter()
-            .find(|entry| !entry.completed)
-        {
-            let research_cost = campaign.research_material_cost(research.materials_cost);
-            if colony_button(
-                Rect::new(878.0, 510.0, 362.0, 32.0),
-                &research_affordance::button_label(
-                    &research.name,
-                    resources.materials,
-                    research_cost,
-                ),
-                campaign.can_complete_research(&research.id),
-                mouse,
-            ) {
-                actions.push(UiAction::CompleteResearch(research.id.clone()));
-            }
-            let icon = match research.id.as_str() {
-                "xeno_triage" => 8,
-                "salvage_doctrine" => 10,
-                _ => 5,
-            };
-            visuals.draw_atlas_cell(
-                assets,
-                &visuals.terrain,
-                icon,
-                Rect::new(878.0, 548.0, 48.0, 42.0),
-                WHITE,
-            );
-            draw_rectangle_lines(878.0, 548.0, 48.0, 42.0, 1.0, dark::ACCENT);
-            for (index, line) in wrap_words(&research.description, 46)
-                .into_iter()
-                .take(2)
-                .enumerate()
-            {
-                draw_ui_text_ex(
-                    &line,
-                    936.0,
-                    558.0 + index as f32 * 14.0,
-                    TextStyle::new(10.0, dark::TEXT_DIM).params(),
-                );
-            }
-            draw_ui_text_ex(
-                &format!(
-                    "PROJECT READY // COST {} MAT // GRID POWER +{}",
-                    research_cost, research.power_reward
-                ),
-                936.0,
-                588.0,
-                TextStyle::new(9.5, dark::POSITIVE).params(),
-            );
+        } else {
+            research::draw_available(campaign, assets, visuals, mouse, actions);
         }
     }
     if !choosing_contact
@@ -452,51 +408,7 @@ pub(super) fn draw_operations(
         && campaign.strategy.available_event().is_none()
         && !campaign.outsider_recruit_available(data)
     {
-        draw_ui_text_ex(
-            "ACTIVE DOCTRINES",
-            878.0,
-            600.0,
-            TextStyle::new(12.0, dark::ACCENT).params(),
-        );
-        let completed = campaign
-            .strategy
-            .research
-            .iter()
-            .filter(|entry| entry.completed)
-            .collect::<Vec<_>>();
-        if completed.is_empty() {
-            draw_ui_text_ex(
-                "No completed field doctrine",
-                878.0,
-                616.0,
-                TextStyle::new(10.0, dark::TEXT_DIM).params(),
-            );
-        } else {
-            for (index, research) in completed.into_iter().take(3).enumerate() {
-                let rect = Rect::new(878.0 + index as f32 * 120.0, 606.0, 114.0, 32.0);
-                draw_rectangle(
-                    rect.x,
-                    rect.y,
-                    rect.w,
-                    rect.h,
-                    Color::new(0.045, 0.105, 0.11, 1.0),
-                );
-                visuals.draw_atlas_cell(
-                    assets,
-                    &visuals.terrain,
-                    [5, 8, 10][index],
-                    Rect::new(rect.x + 2.0, rect.y + 2.0, 30.0, 28.0),
-                    WHITE,
-                );
-                draw_ui_text_ex(
-                    &research.name.to_uppercase(),
-                    rect.x + 36.0,
-                    rect.y + 20.0,
-                    TextStyle::new(10.0, dark::TEXT).params(),
-                );
-                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 1.0, dark::POSITIVE);
-            }
-        }
+        research::draw_completed_summary(campaign, assets, visuals, research_surface_visible);
     }
     recruitment::draw(
         campaign,
@@ -516,7 +428,7 @@ pub(super) fn draw_operations(
                 defense.blocked_tiles.len()
             ),
             878.0,
-            colony_plan_baseline(campaign),
+            colony_plan_baseline(campaign, research_surface_visible),
             TextStyle::new(12.0, dark::TEXT_DIM).params(),
         );
     }
@@ -534,8 +446,10 @@ fn character_event_card_bounds() -> Rect {
     Rect::new(878.0, 514.0, 362.0, 162.0)
 }
 
-fn colony_plan_baseline(campaign: &CampaignState) -> f32 {
-    if campaign.strategy.available_event().is_some() {
+fn colony_plan_baseline(campaign: &CampaignState, research_surface_visible: bool) -> f32 {
+    if research_surface_visible {
+        676.0
+    } else if campaign.strategy.available_event().is_some() {
         668.0
     } else {
         650.0

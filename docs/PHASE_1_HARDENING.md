@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 522 Mirexis unit tests pass, including individual Memorial Register record streaming, failed-objective migration defaults, long-register pagination, and deployment-row affordance coverage for full,
+- 525 Mirexis unit tests pass, including individual Memorial Register record streaming, failed-objective migration defaults, long-register pagination, non-linear field-doctrine choice visibility, and deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and

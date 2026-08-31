@@ -38,7 +38,7 @@ Completion rule: the overhaul cannot complete while any row is not `PASS`.
 | S06 | Construction | Foundations/scaffold/progress/cost/valid placement feedback | Procedural blueprint marks only | PASS |
 | S07 | Roster | Portrait-led recruit identity, class/equipment/mutation and history hierarchy | Rebuild portrait remains procedural | PASS |
 | S08 | Relationships | Portrait pairs, bond state, effects and consistent navigation | Roster screen with text emphasis | PASS |
-| S09 | Research | Technology identity, prerequisites, progress, costs and unlocked states | Colony grid plus command buttons | PASS |
+| S09 | Research | Technology identity, non-linear choice visibility, effects, costs and unlocked states | Colony grid plus command buttons | PASS |
 | S10 | Gene lab | Portrait mutation anatomy, evolution comparison, costs/consequences | Text list and plain panels | PASS |
 | S11 | Equipment | Weapon/tool art, target state, forecast and disabled reasons | Tactical buttons and text | PASS |
 | S12 | Help | Reading typography, grouped topics, keyboard/controller cues | Dense modal, small text | PASS |
@@ -108,7 +108,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | repair | Colony | Restored architecture and repair feedback were not captured explicitly | `ui_repair.png` | PASS |
 | power | Colony | Unpowered state lacks environmental response | `ui_power.png` | PASS |
 | construction | Colony | Construction state lacks authored staging | `ui_construction.png` | PASS |
-| research | Research | Research capture left the doctrine panel behind a closed Operations drawer | `ui_research.png` | PASS |
+| research | Research | Only the first unfinished doctrine was visible, hiding the non-linear choice space and its effects | `ui_research.png` | PASS |
 | roster | Roster | Procedural portrait, dense controls, and the final equipment row extending below the workshop panel | `ui_roster.png` | PASS |
 | recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
 | recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |

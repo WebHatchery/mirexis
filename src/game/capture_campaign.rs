@@ -6,9 +6,6 @@ use crate::state::ObjectiveState;
 
 impl Game {
     pub(super) fn capture_research(&mut self) {
-        for (index, research) in self.campaign.strategy.research.iter_mut().enumerate() {
-            research.completed = index < 2;
-        }
         for event in &mut self.campaign.strategy.character_events {
             event.resolved = true;
         }

@@ -145,7 +145,7 @@ $lines.Add("- ``ui_field_notes.png``: the Operations archive keeps chronological
 $lines.Add("- ``ui_memorial.png``: the Operations register keeps persistent scars, recovery records, lost objectives, and character legacies visible with an explicit return path.")
 $lines.Add("- ``ui_memorial_page_two.png``: the paginated Operations register keeps older long-campaign entries reachable with an explicit PREVIOUS path.")
 $lines.Add("- ``ui_contact_event.png``: the active Contact aftermath event opens in the Operations drawer with its participants, carrier choices, and consequence summary visible.")
-$lines.Add("- ``ui_contact.png``, ``ui_research.png``, ``ui_adaptation.png``, ``ui_escalation_response.png``, and ``ui_mirexis_path.png``: progression references open the Operations drawer at the decision surface they represent, keeping dossier, doctrine, and path context visible.")
+$lines.Add("- ``ui_contact.png``, ``ui_research.png``, ``ui_adaptation.png``, ``ui_escalation_response.png``, and ``ui_mirexis_path.png``: progression references open the Operations drawer at the decision surface they represent, keeping dossier, every available doctrine, and path context visible.")
 $lines.Add("- ``ui_briefing.png``: first-operation deployment guidance focuses DEPLOY SQUAD while preserving the selectable roster rows.")
 $lines.Add("- ``ui_first_hour_tactical.png``: guided tactical lesson marks a legal move target without blocking the battlefield inspection.")
 $lines.Add("- ``ui_first_hour_ability.png``: guided ability lesson focuses a currently actionable mutation, class action, or field item.")

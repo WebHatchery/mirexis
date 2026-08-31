@@ -1,10 +1,10 @@
-//! Operations-panel affordance for the next field doctrine.
+//! Operations-panel affordance for field-doctrine choices.
 
-pub(super) fn button_label(name: &str, materials: i32, cost: i32) -> String {
+pub(super) fn choice_button_label(materials: i32, cost: i32) -> String {
     if materials < cost {
-        format!("RESEARCH {} // NEED {} MAT", name, cost)
+        format!("NEED {} MAT", cost)
     } else {
-        format!("RESEARCH {} // {} MAT", name, cost)
+        format!("COMPLETE // {} MAT", cost)
     }
 }
 

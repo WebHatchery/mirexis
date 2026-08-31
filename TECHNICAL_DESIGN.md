@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.222.0
+Save/content version: 1.223.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -139,6 +139,7 @@ Important transition payloads:
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
 | `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
+| `colony_ui/research.rs` | Concurrent field-doctrine choices and compact completed-doctrine summary | Research mutation |
 | `memorial_ui.rs` | Touch-visible register for character costs, legacies, and failed objectives | Campaign mutation |
 | `colony_map_ui.rs` | 2.5D settlement projection, first-hour destination trace, and plot intents | Campaign mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
@@ -548,6 +549,9 @@ building repairs it and autosaves the restored facility.
   Fortifications raises colony-defense cover integrity from 6 to 10, Xeno-Triage
   reduces new injury recovery by one operation, and Salvage Doctrine adds 8
   materials to later mission rewards.
+- The Operations panel keeps every unfinished doctrine visible at once, with its full
+  effect, effective material cost, and touch-visible completion control; completing one
+  does not hide the remaining research choices.
 - Data-backed character events with participant validation, disclosed costs, and
   persistent character legacies. Survey Family Routes gives Sol +1 movement;
   Documented Carapace gives Mara +1 armour. Legacy modifiers are stored on the
@@ -1001,6 +1005,7 @@ Migration coverage:
 | 1.220.0 | Failed operations now persist their mission objective in the Memorial Register, with an immediate-version migration default and deterministic capture coverage |
 | 1.221.0 | Memorial Register entries now use touch-visible pagination so long campaign histories remain reachable; no new save fields |
 | 1.222.0 | Memorial Register pagination now treats each scar, recovery, and legacy as an individual reachable record; no new save fields |
+| 1.223.0 | Operations now exposes every unfinished field doctrine with its effect, effective cost, and touch-visible completion control; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
