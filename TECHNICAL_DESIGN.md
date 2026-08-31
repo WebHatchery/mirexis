@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.183.0
+Save/content version: 1.184.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -959,6 +959,7 @@ Migration coverage:
 | 1.181.0 | Guided first-hour attacks now outline the forecast card's ATTACK confirmation after a valid hostile forecast is selected, including the second-operation learning lesson; no new save fields |
 | 1.182.0 | Guided first-hour objective play now outlines the SECURE OBJECTIVE command once the selected colonist reaches the objective; no new save fields |
 | 1.183.0 | First-hour return goals now outline the debrief's RETURN TO COLONY control for both operation returns; no new save fields |
+| 1.184.0 | Required first-hour colony conversations now outline their visible CONTINUE control after the correct speaker is opened; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

@@ -143,6 +143,7 @@ $lines.Add("- ``ui_first_hour_tactical.png``: guided tactical lesson marks a leg
 $lines.Add("- ``ui_first_hour_ability.png``: guided ability lesson focuses a currently actionable mutation, class action, or field item.")
 $lines.Add("- ``ui_second_operation_tactical.png``: the persisted transfer lesson keeps the active preparation, ApplyLearning hostile focus, and forecast prompt visible after deployment.")
 $lines.Add("- ``ui_first_hour_return.png``: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.")
+$lines.Add("- ``ui_first_hour_dialogue.png``: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.")
 $lines.Add("- ``ui_first_hour_promise.png``: the promise beat distinguishes a hardened outer route from a second-operation breach before continuation.")
 $lines.Add("- ``ui_first_hour_operations.png``: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.")
 $lines.Add("- ``ui_construction.png``: placement blueprint and reserved resources remain visible at fixed building scale.")

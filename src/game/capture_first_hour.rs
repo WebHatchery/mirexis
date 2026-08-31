@@ -26,6 +26,16 @@ impl Game {
         self.campaign.first_hour.first_outcome_won = Some(false);
     }
 
+    pub(super) fn capture_first_hour_dialogue(&mut self) {
+        self.state = AppState::Colony;
+        self.colony_explorer.reset();
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
+        let position = crate::colony_exploration::npc_position(&self.campaign, "mara_venn")
+            .expect("dialogue capture includes Mara");
+        self.colony_explorer
+            .request_approach("mara_venn", position, &self.campaign.colony);
+    }
+
     pub(super) fn capture_first_hour_promise(&mut self) {
         self.state = AppState::Colony;
         self.colony_explorer.reset();

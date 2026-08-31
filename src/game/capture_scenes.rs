@@ -81,6 +81,7 @@ impl Game {
             }
             "first_hour_guide" => self.capture_first_hour_guide(),
             "first_hour_return" => self.capture_first_hour_return(),
+            "first_hour_dialogue" => self.capture_first_hour_dialogue(),
             "first_hour_promise" => self.capture_first_hour_promise(),
             "first_hour_operations" => self.capture_first_hour_operations(),
             "battle_log" => {

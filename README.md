@@ -25,8 +25,9 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   hostile first and expose the forecast card's visible ATTACK confirmation.
 - The ability lesson recovers onto a colonist with a valid visible action and focuses that
   specific mutation, class, or field-item control.
-- First-hour colony handoffs focus the visible Operations, briefing, and equal-choice preparation
-  controls so the campaign remains touch-completable between operations.
+- First-hour colony handoffs focus the visible Operations, briefing, equal-choice preparation,
+  and required conversation CONTINUE controls so the campaign remains touch-completable between
+  operations.
 - A navigable 2.5D city with NPC interaction, construction, repairs, facilities,
   resources, research, recruitment, route-gated Waystation contacts, and faction pressure.
 - A powered Commons with one shared meal per operation, turning squad preparation into

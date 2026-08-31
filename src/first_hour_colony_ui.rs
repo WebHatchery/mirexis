@@ -8,8 +8,12 @@ const OPERATIONS_BUTTON: Rect = Rect::new(1028.0, 22.0, 124.0, 28.0);
 const BRIEFING_BUTTON: Rect = Rect::new(878.0, 478.0, 362.0, 30.0);
 const INVESTMENT_CHOICES: Rect = Rect::new(878.0, 348.0, 362.0, 212.0);
 
-pub(crate) fn draw_focus(progress: &FirstHourProgress, operations_open: bool) {
-    let Some((rect, _)) = focus_target(progress, operations_open) else {
+pub(crate) fn draw_focus(
+    progress: &FirstHourProgress,
+    operations_open: bool,
+    dialogue_target: Option<&str>,
+) {
+    let Some((rect, _)) = focus_target(progress, operations_open, dialogue_target) else {
         return;
     };
     let color = focus_color();
@@ -40,9 +44,16 @@ pub(crate) fn draw_focus(progress: &FirstHourProgress, operations_open: bool) {
 fn focus_target(
     progress: &FirstHourProgress,
     operations_open: bool,
+    dialogue_target: Option<&str>,
 ) -> Option<(Rect, &'static str)> {
     if !progress.guidance_enabled || progress.help_open {
         return None;
+    }
+    if dialogue_target.is_some() && dialogue_target == progress.colony_guidance_target() {
+        return Some((
+            crate::colony_exploration::dialogue_continue_button_bounds(),
+            "CONTINUE",
+        ));
     }
     match progress.stage {
         FirstHourStage::PrepareFirstOperation | FirstHourStage::SecondOperation => {

@@ -25,6 +25,10 @@ const NPC_STATIONS: [[i32; 2]; 7] = [
     [17, 6],
 ];
 
+pub(crate) fn dialogue_continue_button_bounds() -> Rect {
+    Rect::new(632.0, 532.0, 136.0, 30.0)
+}
+
 mod dialogue;
 use dialogue::{npc_action_button_label, npc_action_enabled};
 
@@ -416,12 +420,7 @@ impl ColonyExplorer {
                 self.close_dialogue();
             }
         }
-        if button(
-            Rect::new(632.0, 532.0, 136.0, 30.0),
-            "CONTINUE",
-            true,
-            mouse,
-        ) {
+        if button(dialogue_continue_button_bounds(), "CONTINUE", true, mouse) {
             actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
             self.close_dialogue();
         }
@@ -430,6 +429,10 @@ impl ColonyExplorer {
 
     pub(crate) fn is_talking(&self) -> bool {
         self.talking_to.is_some()
+    }
+
+    pub(crate) fn talking_to(&self) -> Option<&str> {
+        self.talking_to.as_deref()
     }
 
     pub(crate) fn can_talk(&self, campaign: &CampaignState, data: &GameData) -> bool {
