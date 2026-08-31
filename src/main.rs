@@ -52,6 +52,7 @@ mod hazard_ui;
 mod hazards;
 mod help_ui;
 mod map_variants;
+mod memorial_ui;
 mod objective_ui;
 mod operation_modifiers;
 mod outsider_ui;

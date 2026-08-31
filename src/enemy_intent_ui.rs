@@ -104,7 +104,7 @@ pub(crate) fn draw_inspector(
         TextStyle::new(12.0, Color::new(0.93, 0.45, 0.48, 1.0)).params(),
     );
     draw_text_ex(
-        active_status_summary(&unit),
+        active_status_summary(unit),
         x,
         panel.y + 346.0,
         TextStyle::new(

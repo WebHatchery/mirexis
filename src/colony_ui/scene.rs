@@ -16,6 +16,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         salvage_open,
         settings_open,
         field_notes_open,
+        memorial_open,
         selected_field_note,
     } = context;
     let mut actions = Vec::new();
@@ -31,6 +32,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         campaign.first_hour.help_open,
         settings_open,
         field_notes_open,
+        memorial_open,
         *facility_upgrade_open,
         *salvage_open,
     );
@@ -66,7 +68,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             &mut actions,
         );
     }
-    if !*facility_upgrade_open && !*salvage_open && !field_notes_open {
+    if !*facility_upgrade_open && !*salvage_open && !field_notes_open && !memorial_open {
         crate::first_hour_colony_ui::draw_focus(
             &campaign.first_hour,
             *operations_open,
@@ -81,6 +83,8 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             mouse,
             &mut actions,
         );
+    } else if memorial_open {
+        crate::memorial_ui::draw_modal(campaign, mouse, &mut actions);
     }
     actions
 }
@@ -89,12 +93,14 @@ fn colony_map_input_enabled(
     first_hour_help_open: bool,
     settings_open: bool,
     field_notes_open: bool,
+    memorial_open: bool,
     facility_upgrade_open: bool,
     salvage_open: bool,
 ) -> bool {
     !first_hour_help_open
         && !settings_open
         && !field_notes_open
+        && !memorial_open
         && !facility_upgrade_open
         && !salvage_open
 }

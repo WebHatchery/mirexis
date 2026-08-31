@@ -361,8 +361,10 @@ Build these in priority order:
    yard sorts one object per operation into 24 materials, a 12-material next-doctrine insight,
    or a free standard equipment prototype. The Workshop remains responsible for finished
    equipment and consumes the prototype when the player chooses the item to craft.
-6. **Memorial Archive.** Records scars, retired colonists, lost objectives, and campaign
-   legacies. It becomes essential only when those systems have enough content to honour.
+6. **Memorial Archive.** The first Memorial Register slice records existing scars, recovery
+   records, and campaign legacies in a touch-visible colony overlay. Future work should extend
+   the register to retired colonists and lost objectives once those systems have enough content
+   to honour.
 
 ### 8.3 Identity buildings
 

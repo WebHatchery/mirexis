@@ -19,6 +19,7 @@ mod field_notes_flow;
 mod first_hour_flow;
 mod formation_flow;
 mod input;
+mod memorial_flow;
 mod persistence_io;
 mod playtest_flow;
 mod salvage_flow;
@@ -88,6 +89,7 @@ pub struct Game {
     audio: crate::audio::AudioSystem,
     show_settings: bool,
     show_field_notes: bool,
+    show_memorial: bool,
     selected_field_note: usize,
 }
 
@@ -146,6 +148,7 @@ impl Game {
                 salvage_open: &mut self.salvage_open,
                 settings_open: self.show_settings,
                 field_notes_open: self.show_field_notes,
+                memorial_open: self.show_memorial,
                 selected_field_note: self.selected_field_note,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
@@ -246,6 +249,9 @@ impl Game {
         if self.apply_field_notes_action(&action) {
             return;
         }
+        if self.apply_memorial_action(&action) {
+            return;
+        }
         if self.guard_destructive_action(&action) {
             return;
         }
@@ -279,6 +285,7 @@ impl Game {
                 self.colony_operations_open = false;
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
+                self.show_memorial = false;
                 self.state = AppState::Colony;
                 self.last_outcome = None;
                 self.autosave_campaign_only("New colony autosaved");
@@ -456,12 +463,14 @@ impl Game {
                 self.reset_tactical_transients(false);
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
+                self.show_memorial = false;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
                 self.reset_tactical_transients(false);
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
+                self.show_memorial = false;
                 self.state = AppState::Colony;
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();

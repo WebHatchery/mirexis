@@ -54,6 +54,47 @@ impl Game {
         self.state = AppState::Colony;
     }
 
+    pub(super) fn capture_memorial(&mut self) {
+        let kira = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "kira_voss")
+            .expect("memorial capture includes Kira");
+        crate::trauma::record_incapacitation(kira, 1);
+
+        let mara = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "mara_venn")
+            .expect("memorial capture includes Mara");
+        mara.injuries.push(crate::campaign::InjuryRecord {
+            id: "capture_mireline_fracture".to_owned(),
+            name: "Mireline fracture".to_owned(),
+            recovery_operations: 1,
+        });
+
+        let sol = self
+            .campaign
+            .roster
+            .iter_mut()
+            .find(|character| character.id == "sol_cairn")
+            .expect("memorial capture includes Sol");
+        sol.event_legacies.push(crate::campaign::CharacterLegacy {
+            id: "capture_route_held".to_owned(),
+            name: "The Route Held".to_owned(),
+            stat: "movement".to_owned(),
+            amount: 1,
+        });
+
+        self.campaign.operations_completed = 3;
+        self.campaign.colony.resources.materials = 84;
+        self.colony_operations_open = true;
+        self.show_memorial = true;
+        self.state = AppState::Colony;
+    }
+
     pub(super) fn capture_advanced_roster(&mut self) {
         self.campaign.strategy.phase_id = "adaptation".to_owned();
         self.campaign.colony.resources.materials = 480;

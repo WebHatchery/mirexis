@@ -29,6 +29,7 @@ impl Game {
                 self.show_settings = true;
             }
             "field_notes" => self.capture_field_notes(),
+            "memorial" => self.capture_memorial(),
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),

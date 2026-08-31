@@ -26,12 +26,12 @@ Status: automated and internal verification complete; external playtests pending
 | Colour-independent meaning | Buttons and status text name state; target rings, icons, forecasts, and event prose do not rely on hue alone | Include colour-vision feedback in external sessions |
 | Motion | Persistent **REDUCED MOTION** completes unit presentation immediately and suppresses hostile replay animation | Confirm the faster state changes remain comprehensible |
 | Audio | Persistent 0–100% volume and mute; critical events retain text, markers, meters, and debrief state | Listen for fatigue and overlap in observed sessions |
-| Overlay input safety | First-hour field guide, settings, Field Notes, Facility Upgrades, Salvage Yard, tactical help, battle log, and hostile replay clear underlying release actions; reference overlays are mutually exclusive, blocking colony overlays suppress colony/tactical map gestures and drawer changes, pause movement, and preserve visible close paths; NEXT READY cancels stale tactical targeting before changing unit focus; first-hour guide actions preserve active tactical/debrief save context; new colony/deployment sessions clear replay, combat feedback, targeting, confirmation, overlays, audio cursors, and battle-history filters; save restore clears the same transient tactical/audio state | Repeat on touch-primary browsers |
+| Overlay input safety | First-hour field guide, settings, Field Notes, Memorial Register, Facility Upgrades, Salvage Yard, tactical help, battle log, and hostile replay clear underlying release actions; reference overlays are mutually exclusive, blocking colony overlays suppress colony/tactical map gestures and drawer changes, pause movement, and preserve visible close paths; NEXT READY cancels stale tactical targeting before changing unit focus; first-hour guide actions preserve active tactical/debrief save context; new colony/deployment sessions clear replay, combat feedback, targeting, confirmation, overlays, audio cursors, and battle-history filters; save restore clears the same transient tactical/audio state | Repeat on touch-primary browsers |
 | Playtest evidence | Campaign-persisted elapsed time, first-action milestones, operation durations/rounds, invalid commands, and field-guide opens are visible in the field guide | Observer still records exact input method and qualitative findings |
 
 ## Automated verification baseline
 
-- 516 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 518 Mirexis unit tests pass, including Memorial Register record aggregation and deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -67,7 +67,7 @@ Status: automated and internal verification complete; external playtests pending
   cues, priority selection for mixed event batches, and settings preview behavior.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 102 audited 1280×720 scenes, including the settings and Field Notes
+- The canonical set contains 103 audited 1280×720 scenes, including the settings, Field Notes, and Memorial Register
   overlay and first-hour
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;

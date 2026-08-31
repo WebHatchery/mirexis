@@ -17,5 +17,6 @@ pub(crate) struct ColonyDrawContext<'a> {
     pub(crate) salvage_open: &'a mut bool,
     pub(crate) settings_open: bool,
     pub(crate) field_notes_open: bool,
+    pub(crate) memorial_open: bool,
     pub(crate) selected_field_note: usize,
 }

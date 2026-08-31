@@ -9,6 +9,7 @@ impl Game {
             self.campaign.first_hour.help_open,
             self.show_settings,
             self.show_field_notes,
+            self.show_memorial,
             self.facility_upgrade_open,
             self.salvage_open,
         )
@@ -67,6 +68,7 @@ fn colony_explorer_can_update(
     first_hour_help_open: bool,
     settings_open: bool,
     field_notes_open: bool,
+    memorial_open: bool,
     facility_upgrade_open: bool,
     salvage_open: bool,
 ) -> bool {
@@ -74,6 +76,7 @@ fn colony_explorer_can_update(
         && !first_hour_help_open
         && !settings_open
         && !field_notes_open
+        && !memorial_open
         && !facility_upgrade_open
         && !salvage_open
 }

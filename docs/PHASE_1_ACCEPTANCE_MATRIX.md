@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.218.0, validated and committed with this matrix
+Audit baseline: save/content 1.219.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -22,7 +22,7 @@ developer are not substitutes for that evidence.
 | D07 | Victory, defeat, save, continue, refresh, and resize paths are verified | `PHASE_1_HARDENING.md`, persistence/outcome tests including finished-save debrief restoration, and the recorded WebGL operator pass | VERIFIED |
 | D08 | Audio/settings exist and critical information remains visual | `audio.rs`, audio tests, distinct phase/reinforcement response cues, settings UI with bounded volume meter, settings-modal input isolation, volume/unmute preview feedback, event prose/markers, and browser persistence pass; fatigue remains an observation target | VERIFIED / HUMAN PENDING |
 | D09 | No severity 1 or 2 first-hour issue remains | No implementation-known severity 1/2 issue; five-session issue discovery and triage have not occurred | HUMAN PENDING |
-| D10 | Documentation and verification captures match the build | 102-scene manifest, scene-local capture reset, progression Operations-surface references for Contact, Research, Adaptation, Escalation, and Mirexis, Contact event Operations reference, Field Notes archive reference, acceptance matrix test, `capture_audit.json`, recruited-roster briefing/roster/Gene Lab captures, `ui_settings.png`, `ui_field_notes.png`, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_dialogue.png`, `ui_first_hour_promise.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, `ui_first_hour_tactical.png`, `ui_first_hour_attack.png`, `ui_first_hour_enemy_phase.png`, `ui_first_hour_objective.png`, and `ui_first_hour_replay.png` | VERIFIED |
+| D10 | Documentation and verification captures match the build | 103-scene manifest, scene-local capture reset, progression Operations-surface references for Contact, Research, Adaptation, Escalation, and Mirexis, Contact event Operations reference, Field Notes archive and Memorial Register references, acceptance matrix test, `capture_audit.json`, recruited-roster briefing/roster/Gene Lab captures, `ui_settings.png`, `ui_field_notes.png`, `ui_memorial.png`, `ui_first_hour_guide.png`, `ui_first_hour_return.png`, `ui_first_hour_dialogue.png`, `ui_first_hour_promise.png`, `ui_first_hour_ability.png`, `ui_second_operation_tactical.png`, `ui_first_hour_operations.png`, `ui_first_hour_tactical.png`, `ui_first_hour_attack.png`, `ui_first_hour_enemy_phase.png`, `ui_first_hour_objective.png`, and `ui_first_hour_replay.png` | VERIFIED |
 | D11 | Parameterless publisher passes and changes use project commit conventions | Recorded in `PHASE_1_HARDENING.md`; rerun and commit required after each audit fix | VERIFIED |
 
 ## Workstream audit
@@ -125,7 +125,7 @@ Clipping, stacking, fatigue, and muted comprehension require listening sessions.
 | Text, contrast, colour redundancy, and motion/readability | Graphics acceptance matrix and reduced-motion setting | VERIFIED / HUMAN PENDING |
 | Overlay/focus/resize input safety | First-hour, settings, Facility Upgrades, and Salvage Yard overlays consume underlying physical input and suppress colony/tactical map gestures, walk requests, drawer toggles, and stale camera state; first-hour, tactical help, and battle-history references are mutually exclusive; NEXT READY clears stale tactical targeting before changing unit focus; first-hour guide actions preserve active tactical/debrief save context; new colony/deployment sessions clear replay, combat feedback, targeting, confirmation, overlays, audio cursors, and battle-history filters; save restore clears the same transient tactical/audio state; modal input clearing, camera cleanup, map-release, session-transition, and restore tests | VERIFIED |
 | Explicit save migrations | Schema table and immediate-previous-version fixture | VERIFIED |
-| Canonical captures replaced rather than duplicated | Flat 102-scene capture inventory and audit | VERIFIED |
+| Canonical captures replaced rather than duplicated | Flat 103-scene capture inventory and audit | VERIFIED |
 
 ## Delivery-checkpoint audit
 

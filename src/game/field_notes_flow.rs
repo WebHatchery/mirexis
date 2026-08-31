@@ -16,6 +16,7 @@ impl Game {
                         .len()
                         .saturating_sub(1);
                     self.show_settings = false;
+                    self.show_memorial = false;
                     self.facility_upgrade_open = false;
                     self.salvage_open = false;
                     self.clear_colony_explorer_motion();

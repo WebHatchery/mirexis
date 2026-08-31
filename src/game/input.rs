@@ -37,6 +37,12 @@ impl Game {
         if self.show_field_notes {
             return false;
         }
+        if self.show_memorial {
+            if input.escape_pressed || pad.cancel {
+                self.events.push(UiAction::ToggleMemorial);
+            }
+            return false;
+        }
         if let Some(action) = first_hour_help_overlay_input(
             self.campaign.first_hour.help_open,
             input.escape_pressed,

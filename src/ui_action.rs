@@ -84,6 +84,7 @@ pub enum UiAction {
     ChooseFirstHourInvestment(String),
     ToggleSettings,
     ToggleFieldNotes,
+    ToggleMemorial,
     SelectFieldNote(usize),
     AudioVolumeDown,
     AudioVolumeUp,

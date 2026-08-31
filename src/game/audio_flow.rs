@@ -14,6 +14,7 @@ impl Game {
                 if self.show_settings {
                     self.clear_colony_explorer_motion();
                     self.show_field_notes = false;
+                    self.show_memorial = false;
                 }
             }
             UiAction::AudioVolumeDown => {

@@ -85,6 +85,7 @@ pub(super) fn draw_operations(
         TextStyle::new(15.0, dark::TEXT).params(),
     );
     crate::field_notes_ui::draw_launcher(&campaign.colony_story, mouse, actions);
+    crate::memorial_ui::draw_launcher(campaign, mouse, actions);
     if campaign.first_hour.stage == crate::first_hour::FirstHourStage::MakeInvestment {
         crate::first_hour_investment_ui::draw(campaign, mouse, actions);
         return;

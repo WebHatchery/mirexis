@@ -66,6 +66,7 @@ impl Game {
 
     pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
         if !self.show_field_notes
+            && !self.show_memorial
             && self.state != AppState::Title
             && !(self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
                 && self.state != AppState::Colony)

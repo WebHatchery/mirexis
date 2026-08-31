@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.218.0
+Save/content version: 1.219.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -77,10 +77,11 @@ Important transition payloads:
 | `briefing_deployment_ui.rs` | Squad rows, formation selector, and deploy/stand-down controls | Session creation |
 | `danger_rating.rs` | Deterministic shared offer/briefing danger score and bands | Save state or rendering |
 | `game.rs` | App state, intent dispatch, toolkit save integration | Tactical/strategic calculations |
-| `game/input.rs` | State-aware keyboard translation, settings/Field Notes modal input locks, and replay input lock | Simulation mutation |
+| `game/input.rs` | State-aware keyboard translation, settings/Field Notes/Memorial Register modal input locks, and replay input lock | Simulation mutation |
 | `game/capture_scenes.rs` | Deterministic visual-reference state construction | Runtime input handling |
 | `game/capture_tactical.rs` | Tactical mechanic showcase capture construction | Runtime input handling |
 | `game/field_notes_flow.rs` | Field Notes archive overlay state and safe note selection | Story content or rendering |
+| `game/memorial_flow.rs` | Derived Memorial Register overlay state and safe modal transitions | Campaign record mutation or rendering |
 | `ui_debrief.rs` | Operation results and campaign-finale presentation | Outcome or campaign mutation |
 | `gene_lab_ui.rs` | Mutation inspection and evolution intents | Campaign mutation |
 | `ui_action.rs` | Shared screen-to-state action vocabulary | Rendering and action execution |
@@ -995,6 +996,7 @@ Migration coverage:
 | 1.216.0 | Acknowledged colony beats now retain speaker, title, and transcript text in a save-safe Field Notes archive with a touch-visible Operations overlay |
 | 1.217.0 | Field Notes launcher moves into the stable Operations header lane so it remains visible beside investment and campaign decision surfaces; no new save fields |
 | 1.218.0 | Hostile intent inspection now names active status effects and their remaining phases with the same readable vocabulary used by the colony rail; no new save fields |
+| 1.219.0 | Operations now exposes a touch-visible Memorial Register derived from persistent scars, recovery records, and character legacies, with a deterministic capture scene and no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -1047,8 +1049,8 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (400 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic 102-scene capture with visual inspection
+- `cargo test` (518 Mirexis unit tests plus asset-registry and source-size gates)
+- deterministic 103-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 

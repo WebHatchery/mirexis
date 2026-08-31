@@ -100,6 +100,7 @@ impl Game {
             audio,
             show_settings: false,
             show_field_notes: false,
+            show_memorial: false,
             selected_field_note: 0,
         }
     }

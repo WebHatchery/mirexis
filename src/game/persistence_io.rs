@@ -111,6 +111,7 @@ impl Game {
                 self.colony_operations_open = false;
                 self.facility_upgrade_open = false;
                 self.salvage_open = false;
+                self.show_memorial = false;
                 self.notifications.success(match self.state {
                     AppState::Debrief => "Debrief restored",
                     AppState::Tactical => "Tactical state restored",
