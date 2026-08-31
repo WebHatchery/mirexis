@@ -141,6 +141,7 @@ impl Game {
             "legacy" => self.capture_legacy(),
             "roster" => self.state = AppState::Roster,
             "recruited_roster" => self.capture_recruited_roster_screen(),
+            "roster_info" => self.capture_recruited_roster_info(),
             "recruited_gene_lab" => self.capture_recruited_gene_lab(),
             "advanced_roster" => self.capture_advanced_roster(),
             "relationships" => self.capture_relationships(AppState::Roster),

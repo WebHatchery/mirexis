@@ -109,6 +109,7 @@ pub(crate) fn draw_roster(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     ui: &VirtualUi,
+    roster_inspection_id: Option<&str>,
 ) -> Vec<UiAction> {
     let mouse = crate::ui::pointer_position(ui);
     let mut actions = Vec::new();
@@ -121,7 +122,15 @@ pub(crate) fn draw_roster(
     );
     draw_header(campaign);
     draw_character_list(campaign, assets, visuals, mouse, &mut actions);
-    draw_selected_character(campaign, data, assets, visuals, mouse, &mut actions);
+    draw_selected_character(
+        campaign,
+        data,
+        assets,
+        visuals,
+        mouse,
+        roster_inspection_id,
+        &mut actions,
+    );
     draw_ui_text_ex(
         "TOUCH / MOUSE // TAP COLONIST · TRAIN · CRAFT · EQUIP · COLONY  //  PAD // D-PAD · A · B",
         28.0,
@@ -281,6 +290,7 @@ fn draw_selected_character(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     mouse: Vec2,
+    roster_inspection_id: Option<&str>,
     actions: &mut Vec<UiAction>,
 ) {
     let panel = Rect::new(316.0, 96.0, 946.0, 580.0);
@@ -530,14 +540,21 @@ fn draw_selected_character(
             );
         }
     }
-    let inspected_equipment = data
+    let hovered_equipment = data
         .equipment
         .iter()
         .enumerate()
         .find_map(|(index, item)| equipment_row_rect(index).contains(mouse).then_some(item));
+    let inspected_equipment = hovered_equipment.or_else(|| {
+        roster_inspection_id.and_then(|id| data.equipment.iter().find(|item| item.id == id))
+    });
     if let Some(item) = inspected_equipment {
         draw_text_block(
-            &format!("{} // {}", item.name.to_uppercase(), item.description),
+            &format!(
+                "{} // {} // TOUCH INFO (?) KEEPS THIS READOUT OPEN",
+                item.name.to_uppercase(),
+                item.description
+            ),
             344.0,
             516.0,
             870.0,
@@ -599,8 +616,22 @@ fn draw_selected_character(
             &item.name,
             cost,
         );
-        if button(rect, "", enabled, mouse) {
+        let craft_clicked = button(rect, "", enabled, mouse);
+        let info_clicked = button(
+            equipment_info_rect(rect),
+            if roster_inspection_id == Some(item.id.as_str()) {
+                "!"
+            } else {
+                "?"
+            },
+            true,
+            mouse,
+        );
+        if craft_clicked && !info_clicked {
             actions.push(UiAction::CraftSelected(item.id.clone()));
+        }
+        if info_clicked {
+            actions.push(UiAction::InspectRosterEquipment(item.id.clone()));
         }
         if let Some(index) = crate::visual_assets::equipment_index(&item.id) {
             visuals.draw_atlas_cell(
@@ -638,6 +669,10 @@ fn draw_selected_character(
     ) {
         actions.push(UiAction::ReturnToColony);
     }
+}
+
+fn equipment_info_rect(rect: Rect) -> Rect {
+    Rect::new(rect.x + rect.w - 28.0, rect.y, 28.0, rect.h)
 }
 
 #[cfg(test)]

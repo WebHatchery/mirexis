@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.223.0
+Save/content version: 1.224.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -142,7 +142,7 @@ Important transition payloads:
 | `colony_ui/research.rs` | Concurrent field-doctrine choices and compact completed-doctrine summary | Research mutation |
 | `memorial_ui.rs` | Touch-visible register for character costs, legacies, and failed objectives | Campaign mutation |
 | `colony_map_ui.rs` | 2.5D settlement projection, first-hour destination trace, and plot intents | Campaign mutation |
-| `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
+| `roster_ui.rs` | Colonist selection, training, equipment intents, and touch-persistent equipment inspection | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
 | `formation.rs` | Safe deterministic wedge, line, and column colony entry placement | Tactical persistence |
 | `cover_rules.rs` | Directional facing and cover-penalty calculation shared by combat and preview | Drawing or state mutation |
@@ -333,7 +333,10 @@ The colony roster screen persists a selected colonist and exposes every base cla
 aptitude-priced material costs. Workshop choices cover starter equipment plus three
 Contact prototypes. Crafting replaces any item in the same slot while preserving other
 slots, so primary weapons, armour, tools, and modules remain mutually coherent rather
-than accumulating blindly.
+than accumulating blindly. Each workshop row also exposes a visible `?` inspection target;
+the resulting equipment description remains in the readout after the tap so touch players
+do not need pointer hover to understand a loadout choice. This is transient UI state and
+is cleared when the colonist changes or the roster closes.
 
 Seven initial class families are loaded from `classes.json`. Aptitude changes the
 material cost of training but never class eligibility. Switching classes retains
@@ -1006,6 +1009,7 @@ Migration coverage:
 | 1.221.0 | Memorial Register entries now use touch-visible pagination so long campaign histories remain reachable; no new save fields |
 | 1.222.0 | Memorial Register pagination now treats each scar, recovery, and legacy as an individual reachable record; no new save fields |
 | 1.223.0 | Operations now exposes every unfinished field doctrine with its effect, effective cost, and touch-visible completion control; no new save fields |
+| 1.224.0 | Roster workshop rows now expose a touch-visible `?` inspection target with a persistent equipment description readout; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -1037,7 +1041,7 @@ translated into `UiAction` or tactical commands before simulation mutation. Tact
 units use labels as well as faction color, and colony buildings use text labels.
 
 `scripts/capture_ui.ps1` captures `title`, `colony`, `settings`, `field_notes`, `contact`, `damage`, `power`,
-`construction`, `research`, `roster`, `advanced_roster`, `relationships`, `trauma`, `bonded_briefing`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
+`construction`, `research`, `roster`, `roster_info`, `advanced_roster`, `relationships`, `trauma`, `bonded_briefing`, `contact_gear`, `contact_event`, `adaptation`, `gene_lab`, `evolution`,
 `mara_evolution`, `ilya_evolution`, `sol_evolution`, `nadi_evolution`, `escalation`, `escalation_operation`, `escalation_response`, `mirexis`, `mirexis_path`,
 `redoubt_end`, `commonwealth_end`, `threshold_end`,
 `finale_debrief`,

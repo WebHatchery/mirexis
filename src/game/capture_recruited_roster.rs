@@ -12,6 +12,11 @@ impl Game {
         self.capture_recruited_roster(AppState::Roster);
     }
 
+    pub(super) fn capture_recruited_roster_info(&mut self) {
+        self.capture_recruited_roster(AppState::Roster);
+        self.roster_inspection_id = Some("mireborn_sense".to_owned());
+    }
+
     pub(super) fn capture_recruited_gene_lab(&mut self) {
         self.capture_recruited_roster(AppState::GeneLab);
     }

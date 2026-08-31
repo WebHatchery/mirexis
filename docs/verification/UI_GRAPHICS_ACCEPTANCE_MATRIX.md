@@ -36,7 +36,7 @@ Completion rule: the overhaul cannot complete while any row is not `PASS`.
 | S04 | Loadout briefing | Equipment silhouettes and comparable readiness changes | Text-only loadout summary | PASS |
 | S05 | Colony | Inhabited settlement, resources, operations, interaction feedback | Prototype island; incomplete state/evolution grammar | PASS |
 | S06 | Construction | Foundations/scaffold/progress/cost/valid placement feedback | Procedural blueprint marks only | PASS |
-| S07 | Roster | Portrait-led recruit identity, class/equipment/mutation and history hierarchy | Rebuild portrait remains procedural | PASS |
+| S07 | Roster | Portrait-led recruit identity, class/equipment/mutation and history hierarchy, with touch-readable equipment inspection | Rebuild portrait remains procedural and equipment detail depended on hover | PASS |
 | S08 | Relationships | Portrait pairs, bond state, effects and consistent navigation | Roster screen with text emphasis | PASS |
 | S09 | Research | Technology identity, non-linear choice visibility, effects, costs and unlocked states | Colony grid plus command buttons | PASS |
 | S10 | Gene lab | Portrait mutation anatomy, evolution comparison, costs/consequences | Text list and plain panels | PASS |
@@ -111,6 +111,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | research | Research | Only the first unfinished doctrine was visible, hiding the non-linear choice space and its effects | `ui_research.png` | PASS |
 | roster | Roster | Procedural portrait, dense controls, and the final equipment row extending below the workshop panel | `ui_roster.png` | PASS |
 | recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
+| roster_info | Roster | Equipment descriptions were only available through pointer hover | `ui_roster_info.png` | PASS |
 | recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |
 | advanced_roster | Roster | Class change lacks silhouette transformation | `ui_advanced_roster.png` | PASS |
 | relationships | Relationships | Bonds are text-led | `ui_relationships.png` | PASS |

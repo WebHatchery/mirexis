@@ -41,6 +41,7 @@ pub enum UiAction {
     OpenRoster,
     OpenGeneLab,
     SelectColonist(String),
+    InspectRosterEquipment(String),
     TrainSelected(String),
     LearnSelectedSkill(String),
     ToggleSelectedSkill(String),

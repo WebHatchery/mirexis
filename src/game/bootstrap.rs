@@ -103,6 +103,7 @@ impl Game {
             show_memorial: false,
             memorial_page: 0,
             selected_field_note: 0,
+            roster_inspection_id: None,
         }
     }
 }

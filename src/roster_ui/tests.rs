@@ -69,3 +69,14 @@ fn equipment_rows_clear_the_roster_footer() {
     assert!(last_row.y + last_row.h <= 676.0);
     assert!(last_row.y + last_row.h < 707.0);
 }
+
+#[test]
+fn equipment_info_targets_stay_inside_their_rows() {
+    let row = equipment_row_rect(4);
+    let info = equipment_info_rect(row);
+
+    assert_eq!(info.w, 28.0);
+    assert_eq!(info.h, row.h);
+    assert!(row.contains(Vec2::new(info.x + 1.0, info.y + 1.0)));
+    assert!(row.contains(Vec2::new(info.x + info.w - 1.0, info.y + info.h - 1.0)));
+}

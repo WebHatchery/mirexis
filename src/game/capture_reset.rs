@@ -47,6 +47,7 @@ impl Game {
         self.show_memorial = false;
         self.memorial_page = 0;
         self.selected_field_note = 0;
+        self.roster_inspection_id = None;
         self.title_hover_preview = false;
         self.new_campaign_armed = false;
         self.delete_save_armed = false;

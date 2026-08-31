@@ -92,6 +92,7 @@ pub struct Game {
     show_memorial: bool,
     memorial_page: usize,
     selected_field_note: usize,
+    roster_inspection_id: Option<String>,
 }
 
 impl Game {
@@ -159,6 +160,7 @@ impl Game {
                 &self.assets,
                 &self.visuals,
                 &virtual_ui,
+                self.roster_inspection_id.as_deref(),
             ),
             AppState::GeneLab => crate::gene_lab_ui::draw_gene_lab(
                 &self.campaign,
@@ -468,6 +470,7 @@ impl Game {
                 self.salvage_open = false;
                 self.show_memorial = false;
                 self.memorial_page = 0;
+                self.roster_inspection_id = None;
                 self.state = AppState::Title;
             }
             UiAction::ReturnToColony => {
@@ -476,6 +479,7 @@ impl Game {
                 self.salvage_open = false;
                 self.show_memorial = false;
                 self.memorial_page = 0;
+                self.roster_inspection_id = None;
                 self.state = AppState::Colony;
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();
@@ -495,9 +499,15 @@ impl Game {
             }
             UiAction::SelectColonist(character_id) => {
                 match self.campaign.select_character(&character_id) {
-                    Ok(()) => self.autosave_campaign_only("Roster selection autosaved"),
+                    Ok(()) => {
+                        self.roster_inspection_id = None;
+                        self.autosave_campaign_only("Roster selection autosaved");
+                    }
                     Err(err) => self.notifications.warning(err),
                 }
+            }
+            UiAction::InspectRosterEquipment(equipment_id) => {
+                self.roster_inspection_id = Some(equipment_id);
             }
             UiAction::SelectConstruction(kind) => {
                 if kind == crate::colony::BuildingKind::GeneLab

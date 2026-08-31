@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 525 Mirexis unit tests pass, including individual Memorial Register record streaming, failed-objective migration defaults, long-register pagination, non-linear field-doctrine choice visibility, and deployment-row affordance coverage for full,
+- 526 Mirexis unit tests pass, including individual Memorial Register record streaming, failed-objective migration defaults, long-register pagination, non-linear field-doctrine choice visibility, touch-persistent roster equipment inspection, and deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -67,7 +67,7 @@ Status: automated and internal verification complete; external playtests pending
   cues, priority selection for mixed event batches, and settings preview behavior.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 104 audited 1280×720 scenes, including the settings, Field Notes, and paginated Memorial Register
+- The canonical set contains 105 audited 1280×720 scenes, including the settings, Field Notes, and paginated Memorial Register
   overlay and first-hour
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;
@@ -76,7 +76,7 @@ Status: automated and internal verification complete; external playtests pending
   disclosure,
   enemy-phase readiness and replay-skip transitions, forecast/first-hour layout changes,
   the wrapped escalation pressure modifier, and bounded threat-intelligence rows
-  replace their affected images.
+  replace their affected images, plus touch-persistent roster equipment inspection.
   The three ending captures also open the Operations drawer so each path-specific identity
   card and bounded colony legacy register is visible without the obsolete colony
   plan line colliding with its lower rows in the canonical evidence.
