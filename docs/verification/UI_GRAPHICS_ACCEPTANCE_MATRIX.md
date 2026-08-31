@@ -173,9 +173,9 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | Implementation checkpoint 2 | 150 tests + source gate; Windows/WebGL publish; controller bridge/package audit | PASS |
 | Implementation checkpoint 3 | 151 tests + source gate; 82-scene recapture; Windows/WebGL publish; 27-file package audit | PASS |
 | Live WebGL checkpoint | Warning/error-free browser startup; title through tactical deployment and help exercised | PASS |
-| Final implementation gate | `cargo fmt --all -- --check`; 213 gameplay tests plus the source-limit target test; strict Clippy with warnings denied | PASS |
-| Final publish/package gate | `publish.ps1`; Windows and WebGL release builds; 27-file/25.85 MB runtime asset package; preview deploy | PASS |
-| Final full capture | `FINAL_CAPTURE_INVENTORY.md`; 85 PNGs, SHA-256 digests, eight ordered contact sheets inspected, and machine audit in `capture_audit.json` | PASS |
+| Final implementation gate | `cargo fmt --package mirexis -- --check`; 507 Mirexis unit tests, source-size gate, and strict Clippy with warnings denied | PASS |
+| Final publish/package gate | `publish.ps1`; Windows and WebGL release builds; 37-file/64.43 MB runtime asset package; preview deploy | PASS |
+| Final full capture | `FINAL_CAPTURE_INVENTORY.md`; 100 PNGs, SHA-256 digests, and machine audit in `capture_audit.json` | PASS |
 | Visual regression baseline | Current deterministic PNG set and `FINAL_CAPTURE_INVENTORY.md`; one-off implementation audit reports retired after acceptance | PASS |
 | Ongoing requirement contract | This matrix remains the machine-checked scene contract; product-readiness criteria now live in `../PLAYABLE_GAME_PHASE_1.md` | PASS |
 | Minimum active work | Goal elapsed active work reached 14,408 seconds before closure | PASS |
