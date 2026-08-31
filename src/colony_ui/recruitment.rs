@@ -5,6 +5,16 @@ use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
+fn recruit_button_label(name: &str, cost: i32, resource: &str, available: i32) -> String {
+    let name = name.to_uppercase();
+    let resource = resource.to_uppercase();
+    if available < cost {
+        format!("RECRUIT {name} // NEED {cost} {resource}")
+    } else {
+        format!("RECRUIT {name} // {cost} {resource}")
+    }
+}
+
 pub(super) fn draw(
     campaign: &CampaignState,
     data: &GameData,
@@ -30,6 +40,7 @@ pub(super) fn draw(
     } else {
         outsider.recruitment_resource.as_str()
     };
+    let resource_available = campaign.recruitment_resource_amount(resource);
     draw_ui_text_ex(
         &format!(
             "WAYSTATION // {} AWAITING A DECISION",
@@ -41,15 +52,18 @@ pub(super) fn draw(
     );
     if colony_button(
         Rect::new(878.0, 606.0, 362.0, 36.0),
-        &format!(
-            "RECRUIT {} // {} {}",
-            outsider.name.to_uppercase(),
+        &recruit_button_label(
+            &outsider.name,
             outsider.recruitment_cost,
-            resource.to_uppercase()
+            resource,
+            resource_available,
         ),
-        campaign.recruitment_resource_amount(resource) >= outsider.recruitment_cost,
+        resource_available >= outsider.recruitment_cost,
         mouse,
     ) {
         actions.push(UiAction::RecruitOutsider);
     }
 }
+
+#[cfg(test)]
+mod tests;
