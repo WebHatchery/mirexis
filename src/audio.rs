@@ -17,6 +17,7 @@ pub(crate) enum SoundCue {
     Hit,
     Miss,
     Damage,
+    Recovery,
     Ability,
     Objective,
     Victory,
@@ -195,6 +196,7 @@ fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
         BattleEvent::DamageApplied { .. }
         | BattleEvent::ObjectiveDamaged { .. }
         | BattleEvent::HazardTriggered { .. } => Some(SoundCue::Damage),
+        BattleEvent::UnitHealed { .. } => Some(SoundCue::Recovery),
         BattleEvent::AttackRolled {
             roll, hit_chance, ..
         } => Some(if roll <= hit_chance {
@@ -231,6 +233,14 @@ fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
             Damage,
             vec![noise(0.18, 0.44), tone(0.20, 120.0, 55.0, 0.40)],
             6,
+        ),
+        (
+            Recovery,
+            vec![
+                tone(0.18, 420.0, 680.0, 0.24),
+                tone(0.14, 680.0, 980.0, 0.18),
+            ],
+            13,
         ),
         (
             Ability,

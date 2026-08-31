@@ -13,6 +13,7 @@ fn palette_covers_every_required_response_and_ambience() {
         SoundCue::Hit,
         SoundCue::Miss,
         SoundCue::Damage,
+        SoundCue::Recovery,
         SoundCue::Ability,
         SoundCue::Objective,
         SoundCue::Victory,
@@ -22,6 +23,18 @@ fn palette_covers_every_required_response_and_ambience() {
     ] {
         assert!(cues.contains(&cue));
     }
+}
+
+#[test]
+fn healing_events_use_a_distinct_recovery_cue() {
+    assert_eq!(
+        event_cue(&BattleEvent::UnitHealed {
+            unit_id: "kira_voss".to_owned(),
+            amount: 2,
+            remaining: 8,
+        }),
+        Some(SoundCue::Recovery)
+    );
 }
 
 #[test]

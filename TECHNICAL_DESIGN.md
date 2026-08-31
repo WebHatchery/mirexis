@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.192.0
+Save/content version: 1.193.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -962,6 +962,13 @@ Migration coverage:
 | 1.184.0 | Required first-hour colony conversations now outline their visible CONTINUE control after the correct speaker is opened; no new save fields |
 | 1.185.0 | First-hour opening and promise goals now outline BEGIN ARRIVAL and CONTINUE CAMPAIGN, while skipped guidance suppresses all gold focus cues; no new save fields |
 | 1.186.0 | First-operation briefing guidance now focuses DEPLOY SQUAD for a viable squad or the first selectable row when squad selection needs recovery; no new save fields |
+| 1.187.0 | First-hour hostile replay guidance now focuses the visible SKIP REPLAY control; no new save fields |
+| 1.188.0 | Enemy-phase readiness now summarizes ready, spent, and incapacitated colonists beside the end-phase confirmation; no new save fields |
+| 1.189.0 | Combat feedback now names hit, miss, incapacitation, objective completion, and extraction outcomes in transient battlefield callouts; no new save fields |
+| 1.190.0 | Objective damage and destructible-cover outcomes now anchor transient callouts to their affected battlefield locations; no new save fields |
+| 1.191.0 | Battle history and hostile replay summaries now name HIT or MISS outcomes beside the deterministic roll and target chance; no new save fields |
+| 1.192.0 | Dense combat callouts now use a clamped vertical lane above unit and impact effects so normal HIT feedback remains visible; no new save fields |
+| 1.193.0 | Healing events now use a distinct procedural recovery sound instead of falling through to the generic ability cue; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

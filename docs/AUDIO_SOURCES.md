@@ -5,7 +5,7 @@ Mirexis Phase 1 audio is generated at runtime from deterministic synthesis defin
 attribution.
 
 The palette covers focus, invalid action, movement, weapon hit, weapon miss, damage,
-ability, objective update, victory, defeat, city ambience, and tactical ambience. Fixed
+recovery, ability, objective update, victory, defeat, city ambience, and tactical ambience. Fixed
 seeds make every generated WAV repeatable. The quiet ambience loops use separate scenes
 and stop cleanly when the game changes between title, city, and tactical contexts.
 
