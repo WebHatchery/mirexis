@@ -362,9 +362,9 @@ Build these in priority order:
    or a free standard equipment prototype. The Workshop remains responsible for finished
    equipment and consumes the prototype when the player chooses the item to craft.
 6. **Memorial Archive.** The first Memorial Register slice records existing scars, recovery
-   records, and campaign legacies in a touch-visible colony overlay. Future work should extend
-   the register to retired colonists and lost objectives once those systems have enough content
-   to honour.
+   records, campaign legacies, and failed-operation objectives in a touch-visible colony overlay.
+   Future work should extend the register to retired colonists once that system has enough
+   content to honour.
 
 ### 8.3 Identity buildings
 

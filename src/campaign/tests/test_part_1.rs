@@ -586,6 +586,9 @@ fn failed_colony_defense_damages_a_saved_facility() {
     };
     campaign.apply_mission_outcome(&outcome, &mission, &data);
     assert!(campaign.relationships.is_empty());
+    assert_eq!(campaign.lost_objectives.len(), 1);
+    assert_eq!(campaign.lost_objectives[0].operation, 1);
+    assert_eq!(campaign.lost_objectives[0].objective, mission.objective);
     assert!(campaign
         .colony
         .buildings

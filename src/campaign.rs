@@ -8,6 +8,7 @@ mod evolution;
 mod identity;
 mod medical;
 mod mission;
+mod modifiers;
 mod outsider;
 mod relay;
 mod research;
@@ -17,6 +18,11 @@ mod story;
 #[allow(unused_imports)]
 pub(super) use derivation::derive_unit;
 pub(super) use derivation::derive_unit_with_evolution_options;
+#[allow(unused_imports)]
+pub(super) use modifiers::apply_mutation;
+pub(crate) use modifiers::derived_mutation_traits_with_options;
+#[allow(unused_imports)]
+pub use modifiers::{derived_mutation_traits, equipment_cost};
 pub(crate) use outsider::OutsiderChoice;
 pub(crate) use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};
 pub(crate) use salvage::{SalvageChoice, SALVAGE_MATERIALS_REWARD, SALVAGE_RESEARCH_INSIGHT};
@@ -25,7 +31,7 @@ use crate::colony::{
     BuildingKind, ColonyState, COUNTERINTELLIGENCE_CELL_UPGRADE, HOT_CORE_UPGRADE,
     PRECISION_BENCH_UPGRADE, STABILISATION_WING_UPGRADE, TRAUMA_WARD_UPGRADE,
 };
-use crate::data::{CharacterDef, EquipmentDef, GameData, MutationDef, Team, UnitDef};
+use crate::data::{CharacterDef, EquipmentDef, GameData, Team, UnitDef};
 use crate::relationships::RelationshipRecord;
 use crate::state::{MissionOutcome, ObjectiveState};
 use crate::strategy::{MissionInstance, StrategyState};
@@ -65,6 +71,14 @@ pub struct CharacterLegacy {
     pub name: String,
     pub stat: String,
     pub amount: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LostObjectiveRecord {
+    pub id: String,
+    pub mission_name: String,
+    pub objective: String,
+    pub operation: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -146,6 +160,8 @@ pub struct CampaignState {
     #[serde(default)]
     pub relationships: Vec<RelationshipRecord>,
     #[serde(default)]
+    pub lost_objectives: Vec<LostObjectiveRecord>,
+    #[serde(default)]
     pub first_hour: crate::first_hour::FirstHourProgress,
     #[serde(default)]
     pub colony_story: crate::colony_story::ColonyStoryState,
@@ -204,6 +220,7 @@ impl CampaignState {
             strategy: StrategyState::new(data),
             operations_completed: 0,
             relationships: Vec::new(),
+            lost_objectives: Vec::new(),
             first_hour: crate::first_hour::FirstHourProgress::default(),
             colony_story: crate::colony_story::ColonyStoryState::default(),
             outsider_arc_stage: 0,
@@ -458,6 +475,14 @@ impl CampaignState {
             .collect::<Vec<_>>();
         self.operations_completed += 1;
         self.colony.advance_operation();
+        if outcome.result == ObjectiveState::Failed {
+            self.lost_objectives.push(LostObjectiveRecord {
+                id: format!("failed_operation_{}", self.operations_completed),
+                mission_name: mission.name.clone(),
+                objective: mission.objective.clone(),
+                operation: self.operations_completed,
+            });
+        }
         self.colony.resources.materials += outcome.materials_awarded;
         self.colony.resources.biomass += outcome.biomass_awarded;
         self.colony.resources.power += outcome.power_awarded;
@@ -727,59 +752,6 @@ impl CampaignState {
 
 fn deployment_selected_default() -> bool {
     true
-}
-
-pub fn equipment_cost(slot: &str) -> u32 {
-    match slot {
-        "primary" => 30,
-        "armour" => 25,
-        "tool" | "module" => 20,
-        _ => 25,
-    }
-}
-
-#[allow(dead_code)]
-pub fn derived_mutation_traits(
-    character: &CharacterRecord,
-    data: &GameData,
-) -> BTreeMap<String, i32> {
-    derived_mutation_traits_with_options(character, data, false)
-}
-
-pub(crate) fn derived_mutation_traits_with_options(
-    character: &CharacterRecord,
-    data: &GameData,
-    suppress_evolution_complications: bool,
-) -> BTreeMap<String, i32> {
-    let mut traits = BTreeMap::new();
-    if let Some(mutation) = data
-        .mutations
-        .iter()
-        .find(|entry| entry.id == character.mutation_id)
-    {
-        apply_mutation(mutation, &mut traits);
-        if let Some(evolution) = mutation
-            .evolutions
-            .iter()
-            .find(|evolution| evolution.id == character.mutation_evolution_id)
-        {
-            for modifier in evolution.gift.iter().chain(
-                evolution
-                    .complication
-                    .iter()
-                    .filter(|_| !suppress_evolution_complications),
-            ) {
-                *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
-            }
-        }
-    }
-    traits
-}
-
-fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
-    for modifier in mutation.gift.iter().chain(&mutation.complication) {
-        *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
-    }
 }
 
 #[cfg(test)]

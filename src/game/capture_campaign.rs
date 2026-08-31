@@ -87,6 +87,14 @@ impl Game {
             stat: "movement".to_owned(),
             amount: 1,
         });
+        self.campaign
+            .lost_objectives
+            .push(crate::campaign::LostObjectiveRecord {
+                id: "capture_lost_cold_signal".to_owned(),
+                mission_name: "Cold Signal".to_owned(),
+                objective: "Reach the relay before the signal collapses.".to_owned(),
+                operation: 2,
+            });
 
         self.campaign.operations_completed = 3;
         self.campaign.colony.resources.materials = 84;

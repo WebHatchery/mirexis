@@ -1,6 +1,6 @@
 //! Touch-visible register for the permanent costs and legacies carried by the colony.
 
-use crate::campaign::{CampaignState, CharacterRecord};
+use crate::campaign::{CampaignState, CharacterRecord, LostObjectiveRecord};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
@@ -13,13 +13,14 @@ const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
 mod tests;
 
 pub(crate) fn record_count(campaign: &CampaignState) -> usize {
-    campaign
-        .roster
-        .iter()
-        .map(|character| {
-            character.injuries.len() + character.traumas.len() + character.event_legacies.len()
-        })
-        .sum()
+    campaign.lost_objectives.len()
+        + campaign
+            .roster
+            .iter()
+            .map(|character| {
+                character.injuries.len() + character.traumas.len() + character.event_legacies.len()
+            })
+            .sum::<usize>()
 }
 
 pub(crate) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
@@ -47,7 +48,7 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
     );
     draw_text_ex(
         format!(
-            "{} RECORD{} // SCARS, RECOVERY, AND THE WORK PEOPLE LEFT BEHIND",
+            "{} RECORD{} // SCARS, RECOVERY, LOST OBJECTIVES, AND THE WORK PEOPLE LEFT BEHIND",
             record_count(campaign),
             if record_count(campaign) == 1 { "" } else { "S" }
         ),
@@ -61,7 +62,7 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         .iter()
         .filter(|character| character_has_records(character))
         .collect::<Vec<_>>();
-    if records.is_empty() {
+    if records.is_empty() && campaign.lost_objectives.is_empty() {
         draw_text_ex(
             "NO PERMANENT RECORDS YET // THE COLONY HAS NOT FORGOTTEN, BUT IT HAS NOT HAD TO MARK THE COST.",
             190.0,
@@ -69,8 +70,27 @@ pub(crate) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
     } else {
-        for (index, character) in records.into_iter().take(6).enumerate() {
+        let character_limit = if campaign.lost_objectives.is_empty() {
+            6
+        } else {
+            4
+        };
+        for (index, character) in records.into_iter().take(character_limit).enumerate() {
             draw_record_row(character, index);
+        }
+        let character_rows = campaign
+            .roster
+            .iter()
+            .filter(|character| character_has_records(character))
+            .take(character_limit)
+            .count();
+        for (offset, objective) in campaign
+            .lost_objectives
+            .iter()
+            .take(6usize.saturating_sub(character_rows))
+            .enumerate()
+        {
+            draw_lost_objective_row(objective, character_rows + offset);
         }
     }
     if button(
@@ -126,6 +146,43 @@ fn draw_record_row(character: &CharacterRecord, index: usize) {
     let detail = record_detail(character);
     draw_text_ex(
         detail,
+        row.x + 264.0,
+        row.y + 34.0,
+        TextStyle::new(12.0, dark::TEXT).params(),
+    );
+}
+
+fn draw_lost_objective_row(objective: &LostObjectiveRecord, index: usize) {
+    let row = Rect::new(190.0, 160.0 + index as f32 * 70.0, 860.0, 60.0);
+    draw_rectangle(
+        row.x,
+        row.y,
+        row.w,
+        row.h,
+        Color::new(0.10, 0.075, 0.065, 0.98),
+    );
+    draw_rectangle_lines(
+        row.x,
+        row.y,
+        row.w,
+        row.h,
+        1.0,
+        Color::new(0.60, 0.32, 0.22, 0.90),
+    );
+    draw_text_ex(
+        format!("OBJECTIVE LOST // {}", objective.mission_name),
+        row.x + 14.0,
+        row.y + 23.0,
+        TextStyle::new(15.0, dark::TEXT_BRIGHT).params(),
+    );
+    draw_text_ex(
+        format!("OPERATION {}  //  ROUTE NOT RECOVERED", objective.operation),
+        row.x + 14.0,
+        row.y + 44.0,
+        TextStyle::new(10.0, Color::new(0.92, 0.48, 0.32, 1.0)).params(),
+    );
+    draw_text_ex(
+        &objective.objective,
         row.x + 264.0,
         row.y + 34.0,
         TextStyle::new(12.0, dark::TEXT).params(),

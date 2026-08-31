@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.219.0
+Save/content version: 1.220.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -139,6 +139,7 @@ Important transition payloads:
 | `grid_ui.rs` | Tactical viewport geometry and pointer hit-testing | Simulation rules |
 | `ui_widgets.rs` | Shared tactical buttons, status labels, and event summaries | State mutation |
 | `colony_ui.rs` | Colony rendering and strategic intents | Direct state mutation |
+| `memorial_ui.rs` | Touch-visible register for character costs, legacies, and failed objectives | Campaign mutation |
 | `colony_map_ui.rs` | 2.5D settlement projection, first-hour destination trace, and plot intents | Campaign mutation |
 | `roster_ui.rs` | Colonist selection, training, and equipment intents | Campaign mutation |
 | `equipment_ui.rs` | Tactical item button and targeting intent | Simulation mutation |
@@ -997,6 +998,7 @@ Migration coverage:
 | 1.217.0 | Field Notes launcher moves into the stable Operations header lane so it remains visible beside investment and campaign decision surfaces; no new save fields |
 | 1.218.0 | Hostile intent inspection now names active status effects and their remaining phases with the same readable vocabulary used by the colony rail; no new save fields |
 | 1.219.0 | Operations now exposes a touch-visible Memorial Register derived from persistent scars, recovery records, and character legacies, with a deterministic capture scene and no new save fields |
+| 1.220.0 | Failed operations now persist their mission objective in the Memorial Register, with an immediate-version migration default and deterministic capture coverage |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
@@ -1049,7 +1051,7 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (518 Mirexis unit tests plus asset-registry and source-size gates)
+- `cargo test` (520 Mirexis unit tests plus asset-registry and source-size gates)
 - deterministic 103-scene capture with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)

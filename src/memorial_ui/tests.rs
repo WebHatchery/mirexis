@@ -42,3 +42,19 @@ fn empty_record_detail_is_explicit() {
     let character = campaign.roster.first().unwrap();
     assert_eq!(record_detail(character), "NO RECORD DETAIL");
 }
+
+#[test]
+fn record_count_includes_lost_objectives() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign
+        .lost_objectives
+        .push(crate::campaign::LostObjectiveRecord {
+            id: "lost_route".to_owned(),
+            mission_name: "Cold Signal".to_owned(),
+            objective: "Reach the relay before the signal collapses.".to_owned(),
+            operation: 1,
+        });
+
+    assert_eq!(record_count(&campaign), 1);
+}

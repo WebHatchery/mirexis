@@ -113,7 +113,7 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
 - Touch-visible controls for required actions, supplemented by mouse and keyboard.
 - Persistent volume, mute, and reduced-motion settings with procedural event audio and ambience.
 - Archived colony field notes remain available from Operations with speaker, title, and transcript context.
-- The Memorial Register keeps persistent scars, recovery records, and character legacies visible from Operations.
+- The Memorial Register keeps persistent scars, recovery records, lost objectives, and character legacies visible from Operations.
 - Campaign-owned first-hour guidance with visible help, restart, skip, save migration, advance-control
   focus, and defeat-forward recovery.
 - Deterministic capture scenes and tests for simulation, content, saves, and migrations.

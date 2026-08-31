@@ -416,6 +416,9 @@ fn add_campaign_runtime_defaults(value: &mut Value) -> Result<(), String> {
         .entry("outsider_arc_states".to_owned())
         .or_insert_with(|| serde_json::json!({}));
     campaign
+        .entry("lost_objectives".to_owned())
+        .or_insert_with(|| serde_json::json!([]));
+    campaign
         .entry("commons_meals_hosted".to_owned())
         .or_insert_with(|| serde_json::json!(0));
     campaign
