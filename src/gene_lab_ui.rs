@@ -27,6 +27,13 @@ fn evolution_button_label(affordable: bool, biomass_cost: i32) -> String {
     }
 }
 
+const EVOLUTION_OPTION_START_Y: f32 = 348.0;
+const EVOLUTION_OPTION_STEP_Y: f32 = 118.0;
+
+fn evolution_option_y(index: usize) -> f32 {
+    EVOLUTION_OPTION_START_Y + index as f32 * EVOLUTION_OPTION_STEP_Y
+}
+
 pub(crate) fn draw_gene_lab(
     campaign: &CampaignState,
     data: &GameData,
@@ -289,7 +296,7 @@ fn draw_evolution_panel(
             TextStyle::new(16.0, dark::WARNING).params(),
         );
         for (index, evolution) in mutation.evolutions.iter().enumerate() {
-            let y = 324.0 + index as f32 * 118.0;
+            let y = evolution_option_y(index);
             let biomass_cost = campaign.mutation_evolution_cost(evolution);
             let affordable = campaign.colony.resources.biomass >= biomass_cost;
             draw_surface(

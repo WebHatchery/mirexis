@@ -32,6 +32,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
+- `ui_gene_lab.png` and `ui_recruited_gene_lab.png`: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -48,7 +49,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 7 | contact_gear | `ui_contact_gear.png` | 255491 | `395a64c68d82570af60f4b1ed56002a3915f344760f19129db878de8562710fd` |
 | 8 | contact_event | `ui_contact_event.png` | 743312 | `c1531517e3afb28d3037a1ca677b1bae20b0650d3fa803073327a09a0911e1ef` |
 | 9 | adaptation | `ui_adaptation.png` | 749657 | `92e0c1d6e6796c8d98654ad4486c0a6bddcb302ebd678c25f457625521f87ce2` |
-| 10 | gene_lab | `ui_gene_lab.png` | 180981 | `15333937ce5781c46d30a7a02ec01bf306743cb811a6b9d165809fbe37f3b5ef` |
+| 10 | gene_lab | `ui_gene_lab.png` | 182135 | `383b60cb4148f07415865dfc64677371d4a4ccbaffe740eef890fb5c0b735385` |
 | 11 | evolution | `ui_evolution.png` | 249737 | `0fd21e300fd38d9b1b12d0aafbf657bbb6775809b2c2f203dd6986c4af56ce86` |
 | 12 | mara_evolution | `ui_mara_evolution.png` | 180425 | `36aeac0e75ed9e988f7fd2b65dadff0d74efbf66b0ad347f2068f4516c580c1b` |
 | 13 | ilya_evolution | `ui_ilya_evolution.png` | 180215 | `c7e600f48fabf0363275cd6a41eaa9af3ee22a42c1a10339eb97d6d8d58dab9d` |
@@ -82,7 +83,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 41 | research | `ui_research.png` | 743676 | `1030070408c992cda5730de80770be9388759bc3a169db6a93a85fe978440fca` |
 | 42 | roster | `ui_roster.png` | 254323 | `4fb53223201f266b393f3885bda55c96b927d1f1dff6353c8bbf7156a3d90d63` |
 | 43 | recruited_roster | `ui_recruited_roster.png` | 286857 | `4e93e68ebb8b3854815efd873acbc4aa8044802bdfd7f6b9bc5e27a8a428035a` |
-| 44 | recruited_gene_lab | `ui_recruited_gene_lab.png` | 208809 | `f570a715dda664dd70ef8bd6bfb1b6e0acc052ba1544ac7dc2a0a49de6628255` |
+| 44 | recruited_gene_lab | `ui_recruited_gene_lab.png` | 210227 | `cfca7144c37db59649e1d1f204368654842d06f872b921f084b5331c4440b455` |
 | 45 | advanced_roster | `ui_advanced_roster.png` | 254254 | `171c16d5152ee73fdac96fd80a0ff741fee48d93e141d58986a0e6062f453c8a` |
 | 46 | relationships | `ui_relationships.png` | 255780 | `de1be4679f94b310eb668cedd08508d88320d62437d275077541678ae5518da4` |
 | 47 | trauma | `ui_trauma.png` | 258340 | `7989dfe6959f94738819c8f05ce8568dd0fe1173688aa527bf81e875e07126ca` |

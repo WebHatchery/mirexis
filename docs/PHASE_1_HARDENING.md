@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 494 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 495 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and

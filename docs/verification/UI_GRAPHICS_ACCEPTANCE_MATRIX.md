@@ -70,7 +70,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
 | contact_event | Colony event | Weak event illustration and hierarchy | `ui_contact_event.png` | PASS |
 | adaptation | Colony | Phase evolution primarily textual | `ui_adaptation.png` | PASS |
-| gene_lab | Gene lab | No illustrated mutation anatomy | `ui_gene_lab.png` | PASS |
+| gene_lab | Gene lab | Evolution card obscured the portrait anatomy scan label | `ui_gene_lab.png` | PASS |
 | evolution | Roster/gene lab | Evolution visible mainly as text | `ui_evolution.png` | PASS |
 | mara_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_mara_evolution.png` | PASS |
 | ilya_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_ilya_evolution.png` | PASS |

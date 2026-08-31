@@ -17,3 +17,14 @@ fn full_recruited_roster_stays_inside_gene_lab_list() {
     assert!(last_row_bottom <= 568.0);
     assert!(height >= 50.0);
 }
+
+#[test]
+fn evolution_options_clear_the_anatomy_scan_and_return_control() {
+    let bio_scan_baseline = 328.0;
+    let first_option = evolution_option_y(0);
+    let second_option = evolution_option_y(1);
+    let return_button_top = 622.0;
+
+    assert!(first_option > bio_scan_baseline);
+    assert!(second_option + 100.0 < return_button_top);
+}
