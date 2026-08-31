@@ -29,7 +29,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_return.png`: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
-- `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
+- `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing distinct from the framed event decision card, with both carrier choices and the colony plan visible inside the open Operations drawer.
 - `ui_adaptation_operation.png` and `ui_escalation_operation.png`: threat-intelligence rows stay inside the right briefing column, with repeated hostile roles collapsed and long labels fitted before the deployment controls.
 - `ui_roster.png`, `ui_recruited_roster.png`, and `ui_advanced_roster.png`: the complete workshop equipment catalog stays inside the training panel and above the footer instruction line.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
@@ -123,7 +123,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 77 | first_hour_guide | `ui_first_hour_guide.png` | 215086 | `3914697b5a359239e6bd485506ce955e2904c3ce9cb8c278af3e552dd11f410b` |
 | 78 | first_hour_return | `ui_first_hour_return.png` | 878751 | `04d9aebe69327cfb7d7a379112dcbdb73ca8c7a8533bb4886103802e8690ccec` |
 | 79 | first_hour_promise | `ui_first_hour_promise.png` | 881399 | `dbe4c79162bed43496539774c1bbe7c3a4c6661fa8a94a1ecabcd2cb77d51a39` |
-| 80 | first_hour_operations | `ui_first_hour_operations.png` | 920559 | `620b0cf88a42a372e6b15a7c56875f25c2ebf1d1080583b313c05792cd3e1939` |
+| 80 | first_hour_operations | `ui_first_hour_operations.png` | 919165 | `34fd138a3e021b2c2e158a90e602ef5b68eab2b5452576a33c40fe7f3ba5a5ad` |
 | 81 | battle_log | `ui_battle_log.png` | 660880 | `8c9162a4f4444324d1ca404e573a316dd46cab6a27d6c7be94812cb6cd123a55` |
 | 82 | combat_feedback | `ui_combat_feedback.png` | 1186281 | `9ac5c2b40ae7fc4a4c335e9308d2c6066aa1c22cc732cebfbd9923921e05f6b6` |
 | 83 | phase_replay | `ui_phase_replay.png` | 1095988 | `9269f8ddcd6f27b8816e400744d0ec9e5c63065de5163754d9abde4f94fc7c02` |

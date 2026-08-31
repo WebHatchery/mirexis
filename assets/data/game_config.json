@@ -2,7 +2,7 @@
   "game_name": "mirexis",
   "display_name": "Mirexis",
   "save_slot": "campaign_autosave",
-  "version": "1.207.0",
+  "version": "1.208.0",
   "world_width": 40,
   "world_height": 40,
   "max_action_points": 5,

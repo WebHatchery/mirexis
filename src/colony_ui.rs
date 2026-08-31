@@ -315,7 +315,7 @@ pub(super) fn draw_operations(
             }
         }
         if colony_button(
-            Rect::new(878.0, 478.0, 362.0, 30.0),
+            mission_briefing_bounds(),
             "BRIEF SELECTED MISSION",
             campaign.strategy.selected_mission().is_some(),
             mouse,
@@ -514,7 +514,7 @@ pub(super) fn draw_operations(
                 defense.blocked_tiles.len()
             ),
             878.0,
-            650.0,
+            colony_plan_baseline(campaign),
             TextStyle::new(12.0, dark::TEXT_DIM).params(),
         );
     }
@@ -522,6 +522,22 @@ pub(super) fn draw_operations(
 
 fn should_draw_colony_plan(campaign: &CampaignState) -> bool {
     !campaign.strategy.campaign_complete
+}
+
+fn mission_briefing_bounds() -> Rect {
+    Rect::new(878.0, 478.0, 362.0, 30.0)
+}
+
+fn character_event_card_bounds() -> Rect {
+    Rect::new(878.0, 514.0, 362.0, 162.0)
+}
+
+fn colony_plan_baseline(campaign: &CampaignState) -> f32 {
+    if campaign.strategy.available_event().is_some() {
+        668.0
+    } else {
+        650.0
+    }
 }
 
 fn draw_character_event(
@@ -559,10 +575,19 @@ fn draw_character_event(
         .iter()
         .find(|faction| faction.id == attention_faction)
         .map_or(attention_faction, |faction| faction.name.as_str());
+    let card = character_event_card_bounds();
+    draw_rectangle(
+        card.x,
+        card.y,
+        card.w,
+        card.h,
+        Color::new(0.038, 0.058, 0.062, 0.98),
+    );
+    draw_rectangle_lines(card.x, card.y, card.w, card.h, 1.0, dark::WARNING);
     draw_ui_text_ex(
         "COLONY EVENT // DECISION",
-        878.0,
-        510.0,
+        card.x,
+        card.y + 14.0,
         TextStyle::new(12.0, dark::WARNING).params(),
     );
     if let Some(definition) = definition {
@@ -575,7 +600,7 @@ fn draw_character_event(
                 crate::portrait_ui::draw_character_portrait(
                     assets,
                     visuals,
-                    Rect::new(878.0 + index as f32 * 56.0, 518.0, 50.0, 58.0),
+                    Rect::new(card.x + index as f32 * 56.0, card.y + 22.0, 50.0, 58.0),
                     &character.id,
                     &character.name,
                     dark::WARNING,
@@ -584,8 +609,8 @@ fn draw_character_event(
         }
         draw_ui_text_ex(
             &event.title.to_uppercase(),
-            994.0,
-            526.0,
+            card.x + 116.0,
+            card.y + 30.0,
             TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
         );
         for (index, line) in wrap_words(&definition.description, 38)
@@ -595,8 +620,8 @@ fn draw_character_event(
         {
             draw_ui_text_ex(
                 &line,
-                994.0,
-                545.0 + index as f32 * 14.0,
+                card.x + 116.0,
+                card.y + 49.0 + index as f32 * 14.0,
                 TextStyle::new(10.0, dark::TEXT_DIM).params(),
             );
         }
@@ -610,8 +635,8 @@ fn draw_character_event(
             attention_name.to_uppercase(),
             event.attention_change
         ),
-        878.0,
-        586.0,
+        card.x,
+        card.y + 86.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
     for (index, participant_id) in event.participants.iter().take(2).enumerate() {
@@ -635,7 +660,7 @@ fn draw_character_event(
             campaign.colony.resources.food,
         );
         if colony_button(
-            Rect::new(878.0, 592.0 + index as f32 * 24.0, 362.0, 22.0),
+            Rect::new(card.x, card.y + 92.0 + index as f32 * 24.0, card.w, 22.0),
             &label,
             campaign
                 .strategy
