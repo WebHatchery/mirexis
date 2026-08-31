@@ -30,7 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
-- `ui_escalation_operation.png`: the wrapped pressure modifier stays inside the briefing's left column without colliding with threat intelligence or deployment controls.
+- `ui_adaptation_operation.png` and `ui_escalation_operation.png`: threat-intelligence rows stay inside the right briefing column, with repeated hostile roles collapsed and long labels fitted before the deployment controls.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
 - `ui_finale_debrief.png`: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.
@@ -60,7 +60,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 14 | sol_evolution | `ui_sol_evolution.png` | 174924 | `d62ee19981a701bb8be3ccea1a7c08f55304fa193e8e14ad22977563030d0eb1` |
 | 15 | nadi_evolution | `ui_nadi_evolution.png` | 185539 | `e4985cef48b0ee9eeb3a2a7a6b9419dee5dbe797b60b7912fa10c6fa75aa5eaa` |
 | 16 | escalation | `ui_escalation.png` | 753059 | `83db26465f8cb484169b00cbbbaa455b33fed5c8c0b978a66a507e23e163ea16` |
-| 17 | escalation_operation | `ui_escalation_operation.png` | 210397 | `057bde867ddf45bc1d4b8f3da822460e46254bcbddf4c4d917ffb9e68c9b70e1` |
+| 17 | escalation_operation | `ui_escalation_operation.png` | 204932 | `fb9d0bb84be6fa5be28d75a633672cd9aabcf8f1e1691a764f24f09085a8412e` |
 | 18 | escalation_response | `ui_escalation_response.png` | 753248 | `26204ba62db6594004b35ea5c705858ec0a0c3e9c3d309f82f629d05a9229390` |
 | 19 | mirexis | `ui_mirexis.png` | 747673 | `d95085a5825fbe8aa0a778a0f5411e680bbe6cd30da0ca454d949c6bc62e20ce` |
 | 20 | mirexis_path | `ui_mirexis_path.png` | 749059 | `9d5db1f423ca9def95af43a48edb6d4115fb4a3df8064ddc00d4962fcf5c0be0` |
@@ -68,7 +68,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 22 | commonwealth_end | `ui_commonwealth_end.png` | 932392 | `a8040efe2245caf633b3197dac27454008f6379bf735e8f98260e2d2db644fcc` |
 | 23 | threshold_end | `ui_threshold_end.png` | 933417 | `d76b9b0a2fa19611efb5f20483106c94d0451b374d0f14b9ad86131c98165cbe` |
 | 24 | finale_debrief | `ui_finale_debrief.png` | 197645 | `b402a19906425a1f4b7c7afa28a02e8fd5fe46f4cd03c8a6cd085332e4306f6c` |
-| 25 | adaptation_operation | `ui_adaptation_operation.png` | 195292 | `348b40fd4802a2cc36249f82152ed1e1247d287382da1f7f4171b722b481e1c4` |
+| 25 | adaptation_operation | `ui_adaptation_operation.png` | 190461 | `90906a111cef4b89d09f26cdf45f940669bbebeebe605145609019a0da1560fd` |
 | 26 | glass_nerve | `ui_glass_nerve.png` | 1186698 | `7cbd0f2aa6cf98a7012688d2b7ef1e8eebbb902ab2fbb4a9c1b077e003fdf7f4` |
 | 27 | three_knives | `ui_three_knives.png` | 1190743 | `375b3774167c9225a1ccc7ca87c10a59dc2cb89374d14fe588a6724c773eb79b` |
 | 28 | reinforcement_warning | `ui_reinforcement_warning.png` | 1191071 | `dead5ea967344a27e820b1219b84f4cc989cfc9f66b49f2c428624b57a702fef` |
@@ -91,12 +91,12 @@ Manifest: `scripts/capture_ui.ps1`
 | 45 | advanced_roster | `ui_advanced_roster.png` | 254254 | `171c16d5152ee73fdac96fd80a0ff741fee48d93e141d58986a0e6062f453c8a` |
 | 46 | relationships | `ui_relationships.png` | 255780 | `de1be4679f94b310eb668cedd08508d88320d62437d275077541678ae5518da4` |
 | 47 | trauma | `ui_trauma.png` | 258340 | `7989dfe6959f94738819c8f05ce8568dd0fe1173688aa527bf81e875e07126ca` |
-| 48 | bonded_briefing | `ui_bonded_briefing.png` | 201843 | `6e6adb63620d7bca4a0f420de49200cee50e9f7af93c180bd1b963077ba0d67b` |
+| 48 | bonded_briefing | `ui_bonded_briefing.png` | 200301 | `1d2024459ae9e9bc22088e746a5ee1b81bd4f6840e77e9842652bab2f34f6841` |
 | 49 | legacy | `ui_legacy.png` | 254860 | `5672778f1a49fc56a0caeb7e458885188415ab8b52970a958a8f0bce3aef620f` |
-| 50 | briefing | `ui_briefing.png` | 210885 | `ed3e997f1d725af6f69507b0afb421f54f7512bdeb7e8a3df1992a7e994c3014` |
-| 51 | recruited_briefing | `ui_recruited_briefing.png` | 213307 | `ef223729033d2a38c857761cdf67a1e2b03ee984922b3118875094680f07ee0d` |
-| 52 | threat_briefing | `ui_threat_briefing.png` | 193721 | `abd60020d0b888bb861bc3773f980961dc4c4f56366c98eed5e23b7a878dc8fd` |
-| 53 | loadout_briefing | `ui_loadout_briefing.png` | 200779 | `0b91fc82bec04925db6647fbb72e798f3333c19fbaa01d9e7047c4076b990330` |
+| 50 | briefing | `ui_briefing.png` | 209422 | `c43b2898fe3baa406b1780721c33e31ddee5594cc274e3c85356331db37ea9cc` |
+| 51 | recruited_briefing | `ui_recruited_briefing.png` | 211795 | `8ab206b7d4f0c31790389687cc19a808edd958f5036e9a0ee93f579111100f2c` |
+| 52 | threat_briefing | `ui_threat_briefing.png` | 190338 | `b9e513dcc7f1b76fc4349435022ae0b53140cd539b3510c51a4849627ad64499` |
+| 53 | loadout_briefing | `ui_loadout_briefing.png` | 199250 | `6eb9058e463efc17496cdb282558808a51c8834f8c8681a9359d052f074686c3` |
 | 54 | pressure | `ui_pressure.png` | 208230 | `c151b1a5c9f3772c86716fe98363cc058729595da6e86cae256bd3e3d451e553` |
 | 55 | gameplay | `ui_gameplay.png` | 1185805 | `5336c4ae746e0d98b02e7fe65d8dfa20c7ed515cb21877cbd76393178114c468` |
 | 56 | first_hour_tactical | `ui_first_hour_tactical.png` | 1191602 | `191064225612cbcedf7653ce19ae210c94e560d584916626a90080a586c32545` |

@@ -85,7 +85,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | commonwealth_end | Ending | Ending capture hid the identity card and the legacy register exceeded the Operations drawer | `ui_commonwealth_end.png` | PASS |
 | threshold_end | Ending | Ending capture hid the identity card and the legacy register exceeded the Operations drawer | `ui_threshold_end.png` | PASS |
 | finale_debrief | Debrief | Unbounded colony legacy summary crossed the reward card and retained early-operation guidance | `ui_finale_debrief.png` | PASS |
-| adaptation_operation | Briefing | Weak mission scene identity | `ui_adaptation_operation.png` | PASS |
+| adaptation_operation | Briefing | Long hostile-role intelligence text ran past the right briefing column | `ui_adaptation_operation.png` | PASS |
 | glass_nerve | Tactical | Flat rectangular battlefield | `ui_glass_nerve.png` | PASS |
 | three_knives | Tactical | Flat rectangular battlefield | `ui_three_knives.png` | PASS |
 | reinforcement_warning | Tactical/reinforcement | Entry warning lacks authored staging | `ui_reinforcement_warning.png` | PASS |

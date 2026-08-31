@@ -32,3 +32,14 @@ fn signal_cartography_reveals_reinforcement_roles_in_the_briefing() {
     assert!(mapped.contains("WAVES // R3/R5 · "));
     assert!(!mapped.contains("UNKNOWN ROLES"));
 }
+
+#[test]
+fn repeated_hostile_roles_are_collapsed_for_the_briefing_row() {
+    let data = GameData::load().unwrap();
+    let roles = intel_lines(&data, &data.mission)
+        .into_iter()
+        .find(|line| line.starts_with("ROLES //"))
+        .expect("briefing includes a roles row");
+
+    assert!(!roles.contains(" · ARTILLERY · ARTILLERY"));
+}

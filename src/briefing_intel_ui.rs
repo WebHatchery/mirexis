@@ -4,7 +4,11 @@ use crate::campaign::CampaignState;
 use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};
 use crate::data::{GameData, HazardKind, MissionDef, ObjectiveKind, Team};
 use macroquad::prelude::*;
-use macroquad_toolkit::prelude::{dark, TextStyle};
+use macroquad_toolkit::prelude::{dark, fit_text_to_box_ex, TextLayoutResult, TextStyle};
+
+const INTEL_TEXT_WIDTH: f32 = 232.0;
+const INTEL_LINE_HEIGHT: f32 = 17.0;
+const INTEL_MIN_FONT_SIZE: f32 = 8.5;
 
 pub(crate) fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionDef, origin: Vec2) {
     let danger = crate::danger_rating::for_mission(mission, data);
@@ -23,13 +27,29 @@ pub(crate) fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionD
         intel_lines(data, mission)
     };
     for (index, line) in lines.iter().enumerate() {
-        draw_text_ex(
-            line,
-            origin.x,
-            origin.y + 24.0 + index as f32 * 17.0,
-            TextStyle::new(12.5, dark::TEXT_DIM).params(),
-        );
+        draw_intel_line(line, origin.x, origin.y + 24.0 + index as f32 * 17.0);
     }
+}
+
+fn intel_line_layout(line: &str) -> TextLayoutResult {
+    fit_text_to_box_ex(
+        line,
+        INTEL_TEXT_WIDTH,
+        INTEL_LINE_HEIGHT,
+        TextStyle::new(12.5, dark::TEXT_DIM),
+        INTEL_MIN_FONT_SIZE,
+    )
+}
+
+fn draw_intel_line(line: &str, x: f32, y: f32) {
+    let layout = intel_line_layout(line);
+    let content = layout.lines.first().map(String::as_str).unwrap_or("");
+    draw_text_ex(
+        content,
+        x,
+        y,
+        TextStyle::new(layout.font_size, dark::TEXT_DIM).params(),
+    );
 }
 
 fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
@@ -53,11 +73,14 @@ fn intel_lines_with_cartography(
                 }
         })
         .collect::<Vec<_>>();
-    let roles = hostiles
-        .iter()
-        .map(|unit| unit.role.to_uppercase())
-        .collect::<Vec<_>>()
-        .join(" · ");
+    let roles = hostiles.iter().fold(Vec::new(), |mut roles, unit| {
+        let role = unit.role.to_uppercase();
+        if !roles.contains(&role) {
+            roles.push(role);
+        }
+        roles
+    });
+    let roles = roles.join(" · ");
     let ability = crate::enemy_abilities::ability_name(Some(&mission.hostile_faction))
         .unwrap_or("MIXED POWER RESPONSE");
     let hazards = [

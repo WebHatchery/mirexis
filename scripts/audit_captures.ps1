@@ -148,7 +148,7 @@ $lines.Add("- ``ui_first_hour_return.png``: the first-return recovery handoff ro
 $lines.Add("- ``ui_first_hour_dialogue.png``: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.")
 $lines.Add("- ``ui_first_hour_promise.png``: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.")
 $lines.Add("- ``ui_first_hour_operations.png``: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.")
-$lines.Add("- ``ui_escalation_operation.png``: the wrapped pressure modifier stays inside the briefing's left column without colliding with threat intelligence or deployment controls.")
+$lines.Add("- ``ui_adaptation_operation.png`` and ``ui_escalation_operation.png``: threat-intelligence rows stay inside the right briefing column, with repeated hostile roles collapsed and long labels fitted before the deployment controls.")
 $lines.Add("- ``ui_battle_log.png`` and ``ui_phase_replay.png``: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.")
 $lines.Add("- ``ui_debrief.png``: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.")
 $lines.Add("- ``ui_finale_debrief.png``: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.")
