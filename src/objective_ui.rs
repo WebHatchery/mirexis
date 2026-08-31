@@ -1,10 +1,63 @@
 //! Compact tactical objective progress labels.
 
 use crate::data::{MissionDef, ObjectiveKind, Team};
-use crate::state::GameSession;
+use crate::state::{GameSession, UnitState};
 use crate::tactical::ObjectiveState;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_text_block, TextStyle};
+
+pub(crate) fn action_label(kind: ObjectiveKind, state: ObjectiveState) -> &'static str {
+    match kind {
+        ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",
+        ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
+        ObjectiveKind::Holdout => "HOLD THE PERIMETER",
+        ObjectiveKind::Extraction => "EXTRACT COLONIST",
+        ObjectiveKind::SignalTrace if state != ObjectiveState::Active => "SIGNAL RELAY ACTIVE",
+        ObjectiveKind::SignalTrace => "ACTIVATE SIGNAL RELAY",
+        ObjectiveKind::DefendAsset => "PROTECT FIELD ASSET",
+    }
+}
+
+pub(crate) fn interaction_label(
+    kind: ObjectiveKind,
+    state: ObjectiveState,
+    selected: Option<&UnitState>,
+    at_objective: bool,
+    enabled: bool,
+) -> &'static str {
+    let action = action_label(kind, state);
+    if enabled {
+        return action;
+    }
+    let Some(unit) = selected else {
+        return "SELECT UNIT";
+    };
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if state != ObjectiveState::Active {
+        return match kind {
+            ObjectiveKind::SignalTrace => "RELAY ACTIVE",
+            ObjectiveKind::SecureAndClear => "OBJECTIVE SECURED",
+            ObjectiveKind::Extraction => "EVACUATION COMPLETE",
+            _ => action,
+        };
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    match kind {
+        ObjectiveKind::SecureAndClear | ObjectiveKind::Extraction | ObjectiveKind::SignalTrace
+            if !at_objective =>
+        {
+            "MOVE TO OBJECTIVE"
+        }
+        ObjectiveKind::EliminateAll => "CLEAR HOSTILES",
+        ObjectiveKind::Holdout => "WAIT FOR DEADLINE",
+        ObjectiveKind::DefendAsset => "PROTECT ASSET",
+        _ => action,
+    }
+}
 
 pub(crate) fn draw_summary(session: &GameSession, mission: &MissionDef, x: f32, panel: Rect) {
     draw_text_ex(
@@ -89,3 +142,6 @@ pub(crate) fn progress(session: &GameSession, mission: &MissionDef) -> String {
 fn rounds_remaining(session: &GameSession, mission: &MissionDef) -> u32 {
     mission.round_limit.saturating_sub(session.tactical.round) + 1
 }
+
+#[cfg(test)]
+mod tests;

@@ -1,8 +1,8 @@
 //! Immediate-mode title and tactical presentation.
 
 use crate::campaign::CampaignState;
-use crate::data::{GameData, MissionDef, ObjectiveKind};
-use crate::state::{GameSession, ObjectiveState, TacticalPhase};
+use crate::data::{GameData, MissionDef};
+use crate::state::{GameSession, TacticalPhase};
 use crate::ui_widgets::{action_status, button, event_summary};
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
@@ -518,23 +518,20 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             );
         }
     }
-    let objective_action = match ctx.mission.objective_kind {
-        ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",
-        ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
-        ObjectiveKind::Holdout => "HOLD THE PERIMETER",
-        ObjectiveKind::Extraction => "EXTRACT COLONIST",
-        ObjectiveKind::SignalTrace
-            if ctx.session.tactical.objective_state != ObjectiveState::Active =>
-        {
-            "SIGNAL RELAY ACTIVE"
-        }
-        ObjectiveKind::SignalTrace => "ACTIVATE SIGNAL RELAY",
-        ObjectiveKind::DefendAsset => "PROTECT FIELD ASSET",
-    };
+    let objective_enabled = ctx.session.can_interact_selected();
+    let objective_label = crate::objective_ui::interaction_label(
+        ctx.mission.objective_kind,
+        ctx.session.tactical.objective_state,
+        selected,
+        selected.is_some_and(|unit| {
+            crate::tactical::manhattan(unit.position, ctx.session.tactical.objective_tile) <= 1
+        }),
+        objective_enabled,
+    );
     if button(
         Rect::new(x, panel.bottom() - 232.0, panel.w - 36.0, 34.0),
-        objective_action,
-        ctx.session.can_interact_selected(),
+        objective_label,
+        objective_enabled,
         mouse,
     ) {
         actions.push(UiAction::InteractObjective);

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.162.0
+Save/content version: 1.163.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -938,6 +938,7 @@ Migration coverage:
 | 1.160.0 | Waystation outsider choices now name every missing resource when a conversation response cannot yet be afforded; no new save fields |
 | 1.161.0 | Tactical class-action, technique, and field-item controls now identify when no legal target exists while preserving their cancel state; no new save fields |
 | 1.162.0 | Tactical mutation controls now identify spent gifts, exhausted action points, full regenerative health, incapacitation, and missing mutation data; no new save fields |
+| 1.163.0 | Tactical objective controls now explain selection, distance, action-point, incapacitation, and objective-state requirements; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
