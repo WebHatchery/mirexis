@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.176.0
+Save/content version: 1.177.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -952,6 +952,7 @@ Migration coverage:
 | 1.174.0 | Facility upgrade controls now identify repair, queue, power, and exact material blockers before a level-two branch is queued; no new save fields |
 | 1.175.0 | First-hour preparation controls now identify the exact material shortfall before the second-operation investment is chosen; no new save fields |
 | 1.176.0 | Character-event participant controls now identify the exact food shortfall before a legacy choice is resolved; no new save fields |
+| 1.177.0 | Build Mode controls now identify unique-project, queued-project, and exact material blockers before construction is selected; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

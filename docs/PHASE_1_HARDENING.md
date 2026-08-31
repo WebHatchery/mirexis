@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 462 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 463 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -43,8 +43,9 @@ Status: automated and internal verification complete; external playtests pending
   food-gate label coverage, Commons meal-gate label coverage, and Relay scan-gate label
   coverage, treatment-gate label coverage, research material-gate label coverage, and
   Waystation recruitment resource-gate label coverage, and campaign decision resource-gate
-  label coverage, facility-upgrade blocker-label coverage, and first-hour investment
-  material-gate label coverage, and character-event food-gate label coverage.
+  label coverage, facility-upgrade blocker-label coverage, first-hour investment
+  material-gate label coverage, character-event food-gate label coverage, and Build Mode
+  construction-blocker label coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 95 audited 1280×720 scenes, including the first-hour
