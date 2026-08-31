@@ -13,6 +13,7 @@ pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
         "survey_harness" => Some("MARK HOSTILE"),
         "directorate_cipher" => Some("BREAK TARGETING NET"),
         "mireborn_sense" => Some("MAP HAZARD"),
+        "severed_resonance" => Some("BORROW RESONANCE"),
         _ => None,
     }
 }
@@ -122,6 +123,13 @@ pub(crate) fn validate(
             6,
             !target.has_status(StatusKind::Disrupted) && !unit.has_status(StatusKind::Guarded),
         ),
+        "severed_resonance" => validate_target(
+            target,
+            Team::Hostile,
+            distance,
+            6,
+            !target.has_status(StatusKind::Hindered),
+        ),
         _ => Err(RuleError::InvalidTarget),
     };
     target_result.map(|()| CommandCost { action_points: 1 })
@@ -217,6 +225,39 @@ pub(crate) fn execute(
                 if overcharged { 3 } else { 2 },
                 &mut events,
             );
+        }
+        "severed_resonance" => {
+            let target_position = session
+                .unit(target_id)
+                .expect("validated equipment target exists")
+                .position;
+            let allies = session
+                .tactical
+                .units
+                .iter()
+                .filter(|ally| {
+                    ally.team == Team::Colony
+                        && !ally.incapacitated
+                        && manhattan(ally.position, target_position) <= 2
+                })
+                .map(|ally| ally.id.clone())
+                .collect::<Vec<_>>();
+            crate::class_actions::apply_status(
+                session,
+                target_id,
+                StatusKind::Hindered,
+                if overcharged { 3 } else { 2 },
+                &mut events,
+            );
+            for ally_id in allies {
+                crate::class_actions::apply_status(
+                    session,
+                    &ally_id,
+                    StatusKind::Guarded,
+                    if overcharged { 3 } else { 2 },
+                    &mut events,
+                );
+            }
         }
         _ => unreachable!("validated equipment has an action"),
     }

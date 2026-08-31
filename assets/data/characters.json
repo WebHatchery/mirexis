@@ -74,5 +74,21 @@
     "origin": "Mireborn Adapted",
     "origin_description": "A living route-map makes Sedge faster through danger, but the colony must decide whether an old adaptation is inheritance or consent.",
     "origin_move_bonus": 1
+  },
+  {
+    "id": "ninth_voice_apart",
+    "name": "Ninth-Voice-Apart",
+    "biography": "A small command organism cut from a destroyed Brood chorus, speaking in borrowed phrases until the colony gives it room to choose.",
+    "aptitudes": { "biology": 5, "psionics": 4, "medicine": 3, "mobility": 2 },
+    "initial_class": "biotech",
+    "mutation": "symbiotic_organism",
+    "equipment": ["service_pistol", "severed_resonance"],
+    "recruitment_protocol": "brood_cultivation",
+    "recruitment_cost": 12,
+    "recruitment_resource": "biomass",
+    "origin": "Severed Brood",
+    "origin_description": "Ninth's borrowed chorus can hinder one hostile line and brace colonists holding the ground around it.",
+    "origin_accuracy_bonus": 0,
+    "origin_move_bonus": 0
   }
 ]

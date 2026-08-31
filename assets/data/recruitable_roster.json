@@ -30,5 +30,21 @@
     "weapon_range": 5,
     "weapon_damage": 3,
     "weapon_ap_cost": 2
+  },
+  {
+    "id": "ninth_voice_apart",
+    "name": "Ninth-Voice-Apart",
+    "role": "Severed Brood",
+    "mutation": "Symbiotic Organism",
+    "team": "colony",
+    "faction": null,
+    "position": [9, 18],
+    "max_health": 8,
+    "move_range": 4,
+    "armour": 0,
+    "accuracy": 64,
+    "weapon_range": 4,
+    "weapon_damage": 2,
+    "weapon_ap_cost": 2
   }
 ]

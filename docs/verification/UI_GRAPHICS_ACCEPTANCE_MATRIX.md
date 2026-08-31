@@ -76,6 +76,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | contact | Colony event | Contact progression left its protocol dossier behind a closed Operations drawer | `ui_contact.png` | PASS |
 | contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
 | contact_event | Colony event | Active event was not shown because the capture left the Operations drawer closed | `ui_contact_event.png` | PASS |
+| ninth_recruitment | Colony / Waystation | Brood-route recruitment must name Ninth, show the biomass cost, and remain inside the Operations drawer | `ui_ninth_recruitment.png` | PASS |
 | adaptation | Colony | Adaptation progression did not open the Operations decision surface | `ui_adaptation.png` | PASS |
 | gene_lab | Gene lab | Evolution card obscured the portrait anatomy scan label | `ui_gene_lab.png` | PASS |
 | evolution | Roster/gene lab | Evolution visible mainly as text | `ui_evolution.png` | PASS |
@@ -111,6 +112,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | research | Research | Only the first unfinished doctrine was visible, hiding the non-linear choice space and its effects | `ui_research.png` | PASS |
 | roster | Roster | Procedural portrait, dense controls, and the final equipment row extending below the workshop panel | `ui_roster.png` | PASS |
 | recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
+| ninth_roster | Roster | Ninth's authored portrait, full name, origin, mutation, and carried resonance must remain readable in the expanded roster | `ui_ninth_roster.png` | PASS |
 | roster_info | Roster | Equipment descriptions were only available through pointer hover | `ui_roster_info.png` | PASS |
 | recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |
 | advanced_roster | Roster | Class change lacks silhouette transformation | `ui_advanced_roster.png` | PASS |
@@ -165,6 +167,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | open_circuit | Tactical/map | Late-game hybrid map language weak | `ui_open_circuit.png` | PASS |
 | trace_active | Tactical/objective | Relay activation lacks staging | `ui_trace_active.png` | PASS |
 | equipment | Tactical/equipment | No equipment art or rich target comparison | `ui_equipment.png` | PASS |
+| ninth_resonance | Tactical/equipment | Ninth's unique carried ability must expose a visible touch target and a readable hostile forecast without obscuring the field | `ui_ninth_resonance.png` | PASS |
 | weapon_profile | Tactical/equipment | Profile is text-only | `ui_weapon_profile.png` | PASS |
 | class_target | Tactical/class action | Targeting cue remains rectangular | `ui_class_target.png` | PASS |
 | breach | Tactical/cover feedback | Breach effect lacks authored impact | `ui_breach.png` | PASS |

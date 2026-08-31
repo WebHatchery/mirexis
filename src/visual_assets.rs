@@ -358,6 +358,9 @@ pub(crate) fn equipment_index(id: &str) -> Option<usize> {
     if id == "mireborn_sense" {
         return Some(5);
     }
+    if id == "severed_resonance" {
+        return Some(10);
+    }
     [
         "frontier_rifle",
         "mire_lmg",

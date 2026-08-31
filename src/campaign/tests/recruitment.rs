@@ -29,7 +29,7 @@ fn adaptation_waystation_campaign(data: &GameData) -> CampaignState {
 }
 
 #[test]
-fn route_exclusive_outsider_requires_the_matching_operational_waystation() {
+fn route_exclusive_outsider_requires_an_operational_waystation() {
     let data = GameData::load().unwrap();
     let mut campaign = CampaignState::new(&data);
     assert!(!campaign
@@ -47,33 +47,82 @@ fn route_exclusive_outsider_requires_the_matching_operational_waystation() {
         level: 1,
         damaged: false,
     });
-    assert!(!campaign.outsider_recruit_available(&data));
-    assert!(campaign.recruit_outsider(&data).is_err());
+    assert_eq!(
+        campaign.available_outsider(&data).unwrap().id,
+        "ninth_voice_apart"
+    );
 }
 
 #[test]
-fn waystation_unlocks_for_adaptation_route_contacts() {
+fn waystation_unlocks_for_recruitment_routes() {
     let data = GameData::load().unwrap();
-    for protocol_id in ["brood_cultivation", "ascendant_capacitor"] {
+    for protocol_id in ["directorate_requisition", "brood_cultivation"] {
         let mut campaign = CampaignState::new(&data);
         assert!(!campaign.waystation_unlocked());
         campaign.strategy.contact_protocol_id = protocol_id.to_owned();
-        assert!(!campaign.waystation_unlocked());
-
-        campaign.strategy.phase_id = "adaptation".to_owned();
-        assert!(!campaign.waystation_unlocked());
-        campaign.strategy.contact_complete = true;
         assert!(campaign.waystation_unlocked());
-
-        campaign.colony.buildings.push(BuildingState {
-            id: format!("adaptation_waystation_gate_test_{protocol_id}"),
-            kind: BuildingKind::Waystation,
-            position: [2, 11],
-            level: 1,
-            damaged: false,
-        });
-        assert_eq!(campaign.available_outsider(&data).unwrap().id, "sedge");
     }
+
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "ascendant_capacitor".to_owned();
+    assert!(!campaign.waystation_unlocked());
+    campaign.strategy.phase_id = "adaptation".to_owned();
+    assert!(!campaign.waystation_unlocked());
+    campaign.strategy.contact_complete = true;
+    assert!(campaign.waystation_unlocked());
+    campaign.colony.buildings.push(BuildingState {
+        id: "adaptation_waystation_gate_test".to_owned(),
+        kind: BuildingKind::Waystation,
+        position: [2, 11],
+        level: 1,
+        damaged: false,
+    });
+    assert_eq!(campaign.available_outsider(&data).unwrap().id, "sedge");
+}
+
+#[test]
+fn brood_contact_recruits_ninth_with_biomass_and_a_separate_arc() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.strategy.contact_protocol_id = "brood_cultivation".to_owned();
+    campaign.colony.buildings.push(BuildingState {
+        id: "brood_waystation_test".to_owned(),
+        kind: BuildingKind::Waystation,
+        position: [2, 10],
+        level: 1,
+        damaged: false,
+    });
+    campaign.colony.resources.biomass = 20;
+    let biomass_before = campaign.colony.resources.biomass;
+
+    assert_eq!(
+        campaign.available_outsider(&data).unwrap().id,
+        "ninth_voice_apart"
+    );
+    assert_eq!(
+        campaign.recruit_outsider(&data).unwrap(),
+        "Ninth-Voice-Apart"
+    );
+    let ninth = campaign
+        .roster
+        .iter()
+        .find(|character| character.id == "ninth_voice_apart")
+        .unwrap();
+    assert_eq!(ninth.origin, "Severed Brood");
+    assert_eq!(campaign.colony.resources.biomass, biomass_before - 12);
+    assert!(ninth
+        .equipment_ids
+        .iter()
+        .any(|id| id == "severed_resonance"));
+
+    campaign
+        .resolve_outsider_beat(0, "ninth_give_it_quiet")
+        .unwrap();
+    assert_eq!(campaign.outsider_arc_states["ninth_voice_apart"].stage, 1);
+    assert_eq!(
+        campaign.outsider_arc_states["ninth_voice_apart"].disagreements,
+        1
+    );
 }
 
 #[test]

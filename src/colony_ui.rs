@@ -397,7 +397,7 @@ pub(super) fn draw_operations(
             draw_character_event(campaign, data, assets, visuals, event, mouse, actions);
         } else if campaign.outsider_arc_available() {
             crate::outsider_ui::draw(campaign, assets, visuals, mouse, actions);
-        } else {
+        } else if !campaign.outsider_recruit_available(data) {
             research::draw_available(campaign, assets, visuals, mouse, actions);
         }
     }

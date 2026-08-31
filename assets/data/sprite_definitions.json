@@ -15,6 +15,7 @@
     { "id": "nadi_vale", "texture": "unit_nadi_vale", "portrait_texture": "portraits_recruits", "portrait_index": 4, "portrait_columns": 5, "scale": 1.38, "pivot": [0.50, 0.82] },
     { "id": "veya_orn", "texture": "unit_directorate_rifleman", "portrait_texture": "portraits_enemies", "portrait_index": 2, "portrait_columns": 6, "scale": 1.34, "pivot": [0.50, 0.82] },
     { "id": "sedge", "texture": "unit_sedge", "portrait_texture": "portrait_sedge", "portrait_index": 0, "portrait_columns": 1, "scale": 1.38, "pivot": [0.50, 0.82] },
+    { "id": "ninth_voice_apart", "texture": "unit_ninth_voice_apart", "portrait_texture": "portrait_ninth_voice_apart", "portrait_index": 0, "portrait_columns": 1, "scale": 1.18, "pivot": [0.50, 0.76] },
     { "id": "brood_sporecaster", "name_contains": ["sporecaster"], "texture": "unit_brood_sporecaster", "portrait_texture": "portraits_enemies", "portrait_index": 1, "portrait_columns": 6, "scale": 1.42, "pivot": [0.50, 0.80] },
     { "id": "brood_stalker", "id_prefixes": ["brood_stalker"], "name_contains": ["stalker"], "texture": "unit_brood_stalker", "portrait_texture": "portraits_enemies", "portrait_index": 0, "portrait_columns": 6, "scale": 1.38, "pivot": [0.50, 0.78] },
     { "id": "directorate_rifleman", "name_contains": ["rifleman"], "texture": "unit_directorate_rifleman", "portrait_texture": "portraits_enemies", "portrait_index": 2, "portrait_columns": 6, "scale": 1.34, "pivot": [0.50, 0.82] },

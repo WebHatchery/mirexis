@@ -4,7 +4,7 @@ use super::{CampaignState, CharacterLegacy, CharacterRecord, OutsiderArcState};
 use crate::colony::BuildingKind;
 use crate::data::{CharacterDef, GameData};
 
-const OUTSIDER_IDS: [&str; 2] = ["veya_orn", "sedge"];
+const OUTSIDER_IDS: [&str; 3] = ["veya_orn", "sedge", "ninth_voice_apart"];
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct OutsiderChoice {
@@ -284,6 +284,126 @@ pub(crate) fn outsider_beat(outsider_id: &str, stage: u8) -> Option<OutsiderBeat
                 },
             ],
         }),
+        ("ninth_voice_apart", 0) => Some(OutsiderBeat {
+            outsider_id: "ninth_voice_apart",
+            outsider_name: "Ninth-Voice-Apart",
+            attention_faction: "brood",
+            stage,
+            title: "THE FIRST WORD IS BORROWED",
+            description: "Ninth repeats a phrase from the destroyed chorus. The colony must decide whether a borrowed voice is evidence, a warning, or a person asking for shelter.",
+            choices: [
+                OutsiderChoice {
+                    id: "ninth_give_it_quiet",
+                    label: "GIVE IT QUIET",
+                    description: "Spend food to let Ninth choose a silence before the colony asks for a signal. Ilya learns that a voice can need shelter before it needs translation.",
+                    materials_cost: 0,
+                    food_cost: 2,
+                    power_cost: 0,
+                    biomass_cost: 0,
+                    attention_change: -4,
+                    relationship_partner: "ilya_reed",
+                    disagreement: true,
+                    legacy_name: "Quiet Shelter",
+                    legacy_stat: "health",
+                    legacy_amount: 1,
+                },
+                OutsiderChoice {
+                    id: "ninth_record_the_phrase",
+                    label: "RECORD THE PHRASE",
+                    description: "Spend biomass to preserve the borrowed command. Kira gets a warning, and the Brood gets proof that the voice survived.",
+                    materials_cost: 0,
+                    food_cost: 0,
+                    power_cost: 0,
+                    biomass_cost: 2,
+                    attention_change: 3,
+                    relationship_partner: "kira_voss",
+                    disagreement: true,
+                    legacy_name: "Recorded Echo",
+                    legacy_stat: "accuracy",
+                    legacy_amount: 1,
+                },
+            ],
+        }),
+        ("ninth_voice_apart", 1) => Some(OutsiderBeat {
+            outsider_id: "ninth_voice_apart",
+            outsider_name: "Ninth-Voice-Apart",
+            attention_faction: "brood",
+            stage,
+            title: "WHAT THE CHORUS LEFT BEHIND",
+            description: "Ninth can anchor a hostile line, but every borrowed command leaves a trace. The colony decides whether to teach restraint or exploit the advantage.",
+            choices: [
+                OutsiderChoice {
+                    id: "ninth_build_a_haven",
+                    label: "BUILD A HAVEN",
+                    description: "Spend materials on a quiet alcove beside the Gene Lab. Mara makes room for a body that cannot be reduced to a useful signal.",
+                    materials_cost: 12,
+                    food_cost: 0,
+                    power_cost: 0,
+                    biomass_cost: 0,
+                    attention_change: -2,
+                    relationship_partner: "mara_venn",
+                    disagreement: true,
+                    legacy_name: "Shelter Pattern",
+                    legacy_stat: "armour",
+                    legacy_amount: 1,
+                },
+                OutsiderChoice {
+                    id: "ninth_open_the_channel",
+                    label: "OPEN THE CHANNEL",
+                    description: "Spend biomass to let Sol carry Ninth's resonance through the field relay. The colony gains force, and the Brood hears the invitation.",
+                    materials_cost: 0,
+                    food_cost: 0,
+                    power_cost: 0,
+                    biomass_cost: 2,
+                    attention_change: 2,
+                    relationship_partner: "sol_cairn",
+                    disagreement: true,
+                    legacy_name: "Open Resonance",
+                    legacy_stat: "damage",
+                    legacy_amount: 1,
+                },
+            ],
+        }),
+        ("ninth_voice_apart", 2) => Some(OutsiderBeat {
+            outsider_id: "ninth_voice_apart",
+            outsider_name: "Ninth-Voice-Apart",
+            attention_faction: "brood",
+            stage,
+            title: "A VOICE WITH NO WITNESS",
+            description: "Ninth has learned three phrases the chorus never gave it. The final choice is whether its new voice belongs to the colony, the Brood, or the space between them.",
+            choices: [
+                OutsiderChoice {
+                    id: "ninth_keep_the_gap",
+                    label: "KEEP THE GAP",
+                    description: "Keep the silence between borrowed phrases. Nadi records Ninth as a person who can refuse the chorus without becoming empty.",
+                    materials_cost: 0,
+                    food_cost: 0,
+                    power_cost: 0,
+                    biomass_cost: 0,
+                    attention_change: -2,
+                    relationship_partner: "nadi_vale",
+                    disagreement: false,
+                    legacy_name: "Kept the Gap",
+                    legacy_stat: "health",
+                    legacy_amount: 1,
+                },
+                OutsiderChoice {
+                    id: "ninth_join_the_listeners",
+                    label: "JOIN THE LISTENERS",
+                    description: "Let Ninth sit with the colony's listening circle. The voice gains a future without pretending it has forgotten where it came from.",
+                    materials_cost: 0,
+                    food_cost: 0,
+                    power_cost: 0,
+                    biomass_cost: 0,
+                    attention_change: 1,
+                    relationship_partner: "kira_voss",
+                    disagreement: false,
+                    legacy_name: "Joined Listeners",
+                    legacy_stat: "movement",
+                    legacy_amount: 1,
+                },
+            ],
+        }),
         _ => None,
     }
 }
@@ -291,6 +411,7 @@ pub(crate) fn outsider_beat(outsider_id: &str, stage: u8) -> Option<OutsiderBeat
 impl CampaignState {
     pub(crate) fn waystation_unlocked(&self) -> bool {
         self.strategy.contact_protocol_id == "directorate_requisition"
+            || self.strategy.contact_protocol_id == "brood_cultivation"
             || (self.strategy.phase_id == "adaptation" && self.strategy.contact_complete)
     }
 
@@ -332,7 +453,7 @@ impl CampaignState {
             ));
         }
         self.spend_recruitment_resource(resource, definition.recruitment_cost);
-        if definition.id == "sedge" {
+        if definition.id == "sedge" || definition.id == "ninth_voice_apart" {
             if let Some(brood) = self
                 .strategy
                 .factions

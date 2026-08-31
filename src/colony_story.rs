@@ -248,6 +248,31 @@ pub(crate) fn current_beat(
             title: "THE TIMELINE MOVES",
             text: "Sedge's family changed before the official first mutation, which means our history is missing a living chapter. The courier keeps bringing back routes; now the colony must decide who gets to write them down.",
         }),
+        ("ninth_voice_apart", 0, _) => Some(ColonyBeat {
+            id: "ninth_arrival",
+            title: "THE NINTH VOICE",
+            text: "Ninth arrived from a chorus that no longer exists, carrying commands in a voice that is not quite its own. The Waystation can offer shelter, but the colony must leave room for the first word it chooses.",
+        }),
+        ("ninth_voice_apart", 1, Some(true)) => Some(ColonyBeat {
+            id: "ninth_first_victory",
+            title: "A LINE THAT ANSWERS",
+            text: "Ninth anchored the hostile line and came back with one borrowed phrase missing. The Brood heard the silence; the colony has to decide whether that absence is loss or the beginning of a self.",
+        }),
+        ("ninth_voice_apart", 1, Some(false)) => Some(ColonyBeat {
+            id: "ninth_first_defeat",
+            title: "THE CHORUS STILL REACHES",
+            text: "The failed route gave the old chorus a path back through Ninth. The organism is not a broken tool, but the colony must make the next shelter strong enough for refusal to be possible.",
+        }),
+        ("ninth_voice_apart", 1, _) => Some(ColonyBeat {
+            id: "ninth_first_aftermath",
+            title: "A PHRASE LEFT OPEN",
+            text: "Ninth returned with a sentence that stops before its command. We can record the gap, build around it, and let a voice become more than the thing that first carried it.",
+        }),
+        ("ninth_voice_apart", _, _) => Some(ColonyBeat {
+            id: "ninth_second_aftermath",
+            title: "THE SPACE BETWEEN WORDS",
+            text: "Ninth now speaks in phrases the destroyed chorus never gave it. The colony remembers that a borrowed beginning does not decide who gets to finish the sentence.",
+        }),
         ("veya_orn", 0, _) => Some(ColonyBeat {
             id: "veya_arrival",
             title: "THE PERSON BEHIND THE CIPHER",
@@ -322,6 +347,11 @@ pub(crate) fn finale_beat(
             "A HOME IN THE MARGINS",
             "Sedge marks the routes around the Arsenal in family names, not military coordinates. The wall protects a home when it remembers where home came from.",
         ),
+        ("human_redoubt", "ninth_voice_apart") => (
+            "finale_redoubt_ninth",
+            "A WALL THAT LEAVES A GAP",
+            "Ninth places a quiet resonance at the Arsenal's edge and leaves one channel unclaimed. The wall protects the colony best when it can shelter a voice without making it repeat an order.",
+        ),
         ("living_commonwealth", "kira_voss") => (
             "finale_commonwealth_kira",
             "A MAP FOR MANY VOICES",
@@ -357,6 +387,11 @@ pub(crate) fn finale_beat(
             "A CITIZEN'S HISTORY",
             "Sedge brings the marsh route into the Garden as a family record. Adaptation is no longer a specimen or a secret; it is a citizen's history.",
         ),
+        ("living_commonwealth", "ninth_voice_apart") => (
+            "finale_commonwealth_ninth",
+            "THE CHORUS MAKES ROOM",
+            "Ninth joins the Garden without dissolving into it. The Commonwealth learns that many voices do not need one origin, only enough room to answer in their own time.",
+        ),
         ("open_threshold", "kira_voss") => (
             "finale_threshold_kira",
             "EVERY ROUTE HAS A HOME",
@@ -391,6 +426,11 @@ pub(crate) fn finale_beat(
             "finale_threshold_sedge",
             "THE ROUTE BELONGS TO ITS TRAVELLERS",
             "Sedge carries the first Threshold map back to the reeds and leaves the margins blank for the families who follow. A route belongs to its travellers, not the first colony to copy it.",
+        ),
+        ("open_threshold", "ninth_voice_apart") => (
+            "finale_threshold_ninth",
+            "A SIGNAL THAT CAN STOP",
+            "Ninth sends one phrase through the Threshold and keeps the next one. The open route becomes safer when a voice can cross the distance and still choose silence on the other side.",
         ),
         _ => return None,
     };
@@ -433,6 +473,11 @@ pub(crate) fn commons_meal_beat(character_id: &str) -> Option<ColonyBeat> {
             "commons_meal_sedge",
             "A PLACE IN THE RECORD",
             "Sedge brought reed-salt to the Commons and watched everyone decide whether it was food or evidence. By the second bowl, the colony had made the simpler choice: it was something their family knew how to share.",
+        ),
+        "ninth_voice_apart" => (
+            "commons_meal_ninth",
+            "THE FIRST UNBORROWED WORD",
+            "Ninth repeated the name of the meal, then stopped and made a sound no instrument could classify. Nobody translated it. The Commons let the silence stand as a contribution.",
         ),
         _ => return None,
     };
@@ -498,6 +543,11 @@ pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBea
             "THE OLD MAP IN THE LAB",
             "Sedge knows the Gene Lab's corridors by the pressure in the roots. Their family changed before our records began, and the first ethical question is simple: do we ask what they know before we ask what we can take?",
         ),
+        ("adaptation", "ninth_voice_apart") => (
+            "phase_adaptation_ninth",
+            "THE ORGANISM IS LISTENING",
+            "Ninth can carry a signal between the Gene Lab and the field, but transmission is not obedience. The colony has to build a language that leaves room for the organism to stop answering.",
+        ),
         ("escalation", "mara_venn") => (
             "phase_escalation_mara",
             "THEY CAN SEE THE LIGHTS",
@@ -527,6 +577,11 @@ pub(crate) fn phase_beat(phase_id: &str, character_id: &str) -> Option<ColonyBea
             "phase_escalation_sedge",
             "THE ROUTE HAS WITNESSES",
             "Sedge's map was private when it was only a way home. With three powers converging, every route becomes public the moment someone survives it; the colony must learn how to witness without taking ownership.",
+        ),
+        ("escalation", "ninth_voice_apart") => (
+            "phase_escalation_ninth",
+            "A BORROWED COMMAND IN THE CROSSFIRE",
+            "The three powers want Ninth's resonance because it can turn a line into a formation. The organism has to decide whether the colony is a shelter, a chorus, or another command that has learned to sound gentle.",
         ),
         _ => return None,
     };
