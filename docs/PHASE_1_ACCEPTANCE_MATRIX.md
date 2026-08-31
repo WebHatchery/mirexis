@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.167.0, validated and committed with this matrix
+Audit baseline: save/content 1.168.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path

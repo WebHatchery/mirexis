@@ -18,6 +18,16 @@ fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
     (row_step, (row_step - 2.0).max(20.0))
 }
 
+fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> String {
+    if selected_count == 0 {
+        "SELECT COLONISTS".to_owned()
+    } else if food < food_cost {
+        format!("NEED {} FOOD", food_cost)
+    } else {
+        format!("DEPLOY SQUAD · {} FOOD", food_cost)
+    }
+}
+
 pub(crate) fn draw(
     campaign: &CampaignState,
     data: &GameData,
@@ -27,12 +37,12 @@ pub(crate) fn draw(
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
+    let selected_count = campaign.selected_squad_count();
+    let food_cost = campaign.deployment_food_cost(data);
     draw_text_ex(
         format!(
             "DEPLOYMENT // {}/{} SELECTED // SUPPLY {} FOOD",
-            campaign.selected_squad_count(),
-            SQUAD_LIMIT,
-            campaign.deployment_food_cost(data)
+            selected_count, SQUAD_LIMIT, food_cost
         ),
         200.0,
         356.0,
@@ -96,14 +106,13 @@ pub(crate) fn draw(
     ) {
         actions.push(UiAction::CycleFormation);
     }
+    let deployment_enabled = selected_count > 0 && campaign.colony.resources.food >= food_cost;
+    let deployment_label =
+        deployment_button_label(selected_count, campaign.colony.resources.food, food_cost);
     if button(
         Rect::new(820.0, 562.0, 250.0, 48.0),
-        &format!(
-            "DEPLOY SQUAD · {} FOOD",
-            campaign.deployment_food_cost(data)
-        ),
-        campaign.selected_squad_count() > 0
-            && campaign.colony.resources.food >= campaign.deployment_food_cost(data),
+        &deployment_label,
+        deployment_enabled,
         mouse,
     ) {
         actions.push(UiAction::DeployMission);
