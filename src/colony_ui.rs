@@ -84,6 +84,7 @@ pub(super) fn draw_operations(
         192.0,
         TextStyle::new(15.0, dark::TEXT).params(),
     );
+    crate::field_notes_ui::draw_launcher(&campaign.colony_story, mouse, actions);
     if campaign.first_hour.stage == crate::first_hour::FirstHourStage::MakeInvestment {
         crate::first_hour_investment_ui::draw(campaign, mouse, actions);
         return;
@@ -263,7 +264,6 @@ pub(super) fn draw_operations(
     }
     upgrades::draw_launcher(campaign, mouse, actions);
     salvage::draw_launcher(campaign, mouse, actions);
-    crate::field_notes_ui::draw_launcher(&campaign.colony_story, mouse, actions);
     let choosing_contact =
         campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
     let choosing_escalation = campaign.strategy.escalation_operation_completed

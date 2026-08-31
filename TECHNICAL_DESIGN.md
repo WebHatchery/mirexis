@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.216.0
+Save/content version: 1.217.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -993,6 +993,7 @@ Migration coverage:
 | 1.214.0 | Tactical field-manual guidance now names forecast inspection and the visible ATTACK confirmation; no new save fields |
 | 1.215.0 | Settings now shows a bounded visual master-volume meter and has a dedicated canonical reference scene; no new save fields |
 | 1.216.0 | Acknowledged colony beats now retain speaker, title, and transcript text in a save-safe Field Notes archive with a touch-visible Operations overlay |
+| 1.217.0 | Field Notes launcher moves into the stable Operations header lane so it remains visible beside investment and campaign decision surfaces; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

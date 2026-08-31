@@ -6,7 +6,7 @@ use crate::ui_widgets::{button, button_with_state};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
-const LAUNCHER_BOUNDS: Rect = Rect::new(878.0, 350.0, 362.0, 24.0);
+const LAUNCHER_BOUNDS: Rect = Rect::new(878.0, 130.0, 362.0, 24.0);
 const NOTE_ROWS: usize = 8;
 const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
 

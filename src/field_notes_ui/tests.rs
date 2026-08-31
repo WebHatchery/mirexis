@@ -9,6 +9,8 @@ fn launcher_stays_inside_the_operations_panel() {
     assert!(launcher.right() <= panel.right());
     assert!(launcher.y >= panel.y);
     assert!(launcher.bottom() <= panel.bottom());
+    assert!(launcher.y >= 116.0);
+    assert!(launcher.bottom() <= 166.0);
 }
 
 #[test]
