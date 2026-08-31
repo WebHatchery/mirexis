@@ -169,6 +169,11 @@ impl Game {
                     &self.active_mission,
                 );
             }
+            "first_hour_attack" => {
+                self.capture_valid_shot();
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+                self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Attack;
+            }
             "first_hour_ability" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;

@@ -20,7 +20,7 @@ Status: automated and internal verification complete; external playtests pending
 
 | Concern | Implemented response | Remaining observation target |
 |---|---|---|
-| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; guided attacks add a visible forecast-card ATTACK confirmation; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
+| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; guided attacks add a visible forecast-card ATTACK confirmation and a NEXT cue on the confirmation itself; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
 | Text scale | Fixed 1280×720 virtual UI scales uniformly and preserves layout at audited desktop sizes | Ask testers to assess smallest 1024×768 labels |
 | Contrast | Bright text, outlined panels, dark surfaces, and high-luminance goal accents remain legible in captures | Observe low-quality displays and glare |
 | Colour-independent meaning | Buttons and status text name state; target rings, icons, forecasts, and event prose do not rely on hue alone | Include colour-vision feedback in external sessions |
@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 470 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 472 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -45,13 +45,13 @@ Status: automated and internal verification complete; external playtests pending
   Waystation recruitment resource-gate label coverage, Waystation dialogue recruitment
   shortfall-label coverage, contextual treatment and Gene Lab blocker-label coverage,
   targeted class-action, field-item, and technique team/range blocker coverage, and
-  targeting-card rule-reason coverage, and campaign decision resource-gate
+  targeting-card rule-reason coverage, guided attack-confirmation focus coverage, and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
   material-gate label coverage, character-event food-gate label coverage, and Build Mode
   construction-blocker label coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 95 audited 1280×720 scenes, including the first-hour
+- The canonical set contains 96 audited 1280×720 scenes, including the first-hour
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;
   debrief goal/result layering, fielded-versus-reserve squad disclosure including recruited

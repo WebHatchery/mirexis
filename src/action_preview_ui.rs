@@ -14,6 +14,9 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
+#[cfg(test)]
+mod tests;
+
 pub(crate) struct PreviewInteraction<'a> {
     pub(crate) mouse: Vec2,
     pub(crate) actions: &'a mut Vec<UiAction>,
@@ -113,6 +116,10 @@ pub(crate) fn attack_card_bounds(panel: Rect) -> Rect {
     Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 84.0)
 }
 
+pub(crate) fn attack_button_bounds(card: Rect) -> Rect {
+    Rect::new(card.right() - 205.0, card.y + 22.0, 126.0, 40.0)
+}
+
 pub(crate) fn attack_preview_is_valid(session: &GameSession, tile: TilePos) -> bool {
     matches!(
         action_preview::for_tile(session, tile),
@@ -197,7 +204,7 @@ fn draw_attack_comparison(
         rect.y + 67.0,
         TextStyle::new(12.0, dark::TEXT_DIM).params(),
     );
-    let attack_button = Rect::new(rect.right() - 205.0, rect.y + 22.0, 126.0, 40.0);
+    let attack_button = attack_button_bounds(rect);
     if interaction.interactive && button(attack_button, "ATTACK", true, interaction.mouse) {
         interaction
             .actions

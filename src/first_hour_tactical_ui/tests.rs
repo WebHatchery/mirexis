@@ -124,3 +124,23 @@ fn apply_learning_focus_points_to_a_remaining_hostile() {
     );
     assert!(session.can_attack_selected(&hostile_id));
 }
+
+#[test]
+fn attack_focus_waits_for_a_valid_forecast() {
+    let mut session = session();
+    assert_eq!(attack_focus_rect(&session), None);
+
+    let selected = session.selected_unit().unwrap().position;
+    let hostile_tile = TilePos::new(selected.x + 4, selected.y);
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.team == Team::Hostile)
+        .unwrap()
+        .position = hostile_tile;
+    session.tactical.selected_tile = hostile_tile;
+
+    let focus = attack_focus_rect(&session).expect("valid forecast should focus its attack button");
+    assert_eq!(focus, Rect::new(689.0, 610.0, 126.0, 40.0));
+}

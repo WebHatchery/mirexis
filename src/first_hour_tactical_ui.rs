@@ -113,11 +113,13 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
             };
             ability_focus_rect(x, TACTICAL_PANEL.bottom() - 148.0, slot)
         }
-        TacticalLesson::ApplyLearning => return,
-        TacticalLesson::Select
-        | TacticalLesson::MoveToCover
-        | TacticalLesson::Attack
-        | TacticalLesson::Objective => return,
+        TacticalLesson::Attack | TacticalLesson::ApplyLearning => {
+            let Some(rect) = attack_focus_rect(ctx.session) else {
+                return;
+            };
+            rect
+        }
+        TacticalLesson::Select | TacticalLesson::MoveToCover | TacticalLesson::Objective => return,
     };
     let color = focus_color();
     draw_rectangle_lines(
@@ -142,6 +144,16 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
         rect.y - 7.0,
         TextStyle::new(10.0, color).params(),
     );
+}
+
+fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
+    crate::action_preview_ui::attack_preview_is_valid(session, session.tactical.selected_tile).then(
+        || {
+            let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
+            let card = crate::action_preview_ui::attack_card_bounds(panel);
+            crate::action_preview_ui::attack_button_bounds(card)
+        },
+    )
 }
 
 fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
