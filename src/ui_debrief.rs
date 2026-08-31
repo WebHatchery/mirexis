@@ -189,7 +189,7 @@ pub fn draw_debrief(
     draw_field_record(mission, outcome, assets, visuals, won);
     draw_squad_tableau(campaign, outcome, deployed_ids, assets, visuals, won);
     if button(
-        Rect::new(860.0, 574.0, 220.0, 48.0),
+        crate::first_hour_ui::debrief_return_button_bounds(),
         "RETURN TO COLONY",
         true,
         mouse,

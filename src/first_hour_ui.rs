@@ -24,6 +24,10 @@ pub(crate) fn draw(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<
     draw_goal(progress, mouse, actions);
 }
 
+pub(crate) fn debrief_return_button_bounds() -> Rect {
+    Rect::new(860.0, 574.0, 220.0, 48.0)
+}
+
 fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let layout = goal_banner_layout(progress.stage);
     draw_surface(
@@ -75,6 +79,38 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
         }
         _ => {}
     }
+    if let Some(rect) = debrief_focus_target(progress.stage) {
+        draw_focus(rect);
+    }
+}
+
+fn debrief_focus_target(stage: FirstHourStage) -> Option<Rect> {
+    matches!(
+        stage,
+        FirstHourStage::FirstReturn | FirstHourStage::SecondReturn
+    )
+    .then_some(debrief_return_button_bounds())
+}
+
+fn draw_focus(rect: Rect) {
+    let color = Color::new(1.0, 0.74, 0.18, 0.96);
+    draw_rectangle_lines(
+        rect.x - 4.0,
+        rect.y - 4.0,
+        rect.w + 8.0,
+        rect.h + 8.0,
+        2.0,
+        color,
+    );
+    draw_rectangle_lines(
+        rect.x - 1.0,
+        rect.y - 1.0,
+        rect.w + 2.0,
+        rect.h + 2.0,
+        1.0,
+        Color::new(color.r, color.g, color.b, 0.42),
+    );
+    text("NEXT", rect.x + 2.0, rect.y - 7.0, 10.0, dark::ACCENT);
 }
 
 fn goal_banner_layout(stage: FirstHourStage) -> GoalBannerLayout {
