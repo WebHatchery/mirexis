@@ -44,6 +44,23 @@ fn attack_event_summaries_name_hit_and_miss_outcomes() {
 }
 
 #[test]
+fn event_summaries_turn_internal_identifiers_into_display_names() {
+    let moved = BattleEvent::UnitMoved {
+        unit_id: "brood_stalker_a".to_owned(),
+        path: Vec::new(),
+        cost: 2,
+    };
+    let equipment = BattleEvent::EquipmentUsed {
+        unit_id: "mara_venn".to_owned(),
+        equipment_id: "field_medkit".to_owned(),
+        target_id: "kira_voss".to_owned(),
+    };
+
+    assert_eq!(event_summary(&moved), "Brood Stalker A moved · 2 AP");
+    assert_eq!(event_summary(&equipment), "Field Medkit used on Kira Voss");
+}
+
+#[test]
 fn active_statuses_name_their_remaining_phase_duration() {
     let definition = UnitDef {
         id: "status_test".to_owned(),

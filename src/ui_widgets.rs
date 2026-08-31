@@ -9,7 +9,9 @@ use macroquad_toolkit::ui::RectExt;
 
 pub(crate) fn event_summary(event: &BattleEvent) -> String {
     match event {
-        BattleEvent::UnitMoved { unit_id, cost, .. } => format!("{} moved · {} AP", unit_id, cost),
+        BattleEvent::UnitMoved { unit_id, cost, .. } => {
+            format!("{} moved · {} AP", display_identifier(unit_id), cost)
+        }
         BattleEvent::AttackRolled {
             roll, hit_chance, ..
         } => {
@@ -22,7 +24,9 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::DamageApplied {
             amount, remaining, ..
         } => format!("{} damage · {} vitality remains", amount, remaining),
-        BattleEvent::UnitIncapacitated { unit_id } => format!("{} incapacitated", unit_id),
+        BattleEvent::UnitIncapacitated { unit_id } => {
+            format!("{} incapacitated", display_identifier(unit_id))
+        }
         BattleEvent::ObjectiveSecured { .. } => "Mission objective secured".to_owned(),
         BattleEvent::ObjectiveDamaged { amount, remaining } => {
             format!(
@@ -31,38 +35,50 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
             )
         }
         BattleEvent::ObjectiveDestroyed => "Field asset destroyed".to_owned(),
-        BattleEvent::ExtractionCompleted { unit_id } => format!("{} reached extraction", unit_id),
+        BattleEvent::ExtractionCompleted { unit_id } => {
+            format!("{} reached extraction", display_identifier(unit_id))
+        }
         BattleEvent::MutationActivated { gift, .. } => gift.clone(),
         BattleEvent::ClassActionActivated { action, .. } => action.clone(),
         BattleEvent::SkillActivated { skill_id, .. } => {
-            format!("{} technique activated", skill_id.replace('_', " "))
+            format!("{} technique activated", display_identifier(skill_id))
         }
         BattleEvent::EquipmentUsed {
             equipment_id,
             target_id,
             ..
-        } => format!("{} used on {}", equipment_id, target_id),
+        } => format!(
+            "{} used on {}",
+            display_identifier(equipment_id),
+            display_identifier(target_id)
+        ),
         BattleEvent::CoverDamaged {
             amount, remaining, ..
         } => format!("Cover took {} damage · {} integrity", amount, remaining),
         BattleEvent::CoverDestroyed { .. } => "Cover destroyed · route opened".to_owned(),
-        BattleEvent::OverwatchSet { unit_id } => format!("{} entered overwatch", unit_id),
+        BattleEvent::OverwatchSet { unit_id } => {
+            format!("{} entered overwatch", display_identifier(unit_id))
+        }
         BattleEvent::ReactionTriggered {
             attacker_id,
             target_id,
-        } => format!("{} reacted to {}", attacker_id, target_id),
+        } => format!(
+            "{} reacted to {}",
+            display_identifier(attacker_id),
+            display_identifier(target_id)
+        ),
         BattleEvent::HazardTriggered { unit_id, kind } => {
-            format!("{} crossed {}", unit_id, kind.label())
+            format!("{} crossed {}", display_identifier(unit_id), kind.label())
         }
         BattleEvent::HazardConverted { unit_id, kind, .. } => {
             format!(
                 "{} converted {} into a neutral field",
-                unit_id,
+                display_identifier(unit_id),
                 kind.label()
             )
         }
         BattleEvent::EnemyAbilityActivated { unit_id, ability } => {
-            format!("{} used {}", unit_id, ability)
+            format!("{} used {}", display_identifier(unit_id), ability)
         }
         BattleEvent::StatusApplied { status, .. } => format!("{:?} status applied", status),
         BattleEvent::ReinforcementsArrived { count, .. } => {
@@ -76,6 +92,21 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         }
         BattleEvent::BattleEnded { outcome } => format!("Operation {:?}", outcome),
     }
+}
+
+fn display_identifier(identifier: &str) -> String {
+    identifier
+        .split('_')
+        .filter(|word| !word.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            let Some(first) = chars.next() else {
+                return String::new();
+            };
+            format!("{}{}", first.to_uppercase(), chars.as_str().to_lowercase())
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 pub(crate) fn action_status(unit: &UnitState) -> String {

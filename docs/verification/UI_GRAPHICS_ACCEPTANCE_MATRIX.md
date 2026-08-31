@@ -142,7 +142,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | first_hour_dialogue | First-hour conversation handoff | Required conversation has no focus cue on the visible CONTINUE control | `ui_first_hour_dialogue.png` | PASS |
 | first_hour_promise | First-hour promise consequence | Second-operation consequence and the required CONTINUE CAMPAIGN control lack a guided focus cue | `ui_first_hour_promise.png` | PASS |
 | first_hour_operations | First-hour colony handoff | Operations drawer does not make the next briefing action obvious | `ui_first_hour_operations.png` | PASS |
-| battle_log | Battle log | Filter tabs do not show how many matching events are available, forcing trial-and-error when categories are sparse | `ui_battle_log.png` | PASS |
+| battle_log | Battle log | Event rows expose internal identifiers such as `brood_stalker_a` instead of the display names used elsewhere in the UI | `ui_battle_log.png` | PASS |
 | combat_feedback | Tactical/feedback | Dense result labels can overlap unit and impact effects, hiding normal HIT feedback | `ui_combat_feedback.png` | PASS |
 | phase_replay | Tactical/replay | Replay beat names the attack outcome but omits the immediate damage or incapacitation consequence | `ui_phase_replay.png` | PASS |
 | end_phase_guard | Tactical/warning | Warning hierarchy is small | `ui_end_phase_guard.png` | PASS |
