@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.165.0
+Save/content version: 1.166.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -941,6 +941,7 @@ Migration coverage:
 | 1.163.0 | Tactical objective controls now explain selection, distance, action-point, incapacitation, and objective-state requirements; no new save fields |
 | 1.164.0 | Tactical Overwatch controls now identify selection, incapacitation, armed state, and AP requirements; no new save fields |
 | 1.165.0 | Tactical class-action controls now identify selection, spent actions, incapacitation, AP, and target requirements; no new save fields |
+| 1.166.0 | Tactical technique controls now identify spent skills, incapacitation, AP, target, and unavailable states; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

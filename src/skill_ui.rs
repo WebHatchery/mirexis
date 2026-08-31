@@ -3,8 +3,37 @@
 use crate::data::TechniqueTarget;
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
-use crate::ui_widgets::{action_button_label, button};
+use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
+
+fn skill_button_label<'a>(
+    label: &'a str,
+    unit: &UnitState,
+    skill_id: &str,
+    targeting: bool,
+    requires_target: bool,
+    enabled: bool,
+) -> &'a str {
+    if targeting {
+        return "CANCEL";
+    }
+    if enabled {
+        return label;
+    }
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if unit.used_skill_ids.iter().any(|used| used == skill_id) {
+        return "SPENT";
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    if requires_target {
+        return "NO TARGET";
+    }
+    "UNAVAILABLE"
+}
 
 pub(crate) fn draw_action_buttons(
     ctx: &UiContext<'_>,
@@ -62,8 +91,14 @@ pub(crate) fn draw_action_buttons(
             } else {
                 crate::skills::has_valid_target(ctx.session, &unit.id, &technique.id)
             };
-        let label =
-            action_button_label(technique.name.as_str(), targeting, requires_target, enabled);
+        let label = skill_button_label(
+            technique.name.as_str(),
+            unit,
+            &technique.id,
+            targeting,
+            requires_target,
+            enabled,
+        );
         if button(
             Rect::new(rect.x + slot as f32 * (width + 8.0), rect.y, width, rect.h),
             label,
@@ -80,3 +115,6 @@ pub(crate) fn draw_action_buttons(
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
