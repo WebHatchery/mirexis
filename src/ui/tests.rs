@@ -101,3 +101,14 @@ fn capture_pointer_is_fixed_off_canvas() {
         vec2(-1_000.0, -1_000.0)
     );
 }
+
+#[test]
+fn end_phase_focus_bounds_stay_inside_the_command_rail() {
+    let panel = Rect::new(920.0, 74.0, 350.0, 608.0);
+    let button = end_phase_button_bounds(panel);
+    assert!(button.x >= panel.x);
+    assert!(button.right() <= panel.right());
+    assert!(button.y >= panel.y);
+    assert!(button.bottom() <= panel.bottom());
+    assert_eq!(button.h, 44.0);
+}

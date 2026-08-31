@@ -98,15 +98,7 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
     }
     let x = TACTICAL_PANEL.x + 18.0;
     let rect = match ctx.first_hour.lesson {
-        TacticalLesson::EnemyPhase => {
-            let phase_width = (TACTICAL_PANEL.w - 44.0) * 0.46;
-            Rect::new(
-                x + phase_width + 8.0,
-                TACTICAL_PANEL.bottom() - 104.0,
-                TACTICAL_PANEL.w - 44.0 - phase_width,
-                44.0,
-            )
-        }
+        TacticalLesson::EnemyPhase => crate::ui::end_phase_button_bounds(TACTICAL_PANEL),
         TacticalLesson::Ability => {
             let Some(slot) = ability_focus_slot(ctx.session) else {
                 return;

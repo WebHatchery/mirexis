@@ -3,13 +3,34 @@
 use crate::data::Team;
 use crate::state::GameSession;
 
-pub(crate) fn ready_count(session: &GameSession) -> usize {
-    session
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct ReadinessCounts {
+    pub(crate) ready: usize,
+    pub(crate) spent: usize,
+    pub(crate) incapacitated: usize,
+}
+
+pub(crate) fn counts(session: &GameSession) -> ReadinessCounts {
+    let mut counts = ReadinessCounts::default();
+    for unit in session
         .tactical
         .units
         .iter()
-        .filter(|unit| unit.team == Team::Colony && !unit.incapacitated && unit.action_points > 0)
-        .count()
+        .filter(|unit| unit.team == Team::Colony)
+    {
+        if unit.incapacitated {
+            counts.incapacitated += 1;
+        } else if unit.action_points > 0 {
+            counts.ready += 1;
+        } else {
+            counts.spent += 1;
+        }
+    }
+    counts
+}
+
+pub(crate) fn ready_count(session: &GameSession) -> usize {
+    counts(session).ready
 }
 
 pub(crate) fn select_next(session: &mut GameSession) -> Option<String> {

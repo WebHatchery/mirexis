@@ -49,6 +49,16 @@ pub(crate) fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
     }
 }
 
+pub(crate) fn end_phase_button_bounds(panel: Rect) -> Rect {
+    let phase_width = (panel.w - 44.0) * 0.46;
+    Rect::new(
+        panel.x + 18.0 + phase_width + 8.0,
+        panel.bottom() - 104.0,
+        panel.w - 44.0 - phase_width,
+        44.0,
+    )
+}
+
 fn ui_clip_pixels(ui: &VirtualUi, rect: Rect, dpi: f32) -> (i32, i32, i32, i32) {
     let x = (ui.offset.x + rect.x * ui.scale) * dpi;
     let top = (ui.offset.y + rect.y * ui.scale) * dpi;
@@ -520,6 +530,16 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             );
         }
     }
+    let readiness = crate::phase_readiness::counts(ctx.session);
+    draw_ui_text_ex(
+        &format!(
+            "ACTION STATUS // READY {} · SPENT {} · INCAP {}",
+            readiness.ready, readiness.spent, readiness.incapacitated
+        ),
+        x,
+        panel.y + 364.0,
+        TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
+    );
     let objective_enabled = ctx.session.can_interact_selected();
     let objective_label = crate::objective_ui::interaction_label(
         ctx.mission.objective_kind,
@@ -600,12 +620,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::SetOverwatch);
     }
     if button(
-        Rect::new(
-            x + phase_width + 8.0,
-            panel.bottom() - 104.0,
-            panel.w - 44.0 - phase_width,
-            44.0,
-        ),
+        end_phase_button_bounds(panel),
         &end_phase_label,
         true,
         mouse,

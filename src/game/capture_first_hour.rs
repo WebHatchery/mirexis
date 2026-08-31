@@ -3,6 +3,12 @@
 use super::{AppState, Game};
 
 impl Game {
+    pub(super) fn capture_first_hour_enemy_phase(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+        self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::EnemyPhase;
+    }
+
     pub(super) fn capture_first_hour_replay(&mut self) {
         self.capture_phase_replay();
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;

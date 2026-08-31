@@ -13,7 +13,7 @@ fn capture_manifest() -> Vec<&'static str> {
 fn capture_script_manifest_is_unique_and_every_scene_has_an_explicit_builder() {
     let source = include_str!("../capture_scenes.rs");
     let scenes = capture_manifest();
-    assert_eq!(scenes.len(), 99, "update the audited capture inventory");
+    assert_eq!(scenes.len(), 100, "update the audited capture inventory");
     assert_eq!(
         scenes.iter().copied().collect::<BTreeSet<_>>().len(),
         scenes.len(),

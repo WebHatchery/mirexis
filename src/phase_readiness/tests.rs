@@ -35,3 +35,32 @@ fn readiness_counts_only_active_colonists_with_unspent_actions() {
         .action_points = 0;
     assert!(select_next(&mut session).is_none());
 }
+
+#[test]
+fn readiness_summary_distinguishes_ready_spent_and_incapacitated_colonists() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.team == Team::Colony)
+        .unwrap()
+        .action_points = 0;
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.team == Team::Colony && unit.action_points > 0)
+        .unwrap()
+        .incapacitated = true;
+
+    assert_eq!(
+        counts(&session),
+        ReadinessCounts {
+            ready: 3,
+            spent: 1,
+            incapacitated: 1,
+        }
+    );
+}

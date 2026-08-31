@@ -175,6 +175,7 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Attack;
             }
+            "first_hour_enemy_phase" => self.capture_first_hour_enemy_phase(),
             "first_hour_objective" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
