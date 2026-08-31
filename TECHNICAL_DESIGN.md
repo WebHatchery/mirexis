@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.213.0
+Save/content version: 1.214.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -989,6 +989,7 @@ Migration coverage:
 | 1.211.0 | Tactical phase changes and reinforcement arrivals now use distinct prioritized audio responses, while volume changes and unmuting preview the current sound level; no new save fields |
 | 1.212.0 | Persisted audio volume is clamped to the supported 0–100 range before playback; no new save fields |
 | 1.213.0 | Tactical footer guidance now names forecast inspection and the visible ATTACK confirmation instead of implying a direct click-to-attack path; no new save fields |
+| 1.214.0 | Tactical field-manual guidance now names forecast inspection and the visible ATTACK confirmation; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

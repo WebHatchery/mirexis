@@ -121,7 +121,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 73 | valid_shot | `ui_valid_shot.png` | 1107216 | `e4c166f6b8af8bfbc356f2de7b626191029e54e9878b714d9e63b19c110b0eee` |
 | 74 | threat_range | `ui_threat_range.png` | 1219610 | `fb387642fc0bdf6516dd40d941a40b6944edf5b1c8236c8f1fad21c0c2209d6c` |
 | 75 | danger_reach | `ui_danger_reach.png` | 1215862 | `716914840273c4151793324e69b7327ddff7755b73f7e2cdcbe8d5612904d8ab` |
-| 76 | help | `ui_help.png` | 357956 | `1814e33c953ffeafa76161ac003934a15b34c8228d6daef3a54bb73db6257dab` |
+| 76 | help | `ui_help.png` | 359975 | `60c29f59b02ed80596d3610e3a747d87d04c3592402137f14130afe0cd39ce2c` |
 | 77 | first_hour_guide | `ui_first_hour_guide.png` | 215325 | `d9b590da6f79bc56432eb6b17a6930a8cb0be6274f0986efb9948e04a1295538` |
 | 78 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
 | 79 | first_hour_promise | `ui_first_hour_promise.png` | 881405 | `44fd622d618faf77ff7d1e85fda005e596bb9a65978d0b4a48a3d0df535261bf` |
