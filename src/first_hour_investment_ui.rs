@@ -36,6 +36,14 @@ pub(crate) fn active_summary(id: &str) -> Option<&'static str> {
     }
 }
 
+pub(crate) fn button_label(name: &str, materials: i32) -> String {
+    if materials < INVESTMENT_COST {
+        format!("{name} // NEED {INVESTMENT_COST} MAT")
+    } else {
+        format!("{name} // {INVESTMENT_COST} MAT")
+    }
+}
+
 pub(crate) fn tactical_summary(progress: &FirstHourProgress) -> Option<&'static str> {
     (progress.stage == FirstHourStage::SecondOperationTactical)
         .then(|| active_summary(&progress.investment_name))
@@ -96,7 +104,7 @@ pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
         let y = 352.0 + index as f32 * 74.0;
         if button(
             Rect::new(878.0, y, 362.0, 38.0),
-            &format!("{name} // {INVESTMENT_COST} MAT"),
+            &button_label(name, campaign.colony.resources.materials),
             affordable,
             mouse,
         ) {

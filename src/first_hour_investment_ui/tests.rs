@@ -22,6 +22,18 @@ fn active_summary_rejects_unknown_preparations() {
 }
 
 #[test]
+fn investment_buttons_name_the_material_gate() {
+    assert_eq!(
+        button_label("BASTION MESH", INVESTMENT_COST),
+        "BASTION MESH // 24 MAT"
+    );
+    assert_eq!(
+        button_label("SURVEY UPLINK", INVESTMENT_COST - 1),
+        "SURVEY UPLINK // NEED 24 MAT"
+    );
+}
+
+#[test]
 fn tactical_summary_only_surfaces_the_active_second_operation_preparation() {
     let mut progress = FirstHourProgress {
         investment_name: "survey_uplink".to_owned(),
