@@ -22,6 +22,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_class_target.png`: transformed unit targeting and contextual card remain aligned.
 - `ui_colony.png`: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.
 - `ui_contact_event.png`: the active Contact aftermath event opens in the Operations drawer with its participants, carrier choices, and consequence summary visible.
+- `ui_contact.png`, `ui_research.png`, `ui_adaptation.png`, `ui_escalation_response.png`, and `ui_mirexis_path.png`: progression references open the Operations drawer at the decision surface they represent, keeping dossier, doctrine, and path context visible.
 - `ui_briefing.png`: first-operation deployment guidance focuses DEPLOY SQUAD while preserving the selectable roster rows.
 - `ui_first_hour_tactical.png`: guided tactical lesson marks a legal move target without blocking the battlefield inspection.
 - `ui_first_hour_ability.png`: guided ability lesson focuses a currently actionable mutation, class action, or field item.
@@ -50,21 +51,21 @@ Manifest: `scripts/capture_ui.ps1`
 | 3 | title_hover | `ui_title_hover.png` | 441360 | `bb170f8e7c94033f52d5cbaa5c5eaa3d402fe66bae06a846d08d8ed813c6cc60` |
 | 4 | colony | `ui_colony.png` | 879197 | `0d243d778864aeae362d4cfe4bd31bf7626e3f6b623b989ddf776fa708ead902` |
 | 5 | first_hour_dialogue | `ui_first_hour_dialogue.png` | 739486 | `fc88587d80bfe9e55edcc3c015b272327a86843d487b91ca218e1c15fa314a07` |
-| 6 | contact | `ui_contact.png` | 883333 | `dea634563c95a77813fb1239b8963e427100fe833afb6d013bfb78731457cac6` |
+| 6 | contact | `ui_contact.png` | 931658 | `07c4faaa0e0431aa92145bad841b13913c914c345c59f7cda5cd6eef63b493db` |
 | 7 | contact_gear | `ui_contact_gear.png` | 250666 | `4f696269042dbe8f2a6ce57e7d1b535f8f812ccf8aa127eb8d006da33e83361f` |
-| 8 | contact_event | `ui_contact_event.png` | 918650 | `fa2e175cb57011b22bf8a176e51e7043ff9e637adfb37166ee3b5640414c7d07` |
-| 9 | adaptation | `ui_adaptation.png` | 883897 | `f36bcd5f97be911a82d74786155f850ff40bacae82ae6d696c7623f8ffcd7d21` |
+| 8 | contact_event | `ui_contact_event.png` | 918615 | `f97ff627d8da15fd12ee1d74d37a7f3397c463980386595a3782b57a374988b2` |
+| 9 | adaptation | `ui_adaptation.png` | 893328 | `3fdd2ad1b85860e32f09f3a2eb8135aacb7ad245682300e3f7f73d3180c471cc` |
 | 10 | gene_lab | `ui_gene_lab.png` | 182135 | `383b60cb4148f07415865dfc64677371d4a4ccbaffe740eef890fb5c0b735385` |
 | 11 | evolution | `ui_evolution.png` | 245242 | `763f45a7ecb722a170258526d757373bff86c840923b87cfeba370fe27c23454` |
 | 12 | mara_evolution | `ui_mara_evolution.png` | 180425 | `36aeac0e75ed9e988f7fd2b65dadff0d74efbf66b0ad347f2068f4516c580c1b` |
 | 13 | ilya_evolution | `ui_ilya_evolution.png` | 180215 | `c7e600f48fabf0363275cd6a41eaa9af3ee22a42c1a10339eb97d6d8d58dab9d` |
 | 14 | sol_evolution | `ui_sol_evolution.png` | 174924 | `d62ee19981a701bb8be3ccea1a7c08f55304fa193e8e14ad22977563030d0eb1` |
 | 15 | nadi_evolution | `ui_nadi_evolution.png` | 185539 | `e4985cef48b0ee9eeb3a2a7a6b9419dee5dbe797b60b7912fa10c6fa75aa5eaa` |
-| 16 | escalation | `ui_escalation.png` | 887518 | `c8b6637a73e7f504099b90a08bcdce9cdb5ac13136cfe8826f2a293f7de9ccee` |
-| 17 | escalation_operation | `ui_escalation_operation.png` | 205084 | `de3b180f8874fff009921dd65ee5d91fab1c887bcaa56c8b31393816cd252266` |
-| 18 | escalation_response | `ui_escalation_response.png` | 887706 | `9d7d28bc2d55fe8993f3f262cbe475c6509450bb11e543153262cfef43be091a` |
-| 19 | mirexis | `ui_mirexis.png` | 887661 | `fe35921a506163aefc82d48b425e8c96b6888a9274d7e9e33a5f3b60163ecb73` |
-| 20 | mirexis_path | `ui_mirexis_path.png` | 888975 | `2e1840d20502cc78483aa833e1afbd49b3bb3d20f605bfa75443598433ecbee9` |
+| 16 | escalation | `ui_escalation.png` | 896045 | `a4df2bd39231e8877ee68b8c95587719fdd0e06d9ec25a6ae2eb9f94b2ce68bf` |
+| 17 | escalation_operation | `ui_escalation_operation.png` | 204970 | `307842c55e523dd49fdcee6d454093e00f67495aa7021811a9d5da8f375aba64` |
+| 18 | escalation_response | `ui_escalation_response.png` | 937941 | `eee926eb90f6a73892707d22c30ede1363871b3edeb3c18203a5117fedc0aa32` |
+| 19 | mirexis | `ui_mirexis.png` | 938130 | `45485b9382fa4b68f5ce0ad0d5c20a1915ac4077e25abe751afbb6103d22d506` |
+| 20 | mirexis_path | `ui_mirexis_path.png` | 898325 | `4eff79ab2b863806b3687a09d9d0f6ffd7f3d07e87b9d40f913b34ee913da50d` |
 | 21 | redoubt_end | `ui_redoubt_end.png` | 918191 | `7bc21d54d20f4eadc6378d1c86e42f4918d7a284bd3bd58d795eec6450370adf` |
 | 22 | commonwealth_end | `ui_commonwealth_end.png` | 927309 | `b33f06f4832cfc041a78b684a18b977740ced03c1e2e928b01ea354b65155400` |
 | 23 | threshold_end | `ui_threshold_end.png` | 928259 | `2e79c4122fafd0a165e1462592ae90bedb7acb140aad879504950ad8c0dae99f` |
@@ -85,7 +86,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 38 | repair | `ui_repair.png` | 890783 | `e95132d2fc1cfac0fa097ba4a83a6d8b1aa8b77bada266c19b6d07812ebb5da5` |
 | 39 | power | `ui_power.png` | 882536 | `f39253da0f11a09321c24d376f38e882c335c81f6002ac4fad73bf900bade533` |
 | 40 | construction | `ui_construction.png` | 884197 | `0370ef65e19d95a60ae7a9a9675a475af1121ed88f05bedbb589060245506353` |
-| 41 | research | `ui_research.png` | 883727 | `b4d7fcb8cc75310b72eaaf3712093dcccd3c156bf9f027303bdc3797ca401011` |
+| 41 | research | `ui_research.png` | 904641 | `56041351573ef9fa488d7221854fd32c195e639b2021556d82807319297abd6c` |
 | 42 | roster | `ui_roster.png` | 249555 | `7c12925bc5f75d448982314e73d82e5590ceb8aed51d767b5a8598606797f8c8` |
 | 43 | recruited_roster | `ui_recruited_roster.png` | 282407 | `c8dd5b9dfd9b990e87a9e2dd8c274a38be6193d8f64b44fd230b3ddc590bf317` |
 | 44 | recruited_gene_lab | `ui_recruited_gene_lab.png` | 210796 | `c49dd4defff5a4c80695d7aeb7de3abe7020897bdd18a54570ea625cea5a5671` |

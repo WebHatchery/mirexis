@@ -140,6 +140,7 @@ $lines.Add("- ``ui_movement_route.png`` and ``ui_valid_shot.png``: transformed r
 $lines.Add("- ``ui_class_target.png``: transformed unit targeting and contextual card remain aligned.")
 $lines.Add("- ``ui_colony.png``: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.")
 $lines.Add("- ``ui_contact_event.png``: the active Contact aftermath event opens in the Operations drawer with its participants, carrier choices, and consequence summary visible.")
+$lines.Add("- ``ui_contact.png``, ``ui_research.png``, ``ui_adaptation.png``, ``ui_escalation_response.png``, and ``ui_mirexis_path.png``: progression references open the Operations drawer at the decision surface they represent, keeping dossier, doctrine, and path context visible.")
 $lines.Add("- ``ui_briefing.png``: first-operation deployment guidance focuses DEPLOY SQUAD while preserving the selectable roster rows.")
 $lines.Add("- ``ui_first_hour_tactical.png``: guided tactical lesson marks a legal move target without blocking the battlefield inspection.")
 $lines.Add("- ``ui_first_hour_ability.png``: guided ability lesson focuses a currently actionable mutation, class action, or field item.")

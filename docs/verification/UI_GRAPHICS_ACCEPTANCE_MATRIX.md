@@ -66,21 +66,21 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | title_controller | Title/controller focus | No visible gamepad focus or controller-specific confirmation cue | `ui_title_controller.png` | PASS |
 | title_hover | Title/mouse hover | Hover treatment not represented in deterministic evidence | `ui_title_hover.png` | PASS |
 | colony | Colony | Prototype island lacks full inhabited/state detail | `ui_colony.png` | PASS |
-| contact | Colony event | Text and grid dominate event identity | `ui_contact.png` | PASS |
+| contact | Colony event | Contact progression left its protocol dossier behind a closed Operations drawer | `ui_contact.png` | PASS |
 | contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
 | contact_event | Colony event | Active event was not shown because the capture left the Operations drawer closed | `ui_contact_event.png` | PASS |
-| adaptation | Colony | Phase evolution primarily textual | `ui_adaptation.png` | PASS |
+| adaptation | Colony | Adaptation progression did not open the Operations decision surface | `ui_adaptation.png` | PASS |
 | gene_lab | Gene lab | Evolution card obscured the portrait anatomy scan label | `ui_gene_lab.png` | PASS |
 | evolution | Roster/gene lab | Evolution visible mainly as text | `ui_evolution.png` | PASS |
 | mara_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_mara_evolution.png` | PASS |
 | ilya_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_ilya_evolution.png` | PASS |
 | sol_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_sol_evolution.png` | PASS |
 | nadi_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_nadi_evolution.png` | PASS |
-| escalation | Colony | Campaign visual evolution too weak | `ui_escalation.png` | PASS |
+| escalation | Colony | Escalation progression did not open the Operations decision surface | `ui_escalation.png` | PASS |
 | escalation_operation | Briefing | Pressure modifier copy crossed the split briefing columns and collided with threat intelligence | `ui_escalation_operation.png` | PASS |
-| escalation_response | Campaign event | Choice identity mainly textual | `ui_escalation_response.png` | PASS |
-| mirexis | Colony | Late-game hybridisation too weak | `ui_mirexis.png` | PASS |
-| mirexis_path | Campaign choice | Path identity mainly textual | `ui_mirexis_path.png` | PASS |
+| escalation_response | Campaign event | Escalation response did not open the Operations decision surface | `ui_escalation_response.png` | PASS |
+| mirexis | Colony | Mirexis progression did not open the Operations decision surface | `ui_mirexis.png` | PASS |
+| mirexis_path | Campaign choice | Mirexis path choice did not open its Operations decision surface | `ui_mirexis_path.png` | PASS |
 | redoubt_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_redoubt_end.png` | PASS |
 | commonwealth_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_commonwealth_end.png` | PASS |
 | threshold_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_threshold_end.png` | PASS |
@@ -101,7 +101,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | repair | Colony | Restored architecture and repair feedback were not captured explicitly | `ui_repair.png` | PASS |
 | power | Colony | Unpowered state lacks environmental response | `ui_power.png` | PASS |
 | construction | Colony | Construction state lacks authored staging | `ui_construction.png` | PASS |
-| research | Research | Weak technology art and hierarchy | `ui_research.png` | PASS |
+| research | Research | Research capture left the doctrine panel behind a closed Operations drawer | `ui_research.png` | PASS |
 | roster | Roster | Procedural portrait, dense controls, and the final equipment row extending below the workshop panel | `ui_roster.png` | PASS |
 | recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
 | recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |

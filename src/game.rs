@@ -2,6 +2,7 @@
 
 mod audio_flow;
 mod bootstrap;
+mod capture_campaign;
 mod capture_colony;
 mod capture_debrief;
 mod capture_first_hour;

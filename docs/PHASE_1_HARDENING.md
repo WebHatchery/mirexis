@@ -53,7 +53,8 @@ Status: automated and internal verification complete; external playtests pending
   event-grouping, filter-count, hostile-replay-consequence, and display-name event-summary
   coverage,
   debrief-return, dialogue-continue, advance-control, briefing-deployment focus, and
-  first-hour Operations event-card geometry coverage, and campaign decision resource-gate
+  first-hour Operations event-card geometry coverage, progression capture-surface fidelity,
+  and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
   material-gate label coverage, character-event food-gate label coverage, Build Mode
   construction-blocker label coverage, roster equipment-row geometry coverage, finale

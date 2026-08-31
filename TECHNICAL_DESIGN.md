@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.209.0
+Save/content version: 1.210.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -985,6 +985,7 @@ Migration coverage:
 | 1.207.0 | Tactical combat feedback now places nearby event callouts in separate readable plates above the battlefield effect lane; no new save fields |
 | 1.208.0 | First-hour Operations now separates the briefing focus from the framed colony-event decision card and keeps the colony plan below both participant choices; no new save fields |
 | 1.209.0 | Capture scenes now reset process-owned colony, overlay, title-focus, and save-preview state, while the Contact event reference opens its Operations drawer; no new save fields |
+| 1.210.0 | Progression capture builders now explicitly open the Operations surfaces they represent for Contact, Research, Adaptation, Escalation, and Mirexis references; campaign capture responsibilities move to a named module with no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
