@@ -11,6 +11,8 @@ use macroquad_toolkit::prelude::*;
 
 mod commons;
 mod context;
+mod decision_affordance;
+mod decisions;
 mod medical;
 mod recruitment;
 mod relay;
@@ -359,102 +361,8 @@ pub(super) fn draw_operations(
                 draw_epilogue_dossier(&dossier);
             }
         }
-    } else if choosing_contact {
-        draw_ui_text_ex(
-            "FIRST CONTACT // SPEND 2 COMPONENTS // CHOOSE ONE",
-            878.0,
-            514.0,
-            TextStyle::new(11.0, dark::ACCENT).params(),
-        );
-        for (index, protocol) in data.campaign.contact_protocols.iter().enumerate() {
-            let bonus = if protocol.materials_bonus > 0 {
-                format!("+{} MATERIALS", protocol.materials_bonus)
-            } else if protocol.biomass_bonus > 0 {
-                format!("+{} BIOMASS", protocol.biomass_bonus)
-            } else {
-                format!("+{} POWER", protocol.power_bonus)
-            };
-            if colony_button(
-                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
-                &format!("{} // {}", protocol.name.to_uppercase(), bonus),
-                campaign.colony.resources.alien_components >= protocol.alien_components_cost,
-                mouse,
-            ) {
-                actions.push(UiAction::ChooseContactProtocol(protocol.id.clone()));
-            }
-        }
-    } else if choosing_escalation {
-        draw_ui_text_ex(
-            "CONVERGENCE CAPTURED // CHOOSE ONE RESPONSE",
-            878.0,
-            514.0,
-            TextStyle::new(11.0, dark::ACCENT).params(),
-        );
-        for (index, response) in data.campaign.escalation_responses.iter().enumerate() {
-            let effect = if response.threat_delay > 0 {
-                format!(
-                    "{} MAT // DELAY ASSAULT +{}",
-                    response.materials_cost, response.threat_delay
-                )
-            } else if response.attention_change_all < 0 {
-                format!(
-                    "{} BIOMASS // ATTENTION {}",
-                    response.biomass_cost, response.attention_change_all
-                )
-            } else {
-                format!(
-                    "{} POWER // +{} MAT / ATTENTION +{}",
-                    response.power_cost, response.materials_bonus, response.attention_change_all
-                )
-            };
-            let affordable = campaign.colony.resources.materials >= response.materials_cost
-                && campaign.colony.resources.biomass >= response.biomass_cost
-                && campaign.colony.resources.power >= response.power_cost;
-            if colony_button(
-                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
-                &format!("{} // {}", response.name.to_uppercase(), effect),
-                affordable,
-                mouse,
-            ) {
-                actions.push(UiAction::ChooseEscalationResponse(response.id.clone()));
-            }
-        }
-    } else if choosing_mirexis {
-        draw_ui_text_ex(
-            "MIREXIS REVEALED // CHOOSE WHAT THE COLONY BECOMES",
-            878.0,
-            514.0,
-            TextStyle::new(11.0, dark::ACCENT).params(),
-        );
-        for (index, path) in data.campaign.mirexis_paths.iter().enumerate() {
-            let effect = if path.defense_cover_bonus > 0 {
-                format!(
-                    "{} MAT // DEFENCE COVER +{}",
-                    path.materials_cost, path.defense_cover_bonus
-                )
-            } else if path.deployment_food_discount > 0 {
-                format!(
-                    "{} BIO // FOOD -{}",
-                    path.biomass_cost, path.deployment_food_discount
-                )
-            } else {
-                format!(
-                    "{} POWER // VICTORY POWER +{}",
-                    path.power_cost, path.power_bonus
-                )
-            };
-            let affordable = campaign.colony.resources.materials >= path.materials_cost
-                && campaign.colony.resources.biomass >= path.biomass_cost
-                && campaign.colony.resources.power >= path.power_cost;
-            if colony_button(
-                Rect::new(878.0, 516.0 + index as f32 * 31.0, 362.0, 30.0),
-                &format!("{} // {}", path.name.to_uppercase(), effect),
-                affordable,
-                mouse,
-            ) {
-                actions.push(UiAction::ChooseMirexisPath(path.id.clone()));
-            }
-        }
+    } else if let Some(decision) = decision {
+        decisions::draw_choice_panel(decision, campaign, data, mouse, actions);
     } else if evolution_pending {
         let lab_exists = campaign
             .colony

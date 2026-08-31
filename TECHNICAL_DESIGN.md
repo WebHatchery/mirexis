@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.172.0
+Save/content version: 1.173.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -948,6 +948,7 @@ Migration coverage:
 | 1.170.0 | Colony treatment controls now identify the Infirmary, injury, and biomass gates before recovery is attempted; no new save fields |
 | 1.171.0 | Colony research controls now identify effective material shortfalls before a doctrine is completed; no new save fields |
 | 1.172.0 | Waystation recruitment controls now identify the route resource shortfall before an outsider is recruited; no new save fields |
+| 1.173.0 | Campaign decision controls now identify missing components, materials, biomass, or power before an irreversible branch is chosen; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
