@@ -31,15 +31,15 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 449 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 450 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
   roster prerequisite-label coverage, Gene Lab biomass-label coverage, and Waystation
   outsider shortfall-label coverage, tactical target-gate label coverage, and mutation
   availability-label coverage, objective interaction-label coverage, Overwatch
-  availability-label coverage, class-action availability-label coverage, and technique
-  availability-label coverage.
+  availability-label coverage, class-action availability-label coverage, technique
+  availability-label coverage, and field-item availability-label coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 95 audited 1280×720 scenes, including the first-hour

@@ -9,6 +9,42 @@ fn action_button_enabled(targeting: bool, has_valid_target: bool) -> bool {
     targeting || has_valid_target
 }
 
+fn equipment_button_label<'a>(
+    equipment_label: &'a str,
+    selected: Option<&UnitState>,
+    equipment_id: Option<&str>,
+    targeting: bool,
+    has_valid_target: bool,
+) -> &'a str {
+    if targeting {
+        return "CANCEL";
+    }
+    let Some(unit) = selected else {
+        return "SELECT UNIT";
+    };
+    let Some(_equipment_id) = equipment_id else {
+        return if unit
+            .equipment_ids
+            .iter()
+            .any(|id| crate::equipment_actions::action_name(id).is_some())
+        {
+            "SPENT"
+        } else {
+            "NO FIELD ITEM"
+        };
+    };
+    if has_valid_target {
+        return equipment_label;
+    }
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    action_button_label(equipment_label, false, true, false)
+}
+
 pub(crate) fn draw_action_button(
     ctx: &UiContext<'_>,
     selected: Option<&UnitState>,
@@ -34,10 +70,11 @@ pub(crate) fn draw_action_button(
             crate::equipment_actions::has_valid_target(ctx.session, &unit.id, equipment_id)
         })
     });
-    let button_label = action_button_label(
+    let button_label = equipment_button_label(
         equipment_label,
+        selected,
+        equipment_id.as_deref(),
         targeting,
-        equipment_id.is_some(),
         has_valid_target,
     );
     let clicked = button(
