@@ -119,7 +119,13 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
             };
             rect
         }
-        TacticalLesson::Select | TacticalLesson::MoveToCover | TacticalLesson::Objective => return,
+        TacticalLesson::Objective => {
+            let Some(rect) = objective_focus_rect(ctx.session) else {
+                return;
+            };
+            rect
+        }
+        TacticalLesson::Select | TacticalLesson::MoveToCover => return,
     };
     let color = focus_color();
     draw_rectangle_lines(
@@ -154,6 +160,12 @@ fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
             crate::action_preview_ui::attack_button_bounds(card)
         },
     )
+}
+
+fn objective_focus_rect(session: &GameSession) -> Option<Rect> {
+    session
+        .can_interact_selected()
+        .then_some(crate::objective_ui::action_button_bounds(TACTICAL_PANEL))
 }
 
 fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {

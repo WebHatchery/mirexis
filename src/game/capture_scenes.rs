@@ -174,6 +174,26 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Attack;
             }
+            "first_hour_objective" => {
+                self.reset_capture_session(AppState::Tactical);
+                self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+                self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Objective;
+                let objective = self.session.tactical.objective_tile;
+                let selected_id = self
+                    .session
+                    .tactical
+                    .selected_unit
+                    .clone()
+                    .expect("objective capture selects a colonist");
+                self.session
+                    .tactical
+                    .units
+                    .iter_mut()
+                    .find(|unit| unit.id == selected_id)
+                    .expect("objective capture colonist exists")
+                    .position = objective;
+                self.session.tactical.selected_tile = objective;
+            }
             "first_hour_ability" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;

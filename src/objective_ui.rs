@@ -18,6 +18,10 @@ pub(crate) fn action_label(kind: ObjectiveKind, state: ObjectiveState) -> &'stat
     }
 }
 
+pub(crate) fn action_button_bounds(panel: Rect) -> Rect {
+    Rect::new(panel.x + 18.0, panel.bottom() - 232.0, panel.w - 36.0, 34.0)
+}
+
 pub(crate) fn interaction_label(
     kind: ObjectiveKind,
     state: ObjectiveState,

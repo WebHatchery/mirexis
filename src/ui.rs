@@ -529,7 +529,7 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         objective_enabled,
     );
     if button(
-        Rect::new(x, panel.bottom() - 232.0, panel.w - 36.0, 34.0),
+        crate::objective_ui::action_button_bounds(panel),
         objective_label,
         objective_enabled,
         mouse,
