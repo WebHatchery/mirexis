@@ -57,3 +57,50 @@ fn feedback_marks_missed_attacks_at_the_target_with_an_attacker_fallback() {
     feedback.update(0.81);
     assert!(feedback.callouts.is_empty());
 }
+
+#[test]
+fn feedback_names_successful_hits_incapacitations_and_completion() {
+    let mut feedback = CombatFeedback::default();
+    feedback.record_for(
+        &[
+            BattleEvent::AttackRolled {
+                attacker_id: "brood_stalker_a".to_owned(),
+                target_id: "kira_voss".to_owned(),
+                roll: 4,
+                hit_chance: 72,
+            },
+            BattleEvent::DamageApplied {
+                target_id: "kira_voss".to_owned(),
+                amount: 3,
+                remaining: 0,
+            },
+            BattleEvent::UnitIncapacitated {
+                unit_id: "kira_voss".to_owned(),
+            },
+            BattleEvent::ObjectiveSecured {
+                unit_id: "mara_venn".to_owned(),
+            },
+            BattleEvent::ExtractionCompleted {
+                unit_id: "ilya_reed".to_owned(),
+            },
+        ],
+        0.8,
+    );
+
+    assert_eq!(
+        feedback
+            .callouts
+            .iter()
+            .map(|callout| callout.label.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "HIT",
+            "-3",
+            "INCAPACITATED",
+            "OBJECTIVE SECURED",
+            "EXTRACTED"
+        ]
+    );
+    assert_eq!(feedback.callouts[0].tone, FeedbackTone::Hit);
+    assert_eq!(feedback.impacts.len(), 1);
+}

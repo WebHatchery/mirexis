@@ -148,6 +148,7 @@ $lines.Add("- ``ui_first_hour_return.png``: the first-return recovery handoff ro
 $lines.Add("- ``ui_first_hour_dialogue.png``: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.")
 $lines.Add("- ``ui_first_hour_promise.png``: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.")
 $lines.Add("- ``ui_first_hour_operations.png``: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.")
+$lines.Add("- ``ui_combat_feedback.png``: hit, miss, critical, damage, and recovery callouts remain anchored to the affected combatants.")
 $lines.Add("- ``ui_construction.png``: placement blueprint and reserved resources remain visible at fixed building scale.")
 $lines.Add("")
 $lines.Add("## Files")

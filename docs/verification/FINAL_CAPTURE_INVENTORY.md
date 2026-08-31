@@ -30,6 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
+- `ui_combat_feedback.png`: hit, miss, critical, damage, and recovery callouts remain anchored to the affected combatants.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
 ## Files
@@ -117,7 +118,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 79 | first_hour_promise | `ui_first_hour_promise.png` | 881379 | `4b64d7d086f919d7b25a1c0dadfbcb5cb60b67329b3982b6211827ce61dac3fb` |
 | 80 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
 | 81 | battle_log | `ui_battle_log.png` | 655810 | `3a0d56f8d97647193717f7d0a882db8e0f7111fa2f601700eb7f0d2f744d88c0` |
-| 82 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |
+| 82 | combat_feedback | `ui_combat_feedback.png` | 1192073 | `c448bda3e5ed02c34bc578b349161f945fc3680e35aa0670293db766bcd486cb` |
 | 83 | phase_replay | `ui_phase_replay.png` | 559533 | `c8eace3ed8ec5c0736af49d223accd1021977243b20876553edd0b389c9dcf53` |
 | 84 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |
 | 85 | readiness_markers | `ui_readiness_markers.png` | 593135 | `90486f3d5aeba58d4cec38751bfd775d4ec29e5a74b8c91230b57c887fe0cf48` |

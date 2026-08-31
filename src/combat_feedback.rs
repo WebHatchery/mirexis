@@ -11,6 +11,7 @@ use macroquad_toolkit::prelude::TextStyle;
 enum FeedbackTone {
     Damage,
     Healing,
+    Hit,
     Miss,
     Status,
 }
@@ -94,7 +95,15 @@ impl CombatFeedback {
             {
                 let hit = roll <= hit_chance;
                 pending_attack = Some((attacker_id, target_id, hit && *roll <= 10));
-                if !hit {
+                if hit {
+                    self.callouts.push(CombatCallout {
+                        unit_id: target_id.clone(),
+                        fallback_unit_id: Some(attacker_id.clone()),
+                        label: "HIT".to_owned(),
+                        tone: FeedbackTone::Hit,
+                        remaining: lifetime,
+                    });
+                } else {
                     self.callouts.push(CombatCallout {
                         unit_id: target_id.clone(),
                         fallback_unit_id: Some(attacker_id.clone()),
@@ -124,6 +133,17 @@ impl CombatFeedback {
                 BattleEvent::UnitHealed {
                     unit_id, amount, ..
                 } => Some((unit_id, format!("+{}", amount), FeedbackTone::Healing)),
+                BattleEvent::UnitIncapacitated { unit_id } => {
+                    Some((unit_id, "INCAPACITATED".to_owned(), FeedbackTone::Status))
+                }
+                BattleEvent::ObjectiveSecured { unit_id } => Some((
+                    unit_id,
+                    "OBJECTIVE SECURED".to_owned(),
+                    FeedbackTone::Status,
+                )),
+                BattleEvent::ExtractionCompleted { unit_id } => {
+                    Some((unit_id, "EXTRACTED".to_owned(), FeedbackTone::Status))
+                }
                 BattleEvent::StatusApplied { unit_id, status } => Some((
                     unit_id,
                     format!("{:?}", status).to_uppercase(),
@@ -177,11 +197,13 @@ impl CombatFeedback {
             let color = match callout.tone {
                 FeedbackTone::Damage => Color::new(1.0, 0.32, 0.22, 1.0),
                 FeedbackTone::Healing => Color::new(0.32, 1.0, 0.58, 1.0),
+                FeedbackTone::Hit => Color::new(0.50, 1.0, 0.64, 1.0),
                 FeedbackTone::Miss => Color::new(0.38, 0.76, 1.0, 1.0),
                 FeedbackTone::Status => Color::new(0.98, 0.78, 0.24, 1.0),
             };
             let size = match callout.tone {
                 FeedbackTone::Status => 12.0,
+                FeedbackTone::Hit => 16.0,
                 FeedbackTone::Miss => 18.0,
                 _ => 20.0,
             };

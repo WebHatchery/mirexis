@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 486 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 487 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -46,7 +46,8 @@ Status: automated and internal verification complete; external playtests pending
   shortfall-label coverage, contextual treatment and Gene Lab blocker-label coverage,
   targeted class-action, field-item, and technique team/range blocker coverage, and
   targeting-card rule-reason coverage, guided attack-confirmation focus coverage,
-  objective-interaction, replay-skip, end-phase geometry, readiness-summary,
+  objective-interaction, replay-skip, end-phase geometry, readiness-summary, hit-impact,
+  incapacitation, objective-completion, and extraction-completion feedback,
   debrief-return, dialogue-continue, advance-control, and briefing-deployment focus
   coverage, and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
