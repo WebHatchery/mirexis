@@ -40,6 +40,7 @@ pub(crate) fn draw(
         panel.y + 67.0,
         TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
+    let filter_counts = FILTERS.map(|(option, _)| filtered_event_count(session, option));
     for (index, (option, label)) in FILTERS.iter().enumerate() {
         let rect = Rect::new(
             panel.x + 24.0 + index as f32 * 122.0,
@@ -47,7 +48,8 @@ pub(crate) fn draw(
             116.0,
             28.0,
         );
-        if button_with_state(rect, label, true, filter == *option, mouse) {
+        let label = format!("{} {}", label, filter_counts[index]);
+        if button_with_state(rect, &label, true, filter == *option, mouse) {
             actions.push(UiAction::SetBattleLogFilter(*option));
         }
     }
@@ -122,6 +124,15 @@ pub(crate) fn draw(
 
 fn filter_matches(filter: BattleLogFilter, event: &BattleEvent) -> bool {
     filter == BattleLogFilter::All || event_filter(event) == filter
+}
+
+fn filtered_event_count(session: &GameSession, filter: BattleLogFilter) -> usize {
+    session
+        .tactical
+        .event_log
+        .iter()
+        .filter(|event| filter_matches(filter, event))
+        .count()
 }
 
 fn event_filter(event: &BattleEvent) -> BattleLogFilter {

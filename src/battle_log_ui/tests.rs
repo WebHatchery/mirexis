@@ -45,6 +45,29 @@ fn all_filter_keeps_every_event_and_specific_filters_reject_other_groups() {
 }
 
 #[test]
+fn filter_counts_advertise_the_events_available_in_each_category() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut session = GameSession::new(&data.config, &data.mission, &data.roster);
+    session.tactical.event_log = vec![
+        attack_event(),
+        BattleEvent::UnitMoved {
+            unit_id: "mara_venn".to_owned(),
+            path: Vec::new(),
+            cost: 1,
+        },
+        BattleEvent::PhaseStarted {
+            phase: TacticalPhase::Player,
+            round: 1,
+        },
+    ];
+
+    assert_eq!(filtered_event_count(&session, BattleLogFilter::All), 3);
+    assert_eq!(filtered_event_count(&session, BattleLogFilter::Combat), 1);
+    assert_eq!(filtered_event_count(&session, BattleLogFilter::Ground), 1);
+    assert_eq!(filtered_event_count(&session, BattleLogFilter::System), 1);
+}
+
+#[test]
 fn battle_log_groups_secondary_outcomes_and_names_their_event_kinds() {
     let recovery = BattleEvent::UnitHealed {
         unit_id: "kira_voss".to_owned(),
