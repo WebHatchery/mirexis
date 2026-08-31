@@ -20,6 +20,8 @@ pub(crate) enum SoundCue {
     Recovery,
     Ability,
     Objective,
+    Reinforcement,
+    Phase,
     Victory,
     Defeat,
     CityAmbience,
@@ -96,7 +98,7 @@ impl AudioSystem {
     }
 
     pub(crate) fn play_events(&mut self, events: &[BattleEvent]) {
-        let cue = events.iter().rev().find_map(event_cue);
+        let cue = prioritized_event_cue(events);
         if let Some(cue) = cue {
             self.play(cue);
         }
@@ -205,7 +207,33 @@ fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
             SoundCue::Miss
         }),
         BattleEvent::UnitMoved { .. } => Some(SoundCue::Move),
+        BattleEvent::ReinforcementsArrived { .. } => Some(SoundCue::Reinforcement),
+        BattleEvent::PhaseStarted { .. } => Some(SoundCue::Phase),
         _ => None,
+    }
+}
+
+fn prioritized_event_cue(events: &[BattleEvent]) -> Option<SoundCue> {
+    events
+        .iter()
+        .filter_map(event_cue)
+        .max_by_key(|cue| cue_priority(*cue))
+}
+
+fn cue_priority(cue: SoundCue) -> u8 {
+    match cue {
+        SoundCue::Victory | SoundCue::Defeat => 100,
+        SoundCue::Objective => 90,
+        SoundCue::Reinforcement => 85,
+        SoundCue::Damage => 70,
+        SoundCue::Hit | SoundCue::Miss | SoundCue::Ability => 60,
+        SoundCue::Recovery => 50,
+        SoundCue::Phase => 40,
+        SoundCue::Move => 10,
+        SoundCue::Focus
+        | SoundCue::Invalid
+        | SoundCue::CityAmbience
+        | SoundCue::TacticalAmbience => 0,
     }
 }
 
@@ -257,6 +285,22 @@ fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
                 tone(0.22, 780.0, 1040.0, 0.26),
             ],
             8,
+        ),
+        (
+            Reinforcement,
+            vec![
+                tone(0.18, 180.0, 360.0, 0.28),
+                tone(0.24, 360.0, 720.0, 0.24),
+            ],
+            14,
+        ),
+        (
+            Phase,
+            vec![
+                tone(0.18, 240.0, 420.0, 0.22),
+                tone(0.12, 420.0, 300.0, 0.16),
+            ],
+            15,
         ),
         (
             Victory,

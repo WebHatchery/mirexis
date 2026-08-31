@@ -223,8 +223,10 @@ Acceptance:
 
 ### 5.6 Audio and presentation foundation
 
-Audio is currently an explicit product-readiness gap. Phase 1 does not need a final
-score, but it needs a coherent response language.
+Audio remains a product-readiness observation target. Phase 1 does not need a final
+score, but it now has a coherent response language for focus, invalid actions, movement,
+combat outcomes, abilities, objectives, phase changes, reinforcement arrivals, and
+campaign ambience.
 
 Required work:
 

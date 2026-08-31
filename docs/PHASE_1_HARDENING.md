@@ -63,7 +63,8 @@ Status: automated and internal verification complete; external playtests pending
   ending-register coverage, completed-campaign register-lane coverage,
   briefing pressure geometry coverage, bounded briefing-intelligence coverage,
   workshop equipment-panel geometry coverage, and separated combat-feedback
-  callout coverage.
+  callout coverage. Audio response coverage now includes distinct phase and reinforcement
+  cues, priority selection for mixed event batches, and settings preview behavior.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 100 audited 1280×720 scenes, including the first-hour

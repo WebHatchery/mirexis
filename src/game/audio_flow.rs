@@ -15,9 +15,21 @@ impl Game {
                     self.clear_colony_explorer_motion();
                 }
             }
-            UiAction::AudioVolumeDown => self.audio.adjust_volume(-25, &game_name),
-            UiAction::AudioVolumeUp => self.audio.adjust_volume(25, &game_name),
-            UiAction::ToggleMute => self.audio.toggle_mute(&game_name),
+            UiAction::AudioVolumeDown => {
+                self.audio.adjust_volume(-25, &game_name);
+                self.audio.play(SoundCue::Focus);
+            }
+            UiAction::AudioVolumeUp => {
+                self.audio.adjust_volume(25, &game_name);
+                self.audio.play(SoundCue::Focus);
+            }
+            UiAction::ToggleMute => {
+                let was_muted = self.audio.settings.muted;
+                self.audio.toggle_mute(&game_name);
+                if was_muted {
+                    self.audio.play(SoundCue::Focus);
+                }
+            }
             UiAction::ToggleReducedMotion => self.audio.toggle_reduced_motion(&game_name),
             _ => {
                 if !tactical_command(action) {
