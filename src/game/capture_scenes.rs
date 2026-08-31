@@ -24,6 +24,10 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
                 self.state = AppState::Colony;
             }
+            "settings" => {
+                self.state = AppState::Colony;
+                self.show_settings = true;
+            }
             "contact" => self.capture_contact(),
             "contact_gear" => self.capture_contact_gear(),
             "contact_event" => self.capture_contact_event(),

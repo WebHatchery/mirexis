@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 508 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 510 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -67,7 +67,8 @@ Status: automated and internal verification complete; external playtests pending
   cues, priority selection for mixed event batches, and settings preview behavior.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
-- The canonical set contains 100 audited 1280×720 scenes, including the first-hour
+- The canonical set contains 101 audited 1280×720 scenes, including the settings
+  overlay and first-hour
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;
   debrief goal/result layering, fielded-versus-reserve squad disclosure including recruited

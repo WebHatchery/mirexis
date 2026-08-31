@@ -55,6 +55,7 @@ Completion rule: the overhaul cannot complete while any row is not `PASS`.
 | S23 | Campaign events | Illustrated event identity, choices, consequences, disabled reasons | Text-heavy colony/briefing panels | PASS |
 | S24 | Endings | Each path has distinct full-frame visual state and decisive continuation | Same colony grid with altered text | PASS |
 | S25 | Capture harness | Every supported scene emits current PNG to final inventory | 82 baseline PNGs; post-overhaul set pending | PASS |
+| S26 | Settings | Persistent volume, mute, and reduced-motion controls with explicit current level and return path | No dedicated visual reference | PASS |
 
 ## C. Deterministic capture scene inventory
 
@@ -66,6 +67,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | title_controller | Title/controller focus | No visible gamepad focus or controller-specific confirmation cue | `ui_title_controller.png` | PASS |
 | title_hover | Title/mouse hover | Hover treatment not represented in deterministic evidence | `ui_title_hover.png` | PASS |
 | colony | Colony | Prototype island lacks full inhabited/state detail | `ui_colony.png` | PASS |
+| settings | Settings overlay | No canonical visual reference for persistent audio/readability controls | `ui_settings.png` | PASS |
 | contact | Colony event | Contact progression left its protocol dossier behind a closed Operations drawer | `ui_contact.png` | PASS |
 | contact_gear | Roster/equipment | No authored equipment art | `ui_contact_gear.png` | PASS |
 | contact_event | Colony event | Active event was not shown because the capture left the Operations drawer closed | `ui_contact_event.png` | PASS |
@@ -173,9 +175,9 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | Implementation checkpoint 2 | 150 tests + source gate; Windows/WebGL publish; controller bridge/package audit | PASS |
 | Implementation checkpoint 3 | 151 tests + source gate; 82-scene recapture; Windows/WebGL publish; 27-file package audit | PASS |
 | Live WebGL checkpoint | Warning/error-free browser startup; title through tactical deployment and help exercised | PASS |
-| Final implementation gate | `cargo fmt --package mirexis -- --check`; 507 Mirexis unit tests, source-size gate, and strict Clippy with warnings denied | PASS |
+| Final implementation gate | `cargo fmt --package mirexis -- --check`; 510 Mirexis unit tests, source-size gate, and strict Clippy with warnings denied | PASS |
 | Final publish/package gate | `publish.ps1`; Windows and WebGL release builds; 37-file/64.43 MB runtime asset package; preview deploy | PASS |
-| Final full capture | `FINAL_CAPTURE_INVENTORY.md`; 100 PNGs, SHA-256 digests, and machine audit in `capture_audit.json` | PASS |
+| Final full capture | `FINAL_CAPTURE_INVENTORY.md`; 101 PNGs, SHA-256 digests, and machine audit in `capture_audit.json` | PASS |
 | Visual regression baseline | Current deterministic PNG set and `FINAL_CAPTURE_INVENTORY.md`; one-off implementation audit reports retired after acceptance | PASS |
 | Ongoing requirement contract | This matrix remains the machine-checked scene contract; product-readiness criteria now live in `../PLAYABLE_GAME_PHASE_1.md` | PASS |
 | Minimum active work | Goal elapsed active work reached 14,408 seconds before closure | PASS |

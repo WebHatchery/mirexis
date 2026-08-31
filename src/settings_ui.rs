@@ -6,6 +6,9 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
+#[cfg(test)]
+mod tests;
+
 pub(crate) fn draw_modal(
     settings: AudioSettings,
     open: bool,
@@ -32,6 +35,36 @@ pub(crate) fn draw_modal(
         dark::TEXT_DIM,
     );
     text("MASTER VOLUME", 432.0, 314.0, 14.0, dark::ACCENT);
+    let meter = volume_meter_bounds();
+    draw_rectangle(
+        meter.x,
+        meter.y,
+        meter.w,
+        meter.h,
+        Color::new(0.08, 0.13, 0.14, 1.0),
+    );
+    let fill_width = volume_meter_fill_width(settings.volume_percent);
+    if fill_width > 0.0 {
+        draw_rectangle(
+            meter.x,
+            meter.y,
+            fill_width,
+            meter.h,
+            if settings.muted {
+                dark::TEXT_DIM
+            } else {
+                dark::ACCENT
+            },
+        );
+    }
+    draw_rectangle_lines(
+        meter.x,
+        meter.y,
+        meter.w,
+        meter.h,
+        1.0,
+        Color::new(0.34, 0.86, 0.68, 0.7),
+    );
     if button(Rect::new(432.0, 336.0, 72.0, 42.0), "-", true, mouse) {
         actions.push(UiAction::AudioVolumeDown);
     }
@@ -75,6 +108,14 @@ pub(crate) fn draw_modal(
         12.0,
         dark::TEXT_DIM,
     );
+}
+
+fn volume_meter_bounds() -> Rect {
+    Rect::new(432.0, 322.0, 386.0, 6.0)
+}
+
+fn volume_meter_fill_width(volume_percent: u8) -> f32 {
+    volume_meter_bounds().w * volume_percent.min(100) as f32 / 100.0
 }
 
 fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
