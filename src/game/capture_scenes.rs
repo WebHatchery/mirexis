@@ -500,6 +500,7 @@ impl Game {
             .refresh_mirexis_completion(&self.data));
         self.campaign.strategy.regenerate_missions(&self.data);
         self.campaign.operations_completed = 1;
+        self.colony_operations_open = true;
         self.state = AppState::Colony;
     }
 

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.201.0
+Save/content version: 1.202.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -977,6 +977,7 @@ Migration coverage:
 | 1.199.0 | Gene Lab evolution cards now clear the portrait anatomy scan label and the return control; no new save fields |
 | 1.200.0 | Roster equipment rows now clear the footer instruction baseline across the full catalog; no new save fields |
 | 1.201.0 | Finale debrief legacy summaries now use bounded readable lines and suppress early-operation guidance after campaign completion; no new save fields |
+| 1.202.0 | Ending captures now open the Operations drawer and its colony legacy register uses seven bounded rows beneath each path-specific identity card; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

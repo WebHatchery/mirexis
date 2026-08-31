@@ -686,12 +686,12 @@ fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
         590.0,
         TextStyle::new(11.0, dark::ACCENT).params(),
     );
-    for (index, line) in dossier.lines().iter().enumerate() {
+    for (index, line) in dossier.register_lines().iter().enumerate() {
         draw_ui_text_ex(
             line,
             878.0,
-            607.0 + index as f32 * 14.0,
-            TextStyle::new(8.5, dark::TEXT_DIM).params(),
+            602.0 + index as f32 * 11.0,
+            TextStyle::new(7.5, dark::TEXT_DIM).params(),
         );
     }
 }

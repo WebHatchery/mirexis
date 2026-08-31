@@ -57,7 +57,8 @@ Status: automated and internal verification complete; external playtests pending
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
   material-gate label coverage, character-event food-gate label coverage, Build Mode
   construction-blocker label coverage, roster equipment-row geometry coverage, finale
-  debrief summary coverage, and completed-campaign debrief voice coverage.
+  debrief summary coverage, completed-campaign debrief voice coverage, and bounded
+  ending-register coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 100 audited 1280×720 scenes, including the first-hour
@@ -68,6 +69,8 @@ Status: automated and internal verification complete; external playtests pending
   disclosure,
   enemy-phase readiness and replay-skip transitions, and forecast/first-hour layout changes
   replace their affected images.
+  The three ending captures also open the Operations drawer so each path-specific identity
+  card and bounded colony legacy register is visible in the canonical evidence.
 
 ## Honest boundary
 

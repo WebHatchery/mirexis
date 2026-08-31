@@ -33,6 +33,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
 - `ui_finale_debrief.png`: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.
+- `ui_redoubt_end.png`, `ui_commonwealth_end.png`, and `ui_threshold_end.png`: the identity ending card and bounded colony legacy register remain inside the open Operations drawer.
 - `ui_gene_lab.png` and `ui_recruited_gene_lab.png`: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.
 - `ui_roster.png` and `ui_recruited_roster.png`: the complete equipment catalog clears the footer instruction baseline in both roster variants.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
@@ -62,9 +63,9 @@ Manifest: `scripts/capture_ui.ps1`
 | 18 | escalation_response | `ui_escalation_response.png` | 753248 | `26204ba62db6594004b35ea5c705858ec0a0c3e9c3d309f82f629d05a9229390` |
 | 19 | mirexis | `ui_mirexis.png` | 747673 | `d95085a5825fbe8aa0a778a0f5411e680bbe6cd30da0ca454d949c6bc62e20ce` |
 | 20 | mirexis_path | `ui_mirexis_path.png` | 749059 | `9d5db1f423ca9def95af43a48edb6d4115fb4a3df8064ddc00d4962fcf5c0be0` |
-| 21 | redoubt_end | `ui_redoubt_end.png` | 751153 | `fa6639dd82f8dfbaae6f92bb7e9bff60e3015107cbdcb3828f89ac82a11f20fa` |
-| 22 | commonwealth_end | `ui_commonwealth_end.png` | 760299 | `0cd412eab4b6f6e623ce2b8e53f6bc4119822f00d0e82756023f89ac557d6d9f` |
-| 23 | threshold_end | `ui_threshold_end.png` | 754324 | `097bb2b7fd1c3d8dbd20477ca9451cd287d870b6f8d91c094458e292f9e33482` |
+| 21 | redoubt_end | `ui_redoubt_end.png` | 923317 | `0fb1c7261f397ba41334498d92f0c53b2fa33b489c8cf21778a789fa8e2d2bb5` |
+| 22 | commonwealth_end | `ui_commonwealth_end.png` | 932392 | `a8040efe2245caf633b3197dac27454008f6379bf735e8f98260e2d2db644fcc` |
+| 23 | threshold_end | `ui_threshold_end.png` | 933417 | `d76b9b0a2fa19611efb5f20483106c94d0451b374d0f14b9ad86131c98165cbe` |
 | 24 | finale_debrief | `ui_finale_debrief.png` | 197645 | `b402a19906425a1f4b7c7afa28a02e8fd5fe46f4cd03c8a6cd085332e4306f6c` |
 | 25 | adaptation_operation | `ui_adaptation_operation.png` | 195292 | `348b40fd4802a2cc36249f82152ed1e1247d287382da1f7f4171b722b481e1c4` |
 | 26 | glass_nerve | `ui_glass_nerve.png` | 1186698 | `7cbd0f2aa6cf98a7012688d2b7ef1e8eebbb902ab2fbb4a9c1b077e003fdf7f4` |

@@ -46,20 +46,7 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     });
 
     let dossier = derive(&campaign).unwrap();
-    let lines = dossier.lines();
     assert_eq!(dossier.institution, "Redoubt Arsenal");
-    assert!(lines[0].contains("REDOUBT ARSENAL"));
-    assert!(lines[1].contains("COLONISTS"));
-    assert!(lines[2].contains("TRUSTED+"));
-    assert!(lines[2].contains("+") && !lines[2].contains("NO TRUSTED"));
-    assert!(lines[3].contains("CARRIED"));
-    assert!(lines[4].contains("EVOLUTION"));
-    assert!(lines[6].contains("NAVIGATOR // Kira Voss"));
-    assert!(lines[7].contains("ENGINE // HUMAN BOUNDARY / ARMOURED"));
-    assert!(lines[7].contains("DIRECTORATE 29"));
-    assert!(lines[7].contains("MERCY 1"));
-    assert!(lines[7].contains("EPILOGUE WORK 2"));
-    assert!(lines[7].contains("CIVIC WORK 3"));
     let summary = dossier.debrief_summary_lines();
     assert!(summary[0].contains("REDOUBT ARSENAL ONLINE"));
     assert!(summary[0].contains("5 COLONISTS"));
@@ -70,6 +57,13 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(summary[2].contains("ENGINE HUMAN BOUNDARY / ARMOURED"));
     assert!(summary[2].contains("EPILOGUE 2"));
     assert!(summary[2].contains("CIVIC 3"));
+    let register = dossier.register_lines();
+    assert_eq!(register.len(), 7);
+    assert!(register[0].contains("CIVIC // REDOUBT ARSENAL // ONLINE"));
+    assert!(register[1].contains("5 READY / 0 RECOVERING // 1 TRUSTED+"));
+    assert!(register[2].contains("Kira Voss + Mara Venn"));
+    assert!(register[3].contains("SCARS 1 // EVOLVED 1 // MERCY 1"));
+    assert!(register[6].contains("PRESSURE DIRECTORATE 29 // WORK 2/3"));
 }
 
 #[test]
@@ -122,13 +116,13 @@ fn epilogue_adds_an_authored_voice_for_each_identity_path() {
         campaign.strategy.escalation_response_id = response_id.to_owned();
         campaign.strategy.character_events[0].resolved = true;
 
-        let ready = derive(&campaign).unwrap().lines();
-        assert!(ready[5].contains(character_name));
-        assert!(ready[5].contains(ready_line));
-        assert!(ready[6].contains("NAVIGATOR // Kira Voss"));
-        assert!(ready[7].contains(engine_relationship));
-        assert!(ready[7].contains(engine_response));
-        assert!(ready[7].contains("MERCY 1"));
+        let ready = derive(&campaign).unwrap().register_lines();
+        assert!(ready[4].contains(character_name));
+        assert!(ready[4].contains(ready_line));
+        assert!(ready[5].contains("NAVIGATOR // Kira Voss"));
+        assert!(ready[6].contains(engine_relationship));
+        assert!(ready[6].contains(engine_response));
+        assert!(ready[6].contains("PRESSURE"));
 
         campaign
             .roster
@@ -136,9 +130,9 @@ fn epilogue_adds_an_authored_voice_for_each_identity_path() {
             .find(|character| character.id == character_id)
             .unwrap()
             .availability = Availability::Recovering;
-        let recovering = derive(&campaign).unwrap().lines();
-        assert!(recovering[5].contains(recovering_line));
-        assert_ne!(ready[5], recovering[5]);
+        let recovering = derive(&campaign).unwrap().register_lines();
+        assert!(recovering[4].contains(recovering_line));
+        assert_ne!(ready[4], recovering[4]);
     }
 }
 
@@ -162,7 +156,7 @@ fn epilogue_names_the_mireborn_timeline_when_sedge_survives() {
         });
     campaign.recruit_outsider(&data).unwrap();
 
-    let voice = derive(&campaign).unwrap().lines()[5].clone();
+    let voice = derive(&campaign).unwrap().register_lines()[4].clone();
     assert!(voice.contains("SEDGE"));
     assert!(voice.contains("OLD BODY WAS HERE FIRST"));
 }

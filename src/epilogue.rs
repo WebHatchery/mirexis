@@ -12,9 +12,7 @@ pub(crate) struct EpilogueDossier {
     recovering: usize,
     trusted_bonds: usize,
     bond_detail: String,
-    scars: String,
     scar_count: usize,
-    evolutions: String,
     evolved_count: usize,
     character_voice: String,
     navigator_voice: String,
@@ -27,34 +25,6 @@ pub(crate) struct EpilogueDossier {
 }
 
 impl EpilogueDossier {
-    pub(crate) fn lines(&self) -> [String; 8] {
-        [
-            format!(
-                "CIVIC // {} // {}",
-                self.institution.to_uppercase(),
-                self.institution_status
-            ),
-            format!("PEOPLE // {}", self.people),
-            format!(
-                "BONDS // {} TRUSTED+ // {}",
-                self.trusted_bonds, self.bond_detail
-            ),
-            format!("SCARS // {}", self.scars),
-            format!("EVOLUTION // {}", self.evolutions),
-            format!("VOICE // {}", self.character_voice),
-            format!("NAVIGATOR // {}", self.navigator_voice),
-            format!(
-                "ENGINE // {} / {} // {} // MERCY {} // EPILOGUE WORK {} // CIVIC WORK {}",
-                self.engine_relationship,
-                self.engine_response,
-                self.faction_pressure,
-                self.mercy_count,
-                self.post_campaign_operations_completed,
-                self.identity_stewardship_completed
-            ),
-        ]
-    }
-
     pub(crate) fn debrief_summary_lines(&self) -> [String; 3] {
         [
             format!(
@@ -76,6 +46,35 @@ impl EpilogueDossier {
                 self.engine_relationship,
                 self.engine_response,
                 self.mercy_count,
+                self.post_campaign_operations_completed,
+                self.identity_stewardship_completed
+            ),
+        ]
+    }
+
+    pub(crate) fn register_lines(&self) -> [String; 7] {
+        [
+            format!(
+                "CIVIC // {} // {}",
+                self.institution.to_uppercase(),
+                self.institution_status
+            ),
+            format!(
+                "PEOPLE // {} READY / {} RECOVERING // {} TRUSTED+",
+                self.ready, self.recovering, self.trusted_bonds
+            ),
+            format!("BONDS // {}", self.bond_detail),
+            format!(
+                "SCARS {} // EVOLVED {} // MERCY {}",
+                self.scar_count, self.evolved_count, self.mercy_count
+            ),
+            format!("VOICE // {}", self.character_voice),
+            format!("NAVIGATOR // {}", self.navigator_voice),
+            format!(
+                "ENGINE // {} / {} // PRESSURE {} // WORK {}/{}",
+                self.engine_relationship,
+                self.engine_response,
+                self.faction_pressure,
                 self.post_campaign_operations_completed,
                 self.identity_stewardship_completed
             ),
@@ -145,34 +144,17 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         },
     );
 
-    let scarred = campaign
-        .roster
-        .iter()
-        .filter(|character| !character.traumas.is_empty())
-        .map(|character| character.name.clone())
-        .collect::<Vec<_>>();
     let scar_count = campaign
         .roster
         .iter()
         .map(|character| character.traumas.len())
         .sum::<usize>();
-    let scars = if scar_count == 0 {
-        "NONE RECORDED".to_owned()
-    } else {
-        format!("{} CARRIED // {}", scar_count, scarred.join(", "))
-    };
 
-    let evolved = campaign
+    let evolved_count = campaign
         .roster
         .iter()
         .filter(|character| !character.mutation_evolution_id.is_empty())
-        .map(|character| character.name.clone())
-        .collect::<Vec<_>>();
-    let evolutions = if evolved.is_empty() {
-        "NONE // THE OLD BODY HOLDS".to_owned()
-    } else {
-        format!("{} COLONISTS // {}", evolved.len(), evolved.join(", "))
-    };
+        .count();
     let character_voice = character_voice(campaign);
     let navigator_voice = navigator_voice(campaign);
     let engine_relationship = engine_relationship(&campaign.strategy.mirexis_path_id);
@@ -193,10 +175,8 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         recovering,
         trusted_bonds: trusted.len(),
         bond_detail,
-        scars,
         scar_count,
-        evolutions,
-        evolved_count: evolved.len(),
+        evolved_count,
         character_voice,
         navigator_voice,
         engine_relationship,
