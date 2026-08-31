@@ -1,10 +1,29 @@
 //! Prepaid reaction fire resolved during hostile movement.
 
 use crate::data::Team;
-use crate::state::GameSession;
+use crate::state::{GameSession, UnitState};
 use crate::tactical::{manhattan, BattleEvent, CommandCost, RuleError};
 
 const REACTION_ACCURACY_PENALTY: i32 = 15;
+
+pub(crate) fn overwatch_button_label(selected: Option<&UnitState>, enabled: bool) -> &'static str {
+    let Some(unit) = selected else {
+        return "SELECT UNIT";
+    };
+    if enabled {
+        return "OVERWATCH";
+    }
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if unit.overwatching {
+        return "ARMED";
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    "NEED MORE AP"
+}
 
 impl GameSession {
     pub fn set_selected_overwatch(&mut self) -> Result<Vec<BattleEvent>, RuleError> {

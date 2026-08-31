@@ -4,6 +4,28 @@ use crate::state::Command;
 use macroquad_toolkit::grid::TilePos;
 
 #[test]
+fn overwatch_button_label_names_unavailable_states() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data.config, &data.mission, &data.roster);
+    let mut unit = session.unit("kira_voss").unwrap().clone();
+
+    assert_eq!(overwatch_button_label(None, false), "SELECT UNIT");
+    assert_eq!(overwatch_button_label(Some(&unit), true), "OVERWATCH");
+
+    unit.incapacitated = true;
+    assert_eq!(overwatch_button_label(Some(&unit), false), "INCAPACITATED");
+    unit.incapacitated = false;
+    unit.overwatching = true;
+    assert_eq!(overwatch_button_label(Some(&unit), false), "ARMED");
+    unit.overwatching = false;
+    unit.action_points = 0;
+    assert_eq!(overwatch_button_label(Some(&unit), false), "NO AP");
+    unit.action_points = 1;
+    unit.weapon_ap_cost = 2;
+    assert_eq!(overwatch_button_label(Some(&unit), false), "NEED MORE AP");
+}
+
+#[test]
 fn hostile_movement_triggers_one_prepaid_reaction() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data.config, &data.mission, &data.roster);

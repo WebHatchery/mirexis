@@ -587,10 +587,12 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     } else {
         "END COLONY PHASE".to_owned()
     };
+    let overwatch_enabled = ctx.session.can_set_selected_overwatch();
+    let overwatch_label = crate::overwatch::overwatch_button_label(selected, overwatch_enabled);
     if button(
         Rect::new(x, panel.bottom() - 104.0, phase_width, 44.0),
-        "OVERWATCH",
-        ctx.session.can_set_selected_overwatch(),
+        overwatch_label,
+        overwatch_enabled,
         mouse,
     ) {
         actions.push(UiAction::SetOverwatch);
