@@ -25,6 +25,25 @@ fn action_button_label_explains_target_gates_without_hiding_cancel() {
 }
 
 #[test]
+fn attack_event_summaries_name_hit_and_miss_outcomes() {
+    let hit = BattleEvent::AttackRolled {
+        attacker_id: "mara_venn".to_owned(),
+        target_id: "brood_stalker_a".to_owned(),
+        roll: 41,
+        hit_chance: 64,
+    };
+    let miss = BattleEvent::AttackRolled {
+        attacker_id: "mara_venn".to_owned(),
+        target_id: "brood_stalker_a".to_owned(),
+        roll: 65,
+        hit_chance: 64,
+    };
+
+    assert_eq!(event_summary(&hit), "Attack HIT · roll 41 · 64% target");
+    assert_eq!(event_summary(&miss), "Attack MISS · roll 65 · 64% target");
+}
+
+#[test]
 fn active_statuses_name_their_remaining_phase_duration() {
     let definition = UnitDef {
         id: "status_test".to_owned(),

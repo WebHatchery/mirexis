@@ -84,11 +84,7 @@ impl Game {
             "first_hour_dialogue" => self.capture_first_hour_dialogue(),
             "first_hour_promise" => self.capture_first_hour_promise(),
             "first_hour_operations" => self.capture_first_hour_operations(),
-            "battle_log" => {
-                self.reset_capture_session(AppState::Tactical);
-                self.session.end_player_phase(&self.data.config);
-                self.show_battle_log = true;
-            }
+            "battle_log" => self.capture_battle_log(),
             "combat_feedback" => self.capture_combat_feedback(),
             "phase_replay" => self.capture_phase_replay(),
             "end_phase_guard" => {

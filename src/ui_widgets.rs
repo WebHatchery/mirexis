@@ -12,7 +12,13 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
         BattleEvent::UnitMoved { unit_id, cost, .. } => format!("{} moved · {} AP", unit_id, cost),
         BattleEvent::AttackRolled {
             roll, hit_chance, ..
-        } => format!("Attack roll {} · {}% target", roll, hit_chance),
+        } => {
+            let outcome = if roll <= hit_chance { "HIT" } else { "MISS" };
+            format!(
+                "Attack {} · roll {} · {}% target",
+                outcome, roll, hit_chance
+            )
+        }
         BattleEvent::DamageApplied {
             amount, remaining, ..
         } => format!("{} damage · {} vitality remains", amount, remaining),

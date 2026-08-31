@@ -267,6 +267,12 @@ impl Game {
     pub(super) fn capture_phase_replay(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.phase_replay.hold_for_capture(&[
+            BattleEvent::AttackRolled {
+                attacker_id: "brood_stalker_b".to_owned(),
+                target_id: "kira_voss".to_owned(),
+                roll: 41,
+                hit_chance: 64,
+            },
             BattleEvent::EnemyAbilityActivated {
                 unit_id: "brood_stalker_a".to_owned(),
                 ability: "Predatory Surge".to_owned(),
@@ -276,17 +282,36 @@ impl Game {
                 path: vec![TilePos::new(9, 2), TilePos::new(8, 2)],
                 cost: 2,
             },
-            BattleEvent::AttackRolled {
-                attacker_id: "brood_stalker_b".to_owned(),
-                target_id: "kira_voss".to_owned(),
-                roll: 41,
-                hit_chance: 64,
-            },
             BattleEvent::PhaseStarted {
                 phase: TacticalPhase::Player,
                 round: 2,
             },
         ]);
+    }
+
+    pub(super) fn capture_battle_log(&mut self) {
+        self.reset_capture_session(AppState::Tactical);
+        self.session.end_player_phase(&self.data.config);
+        self.session.tactical.event_log.extend([
+            BattleEvent::AttackRolled {
+                attacker_id: "mara_venn".to_owned(),
+                target_id: "brood_stalker_a".to_owned(),
+                roll: 41,
+                hit_chance: 64,
+            },
+            BattleEvent::DamageApplied {
+                target_id: "brood_stalker_a".to_owned(),
+                amount: 3,
+                remaining: 5,
+            },
+            BattleEvent::AttackRolled {
+                attacker_id: "kira_voss".to_owned(),
+                target_id: "brood_stalker_b".to_owned(),
+                roll: 96,
+                hit_chance: 62,
+            },
+        ]);
+        self.show_battle_log = true;
     }
 
     pub(super) fn capture_combat_feedback(&mut self) {
