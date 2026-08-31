@@ -13,6 +13,7 @@ mod commons;
 mod context;
 mod decision_affordance;
 mod decisions;
+mod event_affordance;
 mod medical;
 mod recruitment;
 mod relay;
@@ -620,14 +621,16 @@ fn draw_character_event(
             .split_whitespace()
             .next()
             .unwrap_or(&character.name);
+        let label = event_affordance::button_label(
+            first_name,
+            legacy_amount,
+            legacy_stat,
+            event.food_cost,
+            campaign.colony.resources.food,
+        );
         if colony_button(
             Rect::new(878.0, 592.0 + index as f32 * 24.0, 362.0, 22.0),
-            &format!(
-                "CHOOSE {} // {:+} {} IN FUTURE BATTLES",
-                first_name.to_uppercase(),
-                legacy_amount,
-                legacy_stat.to_uppercase()
-            ),
+            &label,
             campaign
                 .strategy
                 .can_resolve_first_event(campaign.colony.resources.food),
