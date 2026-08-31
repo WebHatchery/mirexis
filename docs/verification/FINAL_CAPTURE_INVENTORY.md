@@ -30,7 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
-- `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats name HIT/MISS outcomes, while the battle log distinguishes ability, recovery, status, objective, and cover events and shows matching counts on each filter.
+- `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats name HIT/MISS outcomes with immediate damage consequences, while the battle log distinguishes ability, recovery, status, objective, and cover events and shows matching counts on each filter.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -120,7 +120,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 80 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
 | 81 | battle_log | `ui_battle_log.png` | 662748 | `27d051b3f4b99a68aabd730600efa3b704b7db69c703216be75a9b7f0f09655e` |
 | 82 | combat_feedback | `ui_combat_feedback.png` | 1194904 | `0e8120ca306bf41bcdf4a4029b14268ae40c51aac9b65ce46f4b09e7a884eef8` |
-| 83 | phase_replay | `ui_phase_replay.png` | 1093876 | `f59a882036bdb532e15e981c35d9b6debe2cb489dab9fdcdbe3db1454df35efd` |
+| 83 | phase_replay | `ui_phase_replay.png` | 1095963 | `21814557f8283ee3995dab1944e07bb7abad594d67bedb31308c58ce55440d34` |
 | 84 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |
 | 85 | readiness_markers | `ui_readiness_markers.png` | 593135 | `90486f3d5aeba58d4cec38751bfd775d4ec29e5a74b8c91230b57c887fe0cf48` |
 | 86 | vitality_markers | `ui_vitality_markers.png` | 593589 | `730eac87effecdfcc2bffb9eb1a12a548955744c49474ea8ef207ff335570d4b` |

@@ -273,6 +273,11 @@ impl Game {
                 roll: 41,
                 hit_chance: 64,
             },
+            BattleEvent::DamageApplied {
+                target_id: "kira_voss".to_owned(),
+                amount: 3,
+                remaining: 6,
+            },
             BattleEvent::EnemyAbilityActivated {
                 unit_id: "brood_stalker_a".to_owned(),
                 ability: "Predatory Surge".to_owned(),

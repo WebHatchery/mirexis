@@ -24,41 +24,21 @@ impl PhaseReplay {
     pub fn start(&mut self, events: &[BattleEvent]) {
         let significant = events
             .iter()
-            .filter(|event| {
-                matches!(
-                    event,
-                    BattleEvent::UnitMoved { .. }
-                        | BattleEvent::AttackRolled { .. }
-                        | BattleEvent::ReactionTriggered { .. }
-                        | BattleEvent::EnemyAbilityActivated { .. }
-                        | BattleEvent::ReinforcementsArrived { .. }
-                        | BattleEvent::UnitIncapacitated { .. }
-                        | BattleEvent::PhaseStarted { .. }
-                )
-            })
+            .filter(|event| is_replay_event(event))
             .collect::<Vec<_>>();
-        let mut selected = significant
+        let final_phase = significant
             .iter()
-            .take(MAX_BEATS)
-            .copied()
-            .collect::<Vec<_>>();
-        if significant.len() > MAX_BEATS {
-            if let Some(final_phase) = significant
-                .iter()
-                .rev()
-                .find(|event| matches!(event, BattleEvent::PhaseStarted { .. }))
-            {
-                selected[MAX_BEATS - 1] = final_phase;
+            .rev()
+            .find(|event| matches!(event, BattleEvent::PhaseStarted { .. }))
+            .map(|event| replay_summary(event));
+        let mut beats = grouped_replay_summaries(&significant);
+        if beats.len() > MAX_BEATS {
+            beats.truncate(MAX_BEATS);
+            if let Some(final_phase) = final_phase {
+                beats[MAX_BEATS - 1] = final_phase;
             }
         }
-        self.beats = selected
-            .into_iter()
-            .map(|event| {
-                crate::ui_widgets::event_summary(event)
-                    .replace('_', " ")
-                    .to_uppercase()
-            })
-            .collect();
+        self.beats = beats;
         self.current = 0;
         self.remaining = BEAT_SECONDS;
     }
@@ -164,6 +144,62 @@ impl PhaseReplay {
             actions.push(UiAction::SkipPhaseReplay);
         }
     }
+}
+
+fn is_replay_event(event: &BattleEvent) -> bool {
+    matches!(
+        event,
+        BattleEvent::UnitMoved { .. }
+            | BattleEvent::AttackRolled { .. }
+            | BattleEvent::DamageApplied { .. }
+            | BattleEvent::ReactionTriggered { .. }
+            | BattleEvent::EnemyAbilityActivated { .. }
+            | BattleEvent::ReinforcementsArrived { .. }
+            | BattleEvent::UnitIncapacitated { .. }
+            | BattleEvent::ObjectiveDamaged { .. }
+            | BattleEvent::ObjectiveDestroyed
+            | BattleEvent::CoverDamaged { .. }
+            | BattleEvent::CoverDestroyed { .. }
+            | BattleEvent::PhaseStarted { .. }
+    )
+}
+
+fn grouped_replay_summaries(events: &[&BattleEvent]) -> Vec<String> {
+    let mut summaries = Vec::new();
+    let mut index = 0;
+    while index < events.len() {
+        let event = events[index];
+        let mut summary = replay_summary(event);
+        if matches!(event, BattleEvent::AttackRolled { .. }) {
+            while let Some(consequence) = events.get(index + 1) {
+                let Some(suffix) = replay_attack_result_suffix(consequence) else {
+                    break;
+                };
+                summary.push_str(" // ");
+                summary.push_str(&suffix);
+                index += 1;
+            }
+        }
+        summaries.push(summary);
+        index += 1;
+    }
+    summaries
+}
+
+fn replay_summary(event: &BattleEvent) -> String {
+    crate::ui_widgets::event_summary(event)
+        .replace('_', " ")
+        .to_uppercase()
+}
+
+fn replay_attack_result_suffix(event: &BattleEvent) -> Option<String> {
+    Some(match event {
+        BattleEvent::DamageApplied {
+            amount, remaining, ..
+        } => format!("{} DMG · {} REMAIN", amount, remaining),
+        BattleEvent::UnitIncapacitated { .. } => "INCAPACITATED".to_owned(),
+        _ => return None,
+    })
 }
 
 #[cfg(test)]
