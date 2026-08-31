@@ -100,4 +100,11 @@ fn active_statuses_name_their_remaining_phase_duration() {
         action_status(&unit),
         "FOCUSED 1 PH / GUARDED 2 PH · CLASS READY"
     );
+    assert_eq!(
+        active_status_summary(&unit),
+        "EFFECTS // FOCUSED 1 PH / GUARDED 2 PH"
+    );
+
+    unit.statuses.clear();
+    assert_eq!(active_status_summary(&unit), "EFFECTS // NONE");
 }

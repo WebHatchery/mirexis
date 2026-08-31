@@ -3,7 +3,7 @@
 use super::{AppState, Game};
 use crate::data::{CoverEdgeDef, EdgeDirection, OperationModifier, Team};
 use crate::state::{BattleEvent, Command, GameSession, StatusKind, TacticalPhase};
-use crate::tactical::UnitAnimationState;
+use crate::tactical::{StatusEffect, UnitAnimationState};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
@@ -455,9 +455,19 @@ impl Game {
             .session
             .tactical
             .units
-            .iter()
+            .iter_mut()
             .find(|unit| unit.team == Team::Hostile)
             .unwrap();
+        hostile.statuses = vec![
+            StatusEffect {
+                kind: StatusKind::Disrupted,
+                remaining_phases: 2,
+            },
+            StatusEffect {
+                kind: StatusKind::Marked,
+                remaining_phases: 1,
+            },
+        ];
         self.session.tactical.selected_tile = hostile.position;
     }
 

@@ -132,7 +132,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | directorate_ability | Tactical/effect | No production Directorate effect language | `ui_directorate_ability.png` | PASS |
 | ascendant_ability | Tactical/effect | No production Ascendant effect language | `ui_ascendant_ability.png` | PASS |
 | hazard | Tactical/hazard | Flat hazard marks | `ui_hazard.png` | PASS |
-| intent | Tactical/forecast | Intent is small text/line | `ui_intent.png` | PASS |
+| intent | Tactical/forecast | Intent is small text/line and inspected effects lack duration context | `ui_intent.png` | PASS |
 | action_preview | Tactical/forecast | Preview lacks portrait comparison/staging | `ui_action_preview.png` | PASS |
 | movement_route | Tactical/route | Route conforms to rectangles | `ui_movement_route.png` | PASS |
 | cover_edges | Tactical/cover | Cover is shallow procedural geometry | `ui_cover_edges.png` | PASS |

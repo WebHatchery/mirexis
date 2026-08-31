@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.217.0, validated and committed with this matrix
+Audit baseline: save/content 1.218.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -68,7 +68,7 @@ Ten-second goal recognition, city attachment, and traversal friction require obs
 | Reduce low-value clicks | Direct tile/hostile intents outside the lesson; guided attack forecast confirmation, visible actions, and guarded end phase | VERIFIED |
 | Camera, focus, targeting, end phase, and replay review | Camera/input tests and tactical capture set | VERIFIED |
 | Distinct visual/audio results | Event feedback, procedural palette, battle log, and tactical captures | VERIFIED |
-| Active effects and duration explicit | Status rail now displays each remaining phase count; dedicated unit test | VERIFIED |
+| Active effects and duration explicit | Colony status rail and hostile intent inspector name each active effect with its remaining phase count; shared formatter unit tests and `ui_intent.png` | VERIFIED |
 | Forecast agrees with deterministic resolution | Action-preview and deterministic attack tests | VERIFIED |
 | Duration and inactive-wait targets measured | Persisted operation duration/round metrics are ready; three internal and five external samples absent | HUMAN PENDING |
 

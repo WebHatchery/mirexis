@@ -5,6 +5,7 @@ use crate::enemy_intent::{self, IntentAction};
 use crate::grid_ui::GridView;
 use crate::state::{Command, GameSession, TacticalPhase};
 use crate::tactical::manhattan;
+use crate::ui_widgets::active_status_summary;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -101,6 +102,20 @@ pub(crate) fn draw_inspector(
         x,
         panel.y + 334.0,
         TextStyle::new(12.0, Color::new(0.93, 0.45, 0.48, 1.0)).params(),
+    );
+    draw_text_ex(
+        active_status_summary(&unit),
+        x,
+        panel.y + 346.0,
+        TextStyle::new(
+            12.0,
+            if unit.statuses.is_empty() {
+                dark::TEXT_DIM
+            } else {
+                Color::new(1.0, 0.74, 0.24, 1.0)
+            },
+        )
+        .params(),
     );
     true
 }

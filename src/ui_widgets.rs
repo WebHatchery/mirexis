@@ -1,6 +1,7 @@
 //! Reusable Mirexis tactical labels and buttons.
 
 use crate::state::{BattleEvent, UnitState};
+use crate::tactical::StatusKind;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{
     dark, draw_chamfered_surface, draw_text_centered_in_box_ex, ChamferedSurfaceStyle, TextStyle,
@@ -131,15 +132,42 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
     if unit.statuses.is_empty() {
         format!("{} · {}{}", mutation, class, equipment)
     } else {
-        let statuses = unit
-            .statuses
-            .iter()
-            .map(|status| {
-                format!("{:?} {} PH", status.kind, status.remaining_phases).to_uppercase()
-            })
-            .collect::<Vec<_>>()
-            .join(" / ");
-        format!("{} · {}{}", statuses, class, equipment)
+        format!("{} · {}{}", active_status_details(unit), class, equipment)
+    }
+}
+
+pub(crate) fn active_status_summary(unit: &UnitState) -> String {
+    if unit.statuses.is_empty() {
+        "EFFECTS // NONE".to_owned()
+    } else {
+        format!("EFFECTS // {}", active_status_details(unit))
+    }
+}
+
+fn active_status_details(unit: &UnitState) -> String {
+    unit.statuses
+        .iter()
+        .map(|status| {
+            format!(
+                "{} {} PH",
+                status_kind_label(status.kind),
+                status.remaining_phases
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(" / ")
+}
+
+fn status_kind_label(kind: StatusKind) -> &'static str {
+    match kind {
+        StatusKind::Focused => "FOCUSED",
+        StatusKind::Guarded => "GUARDED",
+        StatusKind::Quickened => "QUICKENED",
+        StatusKind::Disrupted => "DISRUPTED",
+        StatusKind::Hindered => "HINDERED",
+        StatusKind::Regenerating => "REGENERATING",
+        StatusKind::Marked => "MARKED",
+        StatusKind::Adapted => "ADAPTED",
     }
 }
 
