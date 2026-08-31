@@ -2,8 +2,36 @@
 
 use crate::state::UnitState;
 use crate::ui::{TargetingView, UiAction, UiContext};
-use crate::ui_widgets::{action_button_label, button};
+use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
+
+fn class_action_button_label<'a>(
+    label: &'a str,
+    unit: &UnitState,
+    targeting: bool,
+    requires_target: bool,
+    enabled: bool,
+) -> &'a str {
+    if targeting {
+        return "CANCEL";
+    }
+    if enabled {
+        return label;
+    }
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if unit.class_action_used {
+        return "SPENT";
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    if requires_target {
+        return "NO TARGET";
+    }
+    label
+}
 
 pub(crate) fn draw_action_button(
     ctx: &UiContext<'_>,
@@ -14,9 +42,9 @@ pub(crate) fn draw_action_button(
 ) {
     let label = selected
         .and_then(|unit| crate::class_actions::action_name(&unit.class_id))
-        .unwrap_or("CLASS ACTION");
+        .unwrap_or("NO CLASS ACTION");
     let Some(unit) = selected else {
-        button(rect, label, false, mouse);
+        button(rect, "SELECT UNIT", false, mouse);
         return;
     };
     let requires_target = crate::class_actions::requires_target(&unit.class_id);
@@ -30,7 +58,7 @@ pub(crate) fn draw_action_button(
         } else {
             ctx.session.can_activate_selected_class_action()
         };
-    let button_label = action_button_label(label, targeting, requires_target, enabled);
+    let button_label = class_action_button_label(label, unit, targeting, requires_target, enabled);
     if !button(rect, button_label, enabled, mouse) {
         return;
     }
@@ -42,3 +70,6 @@ pub(crate) fn draw_action_button(
         UiAction::ActivateClassAction
     });
 }
+
+#[cfg(test)]
+mod tests;
