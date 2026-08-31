@@ -546,19 +546,13 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
         mouse,
         actions,
     );
-    let mutation_label = selected.map_or("MUTATION GIFT", |unit| match unit.mutation.as_str() {
-        "Neural Bloom" => "NEURAL FOCUS",
-        "Chitinous Growth" => "HARDEN CARAPACE",
-        "Regenerative Tissue" => "ACCELERATE TISSUE",
-        "Elastic Musculature" => "COIL MUSCLE",
-        "Symbiotic Organism" => "FEEDING FRENZY",
-        _ => "MUTATION GIFT",
-    });
+    let mutation_enabled = ctx.session.can_activate_selected_mutation();
+    let mutation_label = mutation_button_label(selected, mutation_enabled);
     let action_width = (panel.w - 52.0) / 3.0;
     if button(
         Rect::new(x, panel.bottom() - 148.0, action_width, 34.0),
         mutation_label,
-        ctx.session.can_activate_selected_mutation(),
+        mutation_enabled,
         mouse,
     ) {
         actions.push(UiAction::ActivateMutation);
@@ -633,6 +627,45 @@ fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
             panel.bottom() - 14.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
+    }
+}
+
+fn mutation_button_label(
+    selected: Option<&crate::state::UnitState>,
+    enabled: bool,
+) -> &'static str {
+    let Some(unit) = selected else {
+        return "MUTATION GIFT";
+    };
+    let Some(label) = mutation_action_label(&unit.mutation) else {
+        return "NO MUTATION";
+    };
+    if enabled {
+        return label;
+    }
+    if unit.incapacitated {
+        return "INCAPACITATED";
+    }
+    if unit.mutation_gift_used {
+        return "SPENT";
+    }
+    if unit.mutation == "Regenerative Tissue" && unit.health == unit.max_health {
+        return "FULL HEALTH";
+    }
+    if unit.action_points == 0 {
+        return "NO AP";
+    }
+    "UNAVAILABLE"
+}
+
+fn mutation_action_label(mutation: &str) -> Option<&'static str> {
+    match mutation {
+        "Neural Bloom" => Some("NEURAL FOCUS"),
+        "Chitinous Growth" => Some("HARDEN CARAPACE"),
+        "Regenerative Tissue" => Some("ACCELERATE TISSUE"),
+        "Elastic Musculature" => Some("COIL MUSCLE"),
+        "Symbiotic Organism" => Some("FEEDING FRENZY"),
+        _ => None,
     }
 }
 
