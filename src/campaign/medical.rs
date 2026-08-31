@@ -70,7 +70,7 @@ impl CampaignState {
                 .any(|character| !character.injuries.is_empty())
     }
 
-    fn treatment_cost(&self) -> i32 {
+    pub fn treatment_cost(&self) -> i32 {
         if self
             .colony
             .has_active_upgrade(BuildingKind::Infirmary, ADAPTATION_CLINIC_UPGRADE)

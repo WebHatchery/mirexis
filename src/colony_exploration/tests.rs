@@ -213,10 +213,18 @@ fn treatment_dialogue_action_requires_an_injury_and_prerequisites() {
         .unwrap();
     let action = npc_action(injured, false).unwrap();
     assert_eq!(action, UiAction::TreatInjury);
+    assert_eq!(
+        npc_action_button_label(&campaign, &data, injured, false),
+        "TREAT // 5 BIO"
+    );
     assert!(npc_action_enabled(&campaign, &data, &action, false));
 
     campaign.colony.resources.biomass = 0;
     assert!(!npc_action_enabled(&campaign, &data, &action, false));
+    assert_eq!(
+        npc_action_button_label(&campaign, &data, injured, false),
+        "TREAT // NEED 5 BIO"
+    );
 }
 
 #[test]
@@ -230,5 +238,9 @@ fn gene_lab_dialogue_action_is_disabled_until_the_lab_is_online() {
         .unwrap();
     let action = npc_action(nadi, false).unwrap();
     assert_eq!(action, UiAction::OpenGeneLab);
+    assert_eq!(
+        npc_action_button_label(&campaign, &data, nadi, false),
+        "GENE LAB // NEED ADAPTATION"
+    );
     assert!(!npc_action_enabled(&campaign, &data, &action, false));
 }

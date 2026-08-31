@@ -1,7 +1,7 @@
 //! Operations-panel affordance for first-injury treatment.
 
 use crate::campaign::CampaignState;
-use crate::colony::{BuildingKind, ADAPTATION_CLINIC_UPGRADE};
+use crate::colony::BuildingKind;
 
 fn treatment_button_label_for_state(
     has_infirmary: bool,
@@ -21,14 +21,7 @@ fn treatment_button_label_for_state(
 }
 
 pub(super) fn treatment_button_label(campaign: &CampaignState) -> String {
-    let treatment_cost = if campaign
-        .colony
-        .has_active_upgrade(BuildingKind::Infirmary, ADAPTATION_CLINIC_UPGRADE)
-    {
-        3
-    } else {
-        5
-    };
+    let treatment_cost = campaign.treatment_cost();
     treatment_button_label_for_state(
         campaign.colony.has_facility(BuildingKind::Infirmary),
         campaign
