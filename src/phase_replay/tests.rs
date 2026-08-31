@@ -29,7 +29,7 @@ fn replay_keeps_important_events_bounded_and_advances_by_time() {
 #[test]
 fn skip_control_is_visible_inside_the_replay_overlay() {
     let overlay = Rect::new(18.0, 544.0, 820.0, 82.0);
-    let skip = skip_bounds();
+    let skip = skip_button_bounds();
     assert!(skip.x >= overlay.x);
     assert!(skip.right() <= overlay.right());
     assert!(skip.y >= overlay.y);

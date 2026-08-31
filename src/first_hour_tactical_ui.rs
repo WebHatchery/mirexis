@@ -127,6 +127,21 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
         }
         TacticalLesson::Select | TacticalLesson::MoveToCover => return,
     };
+    draw_focus(rect);
+}
+
+pub(crate) fn draw_replay_focus(ctx: &UiContext<'_>) {
+    if !ctx.phase_replay.is_active() || !replay_guidance_is_active(ctx) {
+        return;
+    }
+    draw_focus(replay_focus_target());
+}
+
+fn replay_focus_target() -> Rect {
+    crate::phase_replay::skip_button_bounds()
+}
+
+fn draw_focus(rect: Rect) {
     let color = focus_color();
     draw_rectangle_lines(
         rect.x - 4.0,
@@ -198,12 +213,16 @@ fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
 }
 
 fn guidance_is_active(ctx: &UiContext<'_>) -> bool {
+    replay_guidance_is_active(ctx) && !ctx.phase_replay.is_active()
+}
+
+fn replay_guidance_is_active(ctx: &UiContext<'_>) -> bool {
     ctx.first_hour.guidance_enabled
         && ctx.first_hour.is_tactical_stage()
         && !ctx.first_hour.help_open
         && !ctx.show_help
         && !ctx.show_battle_log
-        && !ctx.phase_replay.is_active()
+        && !ctx.show_settings
 }
 
 fn move_focus_tile(session: &GameSession) -> Option<TilePos> {

@@ -3,6 +3,12 @@
 use super::{AppState, Game};
 
 impl Game {
+    pub(super) fn capture_first_hour_replay(&mut self) {
+        self.capture_phase_replay();
+        self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
+        self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Objective;
+    }
+
     pub(super) fn capture_first_hour_guide(&mut self) {
         self.state = AppState::Colony;
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::SecondOperation;

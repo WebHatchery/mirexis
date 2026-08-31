@@ -9,7 +9,7 @@ use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 const BEAT_SECONDS: f32 = 0.48;
 const MAX_BEATS: usize = 8;
 
-fn skip_bounds() -> Rect {
+pub(crate) fn skip_button_bounds() -> Rect {
     Rect::new(650.0, 560.0, 168.0, 36.0)
 }
 
@@ -160,7 +160,7 @@ impl PhaseReplay {
             558.0,
             TextStyle::new(11.0, Color::new(0.96, 0.55, 0.35, 1.0)).params(),
         );
-        if button(skip_bounds(), "SKIP REPLAY", true, mouse) {
+        if button(skip_button_bounds(), "SKIP REPLAY", true, mouse) {
             actions.push(UiAction::SkipPhaseReplay);
         }
     }

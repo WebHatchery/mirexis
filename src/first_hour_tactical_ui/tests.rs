@@ -168,3 +168,12 @@ fn objective_focus_waits_until_the_selected_colonist_can_interact() {
         .expect("an adjacent selected colonist should focus objective interaction");
     assert_eq!(focus, Rect::new(938.0, 450.0, 314.0, 34.0));
 }
+
+#[test]
+fn replay_focus_targets_the_visible_skip_control() {
+    assert_eq!(replay_focus_target(), Rect::new(650.0, 560.0, 168.0, 36.0));
+    assert_eq!(
+        replay_focus_target(),
+        crate::phase_replay::skip_button_bounds()
+    );
+}

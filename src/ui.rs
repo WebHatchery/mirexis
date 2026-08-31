@@ -340,6 +340,7 @@ pub fn draw_tactical(
     if ctx.phase_replay.is_active() {
         actions.clear();
         ctx.phase_replay.draw(mouse, &mut actions);
+        crate::first_hour_tactical_ui::draw_replay_focus(&ctx);
     }
     suppress_map_release_actions(&mut actions, suppress_actions);
     actions

@@ -195,6 +195,7 @@ impl Game {
                     .position = objective;
                 self.session.tactical.selected_tile = objective;
             }
+            "first_hour_replay" => self.capture_first_hour_replay(),
             "first_hour_ability" => {
                 self.reset_capture_session(AppState::Tactical);
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
