@@ -130,9 +130,19 @@ fn event_filter(event: &BattleEvent) -> BattleLogFilter {
         AttackRolled { .. }
         | DamageApplied { .. }
         | UnitIncapacitated { .. }
+        | UnitHealed { .. }
+        | StatusApplied { .. }
+        | MutationActivated { .. }
+        | ClassActionActivated { .. }
+        | SkillActivated { .. }
+        | EquipmentUsed { .. }
         | OverwatchSet { .. }
-        | ReactionTriggered { .. } => BattleLogFilter::Combat,
+        | ReactionTriggered { .. }
+        | EnemyAbilityActivated { .. } => BattleLogFilter::Combat,
         UnitMoved { .. }
+        | ObjectiveSecured { .. }
+        | ObjectiveDamaged { .. }
+        | ObjectiveDestroyed
         | ExtractionCompleted { .. }
         | CoverDamaged { .. }
         | CoverDestroyed { .. }
@@ -149,11 +159,23 @@ fn event_kind(event: &BattleEvent) -> &'static str {
         UnitMoved { .. } => "MOVEMENT",
         AttackRolled { .. } | ReactionTriggered { .. } => "ATTACK",
         DamageApplied { .. } | UnitIncapacitated { .. } => "IMPACT",
+        UnitHealed { .. } => "RECOVERY",
+        StatusApplied { .. } => "STATUS",
+        MutationActivated { .. }
+        | ClassActionActivated { .. }
+        | SkillActivated { .. }
+        | EquipmentUsed { .. }
+        | OverwatchSet { .. }
+        | EnemyAbilityActivated { .. } => "ABILITY",
+        ObjectiveSecured { .. }
+        | ObjectiveDamaged { .. }
+        | ObjectiveDestroyed
+        | ExtractionCompleted { .. } => "OBJECTIVE",
+        CoverDamaged { .. } | CoverDestroyed { .. } => "COVER",
         PhaseStarted { .. } => "PHASE",
         BattleEnded { .. } => "OUTCOME",
         HazardTriggered { .. } | HazardConverted { .. } => "HAZARD",
         ReinforcementsArrived { .. } => "WAVE",
-        _ => "ACTION",
     }
 }
 
@@ -188,6 +210,29 @@ fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
             );
         }
         "HAZARD" => draw_poly(center.x, center.y, 6, 8.0, 0.0, color),
+        "RECOVERY" => {
+            draw_line(
+                center.x - 7.0,
+                center.y,
+                center.x + 7.0,
+                center.y,
+                2.0,
+                color,
+            );
+            draw_line(
+                center.x,
+                center.y - 7.0,
+                center.x,
+                center.y + 7.0,
+                2.0,
+                color,
+            );
+        }
+        "COVER" => draw_rectangle_lines(center.x - 7.0, center.y - 7.0, 14.0, 14.0, 2.0, color),
+        "OBJECTIVE" => {
+            draw_circle_lines(center.x, center.y, 7.0, 2.0, color);
+            draw_circle(center.x, center.y, 2.0, color);
+        }
         _ => draw_poly(center.x, center.y, 4, 7.0, 45.0, color),
     }
 }
@@ -196,8 +241,23 @@ fn event_color(event: &BattleEvent) -> Color {
     match event {
         BattleEvent::DamageApplied { .. }
         | BattleEvent::UnitIncapacitated { .. }
-        | BattleEvent::HazardTriggered { .. } => Color::new(0.98, 0.55, 0.38, 1.0),
+        | BattleEvent::HazardTriggered { .. }
+        | BattleEvent::ObjectiveDamaged { .. }
+        | BattleEvent::ObjectiveDestroyed
+        | BattleEvent::CoverDamaged { .. }
+        | BattleEvent::CoverDestroyed { .. } => Color::new(0.98, 0.55, 0.38, 1.0),
+        BattleEvent::UnitHealed { .. } => Color::new(0.38, 0.98, 0.62, 1.0),
         BattleEvent::HazardConverted { .. } => Color::new(0.42, 0.94, 0.72, 1.0),
+        BattleEvent::ObjectiveSecured { .. } | BattleEvent::ExtractionCompleted { .. } => {
+            Color::new(0.48, 0.94, 0.72, 1.0)
+        }
+        BattleEvent::StatusApplied { .. }
+        | BattleEvent::MutationActivated { .. }
+        | BattleEvent::ClassActionActivated { .. }
+        | BattleEvent::SkillActivated { .. }
+        | BattleEvent::EquipmentUsed { .. }
+        | BattleEvent::OverwatchSet { .. }
+        | BattleEvent::EnemyAbilityActivated { .. } => Color::new(0.94, 0.76, 0.34, 1.0),
         BattleEvent::PhaseStarted { .. } | BattleEvent::BattleEnded { .. } => {
             Color::new(0.46, 0.86, 0.72, 1.0)
         }

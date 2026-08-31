@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.193.0
+Save/content version: 1.194.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -969,6 +969,7 @@ Migration coverage:
 | 1.191.0 | Battle history and hostile replay summaries now name HIT or MISS outcomes beside the deterministic roll and target chance; no new save fields |
 | 1.192.0 | Dense combat callouts now use a clamped vertical lane above unit and impact effects so normal HIT feedback remains visible; no new save fields |
 | 1.193.0 | Healing events now use a distinct procedural recovery sound instead of falling through to the generic ability cue; no new save fields |
+| 1.194.0 | Battle history now groups combat actions, recovery, status, objective, and cover outcomes under explicit event-kind labels; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

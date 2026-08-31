@@ -30,7 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
-- `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats name HIT/MISS outcomes alongside the underlying roll and target chance.
+- `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats name HIT/MISS outcomes, while the battle log distinguishes ability, recovery, status, objective, and cover events.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -118,7 +118,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 78 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
 | 79 | first_hour_promise | `ui_first_hour_promise.png` | 881379 | `4b64d7d086f919d7b25a1c0dadfbcb5cb60b67329b3982b6211827ce61dac3fb` |
 | 80 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
-| 81 | battle_log | `ui_battle_log.png` | 659808 | `f62642fd02ee21576be914e01ed59ab18dd6fc9bf9b6376a6f54d38895978445` |
+| 81 | battle_log | `ui_battle_log.png` | 661661 | `9056f9b945478e21e8a824ce0900ebbd224e98edc8dc6ce241c2e661f3e6f0b7` |
 | 82 | combat_feedback | `ui_combat_feedback.png` | 1194904 | `0e8120ca306bf41bcdf4a4029b14268ae40c51aac9b65ce46f4b09e7a884eef8` |
 | 83 | phase_replay | `ui_phase_replay.png` | 1093876 | `f59a882036bdb532e15e981c35d9b6debe2cb489dab9fdcdbe3db1454df35efd` |
 | 84 | end_phase_guard | `ui_end_phase_guard.png` | 590620 | `45c9d9c7c49b51d2d90fbb6ed503a17f4f629c86b1b1818dbbcde9e6601802f5` |

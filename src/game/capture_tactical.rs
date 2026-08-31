@@ -310,6 +310,19 @@ impl Game {
                 roll: 96,
                 hit_chance: 62,
             },
+            BattleEvent::UnitHealed {
+                unit_id: "mara_venn".to_owned(),
+                amount: 2,
+                remaining: 12,
+            },
+            BattleEvent::StatusApplied {
+                unit_id: "ilya_reed".to_owned(),
+                status: StatusKind::Guarded,
+            },
+            BattleEvent::EnemyAbilityActivated {
+                unit_id: "brood_stalker_a".to_owned(),
+                ability: "Predatory Surge".to_owned(),
+            },
         ]);
         self.show_battle_log = true;
     }
