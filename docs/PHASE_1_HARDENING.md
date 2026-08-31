@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 463 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 464 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -42,7 +42,8 @@ Status: automated and internal verification complete; external playtests pending
   availability-label coverage, field-item availability-label coverage, and deployment
   food-gate label coverage, Commons meal-gate label coverage, and Relay scan-gate label
   coverage, treatment-gate label coverage, research material-gate label coverage, and
-  Waystation recruitment resource-gate label coverage, and campaign decision resource-gate
+  Waystation recruitment resource-gate label coverage, Waystation dialogue recruitment
+  shortfall-label coverage, and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
   material-gate label coverage, character-event food-gate label coverage, and Build Mode
   construction-blocker label coverage.

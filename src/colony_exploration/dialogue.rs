@@ -5,6 +5,9 @@ use crate::colony::BuildingKind;
 use crate::data::GameData;
 use crate::ui::UiAction;
 
+#[cfg(test)]
+mod tests;
+
 pub(super) fn npc_action_button_label(
     campaign: &CampaignState,
     data: &GameData,
@@ -18,15 +21,24 @@ pub(super) fn npc_action_button_label(
         return super::npc_action_label(character, guest).to_owned();
     };
     let resource = if outsider.recruitment_resource.is_empty() {
-        "MATERIALS"
+        "materials"
     } else {
         outsider.recruitment_resource.as_str()
     };
-    format!(
-        "RECRUIT // {} {}",
+    recruitment_button_label(
         outsider.recruitment_cost,
-        resource.to_uppercase()
+        resource,
+        campaign.recruitment_resource_amount(resource),
     )
+}
+
+fn recruitment_button_label(cost: i32, resource: &str, available: i32) -> String {
+    let resource = resource.to_uppercase();
+    if available < cost {
+        format!("RECRUIT // NEED {cost} {resource}")
+    } else {
+        format!("RECRUIT // {cost} {resource}")
+    }
 }
 
 pub(super) fn npc_action_enabled(

@@ -140,6 +140,10 @@ fn unchosen_directorate_outsider_stands_at_the_waystation_as_a_guest() {
     assert!(npc_action_enabled(&campaign, &data, &action, guest.guest));
     campaign.colony.resources.materials = recruitment_cost - 1;
     assert!(!npc_action_enabled(&campaign, &data, &action, guest.guest));
+    assert_eq!(
+        npc_action_button_label(&campaign, &data, &guest.character, guest.guest),
+        "RECRUIT // NEED 30 MATERIALS"
+    );
 
     let mut explorer = ColonyExplorer::default();
     let station = npc_position(&campaign, "veya_orn").unwrap();
