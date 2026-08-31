@@ -8,10 +8,14 @@ pub(crate) struct EpilogueDossier {
     pub(crate) institution: String,
     pub(crate) institution_status: &'static str,
     people: String,
+    ready: usize,
+    recovering: usize,
     trusted_bonds: usize,
     bond_detail: String,
     scars: String,
+    scar_count: usize,
     evolutions: String,
+    evolved_count: usize,
     character_voice: String,
     navigator_voice: String,
     engine_relationship: &'static str,
@@ -51,21 +55,31 @@ impl EpilogueDossier {
         ]
     }
 
-    pub(crate) fn debrief_line(&self) -> String {
-        format!(
-            "COLONY LEGACY // {} {} // {} // {} TRUSTED+ BONDS // {} // {} // ENGINE {} / {} // MERCY {} // EPILOGUE WORK {} // CIVIC WORK {}",
-            self.institution.to_uppercase(),
-            self.institution_status,
-            self.people,
-            self.trusted_bonds,
-            self.scars,
-            self.evolutions,
-            self.engine_relationship,
-            self.engine_response,
-            self.mercy_count,
-            self.post_campaign_operations_completed,
-            self.identity_stewardship_completed
-        )
+    pub(crate) fn debrief_summary_lines(&self) -> [String; 3] {
+        [
+            format!(
+                "COLONY LEGACY // {} {} // {} COLONISTS",
+                self.institution.to_uppercase(),
+                self.institution_status,
+                self.people.split_whitespace().next().unwrap_or("0")
+            ),
+            format!(
+                "READY {} // RECOVERING {} // TRUSTED+ {} // SCARS {} // EVOLVED {}",
+                self.ready,
+                self.recovering,
+                self.trusted_bonds,
+                self.scar_count,
+                self.evolved_count
+            ),
+            format!(
+                "ENGINE {} / {} // MERCY {} // EPILOGUE {} // CIVIC {}",
+                self.engine_relationship,
+                self.engine_response,
+                self.mercy_count,
+                self.post_campaign_operations_completed,
+                self.identity_stewardship_completed
+            ),
+        ]
     }
 }
 
@@ -175,10 +189,14 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
         institution,
         institution_status,
         people,
+        ready,
+        recovering,
         trusted_bonds: trusted.len(),
         bond_detail,
         scars,
+        scar_count,
         evolutions,
+        evolved_count: evolved.len(),
         character_voice,
         navigator_voice,
         engine_relationship,

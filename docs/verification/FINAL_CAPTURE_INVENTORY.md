@@ -32,6 +32,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
+- `ui_finale_debrief.png`: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.
 - `ui_gene_lab.png` and `ui_recruited_gene_lab.png`: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.
 - `ui_roster.png` and `ui_recruited_roster.png`: the complete equipment catalog clears the footer instruction baseline in both roster variants.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
@@ -64,7 +65,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 21 | redoubt_end | `ui_redoubt_end.png` | 751153 | `fa6639dd82f8dfbaae6f92bb7e9bff60e3015107cbdcb3828f89ac82a11f20fa` |
 | 22 | commonwealth_end | `ui_commonwealth_end.png` | 760299 | `0cd412eab4b6f6e623ce2b8e53f6bc4119822f00d0e82756023f89ac557d6d9f` |
 | 23 | threshold_end | `ui_threshold_end.png` | 754324 | `097bb2b7fd1c3d8dbd20477ca9451cd287d870b6f8d91c094458e292f9e33482` |
-| 24 | finale_debrief | `ui_finale_debrief.png` | 200847 | `2c4324536623d475887d817c684db49d63c8b1d51d6b835acbcfd40fbe39da30` |
+| 24 | finale_debrief | `ui_finale_debrief.png` | 197645 | `b402a19906425a1f4b7c7afa28a02e8fd5fe46f4cd03c8a6cd085332e4306f6c` |
 | 25 | adaptation_operation | `ui_adaptation_operation.png` | 195292 | `348b40fd4802a2cc36249f82152ed1e1247d287382da1f7f4171b722b481e1c4` |
 | 26 | glass_nerve | `ui_glass_nerve.png` | 1186698 | `7cbd0f2aa6cf98a7012688d2b7ef1e8eebbb902ab2fbb4a9c1b077e003fdf7f4` |
 | 27 | three_knives | `ui_three_knives.png` | 1190743 | `375b3774167c9225a1ccc7ca87c10a59dc2cb89374d14fe588a6724c773eb79b` |

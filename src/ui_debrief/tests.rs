@@ -30,6 +30,17 @@ fn experience_summary_discloses_defeat_award_per_deployed_colonist() {
 }
 
 #[test]
+fn completed_campaign_debrief_hides_early_operation_voice() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.operations_completed = 2;
+    assert!(show_early_debrief_voice(&campaign));
+
+    campaign.strategy.campaign_complete = true;
+    assert!(!show_early_debrief_voice(&campaign));
+}
+
+#[test]
 fn squad_status_distinguishes_fielded_reserve_and_incapacitated_colonists() {
     let deployed_ids = vec!["kira_voss".to_owned()];
     let incapacitated = vec![CharacterConsequence {

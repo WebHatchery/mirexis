@@ -60,12 +60,16 @@ fn epilogue_records_the_civic_state_and_people_who_carried_it() {
     assert!(lines[7].contains("MERCY 1"));
     assert!(lines[7].contains("EPILOGUE WORK 2"));
     assert!(lines[7].contains("CIVIC WORK 3"));
-    assert!(dossier.debrief_line().contains("COLONY LEGACY"));
-    assert!(dossier
-        .debrief_line()
-        .contains("ENGINE HUMAN BOUNDARY / ARMOURED"));
-    assert!(dossier.debrief_line().contains("EPILOGUE WORK 2"));
-    assert!(dossier.debrief_line().contains("CIVIC WORK 3"));
+    let summary = dossier.debrief_summary_lines();
+    assert!(summary[0].contains("REDOUBT ARSENAL ONLINE"));
+    assert!(summary[0].contains("5 COLONISTS"));
+    assert!(summary[1].contains("READY 5"));
+    assert!(summary[1].contains("TRUSTED+ 1"));
+    assert!(summary[1].contains("SCARS 1"));
+    assert!(summary[1].contains("EVOLVED 1"));
+    assert!(summary[2].contains("ENGINE HUMAN BOUNDARY / ARMOURED"));
+    assert!(summary[2].contains("EPILOGUE 2"));
+    assert!(summary[2].contains("CIVIC 3"));
 }
 
 #[test]

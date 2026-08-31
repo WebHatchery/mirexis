@@ -22,6 +22,10 @@ fn experience_summary(outcome: &MissionOutcome) -> String {
     )
 }
 
+fn show_early_debrief_voice(campaign: &CampaignState) -> bool {
+    !campaign.strategy.campaign_complete && campaign.operations_completed <= 2
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SquadStatus {
     Returned,
@@ -126,10 +130,17 @@ pub fn draw_debrief(
             dark::ACCENT,
         );
         if let Some(dossier) = crate::epilogue::derive(campaign) {
-            draw_text(dossier.debrief_line(), 200.0, 232.0, 12.0, dark::POSITIVE);
+            for (index, line) in dossier.debrief_summary_lines().iter().enumerate() {
+                crate::ui::draw_ui_text_ex(
+                    line,
+                    200.0,
+                    220.0 + index as f32 * 13.0,
+                    TextStyle::new(11.0, dark::POSITIVE).params(),
+                );
+            }
         }
     }
-    if campaign.operations_completed <= 2 {
+    if show_early_debrief_voice(campaign) {
         draw_text(
             if won {
                 "ILYA REED // Account for everyone before Mara spends the recovery."
