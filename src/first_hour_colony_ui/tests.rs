@@ -78,3 +78,31 @@ fn dialogue_continue_button_stays_inside_the_conversation_panel() {
     assert!(button.right() <= panel.right());
     assert!(button.bottom() <= panel.bottom());
 }
+
+#[test]
+fn briefing_focus_moves_to_deploy_for_a_ready_squad() {
+    let data = crate::data::GameData::load().expect("embedded data loads");
+    let mut campaign = crate::campaign::CampaignState::new(&data);
+    campaign.first_hour.stage = FirstHourStage::FirstBriefing;
+
+    assert_eq!(
+        briefing_focus_target(&campaign.first_hour, &campaign, &data),
+        Some(crate::briefing_deployment_ui::deploy_button_bounds())
+    );
+}
+
+#[test]
+fn briefing_focus_recovers_to_a_selectable_row_when_the_squad_is_empty() {
+    let data = crate::data::GameData::load().expect("embedded data loads");
+    let mut campaign = crate::campaign::CampaignState::new(&data);
+    campaign.first_hour.stage = FirstHourStage::FirstBriefing;
+    for character in &mut campaign.roster {
+        character.deployment_selected = false;
+    }
+
+    let expected = crate::briefing_deployment_ui::deployment_row_bounds(campaign.roster.len(), 0);
+    assert_eq!(
+        briefing_focus_target(&campaign.first_hour, &campaign, &data),
+        Some(expected)
+    );
+}

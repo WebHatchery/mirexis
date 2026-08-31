@@ -16,6 +16,19 @@ pub(crate) fn draw_focus(
     let Some((rect, _)) = focus_target(progress, operations_open, dialogue_target) else {
         return;
     };
+    draw_focus_rect(rect);
+}
+
+pub(crate) fn draw_briefing_focus(
+    campaign: &crate::campaign::CampaignState,
+    data: &crate::data::GameData,
+) {
+    if let Some(rect) = briefing_focus_target(&campaign.first_hour, campaign, data) {
+        draw_focus_rect(rect);
+    }
+}
+
+fn draw_focus_rect(rect: Rect) {
     let color = focus_color();
     draw_rectangle_lines(
         rect.x - 4.0,
@@ -70,6 +83,32 @@ fn focus_target(
         }),
         _ => None,
     }
+}
+
+fn briefing_focus_target(
+    progress: &FirstHourProgress,
+    campaign: &crate::campaign::CampaignState,
+    data: &crate::data::GameData,
+) -> Option<Rect> {
+    if !progress.guidance_enabled
+        || progress.help_open
+        || progress.stage != FirstHourStage::FirstBriefing
+    {
+        return None;
+    }
+    let selected_count = campaign.selected_squad_count();
+    if selected_count > 0 {
+        return (campaign.colony.resources.food >= campaign.deployment_food_cost(data))
+            .then_some(crate::briefing_deployment_ui::deploy_button_bounds());
+    }
+    campaign
+        .roster
+        .iter()
+        .enumerate()
+        .find(|(_, character)| campaign.can_toggle_deployment(&character.id))
+        .map(|(index, _)| {
+            crate::briefing_deployment_ui::deployment_row_bounds(campaign.roster.len(), index)
+        })
 }
 
 fn focus_color() -> Color {

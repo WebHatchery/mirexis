@@ -28,6 +28,15 @@ fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> 
     }
 }
 
+pub(crate) fn deployment_row_bounds(roster_len: usize, index: usize) -> Rect {
+    let (row_step, row_height) = deployment_row_layout(roster_len);
+    Rect::new(200.0, 366.0 + index as f32 * row_step, 650.0, row_height)
+}
+
+pub(crate) fn deploy_button_bounds() -> Rect {
+    Rect::new(820.0, 562.0, 250.0, 48.0)
+}
+
 pub(crate) fn draw(
     campaign: &CampaignState,
     data: &GameData,
@@ -48,7 +57,6 @@ pub(crate) fn draw(
         356.0,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
-    let (row_step, row_height) = deployment_row_layout(campaign.roster.len());
     for (index, character) in campaign.roster.iter().enumerate() {
         let class_name = data
             .classes
@@ -69,7 +77,7 @@ pub(crate) fn draw(
             "{} // {} · LV{} · XP{}{}",
             state, class_name, character.level, character.experience, bond
         );
-        let row = Rect::new(200.0, 366.0 + index as f32 * row_step, 650.0, row_height);
+        let row = deployment_row_bounds(campaign.roster.len(), index);
         if button_with_state(
             row,
             &label,
@@ -110,7 +118,7 @@ pub(crate) fn draw(
     let deployment_label =
         deployment_button_label(selected_count, campaign.colony.resources.food, food_cost);
     if button(
-        Rect::new(820.0, 562.0, 250.0, 48.0),
+        deploy_button_bounds(),
         &deployment_label,
         deployment_enabled,
         mouse,

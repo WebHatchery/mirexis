@@ -20,7 +20,7 @@ Status: automated and internal verification complete; external playtests pending
 
 | Concern | Implemented response | Remaining observation target |
 |---|---|---|
-| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; first-hour advance goals focus BEGIN ARRIVAL and CONTINUE CAMPAIGN, guided attacks add a visible forecast-card ATTACK confirmation and a NEXT cue on the confirmation itself, objective guidance focuses SECURE OBJECTIVE once actionable, return goals focus RETURN TO COLONY, and required conversations focus CONTINUE after the correct speaker opens; skipped guidance suppresses focus cues; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
+| Touch/click completion | Every required action has a labelled button, map target, speech marker, or direct tap gesture; first-hour advance goals focus BEGIN ARRIVAL and CONTINUE CAMPAIGN, briefing guidance focuses DEPLOY SQUAD or a selectable colonist row, guided attacks add a visible forecast-card ATTACK confirmation and a NEXT cue on the confirmation itself, objective guidance focuses SECURE OBJECTIVE once actionable, return goals focus RETURN TO COLONY, and required conversations focus CONTINUE after the correct speaker opens; skipped guidance suppresses focus cues; no keyboard-only first-hour action | Confirm in two human touch-primary sessions |
 | Text scale | Fixed 1280×720 virtual UI scales uniformly and preserves layout at audited desktop sizes | Ask testers to assess smallest 1024×768 labels |
 | Contrast | Bright text, outlined panels, dark surfaces, and high-luminance goal accents remain legible in captures | Observe low-quality displays and glare |
 | Colour-independent meaning | Buttons and status text name state; target rings, icons, forecasts, and event prose do not rely on hue alone | Include colour-vision feedback in external sessions |
@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 480 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 483 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -46,7 +46,7 @@ Status: automated and internal verification complete; external playtests pending
   shortfall-label coverage, contextual treatment and Gene Lab blocker-label coverage,
   targeted class-action, field-item, and technique team/range blocker coverage, and
   targeting-card rule-reason coverage, guided attack-confirmation focus coverage,
-  objective-interaction, debrief-return, dialogue-continue, and advance-control focus coverage, and campaign decision resource-gate
+  objective-interaction, debrief-return, dialogue-continue, advance-control, and briefing-deployment focus coverage, and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
   material-gate label coverage, character-event food-gate label coverage, and Build Mode
   construction-blocker label coverage.

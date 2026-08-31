@@ -21,6 +21,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_movement_route.png` and `ui_valid_shot.png`: transformed route, target overlays, and the visible ATTACK confirmation remain aligned.
 - `ui_class_target.png`: transformed unit targeting and contextual card remain aligned.
 - `ui_colony.png`: centered settlement with a visible first-hour coordinator route and undeveloped 20 x 20 frontier.
+- `ui_briefing.png`: first-operation deployment guidance focuses DEPLOY SQUAD while preserving the selectable roster rows.
 - `ui_first_hour_tactical.png`: guided tactical lesson marks a legal move target without blocking the battlefield inspection.
 - `ui_first_hour_ability.png`: guided ability lesson focuses a currently actionable mutation, class action, or field item.
 - `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the active preparation, ApplyLearning hostile focus, and forecast prompt visible after deployment.
@@ -83,7 +84,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 47 | trauma | `ui_trauma.png` | 252210 | `3648cddc67a932214d85ca318e203cf6f0dca3f0bccb51c61a22ffa846445e56` |
 | 48 | bonded_briefing | `ui_bonded_briefing.png` | 205833 | `583e7a369da6ac5703d4e365fd3588902bccee118279b841133f280893ca8510` |
 | 49 | legacy | `ui_legacy.png` | 250520 | `8d26ff96d52dc5482e713536bb609374c3485dd72663fa42684bee8574b0c8aa` |
-| 50 | briefing | `ui_briefing.png` | 213472 | `4b90be39d980dd5a6a420e4e80635756a0a05b3f609e250b8498d224fbaae4c6` |
+| 50 | briefing | `ui_briefing.png` | 210993 | `802a273495c2d1c54bb36456795f95ee2e8c41f7b6e42a9b789b52414f16fef2` |
 | 51 | recruited_briefing | `ui_recruited_briefing.png` | 213565 | `115902291d35bb8fa66f937cd5604ab1ed3a25355e8c18325665a4f3ac027267` |
 | 52 | threat_briefing | `ui_threat_briefing.png` | 198417 | `d0c74a5269b3f1084260bdfcdfbe135a99ff43353f199c5bd6e3f5e9cee99e8e` |
 | 53 | loadout_briefing | `ui_loadout_briefing.png` | 204768 | `8c88ac12741bb5a5393a3007b08aa192cad1759b33a79a73a815226f79de55a3` |

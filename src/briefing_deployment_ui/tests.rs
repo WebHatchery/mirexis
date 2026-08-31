@@ -17,3 +17,12 @@ fn full_recruited_roster_stays_above_briefing_actions() {
     assert!(step < default_step);
     assert!(last_row_bottom <= 557.0);
 }
+
+#[test]
+fn shared_deployment_bounds_match_the_rendered_controls() {
+    assert_eq!(deploy_button_bounds(), Rect::new(820.0, 562.0, 250.0, 48.0));
+    assert_eq!(
+        deployment_row_bounds(5, 0),
+        Rect::new(200.0, 366.0, 650.0, 29.0)
+    );
+}

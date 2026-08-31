@@ -110,7 +110,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | trauma | Roster | Injury is text-led | `ui_trauma.png` | PASS |
 | bonded_briefing | Briefing/relationships | No portrait-led relationship cue | `ui_bonded_briefing.png` | PASS |
 | legacy | Roster | Legacy state lacks visual identity | `ui_legacy.png` | PASS |
-| briefing | Briefing | Text-heavy with little mission art | `ui_briefing.png` | PASS |
+| briefing | Briefing | Text-heavy with little mission art; first-hour deployment target lacked a guided focus cue | `ui_briefing.png` | PASS |
 | recruited_briefing | Briefing | Recruited colonists overlap the action controls | `ui_recruited_briefing.png` | PASS |
 | threat_briefing | Briefing | Threat hierarchy and faction art weak | `ui_threat_briefing.png` | PASS |
 | loadout_briefing | Briefing/loadout | Equipment is text-only | `ui_loadout_briefing.png` | PASS |

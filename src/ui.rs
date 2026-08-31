@@ -238,6 +238,7 @@ pub fn draw_mission_briefing(
         mouse,
         &mut actions,
     );
+    crate::first_hour_colony_ui::draw_briefing_focus(campaign, data);
     draw_ui_text_ex(
         "TOUCH // TAP COLONIST · FORMATION · DEPLOY · COLONY  //  PAD // D-PAD · A · X · START · B",
         200.0,

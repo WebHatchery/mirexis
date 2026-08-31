@@ -23,6 +23,8 @@ and [docs/PHASE_1_PLAYTEST_LOG.md](docs/PHASE_1_PLAYTEST_LOG.md).
   requires the squad to enter a real cover tile and then presents a reachable opening firing
   lane and objective route, without blocking battlefield inspection. Guided attacks select a
   hostile first and expose the forecast card's visible ATTACK confirmation.
+- The first-operation briefing focuses DEPLOY SQUAD when the selected squad is viable and
+  recovers to the first selectable colonist row when squad selection is empty.
 - The ability lesson recovers onto a colonist with a valid visible action and focuses that
   specific mutation, class, or field-item control.
 - First-hour colony handoffs focus the visible Operations, briefing, equal-choice preparation,

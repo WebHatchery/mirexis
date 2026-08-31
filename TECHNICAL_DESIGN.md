@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.185.0
+Save/content version: 1.186.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -961,6 +961,7 @@ Migration coverage:
 | 1.183.0 | First-hour return goals now outline the debrief's RETURN TO COLONY control for both operation returns; no new save fields |
 | 1.184.0 | Required first-hour colony conversations now outline their visible CONTINUE control after the correct speaker is opened; no new save fields |
 | 1.185.0 | First-hour opening and promise goals now outline BEGIN ARRIVAL and CONTINUE CAMPAIGN, while skipped guidance suppresses all gold focus cues; no new save fields |
+| 1.186.0 | First-operation briefing guidance now focuses DEPLOY SQUAD for a viable squad or the first selectable row when squad selection needs recovery; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
