@@ -65,6 +65,7 @@ fn equipment_rows_clear_the_roster_footer() {
     let last_row = equipment_row_rect(13);
 
     assert_eq!(first_row.y, 548.0);
-    assert_eq!(last_row.y, 664.0);
+    assert_eq!(last_row.y, 648.0);
+    assert!(last_row.y + last_row.h <= 676.0);
     assert!(last_row.y + last_row.h < 707.0);
 }

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.204.0
+Save/content version: 1.205.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -980,6 +980,7 @@ Migration coverage:
 | 1.202.0 | Ending captures now open the Operations drawer and its colony legacy register uses seven bounded rows beneath each path-specific identity card; no new save fields |
 | 1.203.0 | Escalation briefing pressure modifiers now wrap inside the left briefing column and keep the deployment rail below the copy; no new save fields |
 | 1.204.0 | Briefing threat-intelligence rows now collapse repeated hostile roles and fit long intelligence copy inside the right briefing column; no new save fields |
+| 1.205.0 | Roster workshop equipment rows now fit the full equipment catalog inside the training panel above the footer; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

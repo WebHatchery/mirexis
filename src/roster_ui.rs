@@ -89,8 +89,8 @@ fn equipment_label(
 }
 
 const EQUIPMENT_ROW_START_Y: f32 = 548.0;
-const EQUIPMENT_ROW_STEP_Y: f32 = 29.0;
-const EQUIPMENT_ROW_HEIGHT: f32 = 28.0;
+const EQUIPMENT_ROW_STEP_Y: f32 = 25.0;
+const EQUIPMENT_ROW_HEIGHT: f32 = 24.0;
 
 fn equipment_row_rect(index: usize) -> Rect {
     let column = index % 3;
@@ -607,7 +607,7 @@ fn draw_selected_character(
                 assets,
                 &visuals.equipment,
                 index,
-                Rect::new(rect.x + 5.0, rect.y + 2.0, 34.0, 26.0),
+                Rect::new(rect.x + 5.0, rect.y + 1.0, 30.0, 22.0),
                 if unlocked {
                     WHITE
                 } else {
@@ -617,10 +617,10 @@ fn draw_selected_character(
         }
         draw_ui_text_ex(
             &label.to_uppercase(),
-            rect.x + 46.0,
-            rect.y + 20.0,
+            rect.x + 42.0,
+            rect.y + 17.0,
             TextStyle::new(
-                10.0,
+                9.5,
                 if enabled || equipped {
                     dark::TEXT
                 } else {

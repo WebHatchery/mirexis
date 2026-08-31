@@ -58,8 +58,8 @@ Status: automated and internal verification complete; external playtests pending
   material-gate label coverage, character-event food-gate label coverage, Build Mode
   construction-blocker label coverage, roster equipment-row geometry coverage, finale
   debrief summary coverage, completed-campaign debrief voice coverage, bounded
-  ending-register coverage, briefing pressure geometry coverage, and bounded
-  briefing-intelligence coverage.
+  ending-register coverage, briefing pressure geometry coverage, bounded
+  briefing-intelligence coverage, and workshop equipment-panel geometry coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 100 audited 1280×720 scenes, including the first-hour
