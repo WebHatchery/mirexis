@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.199.0
+Save/content version: 1.200.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -975,6 +975,7 @@ Migration coverage:
 | 1.197.0 | Tactical event summaries now title-case internal identifiers so battle history and hostile replay use readable display names; no new save fields |
 | 1.198.0 | Automatic post-operation technique learning now reports each readable colonist and technique in the debrief notification stack; no new save fields |
 | 1.199.0 | Gene Lab evolution cards now clear the portrait anatomy scan label and the return control; no new save fields |
+| 1.200.0 | Roster equipment rows now clear the footer instruction baseline across the full catalog; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

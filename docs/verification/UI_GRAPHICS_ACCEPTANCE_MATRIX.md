@@ -102,7 +102,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | power | Colony | Unpowered state lacks environmental response | `ui_power.png` | PASS |
 | construction | Colony | Construction state lacks authored staging | `ui_construction.png` | PASS |
 | research | Research | Weak technology art and hierarchy | `ui_research.png` | PASS |
-| roster | Roster | Procedural portrait and dense controls | `ui_roster.png` | PASS |
+| roster | Roster | Procedural portrait, dense controls, and the final equipment row crowding the footer | `ui_roster.png` | PASS |
 | recruited_roster | Roster | Recruited colonists fall below the visible list/relationship boundary | `ui_recruited_roster.png` | PASS |
 | recruited_gene_lab | Gene Lab | Recruited colonists fall below the visible mutation list | `ui_recruited_gene_lab.png` | PASS |
 | advanced_roster | Roster | Class change lacks silhouette transformation | `ui_advanced_roster.png` | PASS |

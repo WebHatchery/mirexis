@@ -88,6 +88,21 @@ fn equipment_label(
     }
 }
 
+const EQUIPMENT_ROW_START_Y: f32 = 548.0;
+const EQUIPMENT_ROW_STEP_Y: f32 = 29.0;
+const EQUIPMENT_ROW_HEIGHT: f32 = 28.0;
+
+fn equipment_row_rect(index: usize) -> Rect {
+    let column = index % 3;
+    let row = index / 3;
+    Rect::new(
+        344.0 + column as f32 * 296.0,
+        EQUIPMENT_ROW_START_Y + row as f32 * EQUIPMENT_ROW_STEP_Y,
+        282.0,
+        EQUIPMENT_ROW_HEIGHT,
+    )
+}
+
 pub(crate) fn draw_roster(
     campaign: &CampaignState,
     data: &GameData,
@@ -515,18 +530,11 @@ fn draw_selected_character(
             );
         }
     }
-    let inspected_equipment = data.equipment.iter().enumerate().find_map(|(index, item)| {
-        let column = index % 3;
-        let row = index / 3;
-        Rect::new(
-            344.0 + column as f32 * 296.0,
-            548.0 + row as f32 * 32.0,
-            282.0,
-            30.0,
-        )
-        .contains(mouse)
-        .then_some(item)
-    });
+    let inspected_equipment = data
+        .equipment
+        .iter()
+        .enumerate()
+        .find_map(|(index, item)| equipment_row_rect(index).contains(mouse).then_some(item));
     if let Some(item) = inspected_equipment {
         draw_text_block(
             &format!("{} // {}", item.name.to_uppercase(), item.description),
@@ -581,14 +589,7 @@ fn draw_selected_character(
         let has_workshop = campaign.colony.has_facility(BuildingKind::Workshop);
         let affordable = prototype_available || campaign.colony.resources.materials >= cost as i32;
         let enabled = has_workshop && unlocked && !equipped && affordable;
-        let column = index % 3;
-        let row = index / 3;
-        let rect = Rect::new(
-            344.0 + column as f32 * 296.0,
-            548.0 + row as f32 * 32.0,
-            282.0,
-            30.0,
-        );
+        let rect = equipment_row_rect(index);
         let label = equipment_label(
             unlocked,
             equipped,

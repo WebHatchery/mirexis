@@ -33,6 +33,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
 - `ui_gene_lab.png` and `ui_recruited_gene_lab.png`: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.
+- `ui_roster.png` and `ui_recruited_roster.png`: the complete equipment catalog clears the footer instruction baseline in both roster variants.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -81,8 +82,8 @@ Manifest: `scripts/capture_ui.ps1`
 | 39 | power | `ui_power.png` | 742191 | `3f482b1e3fd9645afc66cefa4423f2d12201e8616ea0f7b91b3d0a515bfa442e` |
 | 40 | construction | `ui_construction.png` | 743993 | `43385b8287f5f5556d764f8a2d7cc6ee663126df533f1681c2c65a22927bfe95` |
 | 41 | research | `ui_research.png` | 743676 | `1030070408c992cda5730de80770be9388759bc3a169db6a93a85fe978440fca` |
-| 42 | roster | `ui_roster.png` | 254323 | `4fb53223201f266b393f3885bda55c96b927d1f1dff6353c8bbf7156a3d90d63` |
-| 43 | recruited_roster | `ui_recruited_roster.png` | 286857 | `4e93e68ebb8b3854815efd873acbc4aa8044802bdfd7f6b9bc5e27a8a428035a` |
+| 42 | roster | `ui_roster.png` | 254527 | `0c0e2ebe2b5a0bf8704c3f5c95d4a04daf0a6ff7c048d0550cb07e8a92dbc6da` |
+| 43 | recruited_roster | `ui_recruited_roster.png` | 287311 | `726969e16a7734944c411ced5cd4fb24c4bb392c5d0316433d88afdd415ec8b5` |
 | 44 | recruited_gene_lab | `ui_recruited_gene_lab.png` | 210227 | `cfca7144c37db59649e1d1f204368654842d06f872b921f084b5331c4440b455` |
 | 45 | advanced_roster | `ui_advanced_roster.png` | 254254 | `171c16d5152ee73fdac96fd80a0ff741fee48d93e141d58986a0e6062f453c8a` |
 | 46 | relationships | `ui_relationships.png` | 255780 | `de1be4679f94b310eb668cedd08508d88320d62437d275077541678ae5518da4` |
