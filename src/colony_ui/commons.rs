@@ -6,6 +6,23 @@ use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
+fn commons_button_label(
+    already_hosted: bool,
+    ready_squad_count: usize,
+    food: i32,
+    food_cost: i32,
+) -> String {
+    if already_hosted {
+        "MEAL // HOSTED".to_owned()
+    } else if ready_squad_count < 2 {
+        "MEAL // NEED 2 READY".to_owned()
+    } else if food < food_cost {
+        format!("MEAL // NEED {} FOOD", food_cost)
+    } else {
+        format!("HOST MEAL // {} FOOD", food_cost)
+    }
+}
+
 pub(super) fn draw(
     campaign: &CampaignState,
     routine_operations_visible: bool,
@@ -16,14 +33,12 @@ pub(super) fn draw(
         return;
     }
     let already_hosted = campaign.commons_meal_operation == Some(campaign.operations_completed);
-    let label = if already_hosted {
-        "COMMONS MEAL // HOSTED THIS OPERATION".to_owned()
-    } else {
-        format!(
-            "HOST COMMONS MEAL // {} FOOD",
-            campaign.commons_meal_food_cost()
-        )
-    };
+    let label = commons_button_label(
+        already_hosted,
+        campaign.selected_squad_count(),
+        campaign.colony.resources.food,
+        campaign.commons_meal_food_cost(),
+    );
     if button(
         Rect::new(878.0, 344.0, 176.0, 30.0),
         &label,
@@ -33,3 +48,6 @@ pub(super) fn draw(
         actions.push(UiAction::HostCommonsMeal);
     }
 }
+
+#[cfg(test)]
+mod tests;
