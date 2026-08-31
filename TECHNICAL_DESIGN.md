@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.169.0
+Save/content version: 1.170.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -945,6 +945,7 @@ Migration coverage:
 | 1.167.0 | Tactical field-item controls now identify selection, missing items, spent items, incapacitation, AP, target, and cancel states; no new save fields |
 | 1.168.0 | Briefing deployment controls now identify an empty squad and insufficient food before deployment; no new save fields |
 | 1.169.0 | Colony Operations controls now identify Commons meal and Relay scan blockers before an action is attempted; no new save fields |
+| 1.170.0 | Colony treatment controls now identify the Infirmary, injury, and biomass gates before recovery is attempted; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.
