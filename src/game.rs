@@ -15,6 +15,7 @@ mod colony_flow;
 mod debrief_flow;
 mod destructive_flow;
 mod facility_upgrade_flow;
+mod field_notes_flow;
 mod first_hour_flow;
 mod formation_flow;
 mod input;
@@ -86,6 +87,8 @@ pub struct Game {
     salvage_open: bool,
     audio: crate::audio::AudioSystem,
     show_settings: bool,
+    show_field_notes: bool,
+    selected_field_note: usize,
 }
 
 impl Game {
@@ -142,6 +145,8 @@ impl Game {
                 facility_upgrade_open: &mut self.facility_upgrade_open,
                 salvage_open: &mut self.salvage_open,
                 settings_open: self.show_settings,
+                field_notes_open: self.show_field_notes,
+                selected_field_note: self.selected_field_note,
             }),
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -236,6 +241,9 @@ impl Game {
             return;
         }
         if self.apply_first_hour_action(&action) {
+            return;
+        }
+        if self.apply_field_notes_action(&action) {
             return;
         }
         if self.guard_destructive_action(&action) {

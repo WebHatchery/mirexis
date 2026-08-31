@@ -36,6 +36,7 @@ mod epilogue;
 mod equipment_actions;
 mod equipment_catalog;
 mod equipment_ui;
+mod field_notes_ui;
 mod first_hour;
 mod first_hour_colony_ui;
 mod first_hour_consequences_ui;

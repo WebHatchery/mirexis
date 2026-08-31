@@ -446,6 +446,8 @@ Goal: deepen the existing people and city without new tactical systems.
   final reflection is acknowledged.
 - Implemented: path-specific finale field notes now pay off every starting colonist and the
   recruited route outsider, while Kira's player-avatar culmination appears in the ending register.
+- Implemented: acknowledged field notes are retained as chronological transcripts in a
+  touch-visible Operations archive, so the colony's story history can be revisited after dialogue.
 
 Exit test: players recall three colonists, can describe one changing relationship, and
 notice the colony responding to an operation without opening a ledger.

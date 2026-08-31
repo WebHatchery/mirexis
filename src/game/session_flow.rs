@@ -12,6 +12,8 @@ impl Game {
         self.show_battle_log = false;
         self.battle_log_filter = BattleLogFilter::default();
         self.show_settings = false;
+        self.show_field_notes = false;
+        self.selected_field_note = 0;
         reset_tactical_presentation(
             &mut self.combat_feedback,
             &mut self.phase_replay,

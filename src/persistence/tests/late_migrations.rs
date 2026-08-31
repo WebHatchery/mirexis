@@ -1,6 +1,7 @@
 use super::*;
 
 mod engine_effects;
+mod field_notes;
 
 #[test]
 fn gene_lab_save_gains_maras_unevolved_paths() {

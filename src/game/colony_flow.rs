@@ -8,6 +8,7 @@ impl Game {
             self.state,
             self.campaign.first_hour.help_open,
             self.show_settings,
+            self.show_field_notes,
             self.facility_upgrade_open,
             self.salvage_open,
         )
@@ -65,12 +66,14 @@ fn colony_explorer_can_update(
     state: AppState,
     first_hour_help_open: bool,
     settings_open: bool,
+    field_notes_open: bool,
     facility_upgrade_open: bool,
     salvage_open: bool,
 ) -> bool {
     state == AppState::Colony
         && !first_hour_help_open
         && !settings_open
+        && !field_notes_open
         && !facility_upgrade_open
         && !salvage_open
 }

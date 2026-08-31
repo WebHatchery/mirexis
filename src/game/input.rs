@@ -29,6 +29,14 @@ impl Game {
             // fall through to the screen underneath the settings modal.
             return false;
         }
+        if let Some(action) =
+            field_notes_overlay_input(self.show_field_notes, input.escape_pressed, pad.cancel)
+        {
+            self.events.push(action);
+        }
+        if self.show_field_notes {
+            return false;
+        }
         if let Some(action) = first_hour_help_overlay_input(
             self.campaign.first_hour.help_open,
             input.escape_pressed,
@@ -313,6 +321,18 @@ fn settings_overlay_input(
 ) -> Option<UiAction> {
     if show_settings && (escape_pressed || cancel_pressed) {
         Some(UiAction::ToggleSettings)
+    } else {
+        None
+    }
+}
+
+fn field_notes_overlay_input(
+    show_field_notes: bool,
+    escape_pressed: bool,
+    cancel_pressed: bool,
+) -> Option<UiAction> {
+    if show_field_notes && (escape_pressed || cancel_pressed) {
+        Some(UiAction::ToggleFieldNotes)
     } else {
         None
     }

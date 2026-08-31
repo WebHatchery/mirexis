@@ -83,6 +83,8 @@ pub enum UiAction {
     RestartFirstHourTutorial,
     ChooseFirstHourInvestment(String),
     ToggleSettings,
+    ToggleFieldNotes,
+    SelectFieldNote(usize),
     AudioVolumeDown,
     AudioVolumeUp,
     ToggleMute,

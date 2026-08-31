@@ -77,6 +77,12 @@ impl CampaignState {
         let Some(beat) = beat else {
             return;
         };
-        self.colony_story.acknowledge(beat.id);
+        let speaker = self
+            .roster
+            .iter()
+            .find(|character| character.id == character_id)
+            .map_or(character_id, |character| character.name.as_str());
+        self.colony_story
+            .acknowledge_note(character_id, speaker, beat);
     }
 }

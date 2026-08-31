@@ -16,6 +16,44 @@ impl Game {
         self.state = AppState::Colony;
     }
 
+    pub(super) fn capture_field_notes(&mut self) {
+        let notes = [
+            (
+                "mara_venn",
+                "Mara Venn",
+                crate::colony_story::current_beat("mara_venn", 0, None, None)
+                    .expect("field notes capture has Mara's arrival note"),
+            ),
+            (
+                "ilya_reed",
+                "Ilya Reed",
+                crate::colony_story::current_beat("ilya_reed", 1, Some(true), None)
+                    .expect("field notes capture has Ilya's victory note"),
+            ),
+            (
+                "kira_voss",
+                "Kira Voss",
+                crate::colony_story::commons_meal_beat("kira_voss")
+                    .expect("field notes capture has Kira's commons note"),
+            ),
+            (
+                "sol_cairn",
+                "Sol Cairn",
+                crate::colony_story::phase_beat("adaptation", "sol_cairn")
+                    .expect("field notes capture has Sol's phase note"),
+            ),
+        ];
+        for (character_id, speaker, beat) in notes {
+            self.campaign
+                .colony_story
+                .acknowledge_note(character_id, speaker, beat);
+        }
+        self.colony_operations_open = true;
+        self.selected_field_note = 3;
+        self.show_field_notes = true;
+        self.state = AppState::Colony;
+    }
+
     pub(super) fn capture_advanced_roster(&mut self) {
         self.campaign.strategy.phase_id = "adaptation".to_owned();
         self.campaign.colony.resources.materials = 480;

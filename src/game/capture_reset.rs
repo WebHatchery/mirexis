@@ -43,6 +43,8 @@ impl Game {
         self.title_focus_continue = false;
         self.title_focus_active = false;
         self.show_settings = false;
+        self.show_field_notes = false;
+        self.selected_field_note = 0;
         self.title_hover_preview = false;
         self.new_campaign_armed = false;
         self.delete_save_armed = false;

@@ -500,11 +500,17 @@ fn colony_conversations_remember_each_heard_story_beat() {
     campaign.acknowledge_colonist("mara_venn");
     campaign.acknowledge_colonist("mara_venn");
     assert!(campaign.colony_story.has_heard("mara_arrival"));
+    assert_eq!(campaign.colony_story.archived_notes().len(), 1);
+    assert_eq!(
+        campaign.colony_story.archived_notes()[0].speaker,
+        "Mara Venn"
+    );
 
     campaign.operations_completed = 1;
     campaign.first_hour.first_outcome_won = Some(true);
     campaign.acknowledge_colonist("mara_venn");
     assert!(campaign.colony_story.has_heard("mara_first_victory"));
+    assert_eq!(campaign.colony_story.archived_notes().len(), 2);
 }
 
 #[test]

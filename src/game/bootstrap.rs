@@ -99,6 +99,8 @@ impl Game {
             salvage_open: false,
             audio,
             show_settings: false,
+            show_field_notes: false,
+            selected_field_note: 0,
         }
     }
 }

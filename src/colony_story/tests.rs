@@ -76,6 +76,23 @@ fn acknowledgement_is_idempotent_and_preserves_order() {
 }
 
 #[test]
+fn acknowledged_field_note_keeps_a_chronological_transcript() {
+    let beat = current_beat("mara_venn", 0, None, None).unwrap();
+    let mut story = ColonyStoryState::default();
+
+    story.acknowledge_note("mara_venn", "Mara Venn", beat);
+    story.acknowledge_note("mara_venn", "Mara Venn", beat);
+
+    assert_eq!(story.archived_notes().len(), 1);
+    let note = &story.archived_notes()[0];
+    assert_eq!(note.beat_id, beat.id);
+    assert_eq!(note.speaker, "Mara Venn");
+    assert_eq!(note.title, beat.title);
+    assert_eq!(note.text, beat.text);
+    assert_eq!(story.acknowledged_count(), 1);
+}
+
+#[test]
 fn missing_serialized_story_uses_an_empty_ledger() {
     let story: ColonyStoryState = serde_json::from_str("{}").unwrap();
     assert_eq!(story, ColonyStoryState::default());

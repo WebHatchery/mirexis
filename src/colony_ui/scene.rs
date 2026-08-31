@@ -15,6 +15,8 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         facility_upgrade_open,
         salvage_open,
         settings_open,
+        field_notes_open,
+        selected_field_note,
     } = context;
     let mut actions = Vec::new();
     let mouse = crate::ui::pointer_position(ui);
@@ -28,6 +30,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
     let interaction_enabled = colony_map_input_enabled(
         campaign.first_hour.help_open,
         settings_open,
+        field_notes_open,
         *facility_upgrade_open,
         *salvage_open,
     );
@@ -63,7 +66,7 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
             &mut actions,
         );
     }
-    if !*facility_upgrade_open && !*salvage_open {
+    if !*facility_upgrade_open && !*salvage_open && !field_notes_open {
         crate::first_hour_colony_ui::draw_focus(
             &campaign.first_hour,
             *operations_open,
@@ -71,16 +74,29 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         );
     }
     crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
+    if field_notes_open {
+        crate::field_notes_ui::draw_modal(
+            &campaign.colony_story,
+            selected_field_note,
+            mouse,
+            &mut actions,
+        );
+    }
     actions
 }
 
 fn colony_map_input_enabled(
     first_hour_help_open: bool,
     settings_open: bool,
+    field_notes_open: bool,
     facility_upgrade_open: bool,
     salvage_open: bool,
 ) -> bool {
-    !first_hour_help_open && !settings_open && !facility_upgrade_open && !salvage_open
+    !first_hour_help_open
+        && !settings_open
+        && !field_notes_open
+        && !facility_upgrade_open
+        && !salvage_open
 }
 
 #[cfg(test)]

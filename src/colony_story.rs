@@ -11,6 +11,16 @@ pub(crate) use identity::{
 pub(crate) struct ColonyStoryState {
     #[serde(default)]
     heard_beats: Vec<String>,
+    #[serde(default)]
+    archived_notes: Vec<ArchivedFieldNote>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct ArchivedFieldNote {
+    pub(crate) beat_id: String,
+    pub(crate) speaker: String,
+    pub(crate) title: String,
+    pub(crate) text: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -29,6 +39,35 @@ impl ColonyStoryState {
         if !self.has_heard(beat_id) {
             self.heard_beats.push(beat_id.to_owned());
         }
+    }
+
+    pub(crate) fn acknowledge_note(&mut self, speaker_id: &str, speaker: &str, beat: ColonyBeat) {
+        self.acknowledge(beat.id);
+        if self
+            .archived_notes
+            .iter()
+            .any(|note| note.beat_id == beat.id)
+        {
+            return;
+        }
+        self.archived_notes.push(ArchivedFieldNote {
+            beat_id: beat.id.to_owned(),
+            speaker: if speaker.is_empty() {
+                speaker_id.to_owned()
+            } else {
+                speaker.to_owned()
+            },
+            title: beat.title.to_owned(),
+            text: beat.text.to_owned(),
+        });
+    }
+
+    pub(crate) fn archived_notes(&self) -> &[ArchivedFieldNote] {
+        &self.archived_notes
+    }
+
+    pub(crate) fn acknowledged_count(&self) -> usize {
+        self.heard_beats.len()
     }
 }
 
