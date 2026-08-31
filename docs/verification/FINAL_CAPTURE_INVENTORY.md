@@ -26,7 +26,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_second_operation_tactical.png`: the persisted transfer lesson keeps the active preparation, ApplyLearning hostile focus, and forecast prompt visible after deployment.
 - `ui_first_hour_return.png`: the first-return recovery handoff routes the player to Ilya's highlighted speech marker before preparation.
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
-- `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach before continuation.
+- `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -110,7 +110,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 74 | help | `ui_help.png` | 332701 | `a1e0f3b1cca548d6bf1425a40587e26d6f098fb1fdbf094365ef89f97a65fe4e` |
 | 75 | first_hour_guide | `ui_first_hour_guide.png` | 211550 | `4ec8274af4c4b4b2c88ec224ad1a5b6bf4eec8a74e796824c0a271e970c3a20d` |
 | 76 | first_hour_return | `ui_first_hour_return.png` | 878773 | `fd0dc04443a8997f75d5df52ccb52be4dd81f50ef99317054f2085f570c9fb38` |
-| 77 | first_hour_promise | `ui_first_hour_promise.png` | 880688 | `1074d5123a8762eee8c922f4e2efbbd897be1100cb860e2f182e953c7bcf48a5` |
+| 77 | first_hour_promise | `ui_first_hour_promise.png` | 881379 | `4b64d7d086f919d7b25a1c0dadfbcb5cb60b67329b3982b6211827ce61dac3fb` |
 | 78 | first_hour_operations | `ui_first_hour_operations.png` | 920045 | `e0ce281e92487bdb0b2c5c2a3e603963f26423d427f50b9131e6b6128451f161` |
 | 79 | battle_log | `ui_battle_log.png` | 655810 | `3a0d56f8d97647193717f7d0a882db8e0f7111fa2f601700eb7f0d2f744d88c0` |
 | 80 | combat_feedback | `ui_combat_feedback.png` | 1188046 | `fbdd03dd29ffb8848faffdcf98060ae798e118db6c6a06517644a4da6c8b610e` |

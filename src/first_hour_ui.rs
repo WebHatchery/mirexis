@@ -28,6 +28,14 @@ pub(crate) fn debrief_return_button_bounds() -> Rect {
     Rect::new(860.0, 574.0, 220.0, 48.0)
 }
 
+fn begin_arrival_button_bounds() -> Rect {
+    Rect::new(342.0, 114.0, 182.0, 26.0)
+}
+
+fn continue_campaign_button_bounds() -> Rect {
+    Rect::new(330.0, 114.0, 194.0, 26.0)
+}
+
 fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let layout = goal_banner_layout(progress.stage);
     draw_surface(
@@ -58,18 +66,13 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
     }
     match progress.stage {
         FirstHourStage::Arrival
-            if button(
-                Rect::new(342.0, 114.0, 182.0, 26.0),
-                "BEGIN ARRIVAL",
-                true,
-                mouse,
-            ) =>
+            if button(begin_arrival_button_bounds(), "BEGIN ARRIVAL", true, mouse) =>
         {
             actions.push(UiAction::AdvanceFirstHour);
         }
         FirstHourStage::Promise
             if button(
-                Rect::new(330.0, 114.0, 194.0, 26.0),
+                continue_campaign_button_bounds(),
                 "CONTINUE CAMPAIGN",
                 true,
                 mouse,
@@ -79,8 +82,23 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
         }
         _ => {}
     }
-    if let Some(rect) = debrief_focus_target(progress.stage) {
+    if let Some(rect) = focus_target(progress) {
         draw_focus(rect);
+    }
+}
+
+fn focus_target(progress: &FirstHourProgress) -> Option<Rect> {
+    if !progress.guidance_enabled {
+        return None;
+    }
+    advance_focus_target(progress.stage).or_else(|| debrief_focus_target(progress.stage))
+}
+
+fn advance_focus_target(stage: FirstHourStage) -> Option<Rect> {
+    match stage {
+        FirstHourStage::Arrival => Some(begin_arrival_button_bounds()),
+        FirstHourStage::Promise => Some(continue_campaign_button_bounds()),
+        _ => None,
     }
 }
 

@@ -138,7 +138,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | first_hour_guide | First-hour guide and playtest metrics | No canonical evidence for the observer-facing session readout | `ui_first_hour_guide.png` | PASS |
 | first_hour_return | First-hour return/recovery handoff | First return names a colonist but does not visibly route or highlight the conversation target | `ui_first_hour_return.png` | PASS |
 | first_hour_dialogue | First-hour conversation handoff | Required conversation has no focus cue on the visible CONTINUE control | `ui_first_hour_dialogue.png` | PASS |
-| first_hour_promise | First-hour promise consequence | Second-operation outcome does not visibly distinguish a hardened outer route from a breach | `ui_first_hour_promise.png` | PASS |
+| first_hour_promise | First-hour promise consequence | Second-operation consequence and the required CONTINUE CAMPAIGN control lack a guided focus cue | `ui_first_hour_promise.png` | PASS |
 | first_hour_operations | First-hour colony handoff | Operations drawer does not make the next briefing action obvious | `ui_first_hour_operations.png` | PASS |
 | battle_log | Battle log | Chronological event history with touch-visible semantic filters | `ui_battle_log.png` | PASS |
 | combat_feedback | Tactical/feedback | Impact/recoil/critical and miss treatment | `ui_combat_feedback.png` | PASS |

@@ -41,3 +41,42 @@ fn debrief_focus_covers_both_operation_returns_only() {
         None
     );
 }
+
+#[test]
+fn advance_focus_points_only_to_the_required_start_and_promise_controls() {
+    assert_eq!(
+        advance_focus_target(FirstHourStage::Arrival),
+        Some(Rect::new(342.0, 114.0, 182.0, 26.0))
+    );
+    assert_eq!(
+        advance_focus_target(FirstHourStage::Promise),
+        Some(Rect::new(330.0, 114.0, 194.0, 26.0))
+    );
+    assert_eq!(advance_focus_target(FirstHourStage::MeetCoordinator), None);
+}
+
+#[test]
+fn advance_controls_stay_inside_the_standard_goal_banner() {
+    let panel = Rect::new(20.0, 76.0, 520.0, 96.0);
+
+    for button in [
+        begin_arrival_button_bounds(),
+        continue_campaign_button_bounds(),
+    ] {
+        assert!(button.x >= panel.x);
+        assert!(button.y >= panel.y);
+        assert!(button.right() <= panel.right());
+        assert!(button.bottom() <= panel.bottom());
+    }
+}
+
+#[test]
+fn goal_focus_disappears_when_guidance_is_skipped() {
+    let mut progress = FirstHourProgress {
+        stage: FirstHourStage::Promise,
+        ..FirstHourProgress::default()
+    };
+    progress.guidance_enabled = false;
+
+    assert_eq!(focus_target(&progress), None);
+}
