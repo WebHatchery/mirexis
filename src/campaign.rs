@@ -446,7 +446,7 @@ impl CampaignState {
         outcome: &MissionOutcome,
         mission: &MissionInstance,
         data: &GameData,
-    ) {
+    ) -> Vec<String> {
         let deployed_ids = self
             .roster
             .iter()
@@ -509,11 +509,13 @@ impl CampaignState {
                 character.level = 1 + (character.experience / 100).min(9) as u8;
             }
         }
-        crate::skill_training::learn_after_operation(self, &deployed_ids, data);
+        let learned_techniques =
+            crate::skill_training::learn_after_operation(self, &deployed_ids, data);
         self.apply_injury_consequences(outcome, data);
         self.refresh_contact_completion(data);
         self.refresh_adaptation_completion(data);
         self.refresh_escalation_completion(data);
+        learned_techniques
     }
 
     pub fn resolve_first_character_event(&mut self, data: &GameData) -> Result<String, String> {

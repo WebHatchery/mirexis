@@ -13,7 +13,22 @@ impl Game {
                 unit.health = 0;
             }
         }
+        let deployed_ids = self.session.deployed_colonist_ids();
+        for character in &mut self.campaign.roster {
+            if deployed_ids.iter().any(|id| id == &character.id) {
+                character.experience = 20;
+            }
+        }
+        let learned_techniques = crate::skill_training::learn_after_operation(
+            &mut self.campaign,
+            &deployed_ids,
+            &self.data,
+        );
         self.last_outcome = self.session.mission_outcome(&self.active_mission);
+        for technique in learned_techniques {
+            self.notifications
+                .success(format!("Technique learned · {technique}"));
+        }
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstReturn;
         self.state = AppState::Debrief;
     }

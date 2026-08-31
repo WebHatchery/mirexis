@@ -14,7 +14,7 @@ impl Game {
                 .selected_mission()
                 .expect("a deployed mission remains selected")
                 .clone();
-            self.campaign.apply_mission_outcome(
+            let learned_techniques = self.campaign.apply_mission_outcome(
                 self.last_outcome.as_ref().expect("outcome was just stored"),
                 &mission,
                 &self.data,
@@ -22,6 +22,10 @@ impl Game {
             self.record_first_hour_outcome();
             self.state = AppState::Debrief;
             self.autosave_current("Debrief autosaved");
+            for technique in learned_techniques {
+                self.notifications
+                    .success(format!("Technique learned · {technique}"));
+            }
         }
     }
 }

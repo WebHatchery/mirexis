@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.197.0
+Save/content version: 1.198.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -973,6 +973,7 @@ Migration coverage:
 | 1.195.0 | Battle-history filter buttons now show live matching-event counts so category availability is visible before opening a filter; no new save fields |
 | 1.196.0 | Hostile replay beats now pair attacks with immediate damage or incapacitation results while keeping objective and cover consequences chronological; no new save fields |
 | 1.197.0 | Tactical event summaries now title-case internal identifiers so battle history and hostile replay use readable display names; no new save fields |
+| 1.198.0 | Automatic post-operation technique learning now reports each readable colonist and technique in the debrief notification stack; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

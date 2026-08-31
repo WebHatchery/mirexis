@@ -95,6 +95,7 @@ pub(crate) fn learn_after_operation(
         else {
             continue;
         };
+        let character_name = character.name.clone();
         let Some(class) = data
             .classes
             .iter()
@@ -115,7 +116,7 @@ pub(crate) fn learn_after_operation(
             .collect::<Vec<_>>();
         for skill_id in eligible {
             if let Ok(name) = campaign.learn_skill(character_id, &skill_id, data) {
-                learned.push(format!("{}: {}", character_id, name));
+                learned.push(format!("{}: {}", character_name, name));
             }
         }
     }

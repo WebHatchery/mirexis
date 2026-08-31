@@ -25,7 +25,7 @@ pub(crate) fn draw(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<
 }
 
 pub(crate) fn debrief_return_button_bounds() -> Rect {
-    Rect::new(860.0, 574.0, 220.0, 48.0)
+    Rect::new(200.0, 574.0, 220.0, 48.0)
 }
 
 fn begin_arrival_button_bounds() -> Rect {

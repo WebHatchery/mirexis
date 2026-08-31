@@ -23,7 +23,7 @@ fn debrief_return_button_stays_inside_the_result_panel() {
     let button = debrief_return_button_bounds();
     let panel = Rect::new(140.0, 76.0, 1000.0, 568.0);
 
-    assert_eq!(button, Rect::new(860.0, 574.0, 220.0, 48.0));
+    assert_eq!(button, Rect::new(200.0, 574.0, 220.0, 48.0));
     assert!(button.x >= panel.x);
     assert!(button.y >= panel.y);
     assert!(button.right() <= panel.right());

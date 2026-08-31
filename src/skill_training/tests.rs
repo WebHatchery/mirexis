@@ -116,3 +116,15 @@ fn simulation_hall_opens_technique_trials_before_their_normal_threshold() {
         .learn_skill("kira_voss", "slipstep", &data)
         .unwrap();
 }
+
+#[test]
+fn operation_learning_report_uses_the_colonist_display_name() {
+    let data = GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.roster[0].experience = 20;
+
+    let learned = super::learn_after_operation(&mut campaign, &["kira_voss".to_owned()], &data);
+
+    assert_eq!(learned, vec!["Kira Voss: Slipstep"]);
+    assert!(!learned[0].contains("kira_voss"));
+}

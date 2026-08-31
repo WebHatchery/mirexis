@@ -1,7 +1,7 @@
 # Phase 1 Acceptance Matrix
 
 Status: implementation evidence audited; observed-session gates pending
-Audit baseline: save/content 1.197.0, validated and committed with this matrix
+Audit baseline: save/content 1.198.0, validated and committed with this matrix
 
 This matrix maps every Phase 1 workstream and definition-of-done requirement to
 authoritative evidence. `VERIFIED` means code, tests, captures, or an operator-run path
@@ -83,7 +83,7 @@ remain observed-session requirements.
 | Investment changes operation two | Armour, accuracy, or movement bonus plus unit test | VERIFIED |
 | Unavailable choices explain prerequisites | Warning text and lock reasons across first-hour surfaces | VERIFIED |
 | Defeat/injury cannot deadlock economy | Emergency 24-material reserve and recovery tests | VERIFIED |
-| XP, injury, relationships, equipment, and resources visible then inspectable | Debrief plus roster/loadout/colony surfaces | VERIFIED |
+| XP, automatic technique learning, injury, relationships, equipment, and resources visible then inspectable | Debrief notification plus roster/loadout/colony surfaces | VERIFIED |
 | Advanced systems hidden until promise | Deferred list and stage-aware controls | VERIFIED |
 
 Recall of gains, spending, and benefit—and perceived balance among the choices—requires

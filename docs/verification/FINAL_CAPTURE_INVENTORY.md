@@ -31,6 +31,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
+- `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
 - `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
@@ -136,5 +137,5 @@ Manifest: `scripts/capture_ui.ps1`
 | 96 | weapon_profile | `ui_weapon_profile.png` | 1185932 | `9c52b564adc03420a975b0a7d69980a67d8b63232739101579539c0ee4fcfe37` |
 | 97 | class_target | `ui_class_target.png` | 1038372 | `21e3e870dbfd440883f3170cd85a266719f15cacc135b0674bf492d1db9e3497` |
 | 98 | breach | `ui_breach.png` | 1368427 | `0e28167e3c220279695dba370f16d375b0b8e282afc3b035f93db730d86b4926` |
-| 99 | debrief | `ui_debrief.png` | 196018 | `0ac87ad6ea98fd53668e9cd2cfa95b4f949e043ea1d13264a4c02976c36daeac` |
+| 99 | debrief | `ui_debrief.png` | 218633 | `2c2fe4a77d1b81415119bb575ca59a8a58da18fbbd79e9764419ca3bd04ae1dd` |
 | 100 | trauma_debrief | `ui_trauma_debrief.png` | 201829 | `9535965ff998d2e4b194e0465773a17470d8a4e8c0dcce061506ce5ee93e78eb` |

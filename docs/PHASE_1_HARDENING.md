@@ -63,7 +63,8 @@ Status: automated and internal verification complete; external playtests pending
   field guide, guided tactical lesson, second-operation tactical lesson, actionable
   ability lesson, first-return recovery handoff, promise consequence, and colony handoff;
   debrief goal/result layering, fielded-versus-reserve squad disclosure including recruited
-  fielded colonists, recruited-roster list coverage, XP disclosure,
+  fielded colonists, recruited-roster list coverage, XP and automatic technique-learning
+  disclosure,
   enemy-phase readiness and replay-skip transitions, and forecast/first-hour layout changes
   replace their affected images.
 

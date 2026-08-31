@@ -160,7 +160,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | weapon_profile | Tactical/equipment | Profile is text-only | `ui_weapon_profile.png` | PASS |
 | class_target | Tactical/class action | Targeting cue remains rectangular | `ui_class_target.png` | PASS |
 | breach | Tactical/cover feedback | Breach effect lacks authored impact | `ui_breach.png` | PASS |
-| debrief | Debrief | Sparse outcome modal | `ui_debrief.png` | PASS |
+| debrief | Debrief | Sparse outcome modal omitted automatic technique-learning feedback | `ui_debrief.png` | PASS |
 | trauma_debrief | Debrief | Trauma consequence lacks portrait response | `ui_trauma_debrief.png` | PASS |
 
 ## D. Final comparison and validation record
