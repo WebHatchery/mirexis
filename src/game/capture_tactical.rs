@@ -291,6 +291,14 @@ impl Game {
 
     pub(super) fn capture_combat_feedback(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        let feedback_origin = self
+            .session
+            .selected_unit()
+            .expect("combat feedback capture selects a colonist")
+            .position;
+        self.session.tactical.objective_tile =
+            TilePos::new(feedback_origin.x + 4, feedback_origin.y);
+        let cover_tile = TilePos::new(feedback_origin.x, feedback_origin.y + 4);
         if let Some(attacker) = self
             .session
             .tactical
@@ -338,6 +346,13 @@ impl Game {
                 BattleEvent::StatusApplied {
                     unit_id: "ilya_reed".to_owned(),
                     status: StatusKind::Guarded,
+                },
+                BattleEvent::ObjectiveDamaged {
+                    amount: 2,
+                    remaining: 5,
+                },
+                BattleEvent::CoverDestroyed {
+                    position: cover_tile,
                 },
             ],
             100.0,

@@ -47,11 +47,13 @@ fn feedback_marks_missed_attacks_at_the_target_with_an_attacker_fallback() {
     );
 
     assert_eq!(feedback.callouts.len(), 1);
-    assert_eq!(feedback.callouts[0].unit_id, "kira_voss");
-    assert_eq!(
-        feedback.callouts[0].fallback_unit_id.as_deref(),
-        Some("brood_stalker_a")
-    );
+    assert!(matches!(
+        &feedback.callouts[0].anchor,
+        FeedbackAnchor::Unit {
+            unit_id,
+            fallback_unit_id: Some(fallback),
+        } if unit_id == "kira_voss" && fallback == "brood_stalker_a"
+    ));
     assert_eq!(feedback.callouts[0].label, "MISS");
     assert_eq!(feedback.callouts[0].tone, FeedbackTone::Miss);
     feedback.update(0.81);
@@ -83,6 +85,19 @@ fn feedback_names_successful_hits_incapacitations_and_completion() {
             BattleEvent::ExtractionCompleted {
                 unit_id: "ilya_reed".to_owned(),
             },
+            BattleEvent::ObjectiveDamaged {
+                amount: 2,
+                remaining: 5,
+            },
+            BattleEvent::ObjectiveDestroyed,
+            BattleEvent::CoverDamaged {
+                position: macroquad_toolkit::grid::TilePos::new(5, 4),
+                amount: 3,
+                remaining: 4,
+            },
+            BattleEvent::CoverDestroyed {
+                position: macroquad_toolkit::grid::TilePos::new(5, 4),
+            },
         ],
         0.8,
     );
@@ -98,9 +113,21 @@ fn feedback_names_successful_hits_incapacitations_and_completion() {
             "-3",
             "INCAPACITATED",
             "OBJECTIVE SECURED",
-            "EXTRACTED"
+            "EXTRACTED",
+            "OBJECTIVE -2",
+            "OBJECTIVE DESTROYED",
+            "COVER -3",
+            "COVER DESTROYED"
         ]
     );
     assert_eq!(feedback.callouts[0].tone, FeedbackTone::Hit);
     assert_eq!(feedback.impacts.len(), 1);
+    assert!(matches!(
+        &feedback.callouts[5].anchor,
+        FeedbackAnchor::Objective
+    ));
+    assert!(matches!(
+        &feedback.callouts[7].anchor,
+        FeedbackAnchor::Tile(position) if *position == macroquad_toolkit::grid::TilePos::new(5, 4)
+    ));
 }

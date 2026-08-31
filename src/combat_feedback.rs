@@ -5,6 +5,7 @@ use crate::state::{BattleEvent, GameSession};
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
+use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17,9 +18,18 @@ enum FeedbackTone {
 }
 
 #[derive(Debug, Clone)]
+enum FeedbackAnchor {
+    Unit {
+        unit_id: String,
+        fallback_unit_id: Option<String>,
+    },
+    Tile(TilePos),
+    Objective,
+}
+
+#[derive(Debug, Clone)]
 struct CombatCallout {
-    unit_id: String,
-    fallback_unit_id: Option<String>,
+    anchor: FeedbackAnchor,
     label: String,
     tone: FeedbackTone,
     remaining: f32,
@@ -71,9 +81,17 @@ impl CombatFeedback {
             *observed_count = 0;
         }
         let new_events = &events[*observed_count..];
-        let impact = new_events
-            .iter()
-            .any(|event| matches!(event, BattleEvent::DamageApplied { .. }));
+        let impact = new_events.iter().any(|event| {
+            matches!(
+                event,
+                BattleEvent::DamageApplied { .. }
+                    | BattleEvent::UnitIncapacitated { .. }
+                    | BattleEvent::ObjectiveDamaged { .. }
+                    | BattleEvent::ObjectiveDestroyed
+                    | BattleEvent::CoverDamaged { .. }
+                    | BattleEvent::CoverDestroyed { .. }
+            )
+        });
         self.record(new_events);
         *observed_count = events.len();
         impact
@@ -97,16 +115,20 @@ impl CombatFeedback {
                 pending_attack = Some((attacker_id, target_id, hit && *roll <= 10));
                 if hit {
                     self.callouts.push(CombatCallout {
-                        unit_id: target_id.clone(),
-                        fallback_unit_id: Some(attacker_id.clone()),
+                        anchor: FeedbackAnchor::Unit {
+                            unit_id: target_id.clone(),
+                            fallback_unit_id: Some(attacker_id.clone()),
+                        },
                         label: "HIT".to_owned(),
                         tone: FeedbackTone::Hit,
                         remaining: lifetime,
                     });
                 } else {
                     self.callouts.push(CombatCallout {
-                        unit_id: target_id.clone(),
-                        fallback_unit_id: Some(attacker_id.clone()),
+                        anchor: FeedbackAnchor::Unit {
+                            unit_id: target_id.clone(),
+                            fallback_unit_id: Some(attacker_id.clone()),
+                        },
                         label: "MISS".to_owned(),
                         tone: FeedbackTone::Miss,
                         remaining: lifetime,
@@ -129,23 +151,75 @@ impl CombatFeedback {
             let mapped = match event {
                 BattleEvent::DamageApplied {
                     target_id, amount, ..
-                } => Some((target_id, format!("-{}", amount), FeedbackTone::Damage)),
+                } => Some((
+                    FeedbackAnchor::Unit {
+                        unit_id: target_id.clone(),
+                        fallback_unit_id: None,
+                    },
+                    format!("-{}", amount),
+                    FeedbackTone::Damage,
+                )),
                 BattleEvent::UnitHealed {
                     unit_id, amount, ..
-                } => Some((unit_id, format!("+{}", amount), FeedbackTone::Healing)),
-                BattleEvent::UnitIncapacitated { unit_id } => {
-                    Some((unit_id, "INCAPACITATED".to_owned(), FeedbackTone::Status))
-                }
+                } => Some((
+                    FeedbackAnchor::Unit {
+                        unit_id: unit_id.clone(),
+                        fallback_unit_id: None,
+                    },
+                    format!("+{}", amount),
+                    FeedbackTone::Healing,
+                )),
+                BattleEvent::UnitIncapacitated { unit_id } => Some((
+                    FeedbackAnchor::Unit {
+                        unit_id: unit_id.clone(),
+                        fallback_unit_id: None,
+                    },
+                    "INCAPACITATED".to_owned(),
+                    FeedbackTone::Status,
+                )),
                 BattleEvent::ObjectiveSecured { unit_id } => Some((
-                    unit_id,
+                    FeedbackAnchor::Unit {
+                        unit_id: unit_id.clone(),
+                        fallback_unit_id: None,
+                    },
                     "OBJECTIVE SECURED".to_owned(),
                     FeedbackTone::Status,
                 )),
-                BattleEvent::ExtractionCompleted { unit_id } => {
-                    Some((unit_id, "EXTRACTED".to_owned(), FeedbackTone::Status))
-                }
+                BattleEvent::ExtractionCompleted { unit_id } => Some((
+                    FeedbackAnchor::Unit {
+                        unit_id: unit_id.clone(),
+                        fallback_unit_id: None,
+                    },
+                    "EXTRACTED".to_owned(),
+                    FeedbackTone::Status,
+                )),
+                BattleEvent::ObjectiveDamaged { amount, .. } => Some((
+                    FeedbackAnchor::Objective,
+                    format!("OBJECTIVE -{}", amount),
+                    FeedbackTone::Damage,
+                )),
+                BattleEvent::ObjectiveDestroyed => Some((
+                    FeedbackAnchor::Objective,
+                    "OBJECTIVE DESTROYED".to_owned(),
+                    FeedbackTone::Status,
+                )),
+                BattleEvent::CoverDamaged {
+                    position, amount, ..
+                } => Some((
+                    FeedbackAnchor::Tile(*position),
+                    format!("COVER -{}", amount),
+                    FeedbackTone::Damage,
+                )),
+                BattleEvent::CoverDestroyed { position } => Some((
+                    FeedbackAnchor::Tile(*position),
+                    "COVER DESTROYED".to_owned(),
+                    FeedbackTone::Status,
+                )),
                 BattleEvent::StatusApplied { unit_id, status } => Some((
-                    unit_id,
+                    FeedbackAnchor::Unit {
+                        unit_id: unit_id.clone(),
+                        fallback_unit_id: None,
+                    },
                     format!("{:?}", status).to_uppercase(),
                     FeedbackTone::Status,
                 )),
@@ -155,8 +229,7 @@ impl CombatFeedback {
                 continue;
             };
             self.callouts.push(CombatCallout {
-                unit_id: unit_id.clone(),
-                fallback_unit_id: None,
+                anchor: unit_id,
                 label,
                 tone,
                 remaining: lifetime,
@@ -181,19 +254,14 @@ impl CombatFeedback {
             draw_impact(session, view, impact, assets, visuals);
         }
         for (index, callout) in self.callouts.iter().enumerate() {
-            let Some(unit) = session.unit(&callout.unit_id).or_else(|| {
-                callout
-                    .fallback_unit_id
-                    .as_deref()
-                    .and_then(|unit_id| session.unit(unit_id))
-            }) else {
+            let Some(position) = feedback_anchor_position(session, &callout.anchor) else {
                 continue;
             };
             let same_unit_before = self.callouts[..index]
                 .iter()
-                .filter(|prior| prior.unit_id == callout.unit_id)
+                .filter(|prior| same_feedback_anchor(&prior.anchor, &callout.anchor))
                 .count();
-            let rect = view.tile_rect(unit.position);
+            let rect = view.tile_rect(position);
             let color = match callout.tone {
                 FeedbackTone::Damage => Color::new(1.0, 0.32, 0.22, 1.0),
                 FeedbackTone::Healing => Color::new(0.32, 1.0, 0.58, 1.0),
@@ -208,7 +276,7 @@ impl CombatFeedback {
                 _ => 20.0,
             };
             let dimensions = measure_text(&callout.label, None, size as u16, 1.0);
-            let y = rect.y - 4.0 - same_unit_before as f32 * 15.0;
+            let y = rect.y - 18.0 - same_unit_before as f32 * 15.0;
             if callout.tone == FeedbackTone::Healing && same_unit_before == 0 {
                 visuals.draw_atlas_cell(
                     assets,
@@ -225,6 +293,36 @@ impl CombatFeedback {
                 TextStyle::new(size, color).params(),
             );
         }
+    }
+}
+
+fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> Option<TilePos> {
+    match anchor {
+        FeedbackAnchor::Unit {
+            unit_id,
+            fallback_unit_id,
+        } => session
+            .unit(unit_id)
+            .or_else(|| {
+                fallback_unit_id
+                    .as_deref()
+                    .and_then(|unit_id| session.unit(unit_id))
+            })
+            .map(|unit| unit.position),
+        FeedbackAnchor::Tile(position) => Some(*position),
+        FeedbackAnchor::Objective => Some(session.tactical.objective_tile),
+    }
+}
+
+fn same_feedback_anchor(left: &FeedbackAnchor, right: &FeedbackAnchor) -> bool {
+    match (left, right) {
+        (
+            FeedbackAnchor::Unit { unit_id: left, .. },
+            FeedbackAnchor::Unit { unit_id: right, .. },
+        ) => left == right,
+        (FeedbackAnchor::Tile(left), FeedbackAnchor::Tile(right)) => left == right,
+        (FeedbackAnchor::Objective, FeedbackAnchor::Objective) => true,
+        _ => false,
     }
 }
 

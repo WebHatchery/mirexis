@@ -47,7 +47,8 @@ Status: automated and internal verification complete; external playtests pending
   targeted class-action, field-item, and technique team/range blocker coverage, and
   targeting-card rule-reason coverage, guided attack-confirmation focus coverage,
   objective-interaction, replay-skip, end-phase geometry, readiness-summary, hit-impact,
-  incapacitation, objective-completion, and extraction-completion feedback,
+  incapacitation, objective-completion, extraction-completion, objective-damage, and
+  cover-outcome feedback,
   debrief-return, dialogue-continue, advance-control, and briefing-deployment focus
   coverage, and campaign decision resource-gate
   label coverage, facility-upgrade blocker-label coverage, first-hour investment
