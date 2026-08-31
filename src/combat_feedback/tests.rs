@@ -2,6 +2,16 @@ use super::*;
 use crate::state::StatusKind;
 
 #[test]
+fn feedback_callouts_stack_clear_of_the_unit_effect_lane() {
+    let rect = Rect::new(100.0, 200.0, 48.0, 48.0);
+
+    assert_eq!(callout_y(rect, 0), 142.0);
+    assert_eq!(callout_y(rect, 1), 124.0);
+    assert!(callout_y(rect, 0) < rect.y - 37.0);
+    assert_eq!(callout_y(Rect::new(100.0, 50.0, 48.0, 48.0), 4), 24.0);
+}
+
+#[test]
 fn feedback_tracks_only_damage_healing_and_status_events_for_a_bounded_time() {
     let mut feedback = CombatFeedback::default();
     feedback.record(&[

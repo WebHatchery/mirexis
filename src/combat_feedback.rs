@@ -8,6 +8,9 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
+const CALLOUT_BASE_OFFSET: f32 = 58.0;
+const CALLOUT_STACK_STEP: f32 = 18.0;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FeedbackTone {
     Damage,
@@ -276,7 +279,7 @@ impl CombatFeedback {
                 _ => 20.0,
             };
             let dimensions = measure_text(&callout.label, None, size as u16, 1.0);
-            let y = rect.y - 18.0 - same_unit_before as f32 * 15.0;
+            let y = callout_y(rect, same_unit_before);
             if callout.tone == FeedbackTone::Healing && same_unit_before == 0 {
                 visuals.draw_atlas_cell(
                     assets,
@@ -294,6 +297,10 @@ impl CombatFeedback {
             );
         }
     }
+}
+
+fn callout_y(rect: Rect, stack_index: usize) -> f32 {
+    (rect.y - CALLOUT_BASE_OFFSET - stack_index as f32 * CALLOUT_STACK_STEP).max(24.0)
 }
 
 fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> Option<TilePos> {
