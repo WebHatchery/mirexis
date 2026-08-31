@@ -14,6 +14,7 @@ mod context;
 mod medical;
 mod recruitment;
 mod relay;
+mod research_affordance;
 mod salvage;
 mod scene;
 mod upgrades;
@@ -484,12 +485,13 @@ pub(super) fn draw_operations(
             .iter()
             .find(|entry| !entry.completed)
         {
+            let research_cost = campaign.research_material_cost(research.materials_cost);
             if colony_button(
                 Rect::new(878.0, 510.0, 362.0, 32.0),
-                &format!(
-                    "RESEARCH {} // {} MAT",
-                    research.name,
-                    campaign.research_material_cost(research.materials_cost)
+                &research_affordance::button_label(
+                    &research.name,
+                    resources.materials,
+                    research_cost,
                 ),
                 campaign.can_complete_research(&research.id),
                 mouse,
@@ -524,8 +526,7 @@ pub(super) fn draw_operations(
             draw_ui_text_ex(
                 &format!(
                     "PROJECT READY // COST {} MAT // GRID POWER +{}",
-                    campaign.research_material_cost(research.materials_cost),
-                    research.power_reward
+                    research_cost, research.power_reward
                 ),
                 936.0,
                 588.0,
