@@ -31,7 +31,7 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 500 Mirexis unit tests pass, including deployment-row affordance coverage for full,
+- 501 Mirexis unit tests pass, including deployment-row affordance coverage for full,
   minimum, and recovering squads, construction availability coverage for unlocks,
   materials, and unique projects, effective repair-cost affordability coverage, and
   tactical equipment cancellation coverage, invalid-target persistence coverage, and
@@ -58,8 +58,9 @@ Status: automated and internal verification complete; external playtests pending
   material-gate label coverage, character-event food-gate label coverage, Build Mode
   construction-blocker label coverage, roster equipment-row geometry coverage, finale
   debrief summary coverage, completed-campaign debrief voice coverage, bounded
-  ending-register coverage, briefing pressure geometry coverage, bounded
-  briefing-intelligence coverage, and workshop equipment-panel geometry coverage.
+  ending-register coverage, completed-campaign register-lane coverage,
+  briefing pressure geometry coverage, bounded briefing-intelligence coverage,
+  and workshop equipment-panel geometry coverage.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 100 audited 1280×720 scenes, including the first-hour
@@ -72,7 +73,8 @@ Status: automated and internal verification complete; external playtests pending
   the wrapped escalation pressure modifier, and bounded threat-intelligence rows
   replace their affected images.
   The three ending captures also open the Operations drawer so each path-specific identity
-  card and bounded colony legacy register is visible in the canonical evidence.
+  card and bounded colony legacy register is visible without the obsolete colony
+  plan line colliding with its lower rows in the canonical evidence.
 
 ## Honest boundary
 

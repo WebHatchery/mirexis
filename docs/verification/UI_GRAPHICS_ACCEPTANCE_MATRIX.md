@@ -81,9 +81,9 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | escalation_response | Campaign event | Choice identity mainly textual | `ui_escalation_response.png` | PASS |
 | mirexis | Colony | Late-game hybridisation too weak | `ui_mirexis.png` | PASS |
 | mirexis_path | Campaign choice | Path identity mainly textual | `ui_mirexis_path.png` | PASS |
-| redoubt_end | Ending | Ending capture hid the identity card and the legacy register exceeded the Operations drawer | `ui_redoubt_end.png` | PASS |
-| commonwealth_end | Ending | Ending capture hid the identity card and the legacy register exceeded the Operations drawer | `ui_commonwealth_end.png` | PASS |
-| threshold_end | Ending | Ending capture hid the identity card and the legacy register exceeded the Operations drawer | `ui_threshold_end.png` | PASS |
+| redoubt_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_redoubt_end.png` | PASS |
+| commonwealth_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_commonwealth_end.png` | PASS |
+| threshold_end | Ending | Ending Operations drawer legacy register collided with the obsolete colony plan line | `ui_threshold_end.png` | PASS |
 | finale_debrief | Debrief | Unbounded colony legacy summary crossed the reward card and retained early-operation guidance | `ui_finale_debrief.png` | PASS |
 | adaptation_operation | Briefing | Long hostile-role intelligence text ran past the right briefing column | `ui_adaptation_operation.png` | PASS |
 | glass_nerve | Tactical | Flat rectangular battlefield | `ui_glass_nerve.png` | PASS |

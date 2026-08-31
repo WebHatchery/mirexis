@@ -505,17 +505,23 @@ pub(super) fn draw_operations(
         choosing_mirexis,
         actions,
     );
-    draw_ui_text_ex(
-        &format!(
-            "Plan: {} // {} materials // one operation // {} structures mapped",
-            campaign.colony.planned_construction.name(),
-            campaign.colony.planned_construction.material_cost(),
-            defense.blocked_tiles.len()
-        ),
-        878.0,
-        650.0,
-        TextStyle::new(12.0, dark::TEXT_DIM).params(),
-    );
+    if should_draw_colony_plan(campaign) {
+        draw_ui_text_ex(
+            &format!(
+                "Plan: {} // {} materials // one operation // {} structures mapped",
+                campaign.colony.planned_construction.name(),
+                campaign.colony.planned_construction.material_cost(),
+                defense.blocked_tiles.len()
+            ),
+            878.0,
+            650.0,
+            TextStyle::new(12.0, dark::TEXT_DIM).params(),
+        );
+    }
+}
+
+fn should_draw_colony_plan(campaign: &CampaignState) -> bool {
+    !campaign.strategy.campaign_complete
 }
 
 fn draw_character_event(
@@ -699,3 +705,6 @@ fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
 fn colony_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
     crate::ui_widgets::button(rect, label, enabled, mouse)
 }
+
+#[cfg(test)]
+mod tests;
