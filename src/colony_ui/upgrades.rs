@@ -108,11 +108,14 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             },
         );
         let queued = upgrade_queued(campaign, &building.id);
-        let can_queue = building.level < 2
-            && !building.damaged
-            && campaign.colony.building_is_powered(&building.id)
-            && !queued
-            && campaign.colony.resources.materials >= kind.upgrade_cost();
+        let (queue_label, can_queue) = upgrade_button_state(
+            building.level,
+            building.damaged,
+            campaign.colony.building_is_powered(&building.id),
+            queued,
+            campaign.colony.resources.materials,
+            kind.upgrade_cost(),
+        );
         for (option_index, option) in kind.upgrade_options().iter().enumerate() {
             let card_y = y + 16.0 + option_index as f32 * 26.0;
             draw_rectangle(
@@ -144,7 +147,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
             );
             if button(
                 Rect::new(1094.0, card_y + 3.0, 136.0, 18.0),
-                &format!("QUEUE // {} MAT", kind.upgrade_cost()),
+                &queue_label,
                 can_queue,
                 mouse,
             ) {
@@ -177,6 +180,29 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
     }
 }
 
+fn upgrade_button_state(
+    level: u8,
+    damaged: bool,
+    powered: bool,
+    queued: bool,
+    materials: i32,
+    cost: i32,
+) -> (String, bool) {
+    if level >= 2 {
+        ("LEVEL 2 ACTIVE".to_owned(), false)
+    } else if damaged {
+        ("REPAIR FIRST".to_owned(), false)
+    } else if queued {
+        ("PROJECT QUEUED".to_owned(), false)
+    } else if !powered {
+        ("NEED POWER".to_owned(), false)
+    } else if materials < cost {
+        (format!("NEED {cost} MAT"), false)
+    } else {
+        (format!("QUEUE // {cost} MAT"), true)
+    }
+}
+
 fn upgrade_queued(campaign: &CampaignState, building_id: &str) -> bool {
     campaign
         .colony
@@ -184,6 +210,9 @@ fn upgrade_queued(campaign: &CampaignState, building_id: &str) -> bool {
         .iter()
         .any(|project| project.building_id == building_id)
 }
+
+#[cfg(test)]
+mod tests;
 
 fn facility_status(
     campaign: &CampaignState,
