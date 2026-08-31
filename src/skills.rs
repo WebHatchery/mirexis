@@ -174,72 +174,100 @@ pub(crate) fn validate(
     {
         return Err(RuleError::SkillUnavailable);
     }
-    let valid = match target_kind(skill_id) {
+    let target_result = match target_kind(skill_id) {
         Some(TechniqueTarget::SelfTarget) => {
-            target_id.is_none() && target_tile.is_none() && valid_self_target(unit, skill_id)
+            (target_id.is_none() && target_tile.is_none() && valid_self_target(unit, skill_id))
+                .then_some(())
+                .ok_or(RuleError::InvalidTarget)
         }
         Some(TechniqueTarget::Hostile) => {
-            target_id
-                .is_some_and(|target_id| valid_hostile_target(session, unit, skill_id, target_id))
-                && target_tile.is_none()
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                validate_hostile_target(session, unit, skill_id, target_id)
+            }
         }
         Some(TechniqueTarget::Ally) => {
-            target_id.is_some_and(|target_id| valid_ally_target(session, unit, skill_id, target_id))
-                && target_tile.is_none()
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                validate_ally_target(session, unit, skill_id, target_id)
+            }
         }
-        Some(TechniqueTarget::Tile) => {
-            target_id.is_none()
-                && target_tile.is_some_and(|tile| valid_tile_target(session, unit, skill_id, tile))
-        }
-        None => false,
+        Some(TechniqueTarget::Tile) => (target_id.is_none()
+            && target_tile.is_some_and(|tile| valid_tile_target(session, unit, skill_id, tile)))
+        .then_some(())
+        .ok_or(RuleError::InvalidTarget),
+        None => Err(RuleError::InvalidTarget),
     };
-    if !valid {
-        return Err(RuleError::InvalidTarget);
-    }
+    target_result?;
     let action_points = skill_cost(session, unit, skill_id, target_tile);
     (unit.action_points >= action_points)
         .then_some(CommandCost { action_points })
         .ok_or(RuleError::InsufficientActionPoints)
 }
 
-fn valid_hostile_target(
+fn validate_hostile_target(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
-    target_id: &str,
-) -> bool {
-    let Some(target) = session.unit(target_id) else {
-        return false;
-    };
-    if target.team != Team::Hostile || target.incapacitated {
-        return false;
+    target_id: Option<&str>,
+) -> Result<(), RuleError> {
+    let target = target_id
+        .and_then(|target_id| session.unit(target_id))
+        .ok_or(RuleError::InvalidTarget)?;
+    if target.team != Team::Hostile {
+        return Err(RuleError::WrongTeam);
+    }
+    if target.incapacitated {
+        return Err(RuleError::Incapacitated);
     }
     let range = if skill_id == "spotters_mark" {
         6
     } else {
         i32::from(unit.weapon_range)
     };
-    manhattan(unit.position, target.position) <= range
-        && (matches!(skill_id, "spotters_mark")
-            || session.has_line_of_fire(unit.position, target.position))
-        && (skill_id != "kinetic_draw"
-            || kinetic_draw_destination(session, unit.position, target.position).is_some())
+    if manhattan(unit.position, target.position) > range {
+        return Err(RuleError::OutOfRange);
+    }
+    if !matches!(skill_id, "spotters_mark")
+        && !session.has_line_of_fire(unit.position, target.position)
+    {
+        return Err(RuleError::NoLineOfFire);
+    }
+    if skill_id == "kinetic_draw"
+        && kinetic_draw_destination(session, unit.position, target.position).is_none()
+    {
+        return Err(RuleError::InvalidTarget);
+    }
+    Ok(())
 }
 
-fn valid_ally_target(
+fn validate_ally_target(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
-    target_id: &str,
-) -> bool {
-    session.unit(target_id).is_some_and(|target| {
-        target.team == Team::Colony
-            && target.id != unit.id
-            && (skill_id == "stabilise" || !target.incapacitated)
-            && manhattan(unit.position, target.position)
-                <= if skill_id == "interpose" { 2 } else { 4 }
-            && (skill_id != "adaptive_secretion" || adaptive_hazard(session, target_id).is_some())
-    })
+    target_id: Option<&str>,
+) -> Result<(), RuleError> {
+    let target_id = target_id.ok_or(RuleError::InvalidTarget)?;
+    let target = session.unit(target_id).ok_or(RuleError::InvalidTarget)?;
+    if target.team != Team::Colony {
+        return Err(RuleError::WrongTeam);
+    }
+    if target.id == unit.id {
+        return Err(RuleError::InvalidTarget);
+    }
+    if target.incapacitated && skill_id != "stabilise" {
+        return Err(RuleError::Incapacitated);
+    }
+    let range = if skill_id == "interpose" { 2 } else { 4 };
+    if manhattan(unit.position, target.position) > range {
+        return Err(RuleError::OutOfRange);
+    }
+    if skill_id == "adaptive_secretion" && adaptive_hazard(session, target_id).is_none() {
+        return Err(RuleError::InvalidTarget);
+    }
+    Ok(())
 }
 
 fn valid_tile_target(

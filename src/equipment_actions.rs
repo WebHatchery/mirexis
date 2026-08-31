@@ -86,34 +86,61 @@ pub(crate) fn validate(
         return Err(RuleError::EquipmentUnavailable);
     }
     let distance = manhattan(unit.position, target.position);
-    let valid_target = match equipment_id {
-        "field_medkit" => {
-            target.team == Team::Colony && target.health < target.max_health && distance <= 3
-        }
-        "field_toolkit" => {
-            target.team == Team::Colony && !target.has_status(StatusKind::Guarded) && distance <= 3
-        }
-        "survey_harness" => {
-            target.team == Team::Hostile
-                && !target.has_status(StatusKind::Disrupted)
-                && distance <= 6
-        }
-        "directorate_cipher" => {
-            target.team == Team::Hostile
-                && !target.has_status(StatusKind::Hindered)
-                && distance <= 6
-        }
-        "mireborn_sense" => {
-            target.team == Team::Hostile
-                && !target.has_status(StatusKind::Disrupted)
-                && !unit.has_status(StatusKind::Guarded)
-                && distance <= 6
-        }
-        _ => false,
+    let target_result = match equipment_id {
+        "field_medkit" => validate_target(
+            target,
+            Team::Colony,
+            distance,
+            3,
+            target.health < target.max_health,
+        ),
+        "field_toolkit" => validate_target(
+            target,
+            Team::Colony,
+            distance,
+            3,
+            !target.has_status(StatusKind::Guarded),
+        ),
+        "survey_harness" => validate_target(
+            target,
+            Team::Hostile,
+            distance,
+            6,
+            !target.has_status(StatusKind::Disrupted),
+        ),
+        "directorate_cipher" => validate_target(
+            target,
+            Team::Hostile,
+            distance,
+            6,
+            !target.has_status(StatusKind::Hindered),
+        ),
+        "mireborn_sense" => validate_target(
+            target,
+            Team::Hostile,
+            distance,
+            6,
+            !target.has_status(StatusKind::Disrupted) && !unit.has_status(StatusKind::Guarded),
+        ),
+        _ => Err(RuleError::InvalidTarget),
     };
-    valid_target
-        .then_some(CommandCost { action_points: 1 })
-        .ok_or(RuleError::InvalidTarget)
+    target_result.map(|()| CommandCost { action_points: 1 })
+}
+
+fn validate_target(
+    target: &crate::state::UnitState,
+    team: Team,
+    distance: i32,
+    range: i32,
+    extra: bool,
+) -> Result<(), RuleError> {
+    if target.team != team {
+        return Err(RuleError::WrongTeam);
+    }
+    if distance > range {
+        return Err(RuleError::OutOfRange);
+    }
+    extra.then_some(()).ok_or(RuleError::InvalidTarget)
 }
 
 pub(crate) fn execute(

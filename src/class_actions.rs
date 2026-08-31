@@ -152,50 +152,66 @@ pub(crate) fn validate(
     if unit.action_points < 1 {
         return Err(RuleError::InsufficientActionPoints);
     }
-    let target_valid = match unit.class_id.as_str() {
+    let target_result = match unit.class_id.as_str() {
         "medic" => {
-            target_tile.is_none()
-                && target_matches(session, unit_id, target_id, Team::Colony, 4, |target| {
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                target_matches(session, unit_id, target_id, Team::Colony, 4, |target| {
                     target.health < target.max_health
                 })
+            }
         }
         "engineer" => {
-            target_tile.is_none()
-                && target_matches(session, unit_id, target_id, Team::Hostile, 4, |_| true)
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                target_matches(session, unit_id, target_id, Team::Hostile, 4, |_| true)
+            }
         }
         "psionic" => {
-            target_tile.is_none()
-                && target_matches(session, unit_id, target_id, Team::Hostile, 5, |_| true)
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                target_matches(session, unit_id, target_id, Team::Hostile, 5, |_| true)
+            }
         }
         "lifewright" => {
-            target_tile.is_none()
-                && target_matches(session, unit_id, target_id, Team::Colony, 5, |_| true)
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                target_matches(session, unit_id, target_id, Team::Colony, 5, |_| true)
+            }
         }
         "null_adept" => {
-            target_tile.is_none()
-                && target_matches(session, unit_id, target_id, Team::Hostile, 6, |_| true)
+            if target_tile.is_some() {
+                Err(RuleError::InvalidTarget)
+            } else {
+                target_matches(session, unit_id, target_id, Team::Hostile, 6, |_| true)
+            }
         }
-        "breacher" => {
-            target_id.is_none()
-                && target_tile.is_some_and(|tile| valid_breacher_tile(session, unit, tile))
-        }
-        "fortifier" => {
-            target_id.is_none()
-                && target_tile.is_some_and(|tile| valid_fortifier_tile(session, unit, tile))
-        }
-        "rescue_specialist" => {
-            target_tile.is_none() && advanced::valid_rescue_target(session, unit, target_id)
-        }
-        "chorus_warden" => {
-            target_id.is_none()
-                && target_tile
-                    .is_some_and(|tile| advanced::valid_chorus_warden_tile(session, unit, tile))
-        }
-        _ => target_id.is_none() && target_tile.is_none(),
+        "breacher" => (target_id.is_none()
+            && target_tile.is_some_and(|tile| valid_breacher_tile(session, unit, tile)))
+        .then_some(())
+        .ok_or(RuleError::InvalidTarget),
+        "fortifier" => (target_id.is_none()
+            && target_tile.is_some_and(|tile| valid_fortifier_tile(session, unit, tile)))
+        .then_some(())
+        .ok_or(RuleError::InvalidTarget),
+        "rescue_specialist" => (target_tile.is_none()
+            && advanced::valid_rescue_target(session, unit, target_id))
+        .then_some(())
+        .ok_or(RuleError::InvalidTarget),
+        "chorus_warden" => (target_id.is_none()
+            && target_tile
+                .is_some_and(|tile| advanced::valid_chorus_warden_tile(session, unit, tile)))
+        .then_some(())
+        .ok_or(RuleError::InvalidTarget),
+        _ => (target_id.is_none() && target_tile.is_none())
+            .then_some(())
+            .ok_or(RuleError::InvalidTarget),
     };
-    target_valid
-        .then_some(CommandCost { action_points: 1 })
-        .ok_or(RuleError::InvalidTarget)
+    target_result.map(|()| CommandCost { action_points: 1 })
 }
 
 pub(crate) fn execute(
@@ -488,17 +504,23 @@ fn target_matches(
     team: Team,
     range: i32,
     extra: impl FnOnce(&crate::state::UnitState) -> bool,
-) -> bool {
+) -> Result<(), RuleError> {
     let Some((unit, target)) = session
         .unit(unit_id)
         .zip(target_id.and_then(|target_id| session.unit(target_id)))
     else {
-        return false;
+        return Err(RuleError::InvalidTarget);
     };
-    target.team == team
-        && !target.incapacitated
-        && manhattan(unit.position, target.position) <= range
-        && extra(target)
+    if target.team != team {
+        return Err(RuleError::WrongTeam);
+    }
+    if target.incapacitated {
+        return Err(RuleError::Incapacitated);
+    }
+    if manhattan(unit.position, target.position) > range {
+        return Err(RuleError::OutOfRange);
+    }
+    extra(target).then_some(()).ok_or(RuleError::InvalidTarget)
 }
 
 pub(crate) fn apply_status(

@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.179.0
+Save/content version: 1.180.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -955,6 +955,7 @@ Migration coverage:
 | 1.177.0 | Build Mode controls now identify unique-project, queued-project, and exact material blockers before construction is selected; no new save fields |
 | 1.178.0 | Waystation guest dialogue controls now identify the exact recruitment-resource shortfall before a contact is recruited; no new save fields |
 | 1.179.0 | Contextual colonist dialogue controls now identify treatment and Gene Lab progression, construction, repair, and power blockers; no new save fields |
+| 1.180.0 | Tactical targeted-action cards now surface authoritative team, incapacity, range, line-of-fire, and AP blockers instead of a generic invalid-target message; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

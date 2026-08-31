@@ -1,3 +1,4 @@
+use super::validate;
 use crate::campaign::CampaignState;
 use crate::data::{EdgeDirection, GameData, HazardKind};
 use crate::state::GameSession;
@@ -365,5 +366,32 @@ fn overcharge_improves_the_next_equipment_action_and_is_consumed() {
             .unwrap()
             .remaining_phases,
         3
+    );
+}
+
+#[test]
+fn targeted_techniques_explain_team_and_range_failures() {
+    let mut session = session_with_skill("spotters_mark");
+    assert_eq!(
+        validate(
+            &session,
+            "kira_voss",
+            "spotters_mark",
+            Some("mara_venn"),
+            None,
+        ),
+        Err(crate::state::RuleError::WrongTeam)
+    );
+
+    unit_mut(&mut session, "brood_stalker_a").position = TilePos::new(20, 19);
+    assert_eq!(
+        validate(
+            &session,
+            "kira_voss",
+            "spotters_mark",
+            Some("brood_stalker_a"),
+            None,
+        ),
+        Err(crate::state::RuleError::OutOfRange)
     );
 }

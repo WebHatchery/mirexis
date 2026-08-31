@@ -206,7 +206,7 @@ fn draw_attack_comparison(
     interaction.interactive && rect.contains(interaction.mouse)
 }
 
-fn rule_error_label(error: &RuleError) -> &'static str {
+pub(crate) fn rule_error_label(error: &RuleError) -> &'static str {
     match error {
         RuleError::WrongPhase => "WRONG PHASE",
         RuleError::UnknownUnit => "UNKNOWN UNIT",

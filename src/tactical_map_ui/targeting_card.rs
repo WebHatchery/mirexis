@@ -2,10 +2,14 @@
 
 use crate::data::Team;
 use crate::grid_ui::GridView;
+use crate::state::Command;
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
+
+#[cfg(test)]
+mod tests;
 
 pub(super) fn card_bounds(panel: Rect) -> Rect {
     Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 80.0)
@@ -76,17 +80,18 @@ pub(crate) fn draw(
         .units
         .iter()
         .find(|unit| unit.position == tile);
+    let status = targeting_status(ctx, tile);
     match ctx.targeting {
         Some(TargetingView::Equipment {
             unit_id,
             equipment_id,
-        }) => draw_equipment(ctx, card, target, unit_id, equipment_id),
+        }) => draw_equipment(ctx, card, target, unit_id, equipment_id, status),
         Some(TargetingView::ClassAction {
             unit_id,
             target_kind,
-        }) => draw_class_action(ctx, card, target, tile, unit_id, target_kind),
+        }) => draw_class_action(ctx, card, target, tile, unit_id, target_kind, status),
         Some(TargetingView::Skill { unit_id, skill_id }) => {
-            draw_skill(ctx, card, target, tile, unit_id, skill_id)
+            draw_skill(ctx, card, target, tile, unit_id, skill_id, status)
         }
         None => {}
     }
@@ -133,6 +138,7 @@ fn draw_equipment(
     target: Option<&crate::state::UnitState>,
     unit_id: &str,
     equipment_id: &str,
+    status: TargetStatus,
 ) {
     let item = ctx
         .data
@@ -152,10 +158,6 @@ fn draw_equipment(
         .session
         .unit(unit_id)
         .map_or("UNKNOWN", |unit| unit.name.as_str());
-    let valid = target.is_some_and(|target| {
-        ctx.session
-            .can_use_equipment(unit_id, equipment_id, &target.id)
-    });
     draw_ui_text_ex(
         &format!(
             "FIELD ITEM TARGETING // {}",
@@ -171,11 +173,11 @@ fn draw_equipment(
             "{} > {} // {} // 1 AP",
             user.to_uppercase(),
             target.map_or("SELECT A HIGHLIGHTED TARGET", |unit| unit.name.as_str()),
-            validity_label(valid)
+            status.label
         ),
         card.x + 82.0,
         card.y + 49.0,
-        TextStyle::new(13.0, validity_color(valid)).params(),
+        TextStyle::new(13.0, validity_color(status.valid)).params(),
     );
 }
 
@@ -186,14 +188,10 @@ fn draw_class_action(
     tile: TilePos,
     unit_id: &str,
     target_kind: crate::data::TechniqueTarget,
+    status: TargetStatus,
 ) {
     let user = ctx.session.unit(unit_id);
     let tile_target = target_kind == crate::data::TechniqueTarget::Tile;
-    let valid = if tile_target {
-        ctx.session.can_target_class_action_tile(unit_id, tile)
-    } else {
-        target.is_some_and(|target| ctx.session.can_target_class_action(unit_id, &target.id))
-    };
     if let Some(user) = user {
         ctx.visuals.draw_portrait(
             ctx.assets,
@@ -225,11 +223,11 @@ fn draw_class_action(
             } else {
                 target.map_or("NO UNIT SELECTED".to_owned(), |unit| unit.name.clone())
             },
-            validity_label(valid)
+            status.label
         ),
         card.x + 82.0,
         card.y + 49.0,
-        TextStyle::new(13.0, validity_color(valid)).params(),
+        TextStyle::new(13.0, validity_color(status.valid)).params(),
     );
 }
 
@@ -240,6 +238,7 @@ fn draw_skill(
     tile: TilePos,
     unit_id: &str,
     skill_id: &str,
+    status: TargetStatus,
 ) {
     let user = ctx.session.unit(unit_id);
     let technique = user.and_then(|user| {
@@ -256,13 +255,6 @@ fn draw_skill(
     });
     let tile_target =
         crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile);
-    let valid = if tile_target {
-        crate::skills::can_target_tile(ctx.session, unit_id, skill_id, tile)
-    } else {
-        target.is_some_and(|target| {
-            crate::skills::can_target_unit(ctx.session, unit_id, skill_id, &target.id)
-        })
-    };
     if let Some(user) = user {
         ctx.visuals.draw_portrait(
             ctx.assets,
@@ -289,11 +281,11 @@ fn draw_skill(
             } else {
                 target.map_or("NO UNIT SELECTED".to_owned(), |unit| unit.name.clone())
             },
-            validity_label(valid)
+            status.label
         ),
         card.x + 82.0,
         card.y + 49.0,
-        TextStyle::new(13.0, validity_color(valid)).params(),
+        TextStyle::new(13.0, validity_color(status.valid)).params(),
     );
     let effect = match skill_id {
         "adaptive_secretion" => {
@@ -317,11 +309,93 @@ fn draw_skill(
     );
 }
 
-fn validity_label(valid: bool) -> &'static str {
-    if valid {
-        "VALID TARGET"
-    } else {
-        "INVALID TARGET"
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct TargetStatus {
+    label: &'static str,
+    valid: bool,
+}
+
+fn targeting_status(ctx: &UiContext<'_>, tile: TilePos) -> TargetStatus {
+    let Some(targeting) = ctx.targeting else {
+        return TargetStatus {
+            label: "NO TARGETING",
+            valid: false,
+        };
+    };
+    let Some(command) = targeting_command(targeting, tile, ctx.session) else {
+        return TargetStatus {
+            label: "SELECT A HIGHLIGHTED UNIT",
+            valid: false,
+        };
+    };
+    status_from_validation(ctx.session.validate(&command))
+}
+
+fn status_from_validation(
+    result: Result<crate::state::CommandCost, crate::state::RuleError>,
+) -> TargetStatus {
+    match result {
+        Ok(_) => TargetStatus {
+            label: "VALID TARGET",
+            valid: true,
+        },
+        Err(error) => TargetStatus {
+            label: crate::action_preview_ui::rule_error_label(&error),
+            valid: false,
+        },
+    }
+}
+
+fn targeting_command(
+    targeting: TargetingView<'_>,
+    tile: TilePos,
+    session: &crate::state::GameSession,
+) -> Option<Command> {
+    let target = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == tile);
+    match targeting {
+        TargetingView::Equipment {
+            unit_id,
+            equipment_id,
+        } => target.map(|target| Command::UseEquipment {
+            unit_id: unit_id.to_owned(),
+            equipment_id: equipment_id.to_owned(),
+            target_id: target.id.clone(),
+        }),
+        TargetingView::ClassAction {
+            unit_id,
+            target_kind: crate::data::TechniqueTarget::Tile,
+        } => Some(Command::ActivateClassAction {
+            unit_id: unit_id.to_owned(),
+            target_id: None,
+            target_tile: Some(tile),
+        }),
+        TargetingView::ClassAction { unit_id, .. } => {
+            target.map(|target| Command::ActivateClassAction {
+                unit_id: unit_id.to_owned(),
+                target_id: Some(target.id.clone()),
+                target_tile: None,
+            })
+        }
+        TargetingView::Skill { unit_id, skill_id }
+            if crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile) =>
+        {
+            Some(Command::ActivateSkill {
+                unit_id: unit_id.to_owned(),
+                skill_id: skill_id.to_owned(),
+                target_id: None,
+                target_tile: Some(tile),
+            })
+        }
+        TargetingView::Skill { unit_id, skill_id } => target.map(|target| Command::ActivateSkill {
+            unit_id: unit_id.to_owned(),
+            skill_id: skill_id.to_owned(),
+            target_id: Some(target.id.clone()),
+            target_tile: None,
+        }),
     }
 }
 

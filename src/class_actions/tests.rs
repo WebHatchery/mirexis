@@ -378,3 +378,19 @@ fn chorus_warden_converts_a_hazard_and_shares_a_short_regeneration_field() {
         } if *position == TilePos::new(9, 2)
     )));
 }
+
+#[test]
+fn targeted_class_actions_explain_team_and_range_failures() {
+    let mut session = session();
+    let hostile_id = "brood_stalker_a";
+    assert_eq!(
+        validate(&session, "ilya_reed", Some(hostile_id), None,),
+        Err(RuleError::WrongTeam)
+    );
+
+    unit_mut(&mut session, "mara_venn").position = TilePos::new(20, 19);
+    assert_eq!(
+        validate(&session, "ilya_reed", Some("mara_venn"), None),
+        Err(RuleError::OutOfRange)
+    );
+}

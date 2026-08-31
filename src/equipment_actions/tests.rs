@@ -141,3 +141,24 @@ fn mireborn_sense_braces_sedge_and_disrupts_a_hostile() {
         .unwrap()
         .has_status(StatusKind::Disrupted));
 }
+
+#[test]
+fn targeted_field_items_explain_team_and_range_failures() {
+    let mut session = session();
+    assert_eq!(
+        validate(&session, "kira_voss", "survey_harness", "mara_venn",),
+        Err(RuleError::WrongTeam)
+    );
+
+    session
+        .tactical
+        .units
+        .iter_mut()
+        .find(|unit| unit.id == "brood_stalker_a")
+        .unwrap()
+        .position = TilePos::new(20, 19);
+    assert_eq!(
+        validate(&session, "kira_voss", "survey_harness", "brood_stalker_a",),
+        Err(RuleError::OutOfRange)
+    );
+}
