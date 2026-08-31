@@ -77,7 +77,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | sol_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_sol_evolution.png` | PASS |
 | nadi_evolution | Gene lab | No recruit-specific evolved portrait/sprite cue | `ui_nadi_evolution.png` | PASS |
 | escalation | Colony | Campaign visual evolution too weak | `ui_escalation.png` | PASS |
-| escalation_operation | Briefing | Same text modal language | `ui_escalation_operation.png` | PASS |
+| escalation_operation | Briefing | Pressure modifier copy crossed the split briefing columns and collided with threat intelligence | `ui_escalation_operation.png` | PASS |
 | escalation_response | Campaign event | Choice identity mainly textual | `ui_escalation_response.png` | PASS |
 | mirexis | Colony | Late-game hybridisation too weak | `ui_mirexis.png` | PASS |
 | mirexis_path | Campaign choice | Path identity mainly textual | `ui_mirexis_path.png` | PASS |

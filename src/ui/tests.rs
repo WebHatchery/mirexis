@@ -112,3 +112,20 @@ fn end_phase_focus_bounds_stay_inside_the_command_rail() {
     assert!(button.bottom() <= panel.bottom());
     assert_eq!(button.h, 44.0);
 }
+
+#[test]
+fn briefing_modifier_copy_stays_inside_the_left_briefing_column() {
+    let data = crate::data::GameData::load().expect("embedded data loads");
+    let mut mission = data.mission.clone();
+    mission.operation_modifier = crate::data::OperationModifier::EscalationCrossfire;
+
+    let copy = briefing_modifier_copy(&mission);
+    assert!(copy.starts_with("PRESSURE MODIFIER // THREE-POWER CROSSFIRE //"));
+    assert!(copy.contains("Hostiles gain 5 accuracy"));
+
+    let modifier = briefing_modifier_bounds();
+    assert_eq!(modifier.right(), 630.0);
+    assert_eq!(modifier.bottom(), 358.0);
+    assert!(modifier.right() < 660.0);
+    assert!(modifier.bottom() < crate::briefing_deployment_ui::deployment_row_bounds(5, 0).y);
+}

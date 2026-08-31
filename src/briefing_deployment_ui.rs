@@ -10,6 +10,10 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
+const DEPLOYMENT_HEADING_Y: f32 = 374.0;
+const DEPLOYMENT_ROW_Y: f32 = 384.0;
+const DEPLOYMENT_ACTION_Y: f32 = 580.0;
+
 fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
     if roster_len <= 5 {
         return (32.0, 29.0);
@@ -30,11 +34,16 @@ fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> 
 
 pub(crate) fn deployment_row_bounds(roster_len: usize, index: usize) -> Rect {
     let (row_step, row_height) = deployment_row_layout(roster_len);
-    Rect::new(200.0, 366.0 + index as f32 * row_step, 650.0, row_height)
+    Rect::new(
+        200.0,
+        DEPLOYMENT_ROW_Y + index as f32 * row_step,
+        650.0,
+        row_height,
+    )
 }
 
 pub(crate) fn deploy_button_bounds() -> Rect {
-    Rect::new(820.0, 562.0, 250.0, 48.0)
+    Rect::new(820.0, DEPLOYMENT_ACTION_Y, 250.0, 48.0)
 }
 
 pub(crate) fn draw(
@@ -54,7 +63,7 @@ pub(crate) fn draw(
             selected_count, SQUAD_LIMIT, food_cost
         ),
         200.0,
-        356.0,
+        DEPLOYMENT_HEADING_Y,
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     for (index, character) in campaign.roster.iter().enumerate() {
@@ -107,7 +116,7 @@ pub(crate) fn draw(
         );
     }
     if button(
-        Rect::new(400.0, 562.0, 200.0, 48.0),
+        Rect::new(400.0, DEPLOYMENT_ACTION_Y, 200.0, 48.0),
         &format!("FORMATION // {}", formation.label()),
         true,
         mouse,
@@ -126,7 +135,7 @@ pub(crate) fn draw(
         actions.push(UiAction::DeployMission);
     }
     if button(
-        Rect::new(200.0, 562.0, 180.0, 48.0),
+        Rect::new(200.0, DEPLOYMENT_ACTION_Y, 180.0, 48.0),
         "STAND DOWN",
         true,
         mouse,

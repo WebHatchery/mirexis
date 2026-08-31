@@ -14,6 +14,10 @@ pub use crate::ui_action::UiAction;
 
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
+const BRIEFING_MODIFIER_X: f32 = 200.0;
+const BRIEFING_MODIFIER_Y: f32 = 326.0;
+const BRIEFING_MODIFIER_WIDTH: f32 = 430.0;
+const BRIEFING_MODIFIER_HEIGHT: f32 = 32.0;
 
 pub(crate) fn pointer_position(ui: &VirtualUi) -> Vec2 {
     pointer_position_for_capture(ui, macroquad_toolkit::capture::capture_requested("MIREXIS"))
@@ -147,6 +151,28 @@ pub(crate) fn draw_title(context: TitleDrawContext<'_>) -> Vec<UiAction> {
     crate::title_scene_ui::draw(context)
 }
 
+pub(crate) fn briefing_modifier_bounds() -> Rect {
+    Rect::new(
+        BRIEFING_MODIFIER_X,
+        BRIEFING_MODIFIER_Y,
+        BRIEFING_MODIFIER_WIDTH,
+        BRIEFING_MODIFIER_HEIGHT,
+    )
+}
+
+fn briefing_modifier_copy(mission: &MissionDef) -> String {
+    format!(
+        "{} // {} // {}",
+        if mission.operation_modifier.is_engine_effect() {
+            "ENGINE EFFECT"
+        } else {
+            "PRESSURE MODIFIER"
+        },
+        mission.operation_modifier.label(),
+        mission.operation_modifier.description()
+    )
+}
+
 pub fn draw_mission_briefing(
     data: &GameData,
     campaign: &CampaignState,
@@ -200,20 +226,16 @@ pub fn draw_mission_briefing(
     }
     draw_mission_vignette(data, mission, assets, visuals);
     if mission.operation_modifier != crate::data::OperationModifier::None {
-        draw_ui_text_ex(
-            &format!(
-                "{} // {} // {}",
-                if mission.operation_modifier.is_engine_effect() {
-                    "ENGINE EFFECT"
-                } else {
-                    "PRESSURE MODIFIER"
-                },
-                mission.operation_modifier.label(),
-                mission.operation_modifier.description()
-            ),
-            200.0,
-            326.0,
-            TextStyle::new(15.0, dark::NEGATIVE).params(),
+        let modifier = briefing_modifier_bounds();
+        draw_text_block(
+            &briefing_modifier_copy(mission),
+            modifier.x,
+            modifier.y,
+            modifier.w,
+            modifier.h,
+            13.0,
+            2.0,
+            dark::NEGATIVE,
         );
     }
     draw_ui_text_ex(
@@ -252,7 +274,7 @@ pub fn draw_mission_briefing(
     draw_ui_text_ex(
         "TOUCH // TAP COLONIST · FORMATION · DEPLOY · COLONY  //  PAD // D-PAD · A · X · START · B",
         200.0,
-        624.0,
+        646.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
     );
     actions

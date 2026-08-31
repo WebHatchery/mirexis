@@ -30,6 +30,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_first_hour_dialogue.png`: required first-hour conversations focus the visible CONTINUE control after the target speaker opens.
 - `ui_first_hour_promise.png`: the promise beat distinguishes a hardened outer route from a second-operation breach and focuses CONTINUE CAMPAIGN before continuation.
 - `ui_first_hour_operations.png`: guided colony handoff keeps the next mission briefing and active preparation visible inside the open Operations drawer.
+- `ui_escalation_operation.png`: the wrapped pressure modifier stays inside the briefing's left column without colliding with threat intelligence or deployment controls.
 - `ui_battle_log.png` and `ui_phase_replay.png`: attack history and hostile replay beats use readable display names, name HIT/MISS outcomes with immediate damage consequences, and the battle log distinguishes ability, recovery, status, objective, and cover events with matching counts on each filter.
 - `ui_debrief.png`: the operation result keeps rewards and squad consequences visible while the notification stack names each automatic technique learned by a readable colonist name.
 - `ui_finale_debrief.png`: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.
@@ -59,7 +60,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 14 | sol_evolution | `ui_sol_evolution.png` | 174924 | `d62ee19981a701bb8be3ccea1a7c08f55304fa193e8e14ad22977563030d0eb1` |
 | 15 | nadi_evolution | `ui_nadi_evolution.png` | 185539 | `e4985cef48b0ee9eeb3a2a7a6b9419dee5dbe797b60b7912fa10c6fa75aa5eaa` |
 | 16 | escalation | `ui_escalation.png` | 753059 | `83db26465f8cb484169b00cbbbaa455b33fed5c8c0b978a66a507e23e163ea16` |
-| 17 | escalation_operation | `ui_escalation_operation.png` | 211944 | `fed67d33003a761ac0f07acbe292b954fc43da05303ed8c0e71151107a4f1975` |
+| 17 | escalation_operation | `ui_escalation_operation.png` | 210397 | `057bde867ddf45bc1d4b8f3da822460e46254bcbddf4c4d917ffb9e68c9b70e1` |
 | 18 | escalation_response | `ui_escalation_response.png` | 753248 | `26204ba62db6594004b35ea5c705858ec0a0c3e9c3d309f82f629d05a9229390` |
 | 19 | mirexis | `ui_mirexis.png` | 747673 | `d95085a5825fbe8aa0a778a0f5411e680bbe6cd30da0ca454d949c6bc62e20ce` |
 | 20 | mirexis_path | `ui_mirexis_path.png` | 749059 | `9d5db1f423ca9def95af43a48edb6d4115fb4a3df8064ddc00d4962fcf5c0be0` |
