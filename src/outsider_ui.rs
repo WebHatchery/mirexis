@@ -1,6 +1,7 @@
 //! Waystation conversations and route-exclusive outsider choices.
 
 use crate::campaign::{CampaignState, OutsiderChoice};
+use crate::colony::Resources;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
@@ -53,6 +54,7 @@ pub(crate) fn draw(
     for (index, choice) in beat.choices.iter().enumerate() {
         let rect = Rect::new(878.0 + index as f32 * 184.0, 580.0, 178.0, 64.0);
         let enabled = affordable(campaign, choice);
+        let cost = cost_label(&campaign.colony.resources, choice);
         if button(rect, "", enabled, mouse) {
             actions.push(UiAction::ResolveOutsiderBeat(
                 beat.stage,
@@ -66,10 +68,10 @@ pub(crate) fn draw(
             TextStyle::new(10.0, if enabled { dark::TEXT } else { dark::TEXT_DIM }).params(),
         );
         draw_ui_text_ex(
-            &cost_label(choice),
+            &cost,
             rect.x + 8.0,
             rect.y + 32.0,
-            TextStyle::new(9.0, dark::ACCENT).params(),
+            TextStyle::new(9.0, if enabled { dark::ACCENT } else { dark::WARNING }).params(),
         );
         for (line_index, line) in wrap_words(choice.description, 28)
             .into_iter()
@@ -93,7 +95,24 @@ fn affordable(campaign: &CampaignState, choice: &OutsiderChoice) -> bool {
         && campaign.colony.resources.biomass >= choice.biomass_cost
 }
 
-fn cost_label(choice: &OutsiderChoice) -> String {
+fn cost_label(resources: &Resources, choice: &OutsiderChoice) -> String {
+    let mut shortfalls = Vec::new();
+    if resources.materials < choice.materials_cost {
+        shortfalls.push(format!("{} MAT", choice.materials_cost));
+    }
+    if resources.food < choice.food_cost {
+        shortfalls.push(format!("{} FOOD", choice.food_cost));
+    }
+    if resources.power < choice.power_cost {
+        shortfalls.push(format!("{} POWER", choice.power_cost));
+    }
+    if resources.biomass < choice.biomass_cost {
+        shortfalls.push(format!("{} BIOMASS", choice.biomass_cost));
+    }
+    if !shortfalls.is_empty() {
+        return format!("NEEDS {}", shortfalls.join(" // "));
+    }
+
     let mut costs = Vec::new();
     if choice.materials_cost > 0 {
         costs.push(format!("{} MAT", choice.materials_cost));
@@ -131,3 +150,6 @@ fn wrap_words(value: &str, width: usize) -> Vec<String> {
     }
     lines
 }
+
+#[cfg(test)]
+mod tests;
