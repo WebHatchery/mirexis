@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.211.0
+Save/content version: 1.212.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -987,6 +987,7 @@ Migration coverage:
 | 1.209.0 | Capture scenes now reset process-owned colony, overlay, title-focus, and save-preview state, while the Contact event reference opens its Operations drawer; no new save fields |
 | 1.210.0 | Progression capture builders now explicitly open the Operations surfaces they represent for Contact, Research, Adaptation, Escalation, and Mirexis references; campaign capture responsibilities move to a named module with no new save fields |
 | 1.211.0 | Tactical phase changes and reinforcement arrivals now use distinct prioritized audio responses, while volume changes and unmuting preview the current sound level; no new save fields |
+| 1.212.0 | Persisted audio volume is clamped to the supported 0–100 range before playback; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

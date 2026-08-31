@@ -53,6 +53,13 @@ impl Default for AudioSettings {
     }
 }
 
+impl AudioSettings {
+    fn normalized(mut self) -> Self {
+        self.volume_percent = self.volume_percent.min(100);
+        self
+    }
+}
+
 pub(crate) struct AudioSystem {
     sounds: SoundManager<SoundCue>,
     pub settings: AudioSettings,
@@ -62,7 +69,9 @@ pub(crate) struct AudioSystem {
 
 impl AudioSystem {
     pub(crate) async fn new(game_name: &str) -> Self {
-        let settings = load_from_slot(game_name, SETTINGS_SLOT).unwrap_or_default();
+        let settings = load_from_slot::<AudioSettings>(game_name, SETTINGS_SLOT)
+            .unwrap_or_default()
+            .normalized();
         let mut system = Self {
             sounds: SoundManager::new(),
             settings,

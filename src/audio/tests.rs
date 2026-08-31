@@ -92,3 +92,17 @@ fn volume_steps_are_bounded() {
     assert!(!settings.muted);
     assert!(!settings.reduced_motion);
 }
+
+#[test]
+fn persisted_volume_is_normalized_before_playback() {
+    let settings = AudioSettings {
+        volume_percent: u8::MAX,
+        muted: false,
+        reduced_motion: true,
+    }
+    .normalized();
+
+    assert_eq!(settings.volume_percent, 100);
+    assert!(!settings.muted);
+    assert!(settings.reduced_motion);
+}
