@@ -9,7 +9,7 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
 const CALLOUT_BASE_OFFSET: f32 = 58.0;
-const CALLOUT_STACK_STEP: f32 = 18.0;
+const CALLOUT_STACK_STEP: f32 = 26.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FeedbackTone {
@@ -256,6 +256,7 @@ impl CombatFeedback {
         for impact in &self.impacts {
             draw_impact(session, view, impact, assets, visuals);
         }
+        let mut occupied = Vec::new();
         for (index, callout) in self.callouts.iter().enumerate() {
             let Some(position) = feedback_anchor_position(session, &callout.anchor) else {
                 continue;
@@ -279,7 +280,9 @@ impl CombatFeedback {
                 _ => 20.0,
             };
             let dimensions = measure_text(&callout.label, None, size as u16, 1.0);
-            let y = callout_y(rect, same_unit_before);
+            let y = callout_baseline(rect, same_unit_before, dimensions.width, size, &occupied);
+            let bounds = callout_bounds(rect.center(), y, dimensions.width, size);
+            occupied.push(bounds);
             if callout.tone == FeedbackTone::Healing && same_unit_before == 0 {
                 visuals.draw_atlas_cell(
                     assets,
@@ -289,6 +292,21 @@ impl CombatFeedback {
                     Color::new(1.0, 1.0, 1.0, callout.remaining.min(1.0)),
                 );
             }
+            draw_rectangle(
+                bounds.x,
+                bounds.y,
+                bounds.w,
+                bounds.h,
+                Color::new(0.01, 0.035, 0.04, 0.90),
+            );
+            draw_rectangle_lines(
+                bounds.x,
+                bounds.y,
+                bounds.w,
+                bounds.h,
+                1.0,
+                Color::new(color.r, color.g, color.b, 0.62),
+            );
             draw_text_ex(
                 &callout.label,
                 rect.x + (rect.w - dimensions.width) * 0.5,
@@ -301,6 +319,43 @@ impl CombatFeedback {
 
 fn callout_y(rect: Rect, stack_index: usize) -> f32 {
     (rect.y - CALLOUT_BASE_OFFSET - stack_index as f32 * CALLOUT_STACK_STEP).max(24.0)
+}
+
+fn callout_baseline(
+    rect: Rect,
+    stack_index: usize,
+    label_width: f32,
+    label_height: f32,
+    occupied: &[Rect],
+) -> f32 {
+    let mut baseline = callout_y(rect, stack_index);
+    loop {
+        let bounds = callout_bounds(rect.center(), baseline, label_width, label_height);
+        if baseline <= 24.0
+            || !occupied
+                .iter()
+                .any(|other| rectangles_overlap(bounds, *other))
+        {
+            return baseline;
+        }
+        baseline = (baseline - CALLOUT_STACK_STEP).max(24.0);
+    }
+}
+
+fn callout_bounds(center: Vec2, baseline: f32, label_width: f32, label_height: f32) -> Rect {
+    Rect::new(
+        center.x - label_width * 0.5 - 6.0,
+        baseline - label_height - 4.0,
+        label_width + 12.0,
+        label_height + 8.0,
+    )
+}
+
+fn rectangles_overlap(left: Rect, right: Rect) -> bool {
+    left.x < right.right()
+        && left.right() > right.x
+        && left.y < right.bottom()
+        && left.bottom() > right.y
 }
 
 fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> Option<TilePos> {

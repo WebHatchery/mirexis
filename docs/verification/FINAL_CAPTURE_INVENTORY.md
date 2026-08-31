@@ -37,7 +37,7 @@ Manifest: `scripts/capture_ui.ps1`
 - `ui_finale_debrief.png`: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.
 - `ui_redoubt_end.png`, `ui_commonwealth_end.png`, and `ui_threshold_end.png`: the identity ending card and bounded colony legacy register remain inside the open Operations drawer without the obsolete colony plan line colliding with the register.
 - `ui_gene_lab.png` and `ui_recruited_gene_lab.png`: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.
-- `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.
+- `ui_combat_feedback.png`: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations in separate readable plates above unit effects.
 - `ui_construction.png`: placement blueprint and reserved resources remain visible at fixed building scale.
 
 ## Files
@@ -125,7 +125,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 79 | first_hour_promise | `ui_first_hour_promise.png` | 881399 | `dbe4c79162bed43496539774c1bbe7c3a4c6661fa8a94a1ecabcd2cb77d51a39` |
 | 80 | first_hour_operations | `ui_first_hour_operations.png` | 920559 | `620b0cf88a42a372e6b15a7c56875f25c2ebf1d1080583b313c05792cd3e1939` |
 | 81 | battle_log | `ui_battle_log.png` | 660880 | `8c9162a4f4444324d1ca404e573a316dd46cab6a27d6c7be94812cb6cd123a55` |
-| 82 | combat_feedback | `ui_combat_feedback.png` | 1194741 | `ec9de51d34b93e580d6b249f135cf2ddf45cfc2cc01ee6515c80217a7476099a` |
+| 82 | combat_feedback | `ui_combat_feedback.png` | 1186281 | `9ac5c2b40ae7fc4a4c335e9308d2c6066aa1c22cc732cebfbd9923921e05f6b6` |
 | 83 | phase_replay | `ui_phase_replay.png` | 1095988 | `9269f8ddcd6f27b8816e400744d0ec9e5c63065de5163754d9abde4f94fc7c02` |
 | 84 | end_phase_guard | `ui_end_phase_guard.png` | 1186008 | `b89ae39b33d8a2e8564aa9009faa73d71266cdd483dd77ec4929be9eebbc3415` |
 | 85 | readiness_markers | `ui_readiness_markers.png` | 1190105 | `6c39d4d0a02194518e1331ef13eb9aa3e435b005c257893b5b57c4d35e9b0454` |

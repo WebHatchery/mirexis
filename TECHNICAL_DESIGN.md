@@ -2,7 +2,7 @@
 
 Status: systems-rich tech demo; playable-game refinement in progress
 Current production target: cohesive first-hour playable build
-Save/content version: 1.206.0
+Save/content version: 1.207.0
 Target platforms: Windows and browser/WASM
 Runtime: Rust 2021, Macroquad, macroquad-toolkit
 
@@ -982,6 +982,7 @@ Migration coverage:
 | 1.204.0 | Briefing threat-intelligence rows now collapse repeated hostile roles and fit long intelligence copy inside the right briefing column; no new save fields |
 | 1.205.0 | Roster workshop equipment rows now fit the full equipment catalog inside the training panel above the footer; no new save fields |
 | 1.206.0 | Completed-campaign Operations drawers suppress the obsolete colony plan line so the seven-row legacy register keeps its own lower lane; no new save fields |
+| 1.207.0 | Tactical combat feedback now places nearby event callouts in separate readable plates above the battlefield effect lane; no new save fields |
 
 Every future schema bump must migrate the immediately previous version and add a
 fixture test. Validate saved content IDs before adding content removal or renaming.

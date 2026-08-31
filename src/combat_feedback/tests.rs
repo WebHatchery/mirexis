@@ -6,9 +6,20 @@ fn feedback_callouts_stack_clear_of_the_unit_effect_lane() {
     let rect = Rect::new(100.0, 200.0, 48.0, 48.0);
 
     assert_eq!(callout_y(rect, 0), 142.0);
-    assert_eq!(callout_y(rect, 1), 124.0);
+    assert_eq!(callout_y(rect, 1), 116.0);
     assert!(callout_y(rect, 0) < rect.y - 37.0);
     assert_eq!(callout_y(Rect::new(100.0, 50.0, 48.0, 48.0), 4), 24.0);
+}
+
+#[test]
+fn nearby_callouts_lift_until_their_readable_plates_are_separate() {
+    let rect = Rect::new(100.0, 160.0, 48.0, 48.0);
+    let occupied = [callout_bounds(vec2(124.0, 160.0), 102.0, 60.0, 18.0)];
+    let baseline = callout_baseline(rect, 0, 60.0, 18.0, &occupied);
+    let placed = callout_bounds(rect.center(), baseline, 60.0, 18.0);
+
+    assert_eq!(baseline, 76.0);
+    assert!(!rectangles_overlap(placed, occupied[0]));
 }
 
 #[test]

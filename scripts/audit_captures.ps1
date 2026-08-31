@@ -155,7 +155,7 @@ $lines.Add("- ``ui_debrief.png``: the operation result keeps rewards and squad c
 $lines.Add("- ``ui_finale_debrief.png``: the completed-campaign title, bounded legacy summary, operation result, and reward card remain separated and readable.")
 $lines.Add("- ``ui_redoubt_end.png``, ``ui_commonwealth_end.png``, and ``ui_threshold_end.png``: the identity ending card and bounded colony legacy register remain inside the open Operations drawer without the obsolete colony plan line colliding with the register.")
 $lines.Add("- ``ui_gene_lab.png`` and ``ui_recruited_gene_lab.png``: the mutation anatomy scan label remains visible above the separated irreversible evolution cards.")
-$lines.Add("- ``ui_combat_feedback.png``: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations and stack clear of unit effects.")
+$lines.Add("- ``ui_combat_feedback.png``: hit, miss, critical, damage, recovery, objective, and cover callouts remain anchored to their affected field locations in separate readable plates above unit effects.")
 $lines.Add("- ``ui_construction.png``: placement blueprint and reserved resources remain visible at fixed building scale.")
 $lines.Add("")
 $lines.Add("## Files")
