@@ -499,6 +499,7 @@ fn draw_character(context: CharacterDrawContext<'_>) {
         visuals,
         zoom,
     } = context;
+    draw_colony_contact(center, zoom, highlighted);
     if hovered {
         draw_circle(
             center.x,
@@ -576,6 +577,31 @@ fn draw_character(context: CharacterDrawContext<'_>) {
             Color::new(0.76, 1.0, 0.88, 1.0),
         );
     }
+}
+
+fn draw_colony_contact(center: Vec2, zoom: f32, highlighted: bool) {
+    let accent = if highlighted {
+        Color::new(0.96, 0.78, 0.30, 0.76)
+    } else {
+        Color::new(0.24, 0.82, 0.68, 0.62)
+    };
+    draw_ellipse(
+        center.x,
+        center.y + 4.0 * zoom,
+        8.0 * zoom,
+        2.5 * zoom,
+        0.0,
+        Color::new(accent.r, accent.g, accent.b, 0.20),
+    );
+    draw_ellipse_lines(
+        center.x,
+        center.y + 4.0 * zoom,
+        8.0 * zoom,
+        2.5 * zoom,
+        0.0,
+        1.0 * zoom,
+        accent,
+    );
 }
 
 fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {
