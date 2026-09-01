@@ -76,6 +76,7 @@ pub enum UiAction {
     SkipPhaseReplay,
     ToggleTacticalHelp,
     ToggleBattleLog,
+    ToggleTacticalPanel,
     SetBattleLogFilter(BattleLogFilter),
     AdvanceFirstHour,
     AcknowledgeColonist(String),

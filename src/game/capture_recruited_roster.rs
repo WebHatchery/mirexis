@@ -57,6 +57,7 @@ impl Game {
             unit_id: "ninth_voice_apart".to_owned(),
             equipment_id: "severed_resonance".to_owned(),
         });
+        self.tactical_panel_open = true;
     }
 
     pub(super) fn capture_recruited_briefing(&mut self) {

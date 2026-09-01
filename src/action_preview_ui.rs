@@ -91,7 +91,8 @@ pub(crate) fn draw(
             format!("{action} BLOCKED // {}", rule_error_label(&reason))
         }
     };
-    let rect = Rect::new(panel.x + 18.0, panel.bottom() - 34.0, panel.w - 36.0, 28.0);
+    let width = (panel.w - 36.0).min(540.0);
+    let rect = Rect::new(panel.x + 18.0, panel.bottom() - 34.0, width, 28.0);
     draw_surface(
         rect,
         &SurfaceStyle::new(Color::new(0.06, 0.10, 0.11, 0.96)).with_border(
@@ -113,7 +114,8 @@ pub(crate) fn draw(
 }
 
 pub(crate) fn attack_card_bounds(panel: Rect) -> Rect {
-    Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 84.0)
+    let width = (panel.w - 32.0).min(560.0);
+    Rect::new(panel.x + 16.0, panel.bottom() - 94.0, width, 84.0)
 }
 
 pub(crate) fn attack_button_bounds(card: Rect) -> Rect {

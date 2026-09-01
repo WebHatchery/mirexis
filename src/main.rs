@@ -77,6 +77,7 @@ mod strategy_events;
 mod strategy_rewards;
 mod tactical;
 mod tactical_ai;
+mod tactical_hud;
 mod tactical_map_ui;
 mod tactical_unit_ui;
 mod title_scene_ui;

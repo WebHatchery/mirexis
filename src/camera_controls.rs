@@ -4,9 +4,9 @@ use crate::grid_ui::WorldCamera;
 use crate::ui_widgets::button;
 use macroquad::prelude::{vec2, Rect, Vec2};
 
-pub(crate) const CONTROL_WIDTH: f32 = 40.0;
+pub(crate) const CONTROL_WIDTH: f32 = 38.0;
 pub(crate) const CONTROL_HEIGHT: f32 = 28.0;
-pub(crate) const STRIP_WIDTH: f32 = 256.0;
+pub(crate) const STRIP_WIDTH: f32 = 80.0;
 
 pub(crate) fn draw(
     camera: &mut WorldCamera,
@@ -17,16 +17,16 @@ pub(crate) fn draw(
 ) -> bool {
     let mut activated = false;
     let controls = [
-        ("<", vec2(-1.0, 0.0)),
-        ("^", vec2(0.0, -1.0)),
-        ("v", vec2(0.0, 1.0)),
-        (">", vec2(1.0, 0.0)),
+        ("<", vec2(-1.0, 0.0), (0.0, 0.0)),
+        ("^", vec2(0.0, -1.0), (42.0, 0.0)),
+        ("v", vec2(0.0, 1.0), (0.0, 30.0)),
+        (">", vec2(1.0, 0.0), (42.0, 30.0)),
     ];
-    for (index, (label, direction)) in controls.into_iter().enumerate() {
+    for (label, direction, (offset_x, offset_y)) in controls {
         if button(
             Rect::new(
-                origin.x + index as f32 * 42.0,
-                origin.y,
+                origin.x + offset_x,
+                origin.y + offset_y,
                 CONTROL_WIDTH,
                 CONTROL_HEIGHT,
             ),
@@ -44,7 +44,7 @@ pub(crate) fn draw(
             camera,
             viewport,
             mouse,
-            vec2(origin.x + 174.0, origin.y),
+            vec2(origin.x, origin.y + 60.0),
             allow_activation,
         )
 }

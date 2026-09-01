@@ -11,6 +11,7 @@ impl Game {
         self.show_tactical_help = false;
         self.show_battle_log = false;
         self.battle_log_filter = BattleLogFilter::default();
+        self.tactical_panel_open = false;
         self.show_settings = false;
         self.show_field_notes = false;
         self.show_memorial = false;

@@ -142,7 +142,7 @@ fn attack_focus_waits_for_a_valid_forecast() {
     session.tactical.selected_tile = hostile_tile;
 
     let focus = attack_focus_rect(&session).expect("valid forecast should focus its attack button");
-    assert_eq!(focus, Rect::new(689.0, 610.0, 126.0, 40.0));
+    assert_eq!(focus, Rect::new(381.0, 638.0, 126.0, 40.0));
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn objective_focus_waits_until_the_selected_colonist_can_interact() {
 
     let focus = objective_focus_rect(&session)
         .expect("an adjacent selected colonist should focus objective interaction");
-    assert_eq!(focus, Rect::new(938.0, 450.0, 314.0, 34.0));
+    assert_eq!(focus, Rect::new(850.0, 470.0, 308.0, 34.0));
 }
 
 #[test]

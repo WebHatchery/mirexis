@@ -2,8 +2,7 @@
 
 use crate::campaign::CampaignState;
 use crate::data::{GameData, MissionDef};
-use crate::state::{GameSession, TacticalPhase};
-use crate::ui_widgets::{action_status, button, event_summary};
+use crate::state::GameSession;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
@@ -14,6 +13,14 @@ pub use crate::ui_action::UiAction;
 
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
+const TACTICAL_WORLD_X: f32 = 10.0;
+const TACTICAL_WORLD_Y: f32 = 10.0;
+const TACTICAL_WORLD_WIDTH: f32 = LOGICAL_WIDTH - 20.0;
+const TACTICAL_WORLD_HEIGHT: f32 = LOGICAL_HEIGHT - 20.0;
+const TACTICAL_COMMAND_PANEL_X: f32 = 832.0;
+const TACTICAL_COMMAND_PANEL_Y: f32 = 76.0;
+const TACTICAL_COMMAND_PANEL_WIDTH: f32 = 344.0;
+const TACTICAL_COMMAND_PANEL_HEIGHT: f32 = 626.0;
 const BRIEFING_MODIFIER_X: f32 = 200.0;
 const BRIEFING_MODIFIER_Y: f32 = 326.0;
 const BRIEFING_MODIFIER_WIDTH: f32 = 430.0;
@@ -21,6 +28,24 @@ const BRIEFING_MODIFIER_HEIGHT: f32 = 32.0;
 
 pub(crate) fn pointer_position(ui: &VirtualUi) -> Vec2 {
     pointer_position_for_capture(ui, macroquad_toolkit::capture::capture_requested("MIREXIS"))
+}
+
+pub(crate) fn tactical_world_rect() -> Rect {
+    Rect::new(
+        TACTICAL_WORLD_X,
+        TACTICAL_WORLD_Y,
+        TACTICAL_WORLD_WIDTH,
+        TACTICAL_WORLD_HEIGHT,
+    )
+}
+
+pub(crate) fn tactical_command_panel_rect() -> Rect {
+    Rect::new(
+        TACTICAL_COMMAND_PANEL_X,
+        TACTICAL_COMMAND_PANEL_Y,
+        TACTICAL_COMMAND_PANEL_WIDTH,
+        TACTICAL_COMMAND_PANEL_HEIGHT,
+    )
 }
 
 fn pointer_position_for_capture(ui: &VirtualUi, capturing: bool) -> Vec2 {
@@ -134,6 +159,7 @@ pub struct UiContext<'a> {
     pub show_battle_log: bool,
     pub battle_log_filter: crate::ui_action::BattleLogFilter,
     pub show_settings: bool,
+    pub tactical_panel_open: bool,
 }
 
 pub struct TitleDrawContext<'a> {
@@ -358,9 +384,7 @@ pub fn draw_tactical(
     );
     let suppress_actions =
         crate::tactical_map_ui::draw(&ctx, camera, mouse, input_enabled, &mut actions);
-    draw_header(&ctx);
-    draw_sidebar(&ctx, mouse, &mut actions);
-    draw_footer(&ctx, mouse, &mut actions);
+    crate::tactical_hud::draw(&ctx, mouse, &mut actions);
     crate::first_hour_tactical_ui::draw_command_focus(&ctx);
     if ctx.show_help {
         actions.clear();
@@ -394,281 +418,7 @@ pub(crate) fn suppress_map_release_actions(actions: &mut Vec<UiAction>, suppress
     }
 }
 
-fn draw_header(ctx: &UiContext<'_>) {
-    let rect = Rect::new(10.0, 10.0, LOGICAL_WIDTH - 20.0, 52.0);
-    draw_surface(
-        rect,
-        &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
-            .with_border(1.0, Color::new(0.22, 0.62, 0.56, 0.8))
-            .with_left_accent(5.0, Color::new(0.34, 0.86, 0.68, 1.0)),
-    );
-    draw_ui_text_ex(
-        "MIREXIS",
-        rect.x + 22.0,
-        rect.y + 34.0,
-        TextStyle::new(24.0, dark::TEXT_BRIGHT).params(),
-    );
-    draw_ui_text_ex(
-        &ctx.mission.name,
-        rect.x + 190.0,
-        rect.y + 31.0,
-        TextStyle::new(15.0, dark::TEXT_DIM).params(),
-    );
-    draw_ui_text_ex(
-        "DIRECTORATE // BROOD // ASCENDANT",
-        rect.x + 190.0,
-        rect.y + 46.0,
-        TextStyle::new(10.0, Color::new(0.34, 0.58, 0.57, 1.0)).params(),
-    );
-    crate::first_hour_investment_ui::draw_tactical_summary(
-        ctx.first_hour,
-        vec2(rect.x + 415.0, rect.y + 31.0),
-    );
-    draw_badge(
-        Rect::new(rect.right() - 280.0, rect.y + 11.0, 116.0, 28.0),
-        &format!("ROUND {}", ctx.session.tactical.round),
-        Color::new(0.12, 0.22, 0.24, 1.0),
-        dark::TEXT,
-    );
-    let phase = match ctx.session.tactical.phase {
-        TacticalPhase::Player => "COLONY PHASE",
-        TacticalPhase::Enemy => "HOSTILE PHASE",
-    };
-    draw_badge(
-        Rect::new(rect.right() - 152.0, rect.y + 11.0, 136.0, 28.0),
-        phase,
-        Color::new(0.13, 0.29, 0.24, 1.0),
-        dark::TEXT,
-    );
-    draw_ui_text_ex(
-        "TACTICAL VIEW  /  PLANNING",
-        rect.x + 22.0,
-        rect.y - 6.0,
-        TextStyle::new(10.0, Color::new(0.36, 0.78, 0.69, 1.0)).params(),
-    );
-}
-
-fn draw_sidebar(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(920.0, 74.0, 350.0, 608.0);
-    draw_surface_with_title(
-        panel,
-        Some(ctx.mission.name.as_str()),
-        &SurfaceStyle::new(Color::new(0.055, 0.07, 0.08, 0.98))
-            .with_border(1.0, Color::new(0.25, 0.38, 0.40, 0.8))
-            .with_inner_border(6.0, 1.0, Color::new(0.18, 0.28, 0.29, 0.65))
-            .with_header(42.0, Color::new(0.08, 0.105, 0.115, 1.0)),
-        TextStyle::new(17.0, dark::TEXT),
-    );
-    let x = panel.x + 18.0;
-    draw_ui_text_ex(
-        "COMMAND RAIL",
-        x,
-        panel.y - 6.0,
-        TextStyle::new(10.0, Color::new(0.36, 0.78, 0.69, 1.0)).params(),
-    );
-    crate::objective_ui::draw_summary(ctx.session, ctx.mission, x, panel);
-    let selected = ctx.session.selected_unit();
-    if !crate::enemy_intent_ui::draw_inspector(
-        ctx.session,
-        ctx.data.config.max_action_points,
-        panel,
-        ctx.assets,
-        ctx.visuals,
-    ) {
-        draw_ui_text_ex(
-            "SELECTED COLONIST",
-            x,
-            panel.y + 164.0,
-            TextStyle::new(15.0, Color::new(0.43, 0.83, 0.69, 1.0)).params(),
-        );
-        if let Some(unit) = selected {
-            let weapon_name = unit
-                .equipment_ids
-                .iter()
-                .filter_map(|id| ctx.data.equipment.iter().find(|item| &item.id == id))
-                .find(|item| item.slot == "primary")
-                .map_or("Unarmed", |item| item.name.as_str());
-            crate::portrait_ui::draw_character_portrait(
-                ctx.assets,
-                ctx.visuals,
-                Rect::new(x, panel.y + 174.0, 88.0, 96.0),
-                &unit.id,
-                &unit.name,
-                Color::new(0.28, 0.88, 0.72, 1.0),
-            );
-            let detail_x = x + 102.0;
-            draw_ui_text_ex(
-                &unit.name,
-                detail_x,
-                panel.y + 198.0,
-                TextStyle::new(22.0, dark::TEXT_BRIGHT).params(),
-            );
-            draw_ui_text_ex(
-                &format!("{}  //  {}", unit.role, unit.mutation),
-                detail_x,
-                panel.y + 222.0,
-                TextStyle::new(13.0, dark::TEXT_DIM).params(),
-            );
-            draw_ui_text_ex(
-                &format!(
-                    "{} // {} DMG · R{} · {} AP · A{} · M{}",
-                    weapon_name,
-                    unit.effective_weapon_damage(),
-                    unit.weapon_range,
-                    unit.weapon_ap_cost,
-                    unit.effective_armour(),
-                    unit.move_range
-                ),
-                detail_x,
-                panel.y + 242.0,
-                TextStyle::new(11.0, dark::ACCENT).params(),
-            );
-            meter(
-                Rect::new(x, panel.y + 278.0, panel.w - 36.0, 20.0),
-                unit.health as f32,
-                unit.max_health as f32,
-                dark::POSITIVE,
-                Some(&format!("VITALS {}/{}", unit.health, unit.max_health)),
-            );
-            draw_ui_text_ex(
-                &action_status(unit),
-                x,
-                panel.y + 340.0,
-                TextStyle::new(11.0, dark::TEXT_DIM).params(),
-            );
-            meter(
-                Rect::new(x, panel.y + 306.0, panel.w - 36.0, 20.0),
-                unit.action_points as f32,
-                ctx.data.config.max_action_points as f32,
-                Color::new(0.33, 0.65, 0.92, 1.0),
-                Some(&format!("ACTION POINTS {}", unit.action_points)),
-            );
-        } else {
-            draw_ui_text_ex(
-                "Select a colony unit",
-                x,
-                panel.y + 200.0,
-                TextStyle::new(18.0, dark::TEXT_DIM).params(),
-            );
-        }
-    }
-    let readiness = crate::phase_readiness::counts(ctx.session);
-    draw_ui_text_ex(
-        &format!(
-            "ACTION STATUS // READY {} · SPENT {} · INCAP {}",
-            readiness.ready, readiness.spent, readiness.incapacitated
-        ),
-        x,
-        panel.y + 364.0,
-        TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
-    );
-    let objective_enabled = ctx.session.can_interact_selected();
-    let objective_label = crate::objective_ui::interaction_label(
-        ctx.mission.objective_kind,
-        ctx.session.tactical.objective_state,
-        selected,
-        selected.is_some_and(|unit| {
-            crate::tactical::manhattan(unit.position, ctx.session.tactical.objective_tile) <= 1
-        }),
-        objective_enabled,
-    );
-    if button(
-        crate::objective_ui::action_button_bounds(panel),
-        objective_label,
-        objective_enabled,
-        mouse,
-    ) {
-        actions.push(UiAction::InteractObjective);
-    }
-    crate::skill_ui::draw_action_buttons(
-        ctx,
-        selected,
-        Rect::new(x, panel.bottom() - 190.0, panel.w - 36.0, 34.0),
-        mouse,
-        actions,
-    );
-    let mutation_enabled = ctx.session.can_activate_selected_mutation();
-    let mutation_label = mutation_button_label(selected, mutation_enabled);
-    let action_width = (panel.w - 52.0) / 3.0;
-    if button(
-        Rect::new(x, panel.bottom() - 148.0, action_width, 34.0),
-        mutation_label,
-        mutation_enabled,
-        mouse,
-    ) {
-        actions.push(UiAction::ActivateMutation);
-    }
-    crate::class_action_ui::draw_action_button(
-        ctx,
-        selected,
-        Rect::new(
-            x + action_width + 8.0,
-            panel.bottom() - 148.0,
-            action_width,
-            34.0,
-        ),
-        mouse,
-        actions,
-    );
-    crate::equipment_ui::draw_action_button(
-        ctx,
-        selected,
-        Rect::new(
-            x + (action_width + 8.0) * 2.0,
-            panel.bottom() - 148.0,
-            action_width,
-            34.0,
-        ),
-        mouse,
-        actions,
-    );
-    let phase_width = (panel.w - 44.0) * 0.46;
-    let ready = crate::phase_readiness::ready_count(ctx.session);
-    let end_phase_label = if ctx.end_phase_armed {
-        format!("CONFIRM END · {} READY", ready)
-    } else if ready > 0 {
-        format!("END PHASE · {} READY", ready)
-    } else {
-        "END COLONY PHASE".to_owned()
-    };
-    let overwatch_enabled = ctx.session.can_set_selected_overwatch();
-    let overwatch_label = crate::overwatch::overwatch_button_label(selected, overwatch_enabled);
-    if button(
-        Rect::new(x, panel.bottom() - 104.0, phase_width, 44.0),
-        overwatch_label,
-        overwatch_enabled,
-        mouse,
-    ) {
-        actions.push(UiAction::SetOverwatch);
-    }
-    if button(
-        end_phase_button_bounds(panel),
-        &end_phase_label,
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::EndPhase);
-    }
-    draw_ui_text_ex(
-        &format!(
-            "Materials: {}   Round limit: {}",
-            ctx.session.tactical.materials, ctx.mission.round_limit
-        ),
-        x,
-        panel.bottom() - 36.0,
-        TextStyle::new(15.0, dark::TEXT_DIM).params(),
-    );
-    if let Some(event) = ctx.session.tactical.event_log.last() {
-        draw_ui_text_ex(
-            &event_summary(event),
-            x,
-            panel.bottom() - 14.0,
-            TextStyle::new(13.0, dark::TEXT_DIM).params(),
-        );
-    }
-}
-
-fn mutation_button_label(
+pub(crate) fn mutation_button_label(
     selected: Option<&crate::state::UnitState>,
     enabled: bool,
 ) -> &'static str {
@@ -705,71 +455,6 @@ fn mutation_action_label(mutation: &str) -> Option<&'static str> {
         "Symbiotic Organism" => Some("FEEDING FRENZY"),
         _ => None,
     }
-}
-
-fn draw_footer(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
-    let y = 686.0;
-    if button(Rect::new(10.0, y, 82.0, 28.0), "TITLE", true, mouse) {
-        actions.push(UiAction::ReturnToTitle);
-    }
-    if button(Rect::new(98.0, y, 82.0, 28.0), "SAVE [S]", true, mouse) {
-        actions.push(UiAction::Save);
-    }
-    if button(
-        Rect::new(186.0, y, 82.0, 28.0),
-        "LOAD [L]",
-        ctx.save_exists,
-        mouse,
-    ) {
-        actions.push(UiAction::Load);
-    }
-    if button(
-        Rect::new(274.0, y, 110.0, 28.0),
-        if ctx.delete_save_armed {
-            "CONFIRM DELETE"
-        } else {
-            "DELETE SAVE"
-        },
-        ctx.save_exists,
-        mouse,
-    ) {
-        actions.push(UiAction::DeleteSave);
-    }
-    if button(Rect::new(390.0, y, 82.0, 28.0), "HELP [H]", true, mouse) {
-        actions.push(UiAction::ToggleTacticalHelp);
-    }
-    if button(Rect::new(478.0, y, 78.0, 28.0), "LOG [B]", true, mouse) {
-        actions.push(UiAction::ToggleBattleLog);
-    }
-    if button(Rect::new(562.0, y, 96.0, 28.0), "SETTINGS", true, mouse) {
-        actions.push(UiAction::ToggleSettings);
-    }
-    if button(
-        Rect::new(664.0, y, 136.0, 28.0),
-        "NEXT READY [TAB]",
-        crate::phase_readiness::ready_count(ctx.session) > 0,
-        mouse,
-    ) {
-        actions.push(UiAction::SelectNextReady);
-    }
-    draw_ui_text_ex(
-        &format!(
-            "{} campaign  //  {} assets  //  tap a hostile to inspect its forecast",
-            if ctx.mission.name.starts_with("ESCALATION:") {
-                "Escalation"
-            } else if ctx.mission.name.starts_with("ADAPTATION:") {
-                "Adaptation"
-            } else if ctx.mission.name.starts_with("CONTACT:") {
-                "Contact"
-            } else {
-                "Isolation"
-            },
-            ctx.assets.len()
-        ),
-        710.0,
-        y + 20.0,
-        TextStyle::new(11.0, dark::TEXT_DIM).params(),
-    );
 }
 
 pub fn tile_move_from_keys() -> Option<(i32, i32)> {

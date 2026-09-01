@@ -112,7 +112,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 59 | threat_briefing | `ui_threat_briefing.png` | 190720 | `b6c4504edbabe2d9d1cbfa8f6cdf5e267ce360bfe7cec7b8f6a54ffa412f6fdd` |
 | 60 | loadout_briefing | `ui_loadout_briefing.png` | 199667 | `88af477934ba34fade160978faa80f6af7245b216415a30ae62fad2a6ad697fe` |
 | 61 | pressure | `ui_pressure.png` | 204992 | `d031961db941b0954669b96c5cb9d6e9c6ce76179a1333fcae0682e011a93b8b` |
-| 62 | gameplay | `ui_gameplay.png` | 1186905 | `8703ccd6267255c5dd66aaf9eae1480c765c0ac4213ace1d9f2cef84260d1ce7` |
+| 62 | gameplay | `ui_gameplay.png` | 1532790 | `f621a287293cfabba9380f92015c8759808fafdf1c3271975a3601eeb90c68ae` |
 | 63 | first_hour_tactical | `ui_first_hour_tactical.png` | 1192657 | `a92b9d1f8884be6b1f25d8319010a46c3c1a7bf51265607494911f17e2eb4310` |
 | 64 | first_hour_attack | `ui_first_hour_attack.png` | 1111735 | `d07f213deabca2ab14b3c4d6e4fce82e6571b23cd69b50264d4c37669631c2c8` |
 | 65 | first_hour_enemy_phase | `ui_first_hour_enemy_phase.png` | 1201693 | `61957156a5d110495bdc9d40c9d6453994a5e388e601e66f4bc69ddeb5c9d62f` |
@@ -125,7 +125,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 72 | directorate_ability | `ui_directorate_ability.png` | 1245577 | `750d2b76c3f28a1f87c8aad00501d002b1dbd78b268346e55d13cc726c7fa279` |
 | 73 | ascendant_ability | `ui_ascendant_ability.png` | 1245862 | `18308e46fe14a7b7dd1d0ab32f1be46711bad7d951d346320786a3e7bbbaddac` |
 | 74 | hazard | `ui_hazard.png` | 1251994 | `70b67016c121653dfb138bcbc94a7e611b1f6832f66667fe499334a856d9a767` |
-| 75 | intent | `ui_intent.png` | 1152982 | `ef5a65d3c7bb7a277014fbe35421a21731f7445f687a1278a417ba850fcd70e1` |
+| 75 | intent | `ui_intent.png` | 1593440 | `0593330e0f9ca5ec54a6abaaf9331ca761ba6f0dd44a20fe0658f4058f6175f2` |
 | 76 | action_preview | `ui_action_preview.png` | 1114299 | `f1f43555ee366636ce8b7f9dacece63b361856dab73731c442e54080d04ae654` |
 | 77 | movement_route | `ui_movement_route.png` | 1148283 | `d8aeffdf433431c5c8514795e4ba55a693faf2aa6f9b0b28c29dcafeb8e0540f` |
 | 78 | cover_edges | `ui_cover_edges.png` | 1187950 | `daa9235182868acccf7c882b9ba2bbc06749af85fbe0407504f9f08dc59df4ad` |

@@ -212,6 +212,7 @@ impl Game {
 
     pub(super) fn capture_vitality_markers(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
         for unit in &mut self.session.tactical.units {
             match unit.id.as_str() {
                 "kira_voss" => unit.health = (unit.max_health / 4).max(1),
@@ -233,6 +234,7 @@ impl Game {
 
     pub(super) fn capture_readiness_markers(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
         for unit in self
             .session
             .tactical
@@ -262,6 +264,7 @@ impl Game {
         );
         self.session = GameSession::new(&self.data.config, &self.active_mission, &roster);
         self.state = AppState::Tactical;
+        self.tactical_panel_open = true;
     }
 
     pub(super) fn capture_phase_replay(&mut self) {

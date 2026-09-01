@@ -10,29 +10,24 @@ use crate::state::{GameSession, ObjectiveState};
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
-use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
+use macroquad_toolkit::prelude::{draw_surface, SurfaceStyle, TextStyle};
 
 mod targeting_card;
 #[cfg(test)]
 mod tests;
 
 fn tactical_panel() -> Rect {
-    Rect::new(10.0, 74.0, 900.0, 608.0)
+    crate::ui::tactical_world_rect()
 }
 
 fn tactical_viewport(panel: Rect) -> Rect {
-    Rect::new(
-        panel.x + 8.0,
-        panel.y + 32.0,
-        panel.w - 16.0,
-        panel.h - 40.0,
-    )
+    Rect::new(panel.x + 8.0, panel.y + 8.0, panel.w - 96.0, panel.h - 16.0)
 }
 
 fn camera_controls_origin(panel: Rect) -> Vec2 {
     vec2(
-        panel.right() - crate::camera_controls::STRIP_WIDTH - 6.0,
-        panel.y,
+        panel.right() - crate::camera_controls::STRIP_WIDTH - 4.0,
+        panel.y + 10.0,
     )
 }
 
@@ -53,27 +48,28 @@ pub(crate) fn draw(
     actions: &mut Vec<UiAction>,
 ) -> bool {
     let panel = tactical_panel();
-    draw_surface_with_title(
+    draw_surface(
         panel,
-        Some("OUTER SETTLEMENT // TACTICAL CAMERA"),
         &SurfaceStyle::new(Color::new(0.018, 0.034, 0.040, 0.99))
             .with_border(1.0, Color::new(0.20, 0.50, 0.48, 0.9))
             .with_inner_border(6.0, 1.0, Color::new(0.16, 0.28, 0.28, 0.7))
-            .with_header(28.0, Color::new(0.06, 0.10, 0.11, 1.0)),
-        TextStyle::new(13.0, dark::TEXT),
+            .with_left_accent(4.0, Color::new(0.18, 0.54, 0.48, 0.9)),
     );
     let grid_rect = tactical_viewport(panel);
+    draw_edge_strip(panel);
+    let map_input_enabled = input_enabled
+        && !(ctx.tactical_panel_open && crate::ui::tactical_command_panel_rect().contains(mouse));
     let camera_control_clicked = crate::camera_controls::draw(
         camera,
         grid_rect,
         mouse,
         camera_controls_origin(panel),
-        input_enabled && !camera.primary_gesture_active(),
+        map_input_enabled && !camera.primary_gesture_active(),
     );
-    if input_enabled {
+    if map_input_enabled {
         camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     }
-    let camera_dragged = if input_enabled {
+    let camera_dragged = if map_input_enabled {
         camera.update(grid_rect, mouse)
     } else {
         camera.clear_pointer_interaction();
@@ -193,7 +189,7 @@ pub(crate) fn draw(
         crate::action_preview_ui::PreviewInteraction {
             mouse,
             actions,
-            interactive: input_enabled && ctx.targeting.is_none(),
+            interactive: map_input_enabled && ctx.targeting.is_none(),
         },
     );
     if ctx.targeting.is_some() {
@@ -213,10 +209,24 @@ pub(crate) fn draw(
         view,
         grid_rect,
         mouse,
-        suppress_map_click || preview_input_consumed,
+        suppress_map_click || preview_input_consumed || !map_input_enabled,
         actions,
     );
     camera_dragged
+}
+
+fn draw_edge_strip(panel: Rect) {
+    let rect = Rect::new(
+        panel.right() - crate::camera_controls::STRIP_WIDTH - 10.0,
+        panel.y + 1.0,
+        crate::camera_controls::STRIP_WIDTH + 9.0,
+        panel.h - 2.0,
+    );
+    draw_surface(
+        rect,
+        &SurfaceStyle::new(Color::new(0.018, 0.042, 0.046, 0.94))
+            .with_border(1.0, Color::new(0.14, 0.34, 0.34, 0.72)),
+    );
 }
 
 fn draw_backdrop(rect: Rect) {

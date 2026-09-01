@@ -184,6 +184,7 @@ impl Game {
             "first_hour_enemy_phase" => self.capture_first_hour_enemy_phase(),
             "first_hour_objective" => {
                 self.reset_capture_session(AppState::Tactical);
+                self.tactical_panel_open = true;
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Objective;
                 let objective = self.session.tactical.objective_tile;
@@ -205,6 +206,7 @@ impl Game {
             "first_hour_replay" => self.capture_first_hour_replay(),
             "first_hour_ability" => {
                 self.reset_capture_session(AppState::Tactical);
+                self.tactical_panel_open = true;
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
                 self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Ability;
                 super::first_hour_flow::prepare_first_hour_ability_selection(&mut self.session);
@@ -340,6 +342,7 @@ impl Game {
         self.active_mission.hazards = layout.hazards;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
     }
 
     fn capture_active_trace(&mut self) {
@@ -374,6 +377,7 @@ impl Game {
 
     fn capture_equipment_target(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
         let kira_position = self
             .session
             .unit("kira_voss")
@@ -415,10 +419,12 @@ impl Game {
         });
         kira.equipment_ids.push("needle_carbine".to_owned());
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
     }
 
     fn capture_overwatch(&mut self) {
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
         self.session
             .set_selected_overwatch()
             .expect("capture colonist can enter overwatch");
@@ -460,6 +466,7 @@ impl Game {
         self.active_mission.hazards = layout.hazards;
         self.active_mission.cover_edges = layout.cover_edges;
         self.reset_capture_session(AppState::Tactical);
+        self.tactical_panel_open = true;
         let evac = self.session.tactical.objective_tile;
         let colonist = self
             .session
@@ -495,6 +502,7 @@ impl Game {
             unit_id: "ilya_reed".to_owned(),
             target_kind: crate::data::TechniqueTarget::Ally,
         });
+        self.tactical_panel_open = true;
     }
 }
 

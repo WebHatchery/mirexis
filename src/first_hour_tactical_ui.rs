@@ -8,8 +8,6 @@ use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
-const TACTICAL_PANEL: Rect = Rect::new(920.0, 74.0, 350.0, 608.0);
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum AbilityFocusSlot {
     Mutation,
@@ -96,28 +94,37 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
     if !guidance_is_active(ctx) {
         return;
     }
-    let x = TACTICAL_PANEL.x + 18.0;
-    let rect = match ctx.first_hour.lesson {
-        TacticalLesson::EnemyPhase => crate::ui::end_phase_button_bounds(TACTICAL_PANEL),
-        TacticalLesson::Ability => {
-            let Some(slot) = ability_focus_slot(ctx.session) else {
-                return;
-            };
-            ability_focus_rect(x, TACTICAL_PANEL.bottom() - 148.0, slot)
+    let panel = crate::ui::tactical_command_panel_rect();
+    let x = panel.x + 18.0;
+    let rect = if !ctx.tactical_panel_open
+        && matches!(
+            ctx.first_hour.lesson,
+            TacticalLesson::EnemyPhase | TacticalLesson::Objective | TacticalLesson::Ability
+        ) {
+        crate::tactical_hud::command_button_bounds()
+    } else {
+        match ctx.first_hour.lesson {
+            TacticalLesson::EnemyPhase => crate::ui::end_phase_button_bounds(panel),
+            TacticalLesson::Ability => {
+                let Some(slot) = ability_focus_slot(ctx.session) else {
+                    return;
+                };
+                ability_focus_rect(x, panel.bottom() - 148.0, slot)
+            }
+            TacticalLesson::Attack | TacticalLesson::ApplyLearning => {
+                let Some(rect) = attack_focus_rect(ctx.session) else {
+                    return;
+                };
+                rect
+            }
+            TacticalLesson::Objective => {
+                let Some(rect) = objective_focus_rect(ctx.session) else {
+                    return;
+                };
+                rect
+            }
+            TacticalLesson::Select | TacticalLesson::MoveToCover => return,
         }
-        TacticalLesson::Attack | TacticalLesson::ApplyLearning => {
-            let Some(rect) = attack_focus_rect(ctx.session) else {
-                return;
-            };
-            rect
-        }
-        TacticalLesson::Objective => {
-            let Some(rect) = objective_focus_rect(ctx.session) else {
-                return;
-            };
-            rect
-        }
-        TacticalLesson::Select | TacticalLesson::MoveToCover => return,
     };
     draw_focus(rect);
 }
@@ -162,7 +169,7 @@ fn draw_focus(rect: Rect) {
 fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
     crate::action_preview_ui::attack_preview_is_valid(session, session.tactical.selected_tile).then(
         || {
-            let panel = Rect::new(10.0, 74.0, 900.0, 608.0);
+            let panel = crate::ui::tactical_world_rect();
             let card = crate::action_preview_ui::attack_card_bounds(panel);
             crate::action_preview_ui::attack_button_bounds(card)
         },
@@ -172,7 +179,9 @@ fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
 fn objective_focus_rect(session: &GameSession) -> Option<Rect> {
     session
         .can_interact_selected()
-        .then_some(crate::objective_ui::action_button_bounds(TACTICAL_PANEL))
+        .then_some(crate::objective_ui::action_button_bounds(
+            crate::ui::tactical_command_panel_rect(),
+        ))
 }
 
 fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
@@ -195,7 +204,7 @@ fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
 }
 
 fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
-    let action_width = (TACTICAL_PANEL.w - 52.0) / 3.0;
+    let action_width = (crate::ui::tactical_command_panel_rect().w - 52.0) / 3.0;
     let offset = match slot {
         AbilityFocusSlot::Mutation => 0.0,
         AbilityFocusSlot::ClassAction => action_width + 8.0,
