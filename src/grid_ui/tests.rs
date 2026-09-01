@@ -363,19 +363,6 @@ fn primary_tracking_requires_an_inside_press_and_survives_boundary_excursions() 
 }
 
 #[test]
-fn visible_camera_controls_nudge_at_screen_scale_and_zoom_from_center() {
-    let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
-    let mut camera = WorldCamera::tactical_start(TilePos::new(8, 5));
-    camera.zoom = 1.5;
-    let before = camera.center;
-    camera.nudge(vec2(1.0, -1.0));
-    assert_eq!(camera.center, before + vec2(64.0, -64.0));
-    camera.zoom_center(viewport, 1.25);
-    assert_eq!(camera.zoom, 1.85);
-    assert_eq!(camera.center, before + vec2(64.0, -64.0));
-}
-
-#[test]
 fn camera_clamp_keeps_the_large_world_in_view_at_every_zoom_limit() {
     let viewport = Rect::new(18.0, 106.0, 884.0, 568.0);
     let world_min = vec2(-40.0 * TACTICAL_HALF_WIDTH, -TACTICAL_HALF_HEIGHT);

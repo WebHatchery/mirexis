@@ -34,7 +34,7 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         &[
             "Tap/click a colonist to make them active.",
             "Green tiles are reachable this activation.",
-            "Pan with < ^ v >; zoom with -/+; drag/wheel too.",
+            "Drag to pan; use the mouse wheel to zoom.",
             "Tap a hostile to inspect its forecast, then tap ATTACK to fire.",
         ],
     );

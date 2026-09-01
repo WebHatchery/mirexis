@@ -63,7 +63,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             camera,
             viewport,
             mouse,
-            camera_controls_origin(panel),
+            zoom_controls_origin(panel),
             !camera.primary_gesture_active(),
         );
     let camera_dragged = if interaction_enabled {
@@ -198,7 +198,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
             )
         } else {
             format!(
-                "TAP ANY GROUND POINT // HOLD THE PAD TO MOVE // {}%",
+                "TAP ANY GROUND POINT TO WALK // DRAG/WHEEL TO SCAN // {}%",
                 (camera.zoom * 100.0) as i32
             )
         },
@@ -210,7 +210,7 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     camera_dragged
 }
 
-fn camera_controls_origin(panel: Rect) -> Vec2 {
+fn zoom_controls_origin(panel: Rect) -> Vec2 {
     vec2(panel.right() - 104.0, panel.bottom() - 56.0)
 }
 

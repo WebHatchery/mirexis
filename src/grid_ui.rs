@@ -198,10 +198,6 @@ impl WorldCamera {
         self.center -= delta / self.zoom;
     }
 
-    pub(crate) fn nudge(&mut self, direction: Vec2) {
-        self.center += direction * 96.0 / self.zoom;
-    }
-
     pub(crate) fn zoom_center(&mut self, viewport: Rect, factor: f32) {
         self.zoom_at(viewport, viewport.center(), factor);
     }

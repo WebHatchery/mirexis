@@ -1,4 +1,4 @@
-//! Visible touch controls for colony walking and construction mode.
+//! Visible touch controls for colony interaction and construction mode.
 
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
@@ -6,7 +6,7 @@ use crate::colony_exploration::ColonyExplorer;
 use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
-use macroquad::prelude::{is_mouse_button_down, vec2, MouseButton, Rect, Vec2};
+use macroquad::prelude::{Rect, Vec2};
 
 fn build_button_label(
     kind: BuildingKind,
@@ -140,23 +140,6 @@ pub(super) fn draw_exploration_controls(
         }
         return;
     }
-    let mut movement = Vec2::ZERO;
-    for (index, (label, direction)) in [
-        ("NW", vec2(-1.0, 0.0)),
-        ("NE", vec2(0.0, -1.0)),
-        ("SW", vec2(0.0, 1.0)),
-        ("SE", vec2(1.0, 0.0)),
-    ]
-    .into_iter()
-    .enumerate()
-    {
-        let rect = Rect::new(20.0 + index as f32 * 46.0, 654.0, 42.0, 42.0);
-        button(rect, label, true, mouse);
-        if rect.contains(mouse) && is_mouse_button_down(MouseButton::Left) {
-            movement += direction;
-        }
-    }
-    explorer.set_touch_direction(movement.normalize_or_zero());
     if button(
         Rect::new(210.0, 654.0, 112.0, 42.0),
         "TALK",

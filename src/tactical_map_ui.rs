@@ -21,14 +21,7 @@ fn tactical_panel() -> Rect {
 }
 
 fn tactical_viewport(panel: Rect) -> Rect {
-    Rect::new(panel.x + 8.0, panel.y + 8.0, panel.w - 96.0, panel.h - 16.0)
-}
-
-fn camera_controls_origin(panel: Rect) -> Vec2 {
-    vec2(
-        panel.right() - crate::camera_controls::STRIP_WIDTH - 4.0,
-        panel.y + 10.0,
-    )
+    Rect::new(panel.x + 8.0, panel.y + 8.0, panel.w - 16.0, panel.h - 16.0)
 }
 
 fn camera_art_insets(zoom: f32) -> CameraInsets {
@@ -56,16 +49,8 @@ pub(crate) fn draw(
             .with_left_accent(4.0, Color::new(0.18, 0.54, 0.48, 0.9)),
     );
     let grid_rect = tactical_viewport(panel);
-    draw_edge_strip(panel);
     let map_input_enabled = input_enabled
         && !(ctx.tactical_panel_open && crate::ui::tactical_command_panel_rect().contains(mouse));
-    let camera_control_clicked = crate::camera_controls::draw(
-        camera,
-        grid_rect,
-        mouse,
-        camera_controls_origin(panel),
-        map_input_enabled && !camera.primary_gesture_active(),
-    );
     if map_input_enabled {
         camera.reveal_changed_tactical_selection(ctx.session.tactical.selected_tile, grid_rect);
     }
@@ -75,10 +60,7 @@ pub(crate) fn draw(
         camera.clear_pointer_interaction();
         false
     };
-    if camera_control_clicked {
-        camera.guard_next_primary_release();
-    }
-    let suppress_map_click = !input_enabled || camera_control_clicked || camera_dragged;
+    let suppress_map_click = !input_enabled || camera_dragged;
     camera.clamp_isometric_with_insets(
         ctx.session.tactical.fog.width,
         ctx.session.tactical.fog.height,
@@ -197,7 +179,7 @@ pub(crate) fn draw(
     }
     draw_ui_text_ex(
         &format!(
-            "DRAG MAP // PAN < ^ v > // WHEEL OR -/+ ZOOM // {:>3}%",
+            "TAP TILE TO MOVE OR INSPECT // DRAG TO PAN // WHEEL TO ZOOM // {:>3}%",
             (camera.zoom * 100.0) as i32
         ),
         panel.x + 22.0,
@@ -213,20 +195,6 @@ pub(crate) fn draw(
         actions,
     );
     camera_dragged
-}
-
-fn draw_edge_strip(panel: Rect) {
-    let rect = Rect::new(
-        panel.right() - crate::camera_controls::STRIP_WIDTH - 10.0,
-        panel.y + 1.0,
-        crate::camera_controls::STRIP_WIDTH + 9.0,
-        panel.h - 2.0,
-    );
-    draw_surface(
-        rect,
-        &SurfaceStyle::new(Color::new(0.018, 0.042, 0.046, 0.94))
-            .with_border(1.0, Color::new(0.14, 0.34, 0.34, 0.72)),
-    );
 }
 
 fn draw_backdrop(rect: Rect) {

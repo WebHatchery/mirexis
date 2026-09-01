@@ -3,22 +3,13 @@ use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
 use crate::state::GameSession;
 
 #[test]
-fn visible_tactical_camera_controls_stay_inside_the_edge_strip_and_outside_the_map() {
+fn tactical_viewport_uses_the_world_panel_without_a_control_strip() {
     let panel = tactical_panel();
     let viewport = tactical_viewport(panel);
-    let origin = camera_controls_origin(panel);
-    let bounds = Rect::new(
-        origin.x,
-        origin.y,
-        crate::camera_controls::STRIP_WIDTH,
-        crate::camera_controls::CONTROL_HEIGHT * 3.0 + 4.0,
-    );
-
-    assert!(bounds.x >= panel.x);
-    assert!(bounds.right() <= panel.right());
-    assert!(bounds.y >= panel.y);
-    assert!(bounds.x >= viewport.right());
-    assert!(bounds.bottom() <= panel.bottom());
+    assert_eq!(viewport.x, panel.x + 8.0);
+    assert_eq!(viewport.y, panel.y + 8.0);
+    assert_eq!(viewport.right(), panel.right() - 8.0);
+    assert_eq!(viewport.bottom(), panel.bottom() - 8.0);
 }
 
 #[test]
