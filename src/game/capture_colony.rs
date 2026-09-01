@@ -48,4 +48,13 @@ impl Game {
             .expect("capture plot is open");
         self.state = AppState::Colony;
     }
+
+    pub(super) fn capture_facility_upgrades(&mut self) {
+        self.campaign.colony.ensure_gene_lab();
+        self.campaign.colony.resources.materials = 120;
+        self.campaign.colony.resources.power = 20;
+        self.colony_operations_open = true;
+        self.facility_upgrade_open = true;
+        self.state = AppState::Colony;
+    }
 }

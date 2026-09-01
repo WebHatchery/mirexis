@@ -24,6 +24,7 @@ impl Game {
                 self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
                 self.state = AppState::Colony;
             }
+            "facility_upgrades" => self.capture_facility_upgrades(),
             "settings" => {
                 self.state = AppState::Colony;
                 self.show_settings = true;

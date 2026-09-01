@@ -36,6 +36,7 @@ Completion rule: the overhaul cannot complete while any row is not `PASS`.
 | S04 | Loadout briefing | Equipment silhouettes and comparable readiness changes | Text-only loadout summary | PASS |
 | S05 | Colony | Inhabited settlement, resources, operations, interaction feedback | Prototype island; incomplete state/evolution grammar | PASS |
 | S06 | Construction | Foundations/scaffold/progress/cost/valid placement feedback | Procedural blueprint marks only | PASS |
+| S06A | Facility upgrades | Seven facilities, readable branch effects, status/cost context, and touch-visible queue controls | Upgrade branches overlapped their facility headers and queue controls obscured descriptions | PASS |
 | S07 | Roster | Portrait-led recruit identity, class/equipment/mutation and history hierarchy, with touch-readable equipment inspection | Rebuild portrait remains procedural and equipment detail depended on hover | PASS |
 | S08 | Relationships | Portrait pairs, bond state, effects and consistent navigation | Roster screen with text emphasis | PASS |
 | S09 | Research | Technology identity, non-linear choice visibility, effects, costs and unlocked states | Colony grid plus command buttons | PASS |
@@ -69,6 +70,7 @@ Each row must have a post-overhaul PNG in the final capture directory and pass t
 | title_controller | Title/controller focus | No visible gamepad focus or controller-specific confirmation cue | `ui_title_controller.png` | PASS |
 | title_hover | Title/mouse hover | Hover treatment not represented in deterministic evidence | `ui_title_hover.png` | PASS |
 | colony | Colony | Prototype island lacks full inhabited/state detail | `ui_colony.png` | PASS |
+| facility_upgrades | Facility-upgrade modal | Facility headers overlapped the first branch row and descriptions ran beneath queue controls | `ui_facility_upgrades.png` | PASS |
 | settings | Settings overlay | No canonical visual reference for persistent audio/readability controls | `ui_settings.png` | PASS |
 | field_notes | Field Notes archive | Acknowledged story beats could not be revisited after dialogue | `ui_field_notes.png` | PASS |
 | memorial | Memorial Register | Permanent costs, failed objectives, and character legacies were only visible in specialist screens | `ui_memorial.png` | PASS |
