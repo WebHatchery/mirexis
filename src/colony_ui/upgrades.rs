@@ -5,16 +5,20 @@ use crate::colony::BuildingKind;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
-use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
+use macroquad_toolkit::prelude::{
+    dark, draw_chamfered_surface, draw_surface_with_title, ChamferedSurfaceStyle, SurfaceStyle,
+    TextStyle,
+};
+use macroquad_toolkit::ui::RectExt;
 
 const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
 const UPGRADE_PANEL: Rect = Rect::new(862.0, 44.0, 408.0, 660.0);
 const CONTENT_RECT: Rect = Rect::new(884.0, 0.0, 364.0, 0.0);
 const FACILITY_LIST_Y: f32 = 164.0;
-const FACILITY_ROW_STEP: f32 = 62.0;
-const FACILITY_ROW_HEIGHT: f32 = 56.0;
-const OPTION_BUTTON_X: f32 = 1110.0;
-const OPTION_BUTTON_WIDTH: f32 = 120.0;
+const FACILITY_ROW_STEP: f32 = 66.0;
+const FACILITY_ROW_HEIGHT: f32 = 62.0;
+const OPTION_CARD_WIDTH: f32 = 170.0;
+const OPTION_CARD_HEIGHT: f32 = 42.0;
 const UPGRADEABLE_FACILITIES: [BuildingKind; 7] = [
     BuildingKind::CommandCentre,
     BuildingKind::Barracks,
@@ -80,13 +84,13 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         TextStyle::new(17.0, dark::TEXT),
     );
     super::draw_ui_text_ex(
-        "SELECT ONE BRANCH PER FACILITY",
+        "CHOOSE ONE UPGRADE FOR EACH FACILITY",
         CONTENT_RECT.x,
         110.0,
         TextStyle::new(12.0, dark::TEXT_BRIGHT).params(),
     );
     super::draw_ui_text_ex(
-        "PROJECTS COMPLETE AFTER THE NEXT OPERATION",
+        "PROJECT RESOLVES AFTER THE NEXT OPERATION",
         CONTENT_RECT.x,
         127.0,
         TextStyle::new(10.0, dark::TEXT_DIM).params(),
@@ -95,26 +99,33 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
         CONTENT_RECT.x,
         136.0,
         CONTENT_RECT.w,
-        20.0,
+        22.0,
         Color::new(0.025, 0.095, 0.095, 1.0),
     );
     draw_rectangle_lines(
         CONTENT_RECT.x,
         136.0,
         CONTENT_RECT.w,
-        20.0,
+        22.0,
         1.0,
         Color::new(0.18, 0.54, 0.49, 0.75),
     );
     super::draw_ui_text_ex(
-        &format!(
-            "MATERIALS {:>3}  //  COST {} MAT PER PROJECT",
-            campaign.colony.resources.materials,
-            UPGRADEABLE_FACILITIES[0].upgrade_cost()
-        ),
+        &format!("{} MATERIALS", campaign.colony.resources.materials),
         CONTENT_RECT.x + 10.0,
-        150.0,
-        TextStyle::new(10.0, dark::ACCENT).params(),
+        152.0,
+        TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+    );
+    let cost_note = format!(
+        "EACH LEVEL 2 UPGRADE COSTS {}",
+        UPGRADEABLE_FACILITIES[0].upgrade_cost()
+    );
+    let cost_width = measure_text(&cost_note, None, 9, 1.0).width;
+    super::draw_ui_text_ex(
+        &cost_note,
+        CONTENT_RECT.right() - cost_width - 10.0,
+        151.0,
+        TextStyle::new(9.0, dark::ACCENT).params(),
     );
 
     let mut row_index = 0;
@@ -186,14 +197,14 @@ fn draw_facility_row(
     super::draw_ui_text_ex(
         &kind.name().to_uppercase(),
         row.x + 12.0,
-        row.y + 15.0,
+        row.y + 14.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
     let status_width = measure_text(status, None, 9, 1.0).width;
     super::draw_ui_text_ex(
         status,
         row.right() - status_width - 10.0,
-        row.y + 15.0,
+        row.y + 14.0,
         TextStyle::new(9.0, facility_status_color(status)).params(),
     );
 
@@ -207,57 +218,146 @@ fn draw_facility_row(
         kind.upgrade_cost(),
     );
     for (option_index, option) in kind.upgrade_options().iter().enumerate() {
-        let option_row = Rect::new(
-            row.x + 8.0,
-            row.y + 20.0 + option_index as f32 * 18.0,
-            row.w - 16.0,
-            17.0,
+        let option_card = Rect::new(
+            row.x + 8.0 + option_index as f32 * (OPTION_CARD_WIDTH + 8.0),
+            row.y + 19.0,
+            OPTION_CARD_WIDTH,
+            OPTION_CARD_HEIGHT,
         );
-        draw_rectangle(
-            option_row.x,
-            option_row.y,
-            option_row.w,
-            option_row.h,
-            Color::new(0.035, 0.085, 0.085, 1.0),
-        );
-        draw_rectangle(
-            option_row.x,
-            option_row.y,
-            2.0,
-            option_row.h,
-            if option_index == 0 {
-                dark::ACCENT
-            } else {
-                Color::new(0.24, 0.48, 0.45, 1.0)
-            },
-        );
-        let label = fit_text(
-            &format!("{} // {}", option.name.to_uppercase(), option.description),
-            198.0,
-            9,
-        );
-        super::draw_ui_text_ex(
-            &label,
-            option_row.x + 8.0,
-            option_row.y + 12.0,
-            TextStyle::new(9.0, dark::TEXT).params(),
-        );
-        if button(
-            Rect::new(
-                OPTION_BUTTON_X,
-                option_row.y,
-                OPTION_BUTTON_WIDTH,
-                option_row.h,
-            ),
+        draw_option_card(
+            option_card,
+            option_index,
+            option,
             &queue_label,
             can_queue,
+            kind.upgrade_cost(),
             mouse,
-        ) {
-            actions.push(UiAction::QueueFacilityUpgrade(
-                building.id.clone(),
-                option.id.to_owned(),
-            ));
-        }
+            building,
+            actions,
+        );
+    }
+}
+
+fn draw_option_card(
+    card: Rect,
+    option_index: usize,
+    option: &crate::colony::FacilityUpgradeOption,
+    queue_label: &str,
+    can_queue: bool,
+    cost: i32,
+    mouse: Vec2,
+    building: &crate::colony::BuildingState,
+    actions: &mut Vec<UiAction>,
+) {
+    let action_rect = Rect::new(card.x + 98.0, card.y + 25.0, 64.0, 16.0);
+    let hovered = can_queue && action_rect.contains_point(mouse);
+    draw_rectangle(
+        card.x,
+        card.y,
+        card.w,
+        card.h,
+        if hovered {
+            Color::new(0.055, 0.13, 0.13, 1.0)
+        } else {
+            Color::new(0.035, 0.085, 0.085, 1.0)
+        },
+    );
+    draw_rectangle_lines(
+        card.x,
+        card.y,
+        card.w,
+        card.h,
+        1.0,
+        if hovered {
+            dark::ACCENT
+        } else {
+            Color::new(0.15, 0.34, 0.33, 0.95)
+        },
+    );
+    draw_rectangle(
+        card.x,
+        card.y,
+        2.0,
+        card.h,
+        if option_index == 0 {
+            dark::ACCENT
+        } else {
+            Color::new(0.24, 0.48, 0.45, 1.0)
+        },
+    );
+    super::draw_ui_text_ex(
+        option.name,
+        card.x + 8.0,
+        card.y + 11.0,
+        TextStyle::new(11.0, dark::TEXT_BRIGHT).params(),
+    );
+    super::draw_ui_text_ex(
+        &fit_text(option.description, 154.0, 8),
+        card.x + 8.0,
+        card.y + 22.0,
+        TextStyle::new(8.0, dark::TEXT_DIM).params(),
+    );
+    super::draw_ui_text_ex(
+        &format!("{cost} MAT"),
+        card.x + 8.0,
+        card.y + 36.0,
+        TextStyle::new(8.0, dark::ACCENT).params(),
+    );
+    if choice_action_button(
+        action_rect,
+        compact_action_label(queue_label),
+        can_queue,
+        mouse,
+    ) {
+        actions.push(UiAction::QueueFacilityUpgrade(
+            building.id.clone(),
+            option.id.to_owned(),
+        ));
+    }
+}
+
+fn choice_action_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
+    let hovered = enabled && rect.contains_point(mouse);
+    let fill = if !enabled {
+        Color::new(0.045, 0.075, 0.075, 1.0)
+    } else if hovered {
+        Color::new(0.10, 0.31, 0.29, 1.0)
+    } else {
+        Color::new(0.075, 0.20, 0.20, 1.0)
+    };
+    draw_chamfered_surface(
+        rect,
+        &ChamferedSurfaceStyle::new(
+            fill,
+            if hovered {
+                dark::ACCENT
+            } else if enabled {
+                Color::new(0.22, 0.58, 0.53, 1.0)
+            } else {
+                Color::new(0.12, 0.20, 0.20, 1.0)
+            },
+        )
+        .with_corner(4.0)
+        .with_border_width(if hovered { 2.0 } else { 1.0 }),
+    );
+    let text_width = measure_text(label, None, 9, 1.0).width;
+    super::draw_ui_text_ex(
+        label,
+        rect.x + (rect.w - text_width) * 0.5,
+        rect.y + 11.5,
+        TextStyle::new(9.0, if enabled { dark::TEXT } else { dark::TEXT_DIM }).params(),
+    );
+    hovered && is_mouse_button_released(MouseButton::Left)
+}
+
+fn compact_action_label(label: &str) -> &str {
+    match label {
+        "LEVEL 2 ACTIVE" => "ACTIVE",
+        "REPAIR FIRST" => "REPAIR",
+        "PROJECT QUEUED" => "QUEUED",
+        "NEED POWER" => "POWER",
+        "NEED 55 MAT" => "NEED MAT",
+        _ => "QUEUE",
     }
 }
 

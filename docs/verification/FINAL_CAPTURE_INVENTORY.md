@@ -55,7 +55,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 2 | title_controller | `ui_title_controller.png` | 444314 | `0ef437423c16cd2e8bbe2111539eda265081ccbb99767924690de8aa845dcf10` |
 | 3 | title_hover | `ui_title_hover.png` | 441788 | `f789766f7c06c340799fa6ea87e6456a321093019eb9113368b7591131e96d87` |
 | 4 | colony | `ui_colony.png` | 872019 | `8422d11f722dac9d7f07146c624e50e43d0b2373579a34ca02bb1e015099e1b2` |
-| 5 | facility_upgrades | `ui_facility_upgrades.png` | 720324 | `660284907e2e0cd30c37840c4073f73f58171d338580231f9b7208b26b7f52c5` |
+| 5 | facility_upgrades | `ui_facility_upgrades.png` | 696881 | `6647a2ad1f948954b7a6b40dccf20068be6db10d9fce55b660cab468a0a2b865` |
 | 6 | settings | `ui_settings.png` | 230015 | `39835fd8a7028594e4aaf62fbc27989381fa73530192fd6a9c19ea11cb7e1b60` |
 | 7 | field_notes | `ui_field_notes.png` | 124905 | `13cc8f3d57d3fc1976856e606dc41029b9918f41b2c6ec19d15c0726bb2d4d5c` |
 | 8 | memorial | `ui_memorial.png` | 168386 | `1d233bebffc9f9b65e6bddf3189a85b2253e07a34644e169439fad89bc3aab47` |
