@@ -233,12 +233,16 @@ impl VisualCatalog {
             cell.x,
             cell.y,
         );
-        let height = tile_bounds.w * definition.scale;
+        // The source atlases are authored by different passes, so a small
+        // amount of scale normalization keeps silhouettes from jumping in
+        // size when a roster mixes humans, drones, and larger creatures.
+        let height = tile_bounds.w * definition.scale.clamp(1.30, 1.42);
         let width = height * cell.x / cell.y;
         let ground = vec2(
             tile_bounds.x + tile_bounds.w * 0.5,
             tile_bounds.y + tile_bounds.h * 0.72,
         );
+        draw_sprite_shadow(ground, width, height);
         draw_texture_ex(
             texture,
             ground.x - width * definition.pivot[0],
@@ -338,6 +342,17 @@ impl VisualCatalog {
         );
         true
     }
+}
+
+fn draw_sprite_shadow(ground: Vec2, width: f32, height: f32) {
+    draw_ellipse(
+        ground.x + width * 0.04,
+        ground.y + height * 0.025,
+        (width * 0.23).clamp(4.0, 15.0),
+        (height * 0.045).clamp(1.5, 4.0),
+        0.0,
+        Color::new(0.0, 0.01, 0.012, 0.48),
+    );
 }
 
 fn aspect_fit(source: Vec2, destination: Rect) -> Rect {

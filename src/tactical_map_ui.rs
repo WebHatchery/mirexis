@@ -244,15 +244,15 @@ fn draw_terrain_tile(
     draw_exposed_cliffs(view, position, top);
     let parity = ((position.x * 17 + position.y * 31).unsigned_abs() % 3) as f32;
     let top_color = if blocked {
-        Color::new(0.20 + parity * 0.012, 0.16, 0.12, 1.0)
+        Color::new(0.22 + parity * 0.014, 0.17, 0.12, 1.0)
     } else if elevation >= 2 {
-        Color::new(0.15 + parity * 0.008, 0.23, 0.21, 1.0)
+        Color::new(0.16 + parity * 0.010, 0.27, 0.24, 1.0)
     } else if elevation == 1 {
-        Color::new(0.11 + parity * 0.008, 0.18, 0.17, 1.0)
+        Color::new(0.12 + parity * 0.010, 0.21, 0.19, 1.0)
     } else if elevation < 0 {
-        Color::new(0.045 + parity * 0.005, 0.095, 0.11, 1.0)
+        Color::new(0.05 + parity * 0.006, 0.11, 0.14, 1.0)
     } else {
-        Color::new(0.080 + parity * 0.008, 0.125 + parity * 0.006, 0.125, 1.0)
+        Color::new(0.085 + parity * 0.010, 0.145 + parity * 0.007, 0.145, 1.0)
     };
     draw_diamond_fill(top, top_color);
 
@@ -268,9 +268,11 @@ fn draw_terrain_tile(
             &ctx.visuals.terrain,
             atlas_index,
             art_rect,
-            Color::new(0.92, 0.96, 0.94, if blocked { 0.90 } else { 0.78 }),
+            tactical_terrain_tint(atlas_index, blocked),
         );
     }
+
+    draw_surface_seams(top, position, blocked, elevation);
 
     if terrain_cost > 1 && !blocked {
         draw_projected_hatch(top, Color::new(0.90, 0.58, 0.20, 0.50));
@@ -364,6 +366,38 @@ fn draw_cliff_face(
             Color::new(0.24, 0.47, 0.43, 0.52),
         );
     }
+    draw_line(a.x, a.y, b.x, b.y, 1.5, Color::new(0.30, 0.58, 0.52, 0.60));
+}
+
+fn tactical_terrain_tint(index: usize, blocked: bool) -> Color {
+    if blocked {
+        return Color::new(1.0, 0.93, 0.82, 0.92);
+    }
+    match index {
+        8 => Color::new(0.62, 0.92, 0.76, 0.80),
+        10 => Color::new(1.0, 0.78, 0.52, 0.78),
+        11 => Color::new(0.84, 0.68, 1.0, 0.80),
+        _ => Color::new(0.92, 0.97, 0.94, 0.80),
+    }
+}
+
+fn draw_surface_seams(top: [Vec2; 4], position: TilePos, blocked: bool, elevation: i8) {
+    if blocked {
+        return;
+    }
+    let pattern = (position.x as u32).wrapping_mul(31) ^ (position.y as u32).wrapping_mul(17);
+    if pattern % 5 != 0 {
+        return;
+    }
+    let center = (top[0] + top[2]) * 0.5;
+    let inset = inset_diamond(top, 0.72);
+    let color = if elevation < 0 {
+        Color::new(0.30, 0.74, 0.68, 0.34)
+    } else {
+        Color::new(0.36, 0.60, 0.56, 0.28)
+    };
+    draw_line(inset[3].x, inset[3].y, center.x, center.y, 1.0, color);
+    draw_line(center.x, center.y, inset[1].x, inset[1].y, 1.0, color);
 }
 
 fn terrain_art_index(
@@ -372,14 +406,23 @@ fn terrain_art_index(
     blocked: bool,
     cost: u8,
 ) -> Option<usize> {
+    let pattern =
+        (position.x as u32).wrapping_mul(73_856_093) ^ (position.y as u32).wrapping_mul(19_349_663);
     if blocked {
         return Some(3);
     }
     if cost > 1 {
-        return Some(1);
+        return Some(if pattern % 3 == 0 { 8 } else { 1 });
     }
-    let pattern =
-        (position.x as u32).wrapping_mul(73_856_093) ^ (position.y as u32).wrapping_mul(19_349_663);
+    if position.y > 24 && pattern % 17 == 0 {
+        return Some(8);
+    }
+    if pattern % 29 == 0 {
+        return Some(10);
+    }
+    if pattern % 37 == 0 {
+        return Some(11);
+    }
     if pattern.is_multiple_of(31) {
         Some(
             ctx.visuals

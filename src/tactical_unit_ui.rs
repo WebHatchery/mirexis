@@ -37,14 +37,6 @@ pub(crate) fn draw_unit(
 fn draw_allegiance_base(rect: Rect, accent: Color, selected: bool, hostile_notches: bool) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.70);
     draw_ellipse(
-        center.x + 2.0,
-        center.y + 3.0,
-        rect.w * 0.30,
-        rect.h * 0.22,
-        0.0,
-        Color::new(0.0, 0.0, 0.0, 0.48),
-    );
-    draw_ellipse(
         center.x,
         center.y,
         rect.w * 0.29,

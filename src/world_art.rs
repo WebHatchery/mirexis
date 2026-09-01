@@ -180,12 +180,27 @@ fn draw_concept_cell(
     destination: Rect,
     tint: Color,
 ) {
+    draw_art_grounding(destination, tint);
     visuals.draw_atlas_cell(
         assets,
         visuals.concept_atlas(atlas_id),
         index,
         destination,
         tint,
+    );
+}
+
+fn draw_art_grounding(destination: Rect, tint: Color) {
+    if destination.w > 150.0 || destination.h > 150.0 {
+        return;
+    }
+    draw_ellipse(
+        destination.x + destination.w * 0.54,
+        destination.bottom() - destination.h * 0.12,
+        destination.w * 0.24,
+        destination.h * 0.055,
+        0.0,
+        Color::new(0.0, 0.01, 0.012, 0.28 * tint.a),
     );
 }
 

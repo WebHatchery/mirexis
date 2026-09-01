@@ -499,14 +499,6 @@ fn draw_character(context: CharacterDrawContext<'_>) {
         visuals,
         zoom,
     } = context;
-    draw_ellipse(
-        center.x,
-        center.y + 5.0,
-        7.0 * zoom,
-        3.0 * zoom,
-        0.0,
-        Color::new(0.0, 0.0, 0.0, 0.42),
-    );
     if hovered {
         draw_circle(
             center.x,

@@ -9,19 +9,19 @@
   ],
   "units": [
     { "id": "kira_voss", "texture": "unit_kira_voss", "portrait_texture": "portraits_recruits", "portrait_index": 0, "portrait_columns": 5, "scale": 1.38, "pivot": [0.50, 0.82] },
-    { "id": "mara_venn", "texture": "unit_mara_venn", "portrait_texture": "portraits_recruits", "portrait_index": 1, "portrait_columns": 5, "scale": 1.48, "pivot": [0.50, 0.82] },
+    { "id": "mara_venn", "texture": "unit_mara_venn", "portrait_texture": "portraits_recruits", "portrait_index": 1, "portrait_columns": 5, "scale": 1.42, "pivot": [0.50, 0.82] },
     { "id": "ilya_reed", "texture": "unit_ilya_reed", "portrait_texture": "portraits_recruits", "portrait_index": 2, "portrait_columns": 5, "scale": 1.36, "pivot": [0.50, 0.82] },
     { "id": "sol_cairn", "texture": "unit_sol_cairn", "portrait_texture": "portraits_recruits", "portrait_index": 3, "portrait_columns": 5, "scale": 1.38, "pivot": [0.50, 0.82] },
     { "id": "nadi_vale", "texture": "unit_nadi_vale", "portrait_texture": "portraits_recruits", "portrait_index": 4, "portrait_columns": 5, "scale": 1.38, "pivot": [0.50, 0.82] },
     { "id": "veya_orn", "texture": "unit_directorate_rifleman", "portrait_texture": "portraits_enemies", "portrait_index": 2, "portrait_columns": 6, "scale": 1.34, "pivot": [0.50, 0.82] },
     { "id": "sedge", "texture": "unit_sedge", "portrait_texture": "portrait_sedge", "portrait_index": 0, "portrait_columns": 1, "scale": 1.38, "pivot": [0.50, 0.82] },
-    { "id": "ninth_voice_apart", "texture": "unit_ninth_voice_apart", "portrait_texture": "portrait_ninth_voice_apart", "portrait_index": 0, "portrait_columns": 1, "scale": 1.18, "pivot": [0.50, 0.76] },
+    { "id": "ninth_voice_apart", "texture": "unit_ninth_voice_apart", "portrait_texture": "portrait_ninth_voice_apart", "portrait_index": 0, "portrait_columns": 1, "scale": 1.30, "pivot": [0.50, 0.76] },
     { "id": "brood_sporecaster", "name_contains": ["sporecaster"], "texture": "unit_brood_sporecaster", "portrait_texture": "portraits_enemies", "portrait_index": 1, "portrait_columns": 6, "scale": 1.42, "pivot": [0.50, 0.80] },
     { "id": "brood_stalker", "id_prefixes": ["brood_stalker"], "name_contains": ["stalker"], "texture": "unit_brood_stalker", "portrait_texture": "portraits_enemies", "portrait_index": 0, "portrait_columns": 6, "scale": 1.38, "pivot": [0.50, 0.78] },
     { "id": "directorate_rifleman", "name_contains": ["rifleman"], "texture": "unit_directorate_rifleman", "portrait_texture": "portraits_enemies", "portrait_index": 2, "portrait_columns": 6, "scale": 1.34, "pivot": [0.50, 0.82] },
     { "id": "directorate_drone", "name_contains": ["drone"], "texture": "unit_directorate_drone", "portrait_texture": "portraits_enemies", "portrait_index": 3, "portrait_columns": 6, "scale": 1.28, "pivot": [0.50, 0.72] },
     { "id": "ascendant_sentinel", "name_contains": ["sentinel"], "texture": "unit_ascendant_sentinel", "portrait_texture": "portraits_enemies", "portrait_index": 4, "portrait_columns": 6, "scale": 1.38, "pivot": [0.50, 0.78] },
-    { "id": "ascendant_warden", "name_contains": ["warden"], "texture": "unit_ascendant_warden", "portrait_texture": "portraits_enemies", "portrait_index": 5, "portrait_columns": 6, "scale": 1.50, "pivot": [0.50, 0.78] }
+    { "id": "ascendant_warden", "name_contains": ["warden"], "texture": "unit_ascendant_warden", "portrait_texture": "portraits_enemies", "portrait_index": 5, "portrait_columns": 6, "scale": 1.42, "pivot": [0.50, 0.78] }
   ],
   "terrain": { "texture": "terrain_atlas", "columns": 4, "rows": 3 },
   "colony": { "texture": "colony_buildings", "columns": 4, "rows": 4 },
