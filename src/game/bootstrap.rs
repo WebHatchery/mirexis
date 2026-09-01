@@ -26,10 +26,12 @@ impl Game {
         let mut assets = AssetManager::new();
         let placeholder = crate::visual_assets::diagnostic_placeholder_image(32);
         assets.set_placeholder_texture_direct(Texture2D::from_image(&placeholder));
-        if let Err(error) = assets.load_asset_pack("assets.zip").await {
-            println!(
-                "Mirexis runtime asset pack unavailable ({error}); loading loose assets for native development."
-            );
+        if should_load_runtime_asset_pack("assets.zip") {
+            if let Err(error) = assets.load_asset_pack("assets.zip").await {
+                println!(
+                    "Mirexis runtime asset pack unavailable ({error}); loading loose assets for native development."
+                );
+            }
         }
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
         let visuals = VisualCatalog::load();
@@ -107,4 +109,14 @@ impl Game {
             roster_inspection_id: None,
         }
     }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn should_load_runtime_asset_pack(_path: &str) -> bool {
+    true
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn should_load_runtime_asset_pack(path: &str) -> bool {
+    std::path::Path::new(path).is_file()
 }
