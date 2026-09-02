@@ -3,8 +3,8 @@
 use crate::data::{ObjectiveKind, Team};
 use crate::first_hour::{FirstHourProgress, TacticalLesson};
 use crate::grid_ui::{
-    CameraInsets, GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, STRUCTURE_ART_PIVOT,
-    STRUCTURE_ART_SCALE, TERRAIN_ART_PIVOT, TERRAIN_ART_SCALE,
+    CameraInsets, GridView, WorldCamera, CANOPY_ART_PIVOT, CANOPY_ART_SCALE, TERRAIN_ART_PIVOT,
+    TERRAIN_ART_SCALE,
 };
 use crate::state::{GameSession, ObjectiveState};
 use crate::ui::{draw_ui_text_ex, TargetingView, UiAction, UiContext};
@@ -256,21 +256,14 @@ fn draw_terrain_tile(
     };
     draw_diamond_fill(top, top_color);
 
-    if let Some(atlas_index) = terrain_art_index(ctx, position, blocked, terrain_cost) {
-        let (scale, pivot) = if blocked {
-            (STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT)
-        } else {
-            (TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT)
-        };
-        let art_rect = view.art_bounds(position, scale, pivot);
-        ctx.visuals.draw_atlas_cell(
-            ctx.assets,
-            &ctx.visuals.terrain,
-            atlas_index,
-            art_rect,
-            tactical_terrain_tint(atlas_index, blocked),
-        );
-    }
+    let art_rect = view.art_bounds(position, TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT);
+    ctx.visuals.draw_atlas_cell(
+        ctx.assets,
+        &ctx.visuals.terrain,
+        0,
+        art_rect,
+        Color::new(0.92, 0.97, 0.94, 1.0),
+    );
 
     draw_surface_seams(top, position, blocked, elevation);
 
@@ -369,18 +362,6 @@ fn draw_cliff_face(
     draw_line(a.x, a.y, b.x, b.y, 1.5, Color::new(0.30, 0.58, 0.52, 0.60));
 }
 
-fn tactical_terrain_tint(index: usize, blocked: bool) -> Color {
-    if blocked {
-        return Color::new(1.0, 0.93, 0.82, 1.0);
-    }
-    match index {
-        8 => Color::new(0.62, 0.92, 0.76, 1.0),
-        10 => Color::new(1.0, 0.78, 0.52, 1.0),
-        11 => Color::new(0.84, 0.68, 1.0, 1.0),
-        _ => Color::new(0.92, 0.97, 0.94, 1.0),
-    }
-}
-
 fn draw_surface_seams(top: [Vec2; 4], position: TilePos, blocked: bool, elevation: i8) {
     if blocked {
         return;
@@ -398,39 +379,6 @@ fn draw_surface_seams(top: [Vec2; 4], position: TilePos, blocked: bool, elevatio
     };
     draw_line(inset[3].x, inset[3].y, center.x, center.y, 1.0, color);
     draw_line(center.x, center.y, inset[1].x, inset[1].y, 1.0, color);
-}
-
-fn terrain_art_index(
-    ctx: &UiContext<'_>,
-    position: TilePos,
-    blocked: bool,
-    cost: u8,
-) -> Option<usize> {
-    let pattern =
-        (position.x as u32).wrapping_mul(73_856_093) ^ (position.y as u32).wrapping_mul(19_349_663);
-    if blocked {
-        return Some(3);
-    }
-    if cost > 1 {
-        return Some(if pattern % 3 == 0 { 8 } else { 1 });
-    }
-    if position.y > 24 && pattern % 17 == 0 {
-        return Some(8);
-    }
-    if pattern % 29 == 0 {
-        return Some(10);
-    }
-    if pattern % 37 == 0 {
-        return Some(11);
-    }
-    if pattern.is_multiple_of(31) {
-        Some(
-            ctx.visuals
-                .faction_terrain_cell(&ctx.mission.hostile_faction),
-        )
-    } else {
-        Some(0)
-    }
 }
 
 fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {

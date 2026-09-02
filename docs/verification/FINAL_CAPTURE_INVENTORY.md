@@ -113,7 +113,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 60 | threat_briefing | `ui_threat_briefing.png` | 190720 | `b6c4504edbabe2d9d1cbfa8f6cdf5e267ce360bfe7cec7b8f6a54ffa412f6fdd` |
 | 61 | loadout_briefing | `ui_loadout_briefing.png` | 199667 | `88af477934ba34fade160978faa80f6af7245b216415a30ae62fad2a6ad697fe` |
 | 62 | pressure | `ui_pressure.png` | 204992 | `d031961db941b0954669b96c5cb9d6e9c6ce76179a1333fcae0682e011a93b8b` |
-| 63 | gameplay | `ui_gameplay.png` | 1637235 | `82e22ebc7457703c75227f99f42d70532bdf1d07d7b4c08497178703459082c5` |
+| 63 | gameplay | `ui_gameplay.png` | 1612524 | `39d15d8615b8de26a310576cbfa89a6b05a4682b984a45fbb7669fd335377a8d` |
 | 64 | first_hour_tactical | `ui_first_hour_tactical.png` | 1561604 | `08549feeb127803decdf0a80cc2f6ce213e60272810c47dd5e644ec0f7a23065` |
 | 65 | first_hour_attack | `ui_first_hour_attack.png` | 1111735 | `d07f213deabca2ab14b3c4d6e4fce82e6571b23cd69b50264d4c37669631c2c8` |
 | 66 | first_hour_enemy_phase | `ui_first_hour_enemy_phase.png` | 1201693 | `61957156a5d110495bdc9d40c9d6453994a5e388e601e66f4bc69ddeb5c9d62f` |
@@ -146,7 +146,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 93 | readiness_markers | `ui_readiness_markers.png` | 1191174 | `cd5c86144ac05201b6b78ab93ab5e5044c702895a24768f77e5f2be4cb610d22` |
 | 94 | vitality_markers | `ui_vitality_markers.png` | 1191598 | `a46af891b5b9d5e59fb103567fe04b6cee9e7cde347ca4c370dbaa1cec09ed97` |
 | 95 | extraction | `ui_extraction.png` | 1608357 | `ff20e4224b04c7152eb5ac2507dfc37fb14baa1d3388bf9187d3adbb6cb3d3dd` |
-| 96 | variant | `ui_variant.png` | 1558454 | `85428105b88ec6578410b72919ea75eb7b1300475bf1826d40571c80d9d827aa` |
+| 96 | variant | `ui_variant.png` | 1541055 | `6d53efba0e5390534eb8f4ca9a932781317d12779b1dd60712374a64aadc0a89` |
 | 97 | sporefield | `ui_sporefield.png` | 1118822 | `3a20501584f03611155520c1b09c48941fe97710babb79d753ca56e4bb2e8544` |
 | 98 | vault | `ui_vault.png` | 1107808 | `7b8391f25500b67c2877378e538e62445381c0effdbdb508c7a3d8c5587c41be` |
 | 99 | black_channel | `ui_black_channel.png` | 1116674 | `cafd4a4502d06bd8f8b8d4a3921a51b638c4beee368241ece2717975dfafffee` |

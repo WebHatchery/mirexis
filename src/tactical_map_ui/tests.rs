@@ -1,5 +1,6 @@
 use super::*;
 use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
+use crate::grid_ui::{STRUCTURE_ART_PIVOT, STRUCTURE_ART_SCALE};
 use crate::state::GameSession;
 
 #[test]
