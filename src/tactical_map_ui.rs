@@ -371,13 +371,13 @@ fn draw_cliff_face(
 
 fn tactical_terrain_tint(index: usize, blocked: bool) -> Color {
     if blocked {
-        return Color::new(1.0, 0.93, 0.82, 0.92);
+        return Color::new(1.0, 0.93, 0.82, 1.0);
     }
     match index {
-        8 => Color::new(0.62, 0.92, 0.76, 0.58),
-        10 => Color::new(1.0, 0.78, 0.52, 0.54),
-        11 => Color::new(0.84, 0.68, 1.0, 0.56),
-        _ => Color::new(0.92, 0.97, 0.94, 0.72),
+        8 => Color::new(0.62, 0.92, 0.76, 1.0),
+        10 => Color::new(1.0, 0.78, 0.52, 1.0),
+        11 => Color::new(0.84, 0.68, 1.0, 1.0),
+        _ => Color::new(0.92, 0.97, 0.94, 1.0),
     }
 }
 

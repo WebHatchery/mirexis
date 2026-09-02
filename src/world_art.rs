@@ -60,7 +60,7 @@ pub(crate) fn draw_tactical_dressing(
                 cell,
                 1.04,
                 [0.50, 0.84],
-                Color::new(1.0, 1.0, 1.0, 0.86),
+                Color::new(1.0, 1.0, 1.0, 1.0),
             );
         } else {
             draw_tile_cell(
@@ -69,7 +69,7 @@ pub(crate) fn draw_tactical_dressing(
                 (signature % 12) as usize,
                 1.00,
                 [0.50, 0.84],
-                Color::new(0.90, 0.94, 0.92, 0.82),
+                Color::new(0.90, 0.94, 0.92, 1.0),
             );
         }
         return;
@@ -78,24 +78,15 @@ pub(crate) fn draw_tactical_dressing(
         return;
     }
 
-    match open_tile_dressing(signature) {
-        Some(("flora", cell)) => draw_tile_cell(
+    if let Some(cell) = open_tile_flora_cell(signature) {
+        draw_tile_cell(
             &context,
             "flora",
             cell,
             0.78,
             [0.50, 0.84],
-            Color::new(0.78, 0.94, 0.88, 0.52),
-        ),
-        Some(("terrain_dressing", cell)) => draw_tile_cell(
-            &context,
-            "terrain_dressing",
-            cell,
-            0.86,
-            [0.50, 0.84],
-            Color::new(0.86, 0.94, 0.92, 0.42),
-        ),
-        Some(_) | None => {}
+            Color::new(0.78, 0.94, 0.88, 1.0),
+        );
     }
 }
 
@@ -225,14 +216,9 @@ fn flora_cell(signature: u32) -> usize {
     [0, 1, 2, 7, 8, 9, 11][(signature % 7) as usize]
 }
 
-fn terrain_dressing_cell(signature: u32) -> usize {
-    [0, 1, 4, 5, 8, 9][(signature % 6) as usize]
-}
-
-fn open_tile_dressing(signature: u32) -> Option<(&'static str, usize)> {
+fn open_tile_flora_cell(signature: u32) -> Option<usize> {
     match signature % 23 {
-        0 | 1 => Some(("flora", flora_cell(signature))),
-        2 | 3 | 4 => Some(("terrain_dressing", terrain_dressing_cell(signature))),
+        0 | 1 | 2 => Some(flora_cell(signature)),
         _ => None,
     }
 }

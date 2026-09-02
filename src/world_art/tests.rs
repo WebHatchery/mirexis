@@ -1,22 +1,12 @@
 use super::*;
 
 #[test]
-fn empty_tactical_tiles_only_select_terrain_or_flora_dressing() {
-    for signature in 0..23 {
-        let Some((atlas, _)) = open_tile_dressing(signature) else {
-            continue;
-        };
-        assert!(
-            matches!(atlas, "flora" | "terrain_dressing"),
-            "empty tile selected non-terrain atlas {atlas}"
-        );
-    }
+fn former_fauna_slot_selects_an_authored_flora_cutout() {
+    assert!(open_tile_flora_cell(2).is_some());
 }
 
 #[test]
-fn former_fauna_slot_selects_authored_terrain_dressing() {
-    assert!(matches!(
-        open_tile_dressing(2),
-        Some(("terrain_dressing", _))
-    ));
+fn full_terrain_tile_slots_are_not_layered_over_open_tiles() {
+    assert_eq!(open_tile_flora_cell(3), None);
+    assert_eq!(open_tile_flora_cell(4), None);
 }

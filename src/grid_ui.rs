@@ -14,7 +14,9 @@ pub(crate) const STRUCTURE_ART_SCALE: f32 = 1.10;
 pub(crate) const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.68];
 pub(crate) const CANOPY_ART_SCALE: f32 = 1.15;
 pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.65];
-pub(crate) const TERRAIN_ART_ASPECT: f32 = 4.0 / 3.0;
+// Terrain and concept atlases are authored as square cells. Preserve that
+// source aspect so their isometric diamonds are not stretched vertically.
+pub(crate) const TERRAIN_ART_ASPECT: f32 = 1.0;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct CameraInsets {
