@@ -246,7 +246,7 @@ impl ColonyExplorer {
                 }
             }
         }
-        if (self.position.x + self.position.y).round() as i32 == depth {
+        if player_draw_depth(self.position) == depth {
             if let Some(player) = campaign.roster.first() {
                 let center = view.world_center(self.position) + vec2(0.0, 7.0 * view.zoom);
                 draw_character(CharacterDrawContext {
@@ -783,6 +783,10 @@ fn can_occupy(colony: &ColonyState, position: Vec2) -> bool {
 
 fn grid_vec(position: [i32; 2]) -> Vec2 {
     vec2(position[0] as f32, position[1] as f32)
+}
+
+fn player_draw_depth(position: Vec2) -> i32 {
+    (position.x + position.y).floor() as i32
 }
 
 #[cfg(test)]

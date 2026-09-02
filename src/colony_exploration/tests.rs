@@ -15,6 +15,13 @@ fn tapped_destinations_preserve_sub_plot_position() {
 }
 
 #[test]
+fn moving_player_stays_behind_the_next_terrain_row_until_crossing_it() {
+    assert_eq!(player_draw_depth(vec2(8.0, 10.0)), 18);
+    assert_eq!(player_draw_depth(vec2(8.9, 10.9)), 19);
+    assert_eq!(player_draw_depth(vec2(9.0, 11.0)), 20);
+}
+
+#[test]
 fn approaching_an_npc_ends_on_an_adjacent_open_plot() {
     let data = crate::data::GameData::load().unwrap();
     let campaign = CampaignState::new(&data);
