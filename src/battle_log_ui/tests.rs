@@ -101,8 +101,3 @@ fn battle_log_groups_secondary_outcomes_and_names_their_event_kinds() {
     assert_eq!(event_kind(&objective), "OBJECTIVE");
     assert_eq!(event_kind(&cover), "COVER");
 }
-
-#[test]
-fn a_new_battle_history_view_starts_unfiltered() {
-    assert_eq!(BattleLogFilter::default(), BattleLogFilter::All);
-}

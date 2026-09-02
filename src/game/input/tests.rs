@@ -1,61 +1,39 @@
 use super::*;
 
 #[test]
-fn settings_overlay_consumes_physical_input_except_close() {
-    assert_eq!(settings_overlay_input(true, false, false), None);
-    assert_eq!(
-        settings_overlay_input(true, true, false),
-        Some(UiAction::ToggleSettings)
-    );
-    assert_eq!(
-        settings_overlay_input(true, false, true),
-        Some(UiAction::ToggleSettings)
-    );
+fn overlays_only_translate_close_input_while_open() {
+    let overlays: [(&str, fn(bool, bool, bool) -> Option<UiAction>, UiAction); 3] = [
+        ("settings", settings_overlay_input, UiAction::ToggleSettings),
+        (
+            "field notes",
+            field_notes_overlay_input,
+            UiAction::ToggleFieldNotes,
+        ),
+        (
+            "first-hour help",
+            first_hour_help_overlay_input,
+            UiAction::ToggleFirstHourHelp,
+        ),
+    ];
+
+    for (name, translate, close_action) in overlays {
+        assert_eq!(translate(true, false, false), None, "{name}: no input");
+        assert_eq!(
+            translate(true, true, false),
+            Some(close_action.clone()),
+            "{name}: escape"
+        );
+        assert_eq!(
+            translate(true, false, true),
+            Some(close_action),
+            "{name}: controller cancel"
+        );
+        assert_eq!(translate(false, true, true), None, "{name}: closed overlay");
+    }
 }
 
 #[test]
-fn settings_input_does_not_intercept_the_normal_game() {
-    assert_eq!(settings_overlay_input(false, true, true), None);
-}
-
-#[test]
-fn field_notes_overlay_consumes_physical_input_except_close() {
-    assert_eq!(field_notes_overlay_input(true, false, false), None);
-    assert_eq!(
-        field_notes_overlay_input(true, true, false),
-        Some(UiAction::ToggleFieldNotes)
-    );
-    assert_eq!(
-        field_notes_overlay_input(true, false, true),
-        Some(UiAction::ToggleFieldNotes)
-    );
-}
-
-#[test]
-fn field_notes_input_does_not_intercept_the_normal_game() {
-    assert_eq!(field_notes_overlay_input(false, true, true), None);
-}
-
-#[test]
-fn first_hour_help_overlay_consumes_physical_input_except_close() {
-    assert_eq!(first_hour_help_overlay_input(true, false, false), None);
-    assert_eq!(
-        first_hour_help_overlay_input(true, true, false),
-        Some(UiAction::ToggleFirstHourHelp)
-    );
-    assert_eq!(
-        first_hour_help_overlay_input(true, false, true),
-        Some(UiAction::ToggleFirstHourHelp)
-    );
-}
-
-#[test]
-fn first_hour_help_input_does_not_intercept_the_normal_game() {
-    assert_eq!(first_hour_help_overlay_input(false, true, true), None);
-}
-
-#[test]
-fn colony_modal_consumes_physical_input_except_close() {
+fn colony_modals_only_translate_close_input_while_open() {
     assert_eq!(colony_modal_input(true, false, false, false), None);
     assert_eq!(
         colony_modal_input(true, false, true, false),
@@ -65,10 +43,6 @@ fn colony_modal_consumes_physical_input_except_close() {
         colony_modal_input(false, true, false, true),
         Some(UiAction::CloseSalvage)
     );
-}
-
-#[test]
-fn colony_modal_input_does_not_intercept_the_normal_colony() {
     assert_eq!(colony_modal_input(false, false, true, true), None);
 }
 

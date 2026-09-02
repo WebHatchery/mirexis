@@ -87,13 +87,17 @@ fn equipment_button_label_names_unavailable_states() {
 }
 
 #[test]
-fn armed_equipment_can_always_be_cancelled() {
-    assert!(action_button_enabled(true, false));
-    assert!(action_button_enabled(true, true));
-}
-
-#[test]
-fn unarmed_equipment_still_requires_a_valid_target() {
-    assert!(action_button_enabled(false, true));
-    assert!(!action_button_enabled(false, false));
+fn equipment_action_is_enabled_for_cancellation_or_a_valid_target() {
+    for (armed, has_valid_target, expected) in [
+        (true, false, true),
+        (true, true, true),
+        (false, true, true),
+        (false, false, false),
+    ] {
+        assert_eq!(
+            action_button_enabled(armed, has_valid_target),
+            expected,
+            "armed={armed}, has_valid_target={has_valid_target}"
+        );
+    }
 }

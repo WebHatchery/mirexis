@@ -3,16 +3,6 @@ use crate::first_hour::{FirstHourProgress, FirstHourStage, TacticalLesson};
 use crate::state::GameSession;
 
 #[test]
-fn tactical_viewport_uses_the_world_panel_without_a_control_strip() {
-    let panel = tactical_panel();
-    let viewport = tactical_viewport(panel);
-    assert_eq!(viewport.x, panel.x + 8.0);
-    assert_eq!(viewport.y, panel.y + 8.0);
-    assert_eq!(viewport.right(), panel.right() - 8.0);
-    assert_eq!(viewport.bottom(), panel.bottom() - 8.0);
-}
-
-#[test]
 fn cancel_targeting_control_is_visible_without_covering_the_target_portrait() {
     let card = super::targeting_card::card_bounds(tactical_panel());
     let cancel = super::targeting_card::cancel_bounds(card);

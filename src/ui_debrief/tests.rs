@@ -14,19 +14,21 @@ fn outcome(result: ObjectiveState, colonists_deployed: usize) -> MissionOutcome 
 }
 
 #[test]
-fn experience_summary_discloses_victory_award_per_deployed_colonist() {
-    assert_eq!(
-        experience_summary(&outcome(ObjectiveState::Victory, 3)),
-        "Field experience: +20 XP each // 3 deployed colonists"
-    );
-}
-
-#[test]
-fn experience_summary_discloses_defeat_award_per_deployed_colonist() {
-    assert_eq!(
-        experience_summary(&outcome(ObjectiveState::Failed, 2)),
-        "Field experience: +8 XP each // 2 deployed colonists"
-    );
+fn experience_summary_discloses_result_award_and_deployed_count() {
+    for (result, deployed, expected) in [
+        (
+            ObjectiveState::Victory,
+            3,
+            "Field experience: +20 XP each // 3 deployed colonists",
+        ),
+        (
+            ObjectiveState::Failed,
+            2,
+            "Field experience: +8 XP each // 2 deployed colonists",
+        ),
+    ] {
+        assert_eq!(experience_summary(&outcome(result, deployed)), expected);
+    }
 }
 
 #[test]
