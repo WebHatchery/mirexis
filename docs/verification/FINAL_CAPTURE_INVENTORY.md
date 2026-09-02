@@ -54,7 +54,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 1 | title | `ui_title.png` | 441810 | `625b56021556f91092bc11e165ef6ccce21678f1ed62d458edaf0bfe1b84d69b` |
 | 2 | title_controller | `ui_title_controller.png` | 444314 | `0ef437423c16cd2e8bbe2111539eda265081ccbb99767924690de8aa845dcf10` |
 | 3 | title_hover | `ui_title_hover.png` | 441788 | `f789766f7c06c340799fa6ea87e6456a321093019eb9113368b7591131e96d87` |
-| 4 | colony | `ui_colony.png` | 872019 | `8422d11f722dac9d7f07146c624e50e43d0b2373579a34ca02bb1e015099e1b2` |
+| 4 | colony | `ui_colony.png` | 873174 | `c633ef69b618670e3b110991e16fab9644ed946b0d883e939b2f8c6f0fcf0c95` |
 | 5 | facility_upgrades | `ui_facility_upgrades.png` | 696881 | `6647a2ad1f948954b7a6b40dccf20068be6db10d9fce55b660cab468a0a2b865` |
 | 6 | settings | `ui_settings.png` | 230015 | `39835fd8a7028594e4aaf62fbc27989381fa73530192fd6a9c19ea11cb7e1b60` |
 | 7 | field_notes | `ui_field_notes.png` | 124905 | `13cc8f3d57d3fc1976856e606dc41029b9918f41b2c6ec19d15c0726bb2d4d5c` |
@@ -113,7 +113,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 60 | threat_briefing | `ui_threat_briefing.png` | 190720 | `b6c4504edbabe2d9d1cbfa8f6cdf5e267ce360bfe7cec7b8f6a54ffa412f6fdd` |
 | 61 | loadout_briefing | `ui_loadout_briefing.png` | 199667 | `88af477934ba34fade160978faa80f6af7245b216415a30ae62fad2a6ad697fe` |
 | 62 | pressure | `ui_pressure.png` | 204992 | `d031961db941b0954669b96c5cb9d6e9c6ce76179a1333fcae0682e011a93b8b` |
-| 63 | gameplay | `ui_gameplay.png` | 1552686 | `61b508401561c8f854a09102963d439344e7226701556165e93adb0f95a1a799` |
+| 63 | gameplay | `ui_gameplay.png` | 1536547 | `a41351c24b907c3c071eb984e87f77d6251947fdee1cddb78d740e95a5290d92` |
 | 64 | first_hour_tactical | `ui_first_hour_tactical.png` | 1561604 | `08549feeb127803decdf0a80cc2f6ce213e60272810c47dd5e644ec0f7a23065` |
 | 65 | first_hour_attack | `ui_first_hour_attack.png` | 1111735 | `d07f213deabca2ab14b3c4d6e4fce82e6571b23cd69b50264d4c37669631c2c8` |
 | 66 | first_hour_enemy_phase | `ui_first_hour_enemy_phase.png` | 1201693 | `61957156a5d110495bdc9d40c9d6453994a5e388e601e66f4bc69ddeb5c9d62f` |

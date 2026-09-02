@@ -1,5 +1,8 @@
 //! Runtime use of the promoted concept sprites in the tactical world.
 
+#[cfg(test)]
+mod tests;
+
 use crate::grid_ui::GridView;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
@@ -75,32 +78,24 @@ pub(crate) fn draw_tactical_dressing(
         return;
     }
 
-    match signature % 23 {
-        0 | 1 => draw_tile_cell(
+    match open_tile_dressing(signature) {
+        Some(("flora", cell)) => draw_tile_cell(
             &context,
             "flora",
-            flora_cell(signature),
+            cell,
             0.78,
             [0.50, 0.84],
             Color::new(0.78, 0.94, 0.88, 0.52),
         ),
-        2 => draw_tile_cell(
-            &context,
-            "brood_fauna",
-            (signature % 8) as usize,
-            0.84,
-            [0.50, 0.86],
-            Color::new(1.0, 0.90, 0.90, 0.58),
-        ),
-        3 | 4 => draw_tile_cell(
+        Some(("terrain_dressing", cell)) => draw_tile_cell(
             &context,
             "terrain_dressing",
-            terrain_dressing_cell(signature),
+            cell,
             0.86,
             [0.50, 0.84],
             Color::new(0.86, 0.94, 0.92, 0.42),
         ),
-        _ => {}
+        Some(_) | None => {}
     }
 }
 
@@ -232,6 +227,14 @@ fn flora_cell(signature: u32) -> usize {
 
 fn terrain_dressing_cell(signature: u32) -> usize {
     [0, 1, 4, 5, 8, 9][(signature % 6) as usize]
+}
+
+fn open_tile_dressing(signature: u32) -> Option<(&'static str, usize)> {
+    match signature % 23 {
+        0 | 1 => Some(("flora", flora_cell(signature))),
+        2 | 3 | 4 => Some(("terrain_dressing", terrain_dressing_cell(signature))),
+        _ => None,
+    }
 }
 
 fn tile_signature(position: TilePos) -> u32 {
