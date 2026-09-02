@@ -79,10 +79,20 @@ pub(crate) fn draw(
     if !ctx.session.tactical.hazards.is_empty() {
         crate::hazard_ui::draw_legend(panel);
     }
-    let hovered = grid_rect
+    let ground_hovered = grid_rect
         .contains(mouse)
         .then(|| view.tile_at(mouse))
         .flatten();
+    let hovered_unit = grid_rect.contains(mouse).then(|| {
+        ctx.session
+            .tactical
+            .units
+            .iter()
+            .filter(|unit| crate::tactical_unit_ui::hover_hit(view, unit, mouse))
+            .max_by_key(|unit| unit.position.x + unit.position.y)
+    });
+    let hovered_unit = hovered_unit.flatten();
+    let hovered = hovered_unit.map(|unit| unit.position).or(ground_hovered);
     crate::ui::set_ui_clip(ctx.ui, Some(grid_rect));
     let mut tiles = ctx
         .session
@@ -160,6 +170,21 @@ pub(crate) fn draw(
     draw_foreground(ctx, view, hovered);
     ctx.feedback
         .draw(ctx.session, view, ctx.assets, ctx.visuals);
+    if input_enabled {
+        if let Some(unit) = hovered_unit {
+            let tooltip_viewport = if ctx.tactical_panel_open {
+                Rect::new(
+                    grid_rect.x,
+                    grid_rect.y,
+                    crate::ui::tactical_command_panel_rect().x - grid_rect.x - 8.0,
+                    grid_rect.h,
+                )
+            } else {
+                grid_rect
+            };
+            crate::tactical_unit_ui::draw_hover_card(unit, view, tooltip_viewport);
+        }
+    }
     crate::first_hour_tactical_ui::draw_map_focus(ctx, view, grid_rect, input_enabled);
     crate::ui::set_ui_clip(ctx.ui, None);
     let preview_input_consumed = crate::action_preview_ui::draw(
@@ -188,7 +213,7 @@ pub(crate) fn draw(
     );
     handle_click(
         ctx,
-        view,
+        hovered,
         grid_rect,
         mouse,
         suppress_map_click || preview_input_consumed || !map_input_enabled,
@@ -634,7 +659,7 @@ fn targeting_action(
 
 fn handle_click(
     ctx: &UiContext<'_>,
-    view: GridView,
+    hovered: Option<TilePos>,
     viewport: Rect,
     mouse: Vec2,
     suppress_click: bool,
@@ -646,7 +671,7 @@ fn handle_click(
     if !viewport.contains(mouse) {
         return;
     }
-    let Some(tile) = view.tile_at(mouse) else {
+    let Some(tile) = hovered else {
         return;
     };
     if let Some(targeting) = ctx.targeting {

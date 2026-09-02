@@ -6,7 +6,10 @@ use crate::state::UnitState;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
-use macroquad_toolkit::prelude::TextStyle;
+use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
+
+#[cfg(test)]
+mod tests;
 
 pub(crate) fn draw_unit(
     assets: &AssetManager,
@@ -31,6 +34,87 @@ pub(crate) fn draw_unit(
     draw_vitality(rect, unit);
     if unit.team == Team::Colony && !unit.incapacitated {
         draw_readiness(rect, unit.action_points, max_action_points);
+    }
+}
+
+pub(crate) fn hover_hit(view: GridView, unit: &UnitState, point: Vec2) -> bool {
+    unit_hit_bounds(view.tile_rect(unit.position)).contains(point)
+}
+
+pub(crate) fn draw_hover_card(unit: &UnitState, view: GridView, viewport: Rect) {
+    let hit = unit_hit_bounds(view.tile_rect(unit.position));
+    let size = vec2(224.0, 62.0);
+    let right_x = hit.right() + 8.0;
+    let x = if right_x + size.x <= viewport.right() - 8.0 {
+        right_x
+    } else {
+        hit.x - size.x - 8.0
+    }
+    .clamp(viewport.x + 8.0, viewport.right() - size.x - 8.0);
+    let y = hit
+        .y
+        .max(viewport.y + 8.0)
+        .min(viewport.bottom() - size.y - 8.0);
+    let rect = Rect::new(x, y, size.x, size.y);
+    let accent = if unit.team == Team::Hostile {
+        Color::new(1.0, 0.54, 0.20, 1.0)
+    } else {
+        Color::new(0.24, 0.90, 0.76, 1.0)
+    };
+    draw_surface(
+        rect,
+        &SurfaceStyle::new(Color::new(0.025, 0.052, 0.058, 0.98)).with_border(2.0, accent),
+    );
+    draw_text_ex(
+        unit.name.to_uppercase(),
+        rect.x + 9.0,
+        rect.y + 18.0,
+        TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
+    );
+    draw_text_ex(
+        format!(
+            "{} // {}",
+            if unit.team == Team::Hostile {
+                "HOSTILE"
+            } else {
+                "COLONIST"
+            },
+            unit.role.to_uppercase()
+        ),
+        rect.x + 9.0,
+        rect.y + 36.0,
+        TextStyle::new(11.0, dark::TEXT_DIM).params(),
+    );
+    draw_text_ex(
+        format!(
+            "VITALITY {}/{} // {}",
+            unit.health.max(0),
+            unit.max_health,
+            vitality_condition(unit)
+        ),
+        rect.x + 9.0,
+        rect.y + 54.0,
+        TextStyle::new(11.0, accent).params(),
+    );
+}
+
+fn unit_hit_bounds(tile: Rect) -> Rect {
+    Rect::new(
+        tile.x + 2.0,
+        tile.y - tile.w,
+        tile.w - 4.0,
+        tile.h + tile.w + 2.0,
+    )
+}
+
+fn vitality_condition(unit: &UnitState) -> &'static str {
+    let ratio = unit.health.max(0) as f32 / unit.max_health.max(1) as f32;
+    if ratio > 0.6 {
+        "STEADY"
+    } else if ratio > 0.3 {
+        "WOUNDED (ORANGE BAR)"
+    } else {
+        "CRITICAL"
     }
 }
 

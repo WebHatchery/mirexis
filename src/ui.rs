@@ -154,6 +154,7 @@ pub struct UiContext<'a> {
     pub delete_save_armed: bool,
     pub first_hour: &'a crate::first_hour::FirstHourProgress,
     pub ui: &'a VirtualUi,
+    pub pointer_override: Option<Vec2>,
     pub targeting: Option<TargetingView<'a>>,
     pub show_help: bool,
     pub show_battle_log: bool,
@@ -374,7 +375,9 @@ pub fn draw_tactical(
     camera: &mut crate::grid_ui::WorldCamera,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
-    let mouse = pointer_position(ctx.ui);
+    let mouse = ctx
+        .pointer_override
+        .unwrap_or_else(|| pointer_position(ctx.ui));
     let input_enabled = tactical_world_input_enabled(
         ctx.show_help,
         ctx.show_battle_log,

@@ -79,6 +79,7 @@ pub struct Game {
     title_focus_continue: bool,
     title_focus_active: bool,
     title_hover_preview: bool,
+    capture_pointer: Option<Vec2>,
     new_campaign_armed: bool,
     delete_save_armed: bool,
     tactical_camera: WorldCamera,
@@ -193,6 +194,7 @@ impl Game {
                     delete_save_armed: self.delete_save_armed,
                     first_hour: &self.campaign.first_hour,
                     ui: &virtual_ui,
+                    pointer_override: self.capture_pointer,
                     targeting: self.targeting.as_ref().map(|targeting| match targeting {
                         TacticalTargeting::Equipment {
                             unit_id,

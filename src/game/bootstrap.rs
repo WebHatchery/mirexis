@@ -92,6 +92,7 @@ impl Game {
             title_focus_continue: false,
             title_focus_active: false,
             title_hover_preview: false,
+            capture_pointer: None,
             new_campaign_armed: false,
             delete_save_armed: false,
             tactical_camera,

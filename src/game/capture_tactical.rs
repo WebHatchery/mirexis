@@ -230,6 +230,13 @@ impl Game {
         }
         self.session.tactical.selected_unit = Some("mara_venn".to_owned());
         self.session.tactical.selected_tile = self.session.unit("mara_venn").unwrap().position;
+        let hostile_position = self.session.unit("brood_stalker_a").unwrap().position;
+        self.tactical_camera = crate::grid_ui::WorldCamera::tactical_view(
+            hostile_position,
+            self.session.tactical.selected_tile,
+            1.35,
+        );
+        self.capture_pointer = Some(macroquad::prelude::vec2(772.0, 342.0));
     }
 
     pub(super) fn capture_readiness_markers(&mut self) {

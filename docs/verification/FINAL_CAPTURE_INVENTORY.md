@@ -144,7 +144,7 @@ Manifest: `scripts/capture_ui.ps1`
 | 91 | phase_replay | `ui_phase_replay.png` | 1097062 | `40314303265391215f9f98e02cf34b580a9691f56c3a9e117d628d84058ea964` |
 | 92 | end_phase_guard | `ui_end_phase_guard.png` | 1187083 | `834a981a1f69b3225bf41e6c99b45f6d92df48963e17e62a2064b89db5ee8d88` |
 | 93 | readiness_markers | `ui_readiness_markers.png` | 1191174 | `cd5c86144ac05201b6b78ab93ab5e5044c702895a24768f77e5f2be4cb610d22` |
-| 94 | vitality_markers | `ui_vitality_markers.png` | 1191598 | `a46af891b5b9d5e59fb103567fe04b6cee9e7cde347ca4c370dbaa1cec09ed97` |
+| 94 | vitality_markers | `ui_vitality_markers.png` | 1662544 | `f5e9e4ca39a0a8860b3be541987fc752d13517303937500790fdd606ed40dc7e` |
 | 95 | extraction | `ui_extraction.png` | 1608357 | `ff20e4224b04c7152eb5ac2507dfc37fb14baa1d3388bf9187d3adbb6cb3d3dd` |
 | 96 | variant | `ui_variant.png` | 1541055 | `6d53efba0e5390534eb8f4ca9a932781317d12779b1dd60712374a64aadc0a89` |
 | 97 | sporefield | `ui_sporefield.png` | 1118822 | `3a20501584f03611155520c1b09c48941fe97710babb79d753ca56e4bb2e8544` |

@@ -50,6 +50,7 @@ impl Game {
         self.selected_field_note = 0;
         self.roster_inspection_id = None;
         self.title_hover_preview = false;
+        self.capture_pointer = None;
         self.new_campaign_armed = false;
         self.delete_save_armed = false;
         self.colony_explorer.reset();
