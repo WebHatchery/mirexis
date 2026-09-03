@@ -1,7 +1,6 @@
-//! Procedural response palette, ambience, and cross-platform preferences.
+//! Procedural response palette and cross-platform preferences.
 
 use crate::state::{BattleEvent, ObjectiveState};
-use macroquad::audio::PlaySoundParams;
 use macroquad_toolkit::audio::SoundManager;
 use macroquad_toolkit::persistence::{load_from_slot, save_to_slot};
 use macroquad_toolkit::synth::{render_wav, SynthConfig, Voice, Wave};
@@ -24,15 +23,6 @@ pub(crate) enum SoundCue {
     Phase,
     Victory,
     Defeat,
-    CityAmbience,
-    TacticalAmbience,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum AudioScene {
-    Silent,
-    City,
-    Tactical,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -63,7 +53,6 @@ impl AudioSettings {
 pub(crate) struct AudioSystem {
     sounds: SoundManager<SoundCue>,
     pub settings: AudioSettings,
-    scene: AudioScene,
     pub load_failures: Vec<String>,
 }
 
@@ -75,7 +64,6 @@ impl AudioSystem {
         let mut system = Self {
             sounds: SoundManager::new(),
             settings,
-            scene: AudioScene::Silent,
             load_failures: Vec::new(),
         };
         for (cue, voices, seed) in palette() {
@@ -113,28 +101,6 @@ impl AudioSystem {
         }
     }
 
-    pub(crate) fn set_scene(&mut self, scene: AudioScene) {
-        if scene == self.scene {
-            self.apply_ambience_volume();
-            return;
-        }
-        self.sounds.stop_raw(SoundCue::CityAmbience);
-        self.sounds.stop_raw(SoundCue::TacticalAmbience);
-        self.scene = scene;
-        let cue = match scene {
-            AudioScene::Silent => return,
-            AudioScene::City => SoundCue::CityAmbience,
-            AudioScene::Tactical => SoundCue::TacticalAmbience,
-        };
-        self.sounds.play_raw(
-            cue,
-            PlaySoundParams {
-                looped: true,
-                volume: self.ambience_volume(),
-            },
-        );
-    }
-
     pub(crate) fn adjust_volume(&mut self, delta: i8, game_name: &str) {
         self.settings.volume_percent =
             (self.settings.volume_percent as i16 + delta as i16).clamp(0, 100) as u8;
@@ -143,14 +109,12 @@ impl AudioSystem {
         }
         self.persist(game_name);
         self.apply_volume();
-        self.apply_ambience_volume();
     }
 
     pub(crate) fn toggle_mute(&mut self, game_name: &str) {
         self.settings.muted = !self.settings.muted;
         self.persist(game_name);
         self.apply_volume();
-        self.apply_ambience_volume();
     }
 
     pub(crate) fn toggle_reduced_motion(&mut self, game_name: &str) {
@@ -171,21 +135,6 @@ impl AudioSystem {
         } else {
             self.settings.volume_percent as f32 / 100.0
         };
-    }
-
-    fn ambience_volume(&self) -> f32 {
-        if self.settings.muted {
-            0.0
-        } else {
-            self.settings.volume_percent as f32 / 100.0 * 0.16
-        }
-    }
-
-    fn apply_ambience_volume(&self) {
-        let volume = self.ambience_volume();
-        self.sounds.set_raw_volume(SoundCue::CityAmbience, volume);
-        self.sounds
-            .set_raw_volume(SoundCue::TacticalAmbience, volume);
     }
 }
 
@@ -239,10 +188,7 @@ fn cue_priority(cue: SoundCue) -> u8 {
         SoundCue::Recovery => 50,
         SoundCue::Phase => 40,
         SoundCue::Move => 10,
-        SoundCue::Focus
-        | SoundCue::Invalid
-        | SoundCue::CityAmbience
-        | SoundCue::TacticalAmbience => 0,
+        SoundCue::Focus | SoundCue::Invalid => 0,
     }
 }
 
@@ -323,16 +269,6 @@ fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
             Defeat,
             vec![tone(0.55, 260.0, 95.0, 0.34), noise(0.30, 0.12)],
             10,
-        ),
-        (
-            CityAmbience,
-            vec![tone(3.8, 74.0, 82.0, 0.12), noise(3.8, 0.025)],
-            11,
-        ),
-        (
-            TacticalAmbience,
-            vec![tone(3.8, 52.0, 58.0, 0.13), noise(3.8, 0.035)],
-            12,
         ),
     ]
 }

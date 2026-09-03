@@ -1,7 +1,7 @@
-//! Audio scene, response, and persistent settings integration.
+//! Audio response and persistent settings integration.
 
-use super::{AppState, Game};
-use crate::audio::{AudioScene, SoundCue};
+use super::Game;
+use crate::audio::SoundCue;
 use crate::ui::UiAction;
 use macroquad_toolkit::ui::VirtualUi;
 
@@ -72,14 +72,6 @@ impl Game {
     }
 
     pub(super) fn sync_audio(&mut self) {
-        let scene = match self.state {
-            AppState::Colony | AppState::Roster | AppState::GeneLab => AudioScene::City,
-            AppState::MissionBriefing | AppState::Tactical | AppState::Debrief => {
-                AudioScene::Tactical
-            }
-            AppState::Title | AppState::DemoComplete => AudioScene::Silent,
-        };
-        self.audio.set_scene(scene);
         if self.observed_event_count < self.session.tactical.event_log.len() {
             self.audio
                 .play_events(&self.session.tactical.event_log[self.observed_event_count..]);

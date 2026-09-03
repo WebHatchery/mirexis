@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn palette_covers_every_required_response_and_ambience() {
+fn palette_covers_every_required_response() {
     let cues = palette()
         .into_iter()
         .map(|entry| entry.0)
@@ -20,8 +20,6 @@ fn palette_covers_every_required_response_and_ambience() {
         SoundCue::Phase,
         SoundCue::Victory,
         SoundCue::Defeat,
-        SoundCue::CityAmbience,
-        SoundCue::TacticalAmbience,
     ] {
         assert!(cues.contains(&cue));
     }
