@@ -98,7 +98,12 @@ impl Game {
                             .campaign
                             .deployment_roster(&self.data, &self.active_mission),
                     );
-                    self.state = AppState::Colony;
+                    self.state =
+                        if crate::demo::campaign_is_complete(self.campaign.operations_completed) {
+                            AppState::DemoComplete
+                        } else {
+                            AppState::Colony
+                        };
                 }
                 self.last_outcome = restored_outcome(&self.session, &self.active_mission);
                 self.reset_transient_state_after_load();
@@ -117,6 +122,7 @@ impl Game {
                     AppState::Debrief => "Debrief restored",
                     AppState::Tactical => "Tactical state restored",
                     AppState::Colony => "Campaign restored",
+                    AppState::DemoComplete => "Demo completion restored",
                     _ => "Campaign state restored",
                 });
             }

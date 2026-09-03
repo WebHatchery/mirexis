@@ -3,6 +3,10 @@ name = "mirexis"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = []
+demo = []
+
 [dependencies]
 # Procedural SFX and ambience use macroquad's audio backend.
 macroquad = { version = "0.4", features = ["audio"] }

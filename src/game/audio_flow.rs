@@ -77,7 +77,7 @@ impl Game {
             AppState::MissionBriefing | AppState::Tactical | AppState::Debrief => {
                 AudioScene::Tactical
             }
-            AppState::Title => AudioScene::Silent,
+            AppState::Title | AppState::DemoComplete => AudioScene::Silent,
         };
         self.audio.set_scene(scene);
         if self.observed_event_count < self.session.tactical.event_log.len() {

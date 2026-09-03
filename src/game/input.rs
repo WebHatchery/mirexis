@@ -219,6 +219,16 @@ impl Game {
                     self.events.push(UiAction::ReturnToColony);
                 }
             }
+            AppState::DemoComplete => {
+                if input.space_pressed
+                    || input.escape_pressed
+                    || is_key_pressed(KeyCode::Enter)
+                    || pad.confirm
+                    || pad.cancel
+                {
+                    self.events.push(UiAction::ReturnToTitle);
+                }
+            }
         }
         false
     }

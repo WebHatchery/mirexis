@@ -233,6 +233,9 @@ impl Game {
                 &self.visuals,
                 &virtual_ui,
             ),
+            AppState::DemoComplete => {
+                crate::demo_ui::draw(&self.campaign, &self.assets, &self.visuals, &virtual_ui)
+            }
         };
         self.draw_first_hour(&virtual_ui, &mut actions);
         self.draw_settings(&virtual_ui, &mut actions);
@@ -484,7 +487,12 @@ impl Game {
                 self.show_memorial = false;
                 self.memorial_page = 0;
                 self.roster_inspection_id = None;
-                self.state = AppState::Colony;
+                self.state =
+                    if crate::demo::campaign_is_complete(self.campaign.operations_completed) {
+                        AppState::DemoComplete
+                    } else {
+                        AppState::Colony
+                    };
                 self.ensure_first_hour_recovery_reserve();
                 self.campaign.first_hour.returned_to_colony();
                 self.autosave_campaign_only("Colony entry autosaved");

@@ -153,6 +153,23 @@ The required end-to-end validation and packaging path is:
 .\publish.ps1
 ```
 
+### Itch.io demo
+
+The `demo` Cargo feature produces the browser storefront edition. It includes the
+authored rescue and the next two campaign operations, preserves the colony interludes
+and save flow between them, then ends on a dedicated demo-complete screen. The normal
+build has no mission limit.
+
+```powershell
+cargo build --release --features demo --target wasm32-unknown-unknown --target-dir target-demo
+.\publish-itch.ps1 -Channel html5 -DryRun
+```
+
+`publish-itch.ps1` builds the feature-gated WebGL module, packages it with the
+touch-safe `itch-index.html` launcher, and sends only that demo package to the
+`html5-demo` itch.io channel. The standard Windows channel continues to use the full
+build produced by `publish.ps1`.
+
 Refresh deterministic visual references with:
 
 ```powershell

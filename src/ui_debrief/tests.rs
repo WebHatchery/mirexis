@@ -43,6 +43,24 @@ fn completed_campaign_debrief_hides_early_operation_voice() {
 }
 
 #[test]
+fn demo_completion_changes_the_debrief_exit_label() {
+    let data = crate::data::GameData::load().unwrap();
+    let mut campaign = CampaignState::new(&data);
+    campaign.operations_completed = crate::demo::MISSION_LIMIT - 1;
+    assert_eq!(return_button_label(&campaign), "RETURN TO COLONY");
+
+    campaign.operations_completed = crate::demo::MISSION_LIMIT;
+    assert_eq!(
+        return_button_label(&campaign),
+        if crate::demo::is_demo_build() {
+            "FINISH DEMO"
+        } else {
+            "RETURN TO COLONY"
+        }
+    );
+}
+
+#[test]
 fn squad_status_distinguishes_fielded_reserve_and_incapacitated_colonists() {
     let deployed_ids = vec!["kira_voss".to_owned()];
     let incapacitated = vec![CharacterConsequence {

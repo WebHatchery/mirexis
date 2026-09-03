@@ -26,6 +26,14 @@ fn show_early_debrief_voice(campaign: &CampaignState) -> bool {
     !campaign.strategy.campaign_complete && campaign.operations_completed <= 2
 }
 
+fn return_button_label(campaign: &CampaignState) -> &'static str {
+    if crate::demo::campaign_is_complete(campaign.operations_completed) {
+        "FINISH DEMO"
+    } else {
+        "RETURN TO COLONY"
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SquadStatus {
     Returned,
@@ -201,14 +209,18 @@ pub fn draw_debrief(
     draw_squad_tableau(campaign, outcome, deployed_ids, assets, visuals, won);
     if button(
         crate::first_hour_ui::debrief_return_button_bounds(),
-        "RETURN TO COLONY",
+        return_button_label(campaign),
         true,
         mouse,
     ) {
         actions.push(UiAction::ReturnToColony);
     }
     draw_text(
-        "TAP RETURN TO COLONY // ENTER / SPACE / PAD A",
+        if crate::demo::campaign_is_complete(campaign.operations_completed) {
+            "TAP FINISH DEMO // ENTER / SPACE / PAD A"
+        } else {
+            "TAP RETURN TO COLONY // ENTER / SPACE / PAD A"
+        },
         438.0,
         672.0,
         13.0,

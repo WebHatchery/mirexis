@@ -11,6 +11,7 @@ pub(super) enum AppState {
     MissionBriefing,
     Tactical,
     Debrief,
+    DemoComplete,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -29,6 +29,8 @@ mod cover_ui;
 mod danger_rating;
 mod data;
 mod defense_objective;
+mod demo;
+mod demo_ui;
 mod enemy_abilities;
 mod enemy_intent;
 mod enemy_intent_ui;

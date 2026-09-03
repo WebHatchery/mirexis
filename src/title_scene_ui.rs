@@ -29,6 +29,14 @@ pub(crate) fn draw(context: TitleDrawContext<'_>) -> Vec<UiAction> {
     crate::world_art::draw_title_dressing(assets, visuals);
     draw_character_tableau(data, assets, visuals);
     draw_title_copy(data);
+    if crate::demo::is_demo_build() {
+        draw_ui_text_ex(
+            "WEB DEMO  //  3 OPERATIONS",
+            78.0,
+            464.0,
+            TextStyle::new(12.0, dark::WARNING).params(),
+        );
+    }
     if button(
         Rect::new(76.0, 486.0, 244.0, 52.0),
         if new_campaign_armed {

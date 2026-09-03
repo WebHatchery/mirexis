@@ -68,6 +68,7 @@ impl Game {
         if !self.show_field_notes
             && !self.show_memorial
             && self.state != AppState::Title
+            && self.state != AppState::DemoComplete
             && !(self.campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
                 && self.state != AppState::Colony)
         {
