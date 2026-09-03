@@ -71,6 +71,7 @@ pub struct Game {
     tactical_panel_open: bool,
     combat_feedback: CombatFeedback,
     observed_event_count: usize,
+    played_audio_event_count: usize,
     phase_replay: PhaseReplay,
     deployment_formation: FormationKind,
     end_phase_armed: bool,

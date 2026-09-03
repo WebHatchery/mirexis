@@ -84,6 +84,7 @@ impl Game {
             tactical_panel_open: false,
             combat_feedback: CombatFeedback::default(),
             observed_event_count: 0,
+            played_audio_event_count: 0,
             phase_replay: PhaseReplay::default(),
             deployment_formation: FormationKind::default(),
             end_phase_armed: false,

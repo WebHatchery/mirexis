@@ -20,6 +20,7 @@ impl Game {
             &mut self.combat_feedback,
             &mut self.phase_replay,
             &mut self.observed_event_count,
+            &mut self.played_audio_event_count,
             &mut self.end_phase_armed,
             self.session.tactical.event_log.len(),
             play_initial_phase_audio,
@@ -31,17 +32,20 @@ fn reset_tactical_presentation(
     combat_feedback: &mut CombatFeedback,
     phase_replay: &mut PhaseReplay,
     observed_event_count: &mut usize,
+    played_audio_event_count: &mut usize,
     end_phase_armed: &mut bool,
     event_count: usize,
     play_initial_phase_audio: bool,
 ) {
     combat_feedback.clear();
     phase_replay.clear();
-    *observed_event_count = if play_initial_phase_audio {
+    let initial_event_count = if play_initial_phase_audio {
         0
     } else {
         event_count
     };
+    *observed_event_count = initial_event_count;
+    *played_audio_event_count = initial_event_count;
     *end_phase_armed = false;
 }
 

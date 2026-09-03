@@ -38,6 +38,7 @@ impl Game {
         self.tactical_panel_open = false;
         self.combat_feedback = CombatFeedback::default();
         self.observed_event_count = 0;
+        self.played_audio_event_count = 0;
         self.phase_replay = PhaseReplay::default();
         self.deployment_formation = FormationKind::default();
         self.end_phase_armed = false;

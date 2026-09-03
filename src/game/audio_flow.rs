@@ -72,11 +72,26 @@ impl Game {
     }
 
     pub(super) fn sync_audio(&mut self) {
-        if self.observed_event_count < self.session.tactical.event_log.len() {
+        if let Some(start) = unplayed_event_start(
+            &mut self.played_audio_event_count,
+            self.session.tactical.event_log.len(),
+        ) {
             self.audio
-                .play_events(&self.session.tactical.event_log[self.observed_event_count..]);
+                .play_events(&self.session.tactical.event_log[start..]);
         }
     }
+}
+
+fn unplayed_event_start(played_count: &mut usize, event_count: usize) -> Option<usize> {
+    if event_count < *played_count {
+        *played_count = 0;
+    }
+    if *played_count == event_count {
+        return None;
+    }
+    let start = *played_count;
+    *played_count = event_count;
+    Some(start)
 }
 
 fn tactical_command(action: &UiAction) -> bool {
@@ -98,3 +113,6 @@ fn tactical_command(action: &UiAction) -> bool {
             | UiAction::EndPhase
     )
 }
+
+#[cfg(test)]
+mod tests;
