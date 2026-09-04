@@ -170,6 +170,30 @@ touch-safe `itch-index.html` launcher, and sends only that demo package to the
 `html5-demo` itch.io channel. The standard Windows channel continues to use the full
 build produced by `publish.ps1`.
 
+### Itch.io browser console reports
+
+Console messages mentioning `lib.min.js`, `mq_js_bundle.js`, or
+`screen.orientation.lock()` come from a browser session, including a web game
+launched on Windows. They are not diagnostics from the native `mirexis.exe`.
+
+The itch launcher loads only the extra bridges this game needs: JS utilities,
+gamepads, and storage. It does not load the unused external networking or clipboard
+bridges. Macroquad also bundles its own optional `quad_net` plugin, so its
+"not used in the rust code" informational message can still appear safely.
+
+Mirexis and its bundled runtime do not call `screen.orientation.lock()`. An error
+at `mirexis:1` about orientation belongs to the hosting page; it cannot be caught
+from the game's separate iframe. The `monetization`, `xr`, and `allowfullscreen`
+warnings likewise concern the host's iframe configuration. Do not suppress global
+errors or replace browser APIs in the game to hide these messages.
+
+For `ERR_BLOCKED_BY_CLIENT`, capture the blocked resource URL and retry with
+extensions/content blocking disabled for the game page to determine whether a
+required game asset was blocked. If play still fails, record whether this is the
+browser demo or downloaded Windows executable, the last visible screen, and the
+first game error with its complete stack trace. The messages above alone do not
+identify a game crash.
+
 Refresh deterministic visual references with:
 
 ```powershell
