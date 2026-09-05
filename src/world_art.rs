@@ -218,7 +218,7 @@ fn flora_cell(signature: u32) -> usize {
 
 fn open_tile_flora_cell(signature: u32) -> Option<usize> {
     match signature % 23 {
-        0 | 1 | 2 => Some(flora_cell(signature)),
+        0..=2 => Some(flora_cell(signature)),
         _ => None,
     }
 }

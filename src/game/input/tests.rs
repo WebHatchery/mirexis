@@ -2,7 +2,8 @@ use super::*;
 
 #[test]
 fn overlays_only_translate_close_input_while_open() {
-    let overlays: [(&str, fn(bool, bool, bool) -> Option<UiAction>, UiAction); 3] = [
+    type OverlayInput = fn(bool, bool, bool) -> Option<UiAction>;
+    let overlays: [(&str, OverlayInput, UiAction); 3] = [
         ("settings", settings_overlay_input, UiAction::ToggleSettings),
         (
             "field notes",

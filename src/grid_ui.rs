@@ -4,6 +4,7 @@ use macroquad::prelude::{
     is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released, mouse_wheel, vec2,
     MouseButton, Rect, Vec2,
 };
+use macroquad_toolkit::camera::{CameraBounds, CameraBoundsPolicy, CameraTransform};
 use macroquad_toolkit::grid::TilePos;
 
 pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
@@ -40,6 +41,16 @@ pub(crate) struct WorldCamera {
 }
 
 impl WorldCamera {
+    fn transform(&self) -> Option<CameraTransform> {
+        CameraTransform::new(self.center, self.zoom).ok()
+    }
+
+    pub(crate) fn projected_to_screen(&self, viewport: Rect, projected: Vec2) -> Vec2 {
+        self.transform()
+            .and_then(|transform| transform.world_to_screen(viewport, projected))
+            .unwrap_or_else(|| viewport.center())
+    }
+
     pub(crate) fn tactical_start(tile: TilePos) -> Self {
         Self {
             center: projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
@@ -197,7 +208,11 @@ impl WorldCamera {
     }
 
     fn pan_screen(&mut self, delta: Vec2) {
-        self.center -= delta / self.zoom;
+        if let Some(mut transform) = self.transform() {
+            if transform.pan_screen(delta) {
+                self.center = transform.target();
+            }
+        }
     }
 
     pub(crate) fn zoom_center(&mut self, viewport: Rect, factor: f32) {
@@ -205,10 +220,12 @@ impl WorldCamera {
     }
 
     fn zoom_at(&mut self, viewport: Rect, cursor: Vec2, factor: f32) {
-        let old_zoom = self.zoom;
-        self.zoom = (self.zoom * factor).clamp(0.65, 1.85);
-        let from_center = cursor - viewport.center();
-        self.center += from_center / old_zoom - from_center / self.zoom;
+        if let Some(mut transform) = self.transform() {
+            if transform.zoom_at(viewport, cursor, factor, (0.65, 1.85)) {
+                self.center = transform.target();
+                self.zoom = transform.zoom();
+            }
+        }
     }
 
     pub(crate) fn reveal_changed_tactical_selection(&mut self, tile: TilePos, viewport: Rect) {
@@ -217,7 +234,7 @@ impl WorldCamera {
         }
         self.tracked_tile = Some(tile);
         let projected = projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT);
-        let screen = viewport.center() + (projected - self.center) * self.zoom;
+        let screen = self.projected_to_screen(viewport, projected);
         let safe = Rect::new(
             viewport.x + 96.0,
             viewport.y + 76.0,
@@ -270,23 +287,21 @@ impl WorldCamera {
         max.x += insets.right / self.zoom;
         max.y += insets.bottom / self.zoom;
         let visible_half = viewport.size() * 0.5 / self.zoom;
-        self.center.x = clamp_axis(self.center.x, min.x, max.x, visible_half.x);
-        self.center.y = clamp_axis(self.center.y, min.y, max.y, visible_half.y);
+        let middle = (min + max) * 0.5;
+        let bounds = CameraBounds {
+            min: (min + visible_half).min(middle),
+            max: (max - visible_half).max(middle),
+        };
+        if let Some(mut transform) = self.transform() {
+            if transform.constrain(viewport, bounds, CameraBoundsPolicy::TargetInside) {
+                self.center = transform.target();
+            }
+        }
     }
 }
 
 fn primary_tracking(active: bool, inside: bool, pressed: bool, down: bool) -> bool {
     down && (active || (inside && pressed))
-}
-
-fn clamp_axis(value: f32, min: f32, max: f32, visible_half: f32) -> f32 {
-    let lower = min + visible_half;
-    let upper = max - visible_half;
-    if lower <= upper {
-        value.clamp(lower, upper)
-    } else {
-        (min + max) * 0.5
-    }
 }
 
 fn projected_tile(tile: TilePos, half_width: f32, half_height: f32) -> Vec2 {
@@ -330,7 +345,7 @@ impl GridView {
         let half_height = TACTICAL_HALF_HEIGHT * camera.zoom;
         let elevation_step = (half_height * 0.82).max(8.0);
         Self {
-            origin: rect.center() - camera.center * camera.zoom,
+            origin: camera.projected_to_screen(rect, Vec2::ZERO),
             half_width,
             half_height,
             elevation_step,

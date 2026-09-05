@@ -605,25 +605,18 @@ fn draw_colony_contact(center: Vec2, zoom: f32, highlighted: bool) {
 }
 
 fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {
-    let mut line = String::new();
-    let mut baseline = y;
-    for word in text.split_whitespace() {
-        let candidate = if line.is_empty() {
-            word.to_owned()
-        } else {
-            format!("{line} {word}")
-        };
-        if measure_text(&candidate, None, 14, 1.0).width > width && !line.is_empty() {
-            draw_text(&line, x, baseline, 14.0, Color::new(0.72, 0.84, 0.80, 1.0));
-            baseline += 18.0;
-            line = word.to_owned();
-        } else {
-            line = candidate;
-        }
-    }
-    draw_text(&line, x, baseline, 14.0, Color::new(0.72, 0.84, 0.80, 1.0));
+    macroquad_toolkit::ui::draw_text_block_ex(
+        text,
+        x,
+        y - 14.0,
+        width,
+        50.0,
+        macroquad_toolkit::ui::TextStyle::new(14.0, Color::new(0.72, 0.84, 0.80, 1.0))
+            .with_macroquad_font()
+            .with_line_gap(4.0),
+        14.0,
+    );
 }
-
 fn npc_status(character: &CharacterRecord, guest: bool) -> String {
     let duty = match character.id.as_str() {
         "mara_venn" => "SECURITY LEAD",

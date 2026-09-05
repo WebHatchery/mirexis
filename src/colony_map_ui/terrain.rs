@@ -39,9 +39,9 @@ pub(super) fn draw_ground(
     let elevation = view.elevation(position);
     let cell = if occupied || elevation > 0 {
         0
-    } else if elevation < 0 || pattern % 11 == 0 {
+    } else if elevation < 0 || pattern.is_multiple_of(11) {
         8
-    } else if pattern % 5 == 0 {
+    } else if pattern.is_multiple_of(5) {
         1
     } else {
         0
@@ -109,7 +109,7 @@ fn draw_surface_detail(
             1.0,
             Color::new(0.24, 0.66, 0.55, if hovered { 0.60 } else { 0.34 }),
         );
-    } else if !occupied && pattern % 7 == 0 {
+    } else if !occupied && pattern.is_multiple_of(7) {
         let patch = [
             vec2(center.x, center.y - view.half_height * 0.62),
             vec2(center.x + view.half_width * 0.62, center.y),

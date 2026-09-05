@@ -17,7 +17,7 @@ impl ColonyView {
     pub(crate) fn new(viewport: Rect, camera: &WorldCamera) -> Self {
         Self {
             viewport,
-            origin: viewport.center() - camera.center * camera.zoom,
+            origin: camera.projected_to_screen(viewport, Vec2::ZERO),
             half_width: COLONY_HALF_WIDTH * camera.zoom,
             half_height: COLONY_HALF_HEIGHT * camera.zoom,
             zoom: camera.zoom,

@@ -8,6 +8,7 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_ui_text_ex, TextStyle};
+use macroquad_toolkit::ui::wrap_text_ex;
 
 pub(crate) fn draw(
     campaign: &CampaignState,
@@ -42,7 +43,7 @@ pub(crate) fn draw(
         528.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
-    let description = wrap_words(beat.description, 42);
+    let description = wrap_text_ex(beat.description, 302.0, None, 9.5);
     for (index, line) in description.into_iter().take(3).enumerate() {
         draw_ui_text_ex(
             &line,
@@ -73,7 +74,7 @@ pub(crate) fn draw(
             rect.y + 32.0,
             TextStyle::new(9.0, if enabled { dark::ACCENT } else { dark::WARNING }).params(),
         );
-        for (line_index, line) in wrap_words(choice.description, 28)
+        for (line_index, line) in wrap_text_ex(choice.description, rect.w - 16.0, None, 8.0)
             .into_iter()
             .take(2)
             .enumerate()
@@ -131,24 +132,6 @@ fn cost_label(resources: &Resources, choice: &OutsiderChoice) -> String {
     } else {
         costs.join(" // ")
     }
-}
-
-fn wrap_words(value: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut line = String::new();
-    for word in value.split_whitespace() {
-        if !line.is_empty() && line.len() + word.len() + 1 > width {
-            lines.push(std::mem::take(&mut line));
-        }
-        if !line.is_empty() {
-            line.push(' ');
-        }
-        line.push_str(word);
-    }
-    if !line.is_empty() {
-        lines.push(line);
-    }
-    lines
 }
 
 #[cfg(test)]

@@ -9,7 +9,7 @@ use macroquad_toolkit::prelude::{
     dark, draw_chamfered_surface, draw_surface_with_title, ChamferedSurfaceStyle, SurfaceStyle,
     TextStyle,
 };
-use macroquad_toolkit::ui::RectExt;
+use macroquad_toolkit::ui::{truncate_text_to_width_with_style, RectExt};
 
 const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
 const UPGRADE_PANEL: Rect = Rect::new(862.0, 44.0, 408.0, 660.0);
@@ -144,7 +144,11 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
     }
     if let Some(message) = upgrade_message(campaign) {
         super::draw_ui_text_ex(
-            &fit_text(message, CONTENT_RECT.w, 10),
+            &truncate_text_to_width_with_style(
+                message,
+                CONTENT_RECT.w,
+                TextStyle::new(10.0, dark::TEXT).with_macroquad_font(),
+            ),
             CONTENT_RECT.x,
             632.0,
             TextStyle::new(10.0, dark::WARNING).params(),
@@ -228,9 +232,11 @@ fn draw_facility_row(
             option_card,
             option_index,
             option,
-            &queue_label,
-            can_queue,
-            kind.upgrade_cost(),
+            UpgradeCardState {
+                queue_label: &queue_label,
+                can_queue,
+                cost: kind.upgrade_cost(),
+            },
             mouse,
             building,
             actions,
@@ -238,17 +244,26 @@ fn draw_facility_row(
     }
 }
 
+struct UpgradeCardState<'a> {
+    queue_label: &'a str,
+    can_queue: bool,
+    cost: i32,
+}
+
 fn draw_option_card(
     card: Rect,
     option_index: usize,
     option: &crate::colony::FacilityUpgradeOption,
-    queue_label: &str,
-    can_queue: bool,
-    cost: i32,
+    state: UpgradeCardState<'_>,
     mouse: Vec2,
     building: &crate::colony::BuildingState,
     actions: &mut Vec<UiAction>,
 ) {
+    let UpgradeCardState {
+        queue_label,
+        can_queue,
+        cost,
+    } = state;
     let action_rect = Rect::new(card.x + 98.0, card.y + 25.0, 64.0, 16.0);
     let hovered = can_queue && action_rect.contains_point(mouse);
     draw_rectangle(
@@ -292,7 +307,11 @@ fn draw_option_card(
         TextStyle::new(11.0, dark::TEXT_BRIGHT).params(),
     );
     super::draw_ui_text_ex(
-        &fit_text(option.description, 154.0, 8),
+        &truncate_text_to_width_with_style(
+            option.description,
+            154.0,
+            TextStyle::new(8.0, dark::TEXT_DIM).with_macroquad_font(),
+        ),
         card.x + 8.0,
         card.y + 22.0,
         TextStyle::new(8.0, dark::TEXT_DIM).params(),
@@ -368,22 +387,6 @@ fn facility_status_color(status: &str) -> Color {
         "REPAIR FIRST" => dark::NEGATIVE,
         _ => dark::WARNING,
     }
-}
-
-fn fit_text(text: &str, max_width: f32, font_size: u16) -> String {
-    if measure_text(text, None, font_size, 1.0).width <= max_width {
-        return text.to_owned();
-    }
-    let suffix = "...";
-    let mut fitted = String::new();
-    for character in text.chars() {
-        let candidate = format!("{fitted}{character}{suffix}");
-        if measure_text(&candidate, None, font_size, 1.0).width > max_width {
-            break;
-        }
-        fitted.push(character);
-    }
-    format!("{}{}", fitted.trim_end(), suffix)
 }
 
 fn upgrade_button_state(

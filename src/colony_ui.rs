@@ -529,10 +529,19 @@ fn draw_character_event(
             card.y + 30.0,
             TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
         );
-        for (index, line) in wrap_words(&definition.description, 38)
-            .into_iter()
-            .take(3)
-            .enumerate()
+        for (index, line) in fit_text_to_box_ex(
+            &definition.description,
+            card.w - 124.0,
+            38.0,
+            TextStyle::new(10.0, dark::TEXT_DIM)
+                .with_macroquad_font()
+                .with_line_gap(4.0),
+            10.0,
+        )
+        .lines
+        .into_iter()
+        .take(3)
+        .enumerate()
         {
             draw_ui_text_ex(
                 &line,
@@ -586,24 +595,6 @@ fn draw_character_event(
             actions.push(UiAction::ResolveCharacterEvent(participant_id.clone()));
         }
     }
-}
-
-fn wrap_words(value: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut line = String::new();
-    for word in value.split_whitespace() {
-        if !line.is_empty() && line.len() + word.len() + 1 > width {
-            lines.push(std::mem::take(&mut line));
-        }
-        if !line.is_empty() {
-            line.push(' ');
-        }
-        line.push_str(word);
-    }
-    if !line.is_empty() {
-        lines.push(line);
-    }
-    lines
 }
 
 fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &VisualCatalog) {

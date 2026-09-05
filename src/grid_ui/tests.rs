@@ -469,3 +469,14 @@ fn changed_offscreen_selection_recenters_without_fighting_free_pan() {
         projected_tile(distant, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT)
     );
 }
+
+// Original per-axis policy retained as an independent compatibility oracle.
+fn clamp_axis(value: f32, min: f32, max: f32, visible_half: f32) -> f32 {
+    let lower = min + visible_half;
+    let upper = max - visible_half;
+    if lower <= upper {
+        value.clamp(lower, upper)
+    } else {
+        (min + max) * 0.5
+    }
+}

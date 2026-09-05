@@ -392,7 +392,7 @@ fn draw_surface_seams(top: [Vec2; 4], position: TilePos, blocked: bool, elevatio
         return;
     }
     let pattern = (position.x as u32).wrapping_mul(31) ^ (position.y as u32).wrapping_mul(17);
-    if pattern % 5 != 0 {
+    if !pattern.is_multiple_of(5) {
         return;
     }
     let center = (top[0] + top[2]) * 0.5;

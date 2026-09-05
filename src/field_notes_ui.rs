@@ -153,37 +153,18 @@ fn note_row_bounds(row: usize) -> Rect {
 }
 
 fn draw_wrapped(value: &str, x: f32, y: f32, width: f32) {
-    let mut line = String::new();
-    let mut baseline = y;
-    for word in value.split_whitespace() {
-        let candidate = if line.is_empty() {
-            word.to_owned()
-        } else {
-            format!("{line} {word}")
-        };
-        if measure_text(&candidate, None, 16, 1.0).width > width && !line.is_empty() {
-            draw_ui_text_ex(
-                &line,
-                x,
-                baseline,
-                TextStyle::new(16.0, dark::TEXT).params(),
-            );
-            baseline += 24.0;
-            line = word.to_owned();
-        } else {
-            line = candidate;
-        }
-    }
-    if !line.is_empty() {
-        draw_ui_text_ex(
-            &line,
-            x,
-            baseline,
-            TextStyle::new(16.0, dark::TEXT).params(),
-        );
-    }
+    macroquad_toolkit::ui::draw_text_block_ex(
+        value,
+        x,
+        y - 16.0,
+        width,
+        (500.0 - y).max(16.0),
+        TextStyle::new(16.0, dark::TEXT)
+            .with_macroquad_font()
+            .with_line_gap(8.0),
+        16.0,
+    );
 }
-
 fn draw_ui_text_ex<'a>(value: &str, x: f32, y: f32, params: TextParams<'a>) -> TextDimensions {
     crate::ui::draw_ui_text_ex(value, x, y, params)
 }
