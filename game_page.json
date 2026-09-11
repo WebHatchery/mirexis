@@ -1,7 +1,6 @@
 {
   "title": "Mirexis",
   "wasm": "mirexis",
-  "roost_slug": "rust_mirexis",
   "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "auto",
   "about": [
