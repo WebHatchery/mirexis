@@ -1,6 +1,11 @@
 //! Application state machine, persistence, and toolkit integration.
 
+pub mod action_campaign;
+pub mod action_colony;
 pub mod action_dispatch;
+pub mod action_navigation;
+pub mod action_phase;
+pub mod action_tactical;
 pub mod audio_flow;
 pub mod bootstrap;
 pub mod capture_campaign;
@@ -9,8 +14,9 @@ pub mod capture_debrief;
 pub mod capture_first_hour;
 pub mod capture_recruited_roster;
 pub mod capture_reset;
-pub mod capture_scene_groups;
 pub mod capture_scenes;
+pub mod capture_scenes_campaign;
+pub mod capture_scenes_tactical;
 pub mod capture_tactical;
 pub mod class_action_flow;
 pub mod colony_flow;

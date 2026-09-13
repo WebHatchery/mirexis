@@ -8,25 +8,7 @@ use macroquad_toolkit::grid::TilePos;
 impl Game {
     pub fn begin_capture_scene(&mut self, scene: &str) {
         self.reset_capture_world();
-        if self.capture_scene_group_a(scene) {
-            return;
-        }
-        if self.capture_scene_group_b(scene) {
-            return;
-        }
-        if self.capture_scene_group_c(scene) {
-            return;
-        }
-        if self.capture_scene_group_d(scene) {
-            return;
-        }
-        if self.capture_scene_group_e(scene) {
-            return;
-        }
-        if self.capture_scene_group_f(scene) {
-            return;
-        }
-        if self.capture_scene_group_g(scene) {
+        if self.capture_campaign_scene(scene) || self.capture_tactical_scene(scene) {
             return;
         }
         panic!("unsupported Mirexis capture scene: {scene}");

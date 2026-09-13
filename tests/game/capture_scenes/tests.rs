@@ -11,7 +11,10 @@ fn capture_manifest() -> Vec<&'static str> {
 
 #[test]
 fn capture_script_manifest_is_unique_and_every_scene_has_an_explicit_builder() {
-    let source = include_str!("../../../src/game/capture_scene_groups.rs");
+    let source = concat!(
+        include_str!("../../../src/game/capture_scenes_campaign.rs"),
+        include_str!("../../../src/game/capture_scenes_tactical.rs")
+    );
     let scenes = capture_manifest();
     assert_eq!(scenes.len(), 109, "update the audited capture inventory");
     assert_eq!(
