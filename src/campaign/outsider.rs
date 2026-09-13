@@ -1,28 +1,45 @@
 //! Route-specific recruitment rules and Waystation outsider arcs.
-pub mod beats;
-pub use beats::*;
-
 use super::{CampaignState, CharacterLegacy, CharacterRecord, OutsiderArcState};
 use crate::colony::BuildingKind;
-use crate::data::{CharacterDef, GameData};
+use crate::data::{CharacterDef, GameData, OutsiderBeatDef, OutsiderChoiceDef};
 
 pub const OUTSIDER_IDS: [&str; 3] = ["veya_orn", "sedge", "ninth_voice_apart"];
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct OutsiderChoice {
-    pub id: &'static str,
-    pub label: &'static str,
-    pub description: &'static str,
+    pub id: String,
+    pub label: String,
+    pub description: String,
     pub materials_cost: i32,
     pub food_cost: i32,
     pub power_cost: i32,
     pub biomass_cost: i32,
     pub attention_change: i32,
-    pub relationship_partner: &'static str,
+    pub relationship_partner: String,
     pub disagreement: bool,
-    pub legacy_name: &'static str,
-    pub legacy_stat: &'static str,
+    pub legacy_name: String,
+    pub legacy_stat: String,
     pub legacy_amount: i32,
+}
+
+impl From<&OutsiderChoiceDef> for OutsiderChoice {
+    fn from(definition: &OutsiderChoiceDef) -> Self {
+        Self {
+            id: definition.id.clone(),
+            label: definition.label.clone(),
+            description: definition.description.clone(),
+            materials_cost: definition.materials_cost,
+            food_cost: definition.food_cost,
+            power_cost: definition.power_cost,
+            biomass_cost: definition.biomass_cost,
+            attention_change: definition.attention_change,
+            relationship_partner: definition.relationship_partner.clone(),
+            disagreement: definition.disagreement,
+            legacy_name: definition.legacy_name.clone(),
+            legacy_stat: definition.legacy_stat.clone(),
+            legacy_amount: definition.legacy_amount,
+        }
+    }
 }
 
 pub fn recruitment_resource(definition: &CharacterDef) -> &str {
@@ -33,15 +50,41 @@ pub fn recruitment_resource(definition: &CharacterDef) -> &str {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct OutsiderBeat {
-    pub outsider_id: &'static str,
-    pub outsider_name: &'static str,
-    pub attention_faction: &'static str,
+    pub outsider_id: String,
+    pub outsider_name: String,
+    pub attention_faction: String,
     pub stage: u8,
-    pub title: &'static str,
-    pub description: &'static str,
-    pub choices: [OutsiderChoice; 2],
+    pub title: String,
+    pub description: String,
+    pub choices: Vec<OutsiderChoice>,
+}
+
+impl From<&OutsiderBeatDef> for OutsiderBeat {
+    fn from(definition: &OutsiderBeatDef) -> Self {
+        Self {
+            outsider_id: definition.outsider_id.clone(),
+            outsider_name: definition.outsider_name.clone(),
+            attention_faction: definition.attention_faction.clone(),
+            stage: definition.stage,
+            title: definition.title.clone(),
+            description: definition.description.clone(),
+            choices: definition
+                .choices
+                .iter()
+                .map(OutsiderChoice::from)
+                .collect(),
+        }
+    }
+}
+
+pub fn outsider_beat(data: &GameData, outsider_id: &str, stage: u8) -> Option<OutsiderBeat> {
+    data.campaign
+        .outsider_beats
+        .iter()
+        .find(|beat| beat.outsider_id == outsider_id && beat.stage == stage)
+        .map(OutsiderBeat::from)
 }
 
 impl CampaignState {
@@ -161,7 +204,7 @@ impl CampaignState {
             .insert(outsider_id.to_owned(), state);
     }
 
-    pub fn outsider_arc_beat(&self) -> Option<OutsiderBeat> {
+    pub fn outsider_arc_beat(&self, data: &GameData) -> Option<OutsiderBeat> {
         for outsider_id in OUTSIDER_IDS {
             if !self
                 .roster
@@ -171,7 +214,7 @@ impl CampaignState {
                 continue;
             }
             let state = self.outsider_arc_state(outsider_id);
-            let Some(beat) = outsider_beat(outsider_id, state.stage) else {
+            let Some(beat) = outsider_beat(data, outsider_id, state.stage) else {
                 continue;
             };
             if self.operations_completed >= u32::from(state.stage) {
@@ -181,19 +224,24 @@ impl CampaignState {
         None
     }
 
-    pub fn outsider_arc_disagreements(&self) -> u8 {
-        self.outsider_arc_beat()
-            .map(|beat| self.outsider_arc_state(beat.outsider_id).disagreements)
+    pub fn outsider_arc_disagreements(&self, data: &GameData) -> u8 {
+        self.outsider_arc_beat(data)
+            .map(|beat| self.outsider_arc_state(&beat.outsider_id).disagreements)
             .unwrap_or_default()
     }
 
-    pub fn outsider_arc_available(&self) -> bool {
-        self.outsider_arc_beat().is_some()
+    pub fn outsider_arc_available(&self, data: &GameData) -> bool {
+        self.outsider_arc_beat(data).is_some()
     }
 
-    pub fn resolve_outsider_beat(&mut self, stage: u8, choice_id: &str) -> Result<String, String> {
+    pub fn resolve_outsider_beat(
+        &mut self,
+        data: &GameData,
+        stage: u8,
+        choice_id: &str,
+    ) -> Result<String, String> {
         let beat = self
-            .outsider_arc_beat()
+            .outsider_arc_beat(data)
             .ok_or_else(|| "No recruited outsider has a current conversation".to_owned())?;
         if beat.stage != stage {
             return Err("That outsider conversation is no longer current".to_owned());
@@ -202,7 +250,7 @@ impl CampaignState {
             .choices
             .iter()
             .find(|choice| choice.id == choice_id)
-            .copied()
+            .cloned()
             .ok_or_else(|| format!("Unknown outsider choice: {choice_id}"))?;
         if self.colony.resources.materials < choice.materials_cost {
             return Err(format!(
@@ -234,7 +282,7 @@ impl CampaignState {
         {
             faction.attention = (faction.attention + choice.attention_change).clamp(0, 100);
         }
-        let mut arc_state = self.outsider_arc_state(beat.outsider_id);
+        let mut arc_state = self.outsider_arc_state(&beat.outsider_id);
         if choice.disagreement {
             arc_state.disagreements = arc_state.disagreements.saturating_add(1);
         }
@@ -266,7 +314,7 @@ impl CampaignState {
             arc_state.final_choice = choice.id.to_owned();
         }
         arc_state.stage = arc_state.stage.saturating_add(1);
-        self.set_outsider_arc_state(beat.outsider_id, arc_state);
+        self.set_outsider_arc_state(&beat.outsider_id, arc_state);
         Ok(format!("{} // {}", beat.title, choice.label))
     }
 }

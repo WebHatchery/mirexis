@@ -385,7 +385,7 @@ fn draw_equipment_controls(context: EquipmentControlsContext<'_>) {
         TextStyle::new(15.0, dark::ACCENT).params(),
     );
     for (index, item) in data.equipment.iter().enumerate() {
-        let cost = equipment_cost(&item.slot);
+        let cost = equipment_cost(&item.slot, &data.config);
         let equipped = character.equipment_ids.contains(&item.id);
         let unlocked = campaign.equipment_is_unlocked(item);
         let prototype_available =

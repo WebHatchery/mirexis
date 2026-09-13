@@ -16,6 +16,7 @@ pub struct GameConfig {
     pub max_action_points: u8,
     pub battle_seed: u64,
     pub starting_resources: StartingResources,
+    pub equipment_costs: std::collections::BTreeMap<String, u32>,
     pub exploration: ExplorationBalance,
     pub tutorial: TutorialCopy,
 }
@@ -53,6 +54,41 @@ pub struct TutorialCopy {
     pub tactical_win_contract_lines: Vec<String>,
     pub tactical_touch_controls: String,
     pub tactical_optional_controls: String,
+    pub first_hour_goals: FirstHourGoals,
+    pub first_hour_help_button: String,
+    pub first_hour_help_return_button: String,
+    pub first_hour_help_restart_button: String,
+    pub first_hour_help_skip_button: String,
+    pub first_hour_help_skipped_button: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FirstHourGoals {
+    pub arrival: String,
+    pub meet_coordinator: String,
+    pub prepare_first_operation: String,
+    pub first_briefing: String,
+    pub first_return: String,
+    pub first_return_colony: String,
+    pub make_investment: String,
+    pub second_operation: String,
+    pub second_return: String,
+    pub promise: String,
+    pub complete: String,
+    pub unguided_first_operation: String,
+    pub unguided_second_operation: String,
+    pub lessons: FirstHourLessons,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FirstHourLessons {
+    pub select: String,
+    pub move_to_cover: String,
+    pub attack: String,
+    pub enemy_phase: String,
+    pub objective: String,
+    pub ability: String,
+    pub apply_learning: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -295,8 +331,38 @@ pub struct CampaignDef {
     pub escalation_responses: Vec<EscalationResponseDef>,
     pub mirexis_paths: Vec<MirexisPathDef>,
     pub events: Vec<CharacterEventDef>,
+    #[serde(default)]
+    pub outsider_beats: Vec<OutsiderBeatDef>,
     pub mission_templates: Vec<MissionTemplateDef>,
     pub map_recipes: Vec<MapRecipeDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OutsiderBeatDef {
+    pub outsider_id: String,
+    pub outsider_name: String,
+    pub attention_faction: String,
+    pub stage: u8,
+    pub title: String,
+    pub description: String,
+    pub choices: Vec<OutsiderChoiceDef>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OutsiderChoiceDef {
+    pub id: String,
+    pub label: String,
+    pub description: String,
+    pub materials_cost: i32,
+    pub food_cost: i32,
+    pub power_cost: i32,
+    pub biomass_cost: i32,
+    pub attention_change: i32,
+    pub relationship_partner: String,
+    pub disagreement: bool,
+    pub legacy_name: String,
+    pub legacy_stat: String,
+    pub legacy_amount: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

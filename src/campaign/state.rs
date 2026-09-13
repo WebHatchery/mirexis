@@ -459,7 +459,7 @@ impl CampaignState {
                 equipment.name
             ));
         }
-        let base_cost = equipment_cost(&equipment.slot);
+        let base_cost = equipment_cost(&equipment.slot, &data.config);
         let prototype_available =
             self.salvage_prototypes > 0 && equipment.required_protocol.is_empty();
         let cost = if prototype_available {

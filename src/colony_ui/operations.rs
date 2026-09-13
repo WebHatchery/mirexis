@@ -493,8 +493,8 @@ fn draw_campaign_surfaces(context: CampaignSurfacesContext<'_>) -> CampaignSurfa
     } else {
         if let Some(event) = campaign.strategy.available_event() {
             draw_character_event(campaign, data, assets, visuals, event, mouse, actions);
-        } else if campaign.outsider_arc_available() {
-            crate::outsider_ui::draw(campaign, assets, visuals, mouse, actions);
+        } else if campaign.outsider_arc_available(data) {
+            crate::outsider_ui::draw(campaign, data, assets, visuals, mouse, actions);
         } else if !campaign.outsider_recruit_available(data) {
             research::draw_available(campaign, assets, visuals, mouse, actions);
         }

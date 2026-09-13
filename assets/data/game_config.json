@@ -14,6 +14,13 @@
     "biomass": 12,
     "alien_components": 0
   },
+  "equipment_costs": {
+    "primary": 30,
+    "armour": 25,
+    "tool": 20,
+    "module": 20,
+    "default": 25
+  },
   "exploration": {
     "player_start": [9.0, 10.0],
     "walk_speed": 3.6,
@@ -62,6 +69,35 @@
       "Save and load remain available during battle."
     ],
     "tactical_touch_controls": "TOUCH // TAP MAP TO INSPECT · DRAG MAP TO PAN · TAP +/- TO ZOOM · TAP NEXT READY / END PHASE / SAVE / LOAD / HELP / LOG",
-    "tactical_optional_controls": "OPTIONAL // KEYS ARROWS / TAB / ENTER / S / L / H / B · PAD D-PAD / A / B / X / Y / RB / START"
+    "tactical_optional_controls": "OPTIONAL // KEYS ARROWS / TAB / ENTER / S / L / H / B · PAD D-PAD / A / B / X / Y / RB / START",
+    "first_hour_help_button": "HELP",
+    "first_hour_help_return_button": "RETURN",
+    "first_hour_help_restart_button": "RESTART GUIDE",
+    "first_hour_help_skip_button": "SKIP PROMPTS",
+    "first_hour_help_skipped_button": "PROMPTS SKIPPED",
+    "first_hour_goals": {
+      "arrival": "Tap BEGIN ARRIVAL to answer the refuge distress call.",
+      "meet_coordinator": "Tap Mara Venn's speech marker, then tap CONTINUE.",
+      "prepare_first_operation": "Tap OPERATIONS, inspect GLASSROOT, then tap BRIEF SELECTED MISSION.",
+      "first_briefing": "Tap colonists to choose up to three, then tap DEPLOY SQUAD.",
+      "first_return": "Tap RETURN TO COLONY, then tap Ilya Reed's marker.",
+      "first_return_colony": "Tap Ilya Reed's speech marker, then tap CONTINUE.",
+      "make_investment": "Tap OPERATIONS and choose one affordable preparation investment.",
+      "second_operation": "Tap OPERATIONS, choose the next mission, then tap BRIEF SELECTED MISSION.",
+      "second_return": "Tap RETURN TO COLONY to see what the two operations changed.",
+      "promise": "Read the colony consequence, then tap CONTINUE CAMPAIGN.",
+      "complete": "Protect the colony before the Directorate assault reaches Mirexis.",
+      "unguided_first_operation": "Secure the refuge and neutralise the remaining Brood.",
+      "unguided_second_operation": "Complete the mission and neutralise remaining hostiles.",
+      "lessons": {
+        "select": "Tap a colonist to select them.",
+        "move_to_cover": "Tap the gold-marked cover tile to move into cover.",
+        "attack": "Tap a hostile, review the forecast, then tap ATTACK.",
+        "enemy_phase": "Tap END PHASE; if a READY warning appears, tap CONFIRM END again to watch the hostile response.",
+        "objective": "Move onto the gold objective, tap COMMAND, then tap SECURE OBJECTIVE.",
+        "ability": "Tap COMMAND, then a visible CLASS, MUTATION, or GEAR action.",
+        "apply_learning": "Tap a remaining hostile, review the forecast, then tap ATTACK."
+      }
+    }
   }
 }

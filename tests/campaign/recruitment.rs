@@ -116,7 +116,7 @@ fn brood_contact_recruits_ninth_with_biomass_and_a_separate_arc() {
         .any(|id| id == "severed_resonance"));
 
     campaign
-        .resolve_outsider_beat(0, "ninth_give_it_quiet")
+        .resolve_outsider_beat(&data, 0, "ninth_give_it_quiet")
         .unwrap();
     assert_eq!(campaign.outsider_arc_states["ninth_voice_apart"].stage, 1);
     assert_eq!(
@@ -164,7 +164,7 @@ fn outsider_recruitment_adds_a_reserve_with_a_distinct_origin_profile() {
         .deployment_roster(&data, &data.mission)
         .iter()
         .any(|unit| unit.id == "veya_orn"));
-    assert!(campaign.outsider_arc_available());
+    assert!(campaign.outsider_arc_available(&data));
 }
 
 #[test]
@@ -173,23 +173,27 @@ fn outsider_arc_persists_two_disagreements_and_a_third_closing_beat() {
     let mut campaign = directorate_waystation_campaign(&data);
     campaign.recruit_outsider(&data).unwrap();
 
-    campaign.resolve_outsider_beat(0, "shelter_cipher").unwrap();
+    campaign
+        .resolve_outsider_beat(&data, 0, "shelter_cipher")
+        .unwrap();
     assert_eq!(campaign.outsider_arc_stage, 1);
     assert_eq!(campaign.outsider_disagreements, 1);
     assert_eq!(campaign.roster[5].event_legacies[0].stat, "accuracy");
 
     campaign.operations_completed = 1;
     campaign
-        .resolve_outsider_beat(1, "kira_walks_range")
+        .resolve_outsider_beat(&data, 1, "kira_walks_range")
         .unwrap();
     assert_eq!(campaign.outsider_arc_stage, 2);
     assert_eq!(campaign.outsider_disagreements, 2);
 
     campaign.operations_completed = 2;
-    campaign.resolve_outsider_beat(2, "stay_on_line").unwrap();
+    campaign
+        .resolve_outsider_beat(&data, 2, "stay_on_line")
+        .unwrap();
     assert_eq!(campaign.outsider_arc_stage, 3);
     assert_eq!(campaign.outsider_final_choice, "stay_on_line");
-    assert!(!campaign.outsider_arc_available());
+    assert!(!campaign.outsider_arc_available(&data));
 
     let saved = serde_json::to_value(&campaign).unwrap();
     let restored: CampaignState = serde_json::from_value(saved).unwrap();
@@ -207,12 +211,17 @@ fn recruited_outsider_arcs_keep_progress_separate_across_routes() {
     campaign.strategy.contact_complete = true;
     campaign.recruit_outsider(&data).unwrap();
 
-    campaign.resolve_outsider_beat(0, "shelter_cipher").unwrap();
+    campaign
+        .resolve_outsider_beat(&data, 0, "shelter_cipher")
+        .unwrap();
     assert_eq!(campaign.outsider_arc_stage, 1);
-    assert_eq!(campaign.outsider_arc_beat().unwrap().outsider_id, "sedge");
+    assert_eq!(
+        campaign.outsider_arc_beat(&data).unwrap().outsider_id,
+        "sedge"
+    );
 
     campaign
-        .resolve_outsider_beat(0, "sedge_keep_map_personal")
+        .resolve_outsider_beat(&data, 0, "sedge_keep_map_personal")
         .unwrap();
     assert_eq!(campaign.outsider_arc_stage, 1);
     assert_eq!(campaign.outsider_arc_states["sedge"].stage, 1);
@@ -288,7 +297,7 @@ fn adaptation_outsider_arc_tracks_sedge_and_brood_attention() {
         .attention;
 
     campaign
-        .resolve_outsider_beat(0, "sedge_trade_the_route")
+        .resolve_outsider_beat(&data, 0, "sedge_trade_the_route")
         .unwrap();
     assert_eq!(campaign.colony.resources.biomass, biomass_before - 2);
     assert_eq!(campaign.outsider_arc_states["sedge"].stage, 1);
@@ -305,20 +314,20 @@ fn adaptation_outsider_arc_tracks_sedge_and_brood_attention() {
 
     campaign.operations_completed = 1;
     campaign
-        .resolve_outsider_beat(1, "sedge_follow_the_pulse")
+        .resolve_outsider_beat(&data, 1, "sedge_follow_the_pulse")
         .unwrap();
     assert_eq!(campaign.outsider_arc_states["sedge"].stage, 2);
 
     campaign.operations_completed = 2;
     campaign
-        .resolve_outsider_beat(2, "sedge_publish_the_route")
+        .resolve_outsider_beat(&data, 2, "sedge_publish_the_route")
         .unwrap();
     assert_eq!(campaign.outsider_arc_states["sedge"].stage, 3);
     assert_eq!(
         campaign.outsider_arc_states["sedge"].final_choice,
         "sedge_publish_the_route"
     );
-    assert!(!campaign.outsider_arc_available());
+    assert!(!campaign.outsider_arc_available(&data));
 
     let saved = serde_json::to_value(&campaign).unwrap();
     let restored: CampaignState = serde_json::from_value(saved).unwrap();

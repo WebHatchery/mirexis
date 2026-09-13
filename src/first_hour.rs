@@ -1,5 +1,6 @@
 //! Persistent first-session direction and contextual tactical teaching.
 
+use crate::data::{FirstHourGoals, FirstHourLessons};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -74,51 +75,33 @@ pub fn enabled() -> bool {
 }
 
 impl FirstHourProgress {
-    pub fn primary_goal(&self) -> &'static str {
+    pub fn primary_goal<'a>(&self, copy: &'a FirstHourGoals) -> &'a str {
         match self.stage {
-            FirstHourStage::Arrival => "Tap BEGIN ARRIVAL to answer the refuge distress call.",
-            FirstHourStage::MeetCoordinator => "Tap Mara Venn's speech marker, then tap CONTINUE.",
-            FirstHourStage::PrepareFirstOperation => {
-                "Tap OPERATIONS, inspect GLASSROOT, then tap BRIEF SELECTED MISSION."
-            }
-            FirstHourStage::FirstBriefing => {
-                "Tap colonists to choose up to three, then tap DEPLOY SQUAD."
-            }
+            FirstHourStage::Arrival => &copy.arrival,
+            FirstHourStage::MeetCoordinator => &copy.meet_coordinator,
+            FirstHourStage::PrepareFirstOperation => &copy.prepare_first_operation,
+            FirstHourStage::FirstBriefing => &copy.first_briefing,
             FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical => {
-                lesson_prompt(self.lesson)
+                lesson_prompt(self.lesson, &copy.lessons)
             }
-            FirstHourStage::FirstReturn => "Tap RETURN TO COLONY, then tap Ilya Reed's marker.",
-            FirstHourStage::FirstReturnColony => {
-                "Tap Ilya Reed's speech marker, then tap CONTINUE."
-            }
-            FirstHourStage::MakeInvestment => {
-                "Tap OPERATIONS and choose one affordable preparation investment."
-            }
-            FirstHourStage::SecondOperation => {
-                "Tap OPERATIONS, choose the next mission, then tap BRIEF SELECTED MISSION."
-            }
-            FirstHourStage::SecondReturn => {
-                "Tap RETURN TO COLONY to see what the two operations changed."
-            }
-            FirstHourStage::Promise => "Read the colony consequence, then tap CONTINUE CAMPAIGN.",
-            FirstHourStage::Complete => {
-                "Protect the colony before the Directorate assault reaches Mirexis."
-            }
+            FirstHourStage::FirstReturn => &copy.first_return,
+            FirstHourStage::FirstReturnColony => &copy.first_return_colony,
+            FirstHourStage::MakeInvestment => &copy.make_investment,
+            FirstHourStage::SecondOperation => &copy.second_operation,
+            FirstHourStage::SecondReturn => &copy.second_return,
+            FirstHourStage::Promise => &copy.promise,
+            FirstHourStage::Complete => &copy.complete,
         }
     }
 
-    pub fn visible_goal(&self) -> &'static str {
+    pub fn visible_goal<'a>(&self, copy: &'a FirstHourGoals) -> &'a str {
         if self.guidance_enabled {
-            return self.primary_goal();
+            return self.primary_goal(copy);
         }
         match self.stage {
-            FirstHourStage::FirstOperation => {
-                "Secure the refuge and neutralise the remaining Brood."
-            }
-            FirstHourStage::SecondOperationTactical => {
-                "Complete the mission and neutralise remaining hostiles."
-            }
-            _ => self.primary_goal(),
+            FirstHourStage::FirstOperation => &copy.unguided_first_operation,
+            FirstHourStage::SecondOperationTactical => &copy.unguided_second_operation,
+            _ => self.primary_goal(copy),
         }
     }
 
@@ -287,20 +270,14 @@ impl FirstHourProgress {
     }
 }
 
-pub fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
+pub fn lesson_prompt(lesson: TacticalLesson, copy: &FirstHourLessons) -> &str {
     match lesson {
-        TacticalLesson::Select => "Tap a colonist to select them.",
-        TacticalLesson::MoveToCover => "Tap the gold-marked cover tile to move into cover.",
-        TacticalLesson::Attack => "Tap a hostile, review the forecast, then tap ATTACK.",
-        TacticalLesson::EnemyPhase => {
-            "Tap END PHASE; if a READY warning appears, tap CONFIRM END again to watch the hostile response."
-        }
-        TacticalLesson::Objective => {
-            "Move onto the gold objective, tap COMMAND, then tap SECURE OBJECTIVE."
-        }
-        TacticalLesson::Ability => "Tap COMMAND, then a visible CLASS, MUTATION, or GEAR action.",
-        TacticalLesson::ApplyLearning => {
-            "Tap a remaining hostile, review the forecast, then tap ATTACK."
-        }
+        TacticalLesson::Select => &copy.select,
+        TacticalLesson::MoveToCover => &copy.move_to_cover,
+        TacticalLesson::Attack => &copy.attack,
+        TacticalLesson::EnemyPhase => &copy.enemy_phase,
+        TacticalLesson::Objective => &copy.objective,
+        TacticalLesson::Ability => &copy.ability,
+        TacticalLesson::ApplyLearning => &copy.apply_learning,
     }
 }

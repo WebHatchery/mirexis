@@ -11,13 +11,9 @@ impl Default for ColonyState {
 
 impl ColonyState {
     pub fn new() -> Self {
-        Self::new_with_resources(&StartingResources {
-            materials: 120,
-            power: 4,
-            food: 24,
-            biomass: 12,
-            alien_components: 0,
-        })
+        let data = crate::data::GameData::load()
+            .expect("embedded game data must load before creating a colony");
+        Self::new_with_resources(&data.config.starting_resources)
     }
 
     pub fn new_with_resources(starting: &StartingResources) -> Self {

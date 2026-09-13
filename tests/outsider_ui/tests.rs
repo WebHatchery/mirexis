@@ -2,18 +2,18 @@ use super::*;
 
 fn test_choice() -> OutsiderChoice {
     OutsiderChoice {
-        id: "test_choice",
-        label: "TEST CHOICE",
-        description: "Test choice",
+        id: "test_choice".to_owned(),
+        label: "TEST CHOICE".to_owned(),
+        description: "Test choice".to_owned(),
         materials_cost: 12,
         food_cost: 2,
         power_cost: 1,
         biomass_cost: 3,
         attention_change: 0,
-        relationship_partner: "test_partner",
+        relationship_partner: "test_partner".to_owned(),
         disagreement: false,
-        legacy_name: "Test Legacy",
-        legacy_stat: "health",
+        legacy_name: "Test Legacy".to_owned(),
+        legacy_stat: "health".to_owned(),
         legacy_amount: 1,
     }
 }

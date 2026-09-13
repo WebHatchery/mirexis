@@ -13,6 +13,7 @@ fn opening_advances_only_after_mara_is_acknowledged() {
 
 #[test]
 fn colony_guidance_targets_arrival_and_first_return_conversations() {
+    let data = GameData::load().unwrap();
     let mut progress = FirstHourProgress::default();
     assert_eq!(progress.colony_guidance_target(), None);
 
@@ -23,14 +24,14 @@ fn colony_guidance_targets_arrival_and_first_return_conversations() {
     assert_eq!(progress.stage, FirstHourStage::FirstReturn);
     assert_eq!(progress.colony_guidance_target(), None);
     assert_eq!(
-        progress.primary_goal(),
+        progress.primary_goal(&data.config.tutorial.first_hour_goals),
         "Tap RETURN TO COLONY, then tap Ilya Reed's marker."
     );
     progress.returned_to_colony();
     assert_eq!(progress.stage, FirstHourStage::FirstReturnColony);
     assert_eq!(progress.colony_guidance_target(), Some("ilya_reed"));
     assert_eq!(
-        progress.primary_goal(),
+        progress.primary_goal(&data.config.tutorial.first_hour_goals),
         "Tap Ilya Reed's speech marker, then tap CONTINUE."
     );
 
@@ -95,6 +96,7 @@ fn first_investment_changes_only_the_second_deployment() {
 
 #[test]
 fn second_deployment_enters_a_distinct_tactical_guidance_stage() {
+    let data = GameData::load().unwrap();
     let mut progress = FirstHourProgress {
         stage: FirstHourStage::MakeInvestment,
         ..FirstHourProgress::default()
@@ -107,13 +109,14 @@ fn second_deployment_enters_a_distinct_tactical_guidance_stage() {
     assert_eq!(progress.stage, FirstHourStage::SecondOperationTactical);
     assert_eq!(progress.lesson, TacticalLesson::ApplyLearning);
     assert_eq!(
-        progress.primary_goal(),
+        progress.primary_goal(&data.config.tutorial.first_hour_goals),
         "Tap a remaining hostile, review the forecast, then tap ATTACK."
     );
 }
 
 #[test]
 fn enemy_phase_prompt_explains_the_conditional_confirmation() {
+    let data = GameData::load().unwrap();
     let progress = FirstHourProgress {
         stage: FirstHourStage::FirstOperation,
         lesson: TacticalLesson::EnemyPhase,
@@ -121,7 +124,7 @@ fn enemy_phase_prompt_explains_the_conditional_confirmation() {
     };
 
     assert_eq!(
-        progress.primary_goal(),
+        progress.primary_goal(&data.config.tutorial.first_hour_goals),
         "Tap END PHASE; if a READY warning appears, tap CONFIRM END again to watch the hostile response."
     );
 }

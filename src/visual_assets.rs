@@ -4,12 +4,23 @@ use crate::data::Team;
 use crate::state::UnitState;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use macroquad::prelude::*;
-use macroquad_toolkit::assets::AssetManager;
+use macroquad_toolkit::assets::{AssetManager, TextureConfig};
 use macroquad_toolkit::data_loader::load_embedded_json_labeled;
 use serde::Deserialize;
+use std::collections::BTreeSet;
 
 pub const DEFINITIONS_JSON: &str =
     macroquad_toolkit::include_json_str!("../assets/data/sprite_definitions.json");
+
+const REQUIRED_CONCEPT_ATLASES: [&str; 7] = [
+    "passage_wreckage",
+    "flora",
+    "emplacements",
+    "colony_props",
+    "colony_machinery",
+    "objectives",
+    "operative_actions",
+];
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AtlasDefinition {
@@ -95,6 +106,14 @@ impl VisualCatalog {
         )?;
         for atlas in &self.concepts {
             validate_atlas("concept", atlas)?;
+        }
+        for required_id in REQUIRED_CONCEPT_ATLASES {
+            if self.concept_atlas(required_id).is_none() {
+                return Err(format!(
+                    "sprite_definitions: required concept atlas '{}' is missing",
+                    required_id
+                ));
+            }
         }
         for channel in &self.faction_channels {
             if channel.terrain_cell >= self.terrain.columns * self.terrain.rows {
@@ -195,11 +214,40 @@ impl VisualCatalog {
         self.faction_channel(faction).effect_cell
     }
 
-    pub fn concept_atlas(&self, id: &str) -> &AtlasDefinition {
-        self.concepts
+    pub fn concept_atlas(&self, id: &str) -> Option<&AtlasDefinition> {
+        self.concepts.iter().find(|atlas| atlas.id == id)
+    }
+
+    pub fn validate_texture_manifest(&self, manifest: &[TextureConfig]) -> Result<(), String> {
+        let manifest_keys = manifest
             .iter()
-            .find(|atlas| atlas.id == id)
-            .unwrap_or_else(|| panic!("Mirexis concept atlas is undefined: {id}"))
+            .map(|texture| texture.key.as_str())
+            .collect::<BTreeSet<_>>();
+        let mut required_keys = Vec::new();
+        required_keys.extend(
+            self.units
+                .iter()
+                .flat_map(|unit| [&unit.texture, &unit.portrait_texture]),
+        );
+        required_keys.extend([
+            &self.terrain.texture,
+            &self.colony.texture,
+            &self.equipment.texture,
+            &self.effects.texture,
+        ]);
+        required_keys.extend(self.concepts.iter().map(|atlas| &atlas.texture));
+        let missing = required_keys
+            .into_iter()
+            .filter(|key| !manifest_keys.contains(key.as_str()))
+            .collect::<BTreeSet<_>>();
+        if missing.is_empty() {
+            Ok(())
+        } else {
+            Err(format!(
+                "sprite_definitions: texture manifest is missing {}",
+                missing.into_iter().cloned().collect::<Vec<_>>().join(", ")
+            ))
+        }
     }
 
     pub fn validate_loaded(&self, assets: &AssetManager) -> Vec<String> {

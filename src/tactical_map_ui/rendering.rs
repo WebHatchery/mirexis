@@ -330,13 +330,15 @@ pub fn is_objective(ctx: &UiContext<'_>, position: TilePos) -> bool {
 
 pub fn draw_objective(ctx: &UiContext<'_>, rect: Rect, defended_asset: bool) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.48);
-    ctx.visuals.draw_atlas_cell(
-        ctx.assets,
-        ctx.visuals.concept_atlas("objectives"),
-        objective_art_cell(ctx.mission.objective_kind, defended_asset),
-        Rect::new(center.x - 30.0, center.y - 42.0, 60.0, 60.0),
-        Color::new(1.0, 1.0, 1.0, 0.88),
-    );
+    if let Some(atlas) = ctx.visuals.concept_atlas("objectives") {
+        ctx.visuals.draw_atlas_cell(
+            ctx.assets,
+            atlas,
+            objective_art_cell(ctx.mission.objective_kind, defended_asset),
+            Rect::new(center.x - 30.0, center.y - 42.0, 60.0, 60.0),
+            Color::new(1.0, 1.0, 1.0, 0.88),
+        );
+    }
     for radius in [rect.w * 0.18, rect.w * 0.26] {
         draw_ellipse_ring(
             center,

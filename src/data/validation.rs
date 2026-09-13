@@ -6,6 +6,7 @@ impl GameData {
     pub fn validate_registry(&self) -> Result<(), String> {
         self.validate_identity_references()?;
         self.validate_campaign_options()?;
+        self.validate_outsider_beats()?;
         self.validate_content_catalog()?;
         self.validate_character_references()?;
         self.validate_mission_references()?;
@@ -149,6 +150,88 @@ impl GameData {
                 .iter()
                 .map(|entry| entry.id.as_str()),
         )?;
+        Ok(())
+    }
+
+    fn validate_outsider_beats(&self) -> Result<(), String> {
+        let mut beat_keys = Vec::with_capacity(self.campaign.outsider_beats.len());
+        let mut choice_ids = Vec::new();
+        for beat in &self.campaign.outsider_beats {
+            if beat.stage > 2 {
+                return Err(format!(
+                    "Outsider beat {} has unsupported stage {}",
+                    beat.outsider_id, beat.stage
+                ));
+            }
+            if !self
+                .characters
+                .iter()
+                .any(|character| character.id == beat.outsider_id)
+            {
+                return Err(format!(
+                    "Outsider beat {} references missing character",
+                    beat.outsider_id
+                ));
+            }
+            if !self
+                .campaign
+                .factions
+                .iter()
+                .any(|faction| faction.id == beat.attention_faction)
+            {
+                return Err(format!(
+                    "Outsider beat {} references missing attention faction {}",
+                    beat.outsider_id, beat.attention_faction
+                ));
+            }
+            if beat.choices.len() != 2 {
+                return Err(format!(
+                    "Outsider beat {} stage {} must offer exactly two choices",
+                    beat.outsider_id, beat.stage
+                ));
+            }
+            beat_keys.push(format!("{}:{}", beat.outsider_id, beat.stage));
+            for choice in &beat.choices {
+                if choice.materials_cost < 0
+                    || choice.food_cost < 0
+                    || choice.power_cost < 0
+                    || choice.biomass_cost < 0
+                {
+                    return Err(format!(
+                        "Outsider choice {} has a negative resource cost",
+                        choice.id
+                    ));
+                }
+                if !self
+                    .characters
+                    .iter()
+                    .any(|character| character.id == choice.relationship_partner)
+                {
+                    return Err(format!(
+                        "Outsider choice {} references missing relationship partner {}",
+                        choice.id, choice.relationship_partner
+                    ));
+                }
+                choice_ids.push(choice.id.as_str());
+            }
+        }
+        ensure_unique("outsider beat", beat_keys.iter().map(String::as_str))?;
+        ensure_unique("outsider choice", choice_ids.into_iter())?;
+        for outsider_id in crate::campaign::outsider::OUTSIDER_IDS {
+            for stage in 0..=2 {
+                if !self
+                    .campaign
+                    .outsider_beats
+                    .iter()
+                    .any(|beat| beat.outsider_id == outsider_id && beat.stage == stage)
+                {
+                    return Err(format!(
+                        "Outsider {} is missing authored beat stage {}",
+                        outsider_id, stage
+                    ));
+                }
+            }
+        }
         Ok(())
     }
 

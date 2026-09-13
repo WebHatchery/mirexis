@@ -63,7 +63,7 @@ pub fn draw_goal(
         dark::ACCENT,
     );
     draw_text_block(
-        progress.visible_goal(),
+        progress.visible_goal(&copy.first_hour_goals),
         layout.text_origin.x,
         layout.text_origin.y,
         layout.text_width,
@@ -72,7 +72,12 @@ pub fn draw_goal(
         2.0,
         dark::TEXT_BRIGHT,
     );
-    if button(layout.help_button, "HELP", true, mouse) {
+    if button(
+        layout.help_button,
+        &copy.first_hour_help_button,
+        true,
+        mouse,
+    ) {
         actions.push(UiAction::ToggleFirstHourHelp);
     }
     match progress.stage {
@@ -192,16 +197,27 @@ pub fn draw_help(
         13.0,
         dark::ACCENT,
     );
-    text(progress.visible_goal(), 240.0, 212.0, 17.0, dark::TEXT);
+    text(
+        progress.visible_goal(&copy.first_hour_goals),
+        240.0,
+        212.0,
+        17.0,
+        dark::TEXT,
+    );
     section(240.0, 262.0, "COLONY", &copy.first_hour_colony_lines);
     section(650.0, 262.0, "TACTICAL", &copy.first_hour_tactical_lines);
     draw_metrics(progress);
-    if button(Rect::new(240.0, 542.0, 210.0, 42.0), "RETURN", true, mouse) {
+    if button(
+        Rect::new(240.0, 542.0, 210.0, 42.0),
+        &copy.first_hour_help_return_button,
+        true,
+        mouse,
+    ) {
         actions.push(UiAction::ToggleFirstHourHelp);
     }
     if button(
         Rect::new(466.0, 542.0, 210.0, 42.0),
-        "RESTART GUIDE",
+        &copy.first_hour_help_restart_button,
         true,
         mouse,
     ) {
@@ -210,9 +226,9 @@ pub fn draw_help(
     if button(
         Rect::new(692.0, 542.0, 210.0, 42.0),
         if progress.guidance_enabled {
-            "SKIP PROMPTS"
+            &copy.first_hour_help_skip_button
         } else {
-            "PROMPTS SKIPPED"
+            &copy.first_hour_help_skipped_button
         },
         progress.guidance_enabled,
         mouse,

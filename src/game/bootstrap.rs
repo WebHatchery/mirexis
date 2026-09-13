@@ -36,6 +36,9 @@ impl Game {
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
         let visuals = VisualCatalog::load()
             .unwrap_or_else(|error| panic!("Mirexis visual catalog failed validation: {error}"));
+        visuals
+            .validate_texture_manifest(&data.texture_manifest)
+            .unwrap_or_else(|error| panic!("Mirexis visual manifest failed validation: {error}"));
         let missing_visuals = visuals.validate_loaded(&assets);
         let visual_summary = visuals.diagnostic_summary(&assets);
         println!("Mirexis visual catalog: {visual_summary}");

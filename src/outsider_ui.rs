@@ -2,6 +2,7 @@
 
 use crate::campaign::{CampaignState, OutsiderChoice};
 use crate::colony::Resources;
+use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
@@ -12,19 +13,20 @@ use macroquad_toolkit::ui::wrap_text_ex;
 
 pub fn draw(
     campaign: &CampaignState,
+    data: &GameData,
     assets: &AssetManager,
     visuals: &VisualCatalog,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    let Some(beat) = campaign.outsider_arc_beat() else {
+    let Some(beat) = campaign.outsider_arc_beat(data) else {
         return;
     };
     draw_ui_text_ex(
         &format!(
             "WAYSTATION // OUTSIDER ARC // BEAT {}/3 // DISAGREEMENTS {}/2",
             beat.stage + 1,
-            campaign.outsider_arc_disagreements().min(2)
+            campaign.outsider_arc_disagreements(data).min(2)
         ),
         878.0,
         510.0,
@@ -32,18 +34,18 @@ pub fn draw(
     );
     visuals.draw_portrait(
         assets,
-        beat.outsider_id,
-        beat.outsider_name,
+        &beat.outsider_id,
+        &beat.outsider_name,
         Rect::new(878.0, 518.0, 48.0, 56.0),
         dark::WARNING,
     );
     draw_ui_text_ex(
-        beat.title,
+        &beat.title,
         938.0,
         528.0,
         TextStyle::new(13.0, dark::TEXT_BRIGHT).params(),
     );
-    let description = wrap_text_ex(beat.description, 302.0, None, 9.5);
+    let description = wrap_text_ex(&beat.description, 302.0, None, 9.5);
     for (index, line) in description.into_iter().take(3).enumerate() {
         draw_ui_text_ex(
             &line,
@@ -63,7 +65,7 @@ pub fn draw(
             ));
         }
         draw_ui_text_ex(
-            choice.label,
+            &choice.label,
             rect.x + 8.0,
             rect.y + 18.0,
             TextStyle::new(10.0, if enabled { dark::TEXT } else { dark::TEXT_DIM }).params(),
@@ -74,7 +76,7 @@ pub fn draw(
             rect.y + 32.0,
             TextStyle::new(9.0, if enabled { dark::ACCENT } else { dark::WARNING }).params(),
         );
-        for (line_index, line) in wrap_text_ex(choice.description, rect.w - 16.0, None, 8.0)
+        for (line_index, line) in wrap_text_ex(&choice.description, rect.w - 16.0, None, 8.0)
             .into_iter()
             .take(2)
             .enumerate()

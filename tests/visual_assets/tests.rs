@@ -183,6 +183,46 @@ fn every_declared_atlas_decodes_and_has_art_in_every_cell() {
     }
 }
 
+#[test]
+fn required_concept_atlases_and_manifest_references_fail_recoverably() {
+    let catalog = VisualCatalog::load().expect("embedded visual catalog loads");
+    for id in [
+        "passage_wreckage",
+        "flora",
+        "emplacements",
+        "colony_props",
+        "colony_machinery",
+        "objectives",
+        "operative_actions",
+    ] {
+        assert!(
+            catalog.concept_atlas(id).is_some(),
+            "missing concept atlas {id}"
+        );
+    }
+    assert!(catalog.concept_atlas("not_authored").is_none());
+
+    let data = mirexis::data::GameData::load().expect("embedded game data loads");
+    catalog
+        .validate_texture_manifest(&data.texture_manifest)
+        .expect("production manifest covers the visual catalog");
+    let mut incomplete_manifest = data.texture_manifest.clone();
+    incomplete_manifest.retain(|texture| texture.key != "concept_objectives");
+    let error = catalog
+        .validate_texture_manifest(&incomplete_manifest)
+        .expect_err("missing texture references must be reported");
+    assert!(error.contains("concept_objectives"));
+
+    let mut missing_concept = catalog.clone();
+    missing_concept
+        .concepts
+        .retain(|atlas| atlas.id != "objectives");
+    let error = missing_concept
+        .validate_registry()
+        .expect_err("missing objective art must be reported before drawing");
+    assert!(error.contains("objectives"));
+}
+
 fn assert_cells_have_alpha(image: &Image, columns: usize, rows: usize, label: &str) {
     let width = image.width as usize;
     let cell_width = width / columns;

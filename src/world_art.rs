@@ -164,13 +164,10 @@ pub fn draw_concept_cell(
     tint: Color,
 ) {
     draw_art_grounding(destination, tint);
-    visuals.draw_atlas_cell(
-        assets,
-        visuals.concept_atlas(atlas_id),
-        index,
-        destination,
-        tint,
-    );
+    let Some(atlas) = visuals.concept_atlas(atlas_id) else {
+        return;
+    };
+    visuals.draw_atlas_cell(assets, atlas, index, destination, tint);
 }
 
 pub fn draw_art_grounding(destination: Rect, tint: Color) {

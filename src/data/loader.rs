@@ -1,7 +1,7 @@
 //! Embedded JSON loading for the authored Mirexis content registry.
 
 use super::*;
-use macroquad_toolkit::data_loader::{load_embedded_json, load_embedded_json_labeled};
+use macroquad_toolkit::data_loader::load_embedded_json_labeled;
 
 pub const GAME_CONFIG_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/game_config.json");
@@ -35,7 +35,8 @@ impl GameData {
         let mutations = load_embedded_json_labeled("mutations", MUTATIONS_JSON)?;
         let equipment = load_embedded_json_labeled("equipment", EQUIPMENT_JSON)?;
         let campaign = load_embedded_json_labeled("campaign", CAMPAIGN_JSON)?;
-        let texture_manifest = load_embedded_json(TEXTURE_MANIFEST_JSON)?;
+        let texture_manifest =
+            load_embedded_json_labeled("texture_manifest", TEXTURE_MANIFEST_JSON)?;
 
         let data = Self {
             config,

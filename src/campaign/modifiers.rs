@@ -1,16 +1,16 @@
 //! Mutation traits and equipment costs shared by campaign and roster views.
 
 use super::CharacterRecord;
-use crate::data::{GameData, MutationDef};
+use crate::data::{GameConfig, GameData, MutationDef};
 use std::collections::BTreeMap;
 
-pub fn equipment_cost(slot: &str) -> u32 {
-    match slot {
-        "primary" => 30,
-        "armour" => 25,
-        "tool" | "module" => 20,
-        _ => 25,
-    }
+pub fn equipment_cost(slot: &str, config: &GameConfig) -> u32 {
+    config
+        .equipment_costs
+        .get(slot)
+        .or_else(|| config.equipment_costs.get("default"))
+        .copied()
+        .unwrap_or(25)
 }
 
 // This helper is part of the mutation validation seam and is intentionally

@@ -224,7 +224,10 @@ fn apply_action_group_b(game: &mut Game, action: UiAction) -> bool {
         }
         UiAction::ResolveOutsiderBeat(stage, choice_id) => {
             {
-                match game.campaign.resolve_outsider_beat(stage, &choice_id) {
+                match game
+                    .campaign
+                    .resolve_outsider_beat(&game.data, stage, &choice_id)
+                {
                     Ok(summary) => {
                         game.notifications.success(summary);
                         game.autosave_campaign_only("Outsider arc autosaved");

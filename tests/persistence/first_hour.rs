@@ -130,7 +130,10 @@ fn version_117_tactical_save_resumes_second_operation_guidance() {
         FirstHourStage::SecondOperationTactical
     );
     assert_eq!(
-        migrated.campaign.first_hour.visible_goal(),
+        migrated
+            .campaign
+            .first_hour
+            .visible_goal(&data.config.tutorial.first_hour_goals),
         "Tap a remaining hostile, review the forecast, then tap ATTACK."
     );
 }
