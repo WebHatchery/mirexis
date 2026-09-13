@@ -18,16 +18,13 @@ pub mod story;
 
 // These re-exports form the campaign's public calculation seam for UI and
 // integration tests; some consumers only use them through glob imports.
-#[allow(unused_imports)]
 pub use derivation::derive_unit;
 pub use derivation::derive_unit_with_evolution_options;
 // Kept as a named public seam for authored mutation application.
-#[allow(unused_imports)]
 pub use modifiers::apply_mutation;
 pub use modifiers::derived_mutation_traits_with_options;
 // Both direct campaign callers and the public campaign namespace use these
 // helpers; retain the allowance while the feature modules remain split.
-#[allow(unused_imports)]
 pub use modifiers::{derived_mutation_traits, equipment_cost};
 pub use outsider::OutsiderChoice;
 pub use relay::{RELAY_SCAN_POWER_COST, RELAY_SIGNAL_ATTENTION};

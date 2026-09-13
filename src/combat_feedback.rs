@@ -107,140 +107,43 @@ impl CombatFeedback {
     pub fn record_for(&mut self, events: &[BattleEvent], lifetime: f32) {
         let mut pending_attack: Option<(&str, &str, bool)> = None;
         for event in events {
-            if let BattleEvent::AttackRolled {
-                attacker_id,
-                target_id,
-                roll,
-                hit_chance,
-            } = event
+            pending_attack = self.record_event(event, lifetime, pending_attack);
+        }
+        if self.callouts.len() > 12 {
+            self.callouts.drain(..self.callouts.len() - 12);
+        }
+    }
+
+    fn record_event<'a>(
+        &mut self,
+        event: &'a BattleEvent,
+        lifetime: f32,
+        pending_attack: Option<(&'a str, &'a str, bool)>,
+    ) -> Option<(&'a str, &'a str, bool)> {
+        if let Some(attack) = attack_feedback(event, lifetime, &mut self.callouts) {
+            return Some(attack);
+        }
+        if let BattleEvent::DamageApplied { target_id, .. } = event {
+            if let Some((attacker_id, expected_target, critical)) =
+                pending_attack.filter(|(_, expected_target, _)| *expected_target == target_id)
             {
-                let hit = roll <= hit_chance;
-                pending_attack = Some((attacker_id, target_id, hit && *roll <= 10));
-                if hit {
-                    self.callouts.push(CombatCallout {
-                        anchor: FeedbackAnchor::Unit {
-                            unit_id: target_id.clone(),
-                            fallback_unit_id: Some(attacker_id.clone()),
-                        },
-                        label: "HIT".to_owned(),
-                        tone: FeedbackTone::Hit,
-                        remaining: lifetime,
-                    });
-                } else {
-                    self.callouts.push(CombatCallout {
-                        anchor: FeedbackAnchor::Unit {
-                            unit_id: target_id.clone(),
-                            fallback_unit_id: Some(attacker_id.clone()),
-                        },
-                        label: "MISS".to_owned(),
-                        tone: FeedbackTone::Miss,
-                        remaining: lifetime,
-                    });
-                }
-                continue;
+                self.impacts.push(CombatImpact {
+                    attacker_id: attacker_id.to_owned(),
+                    target_id: expected_target.to_owned(),
+                    critical,
+                    remaining: lifetime,
+                });
             }
-            if let BattleEvent::DamageApplied { target_id, .. } = event {
-                if let Some((attacker_id, expected_target, critical)) =
-                    pending_attack.filter(|(_, expected_target, _)| *expected_target == target_id)
-                {
-                    self.impacts.push(CombatImpact {
-                        attacker_id: attacker_id.to_owned(),
-                        target_id: expected_target.to_owned(),
-                        critical,
-                        remaining: lifetime,
-                    });
-                }
-            }
-            let mapped = match event {
-                BattleEvent::DamageApplied {
-                    target_id, amount, ..
-                } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: target_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    format!("-{}", amount),
-                    FeedbackTone::Damage,
-                )),
-                BattleEvent::UnitHealed {
-                    unit_id, amount, ..
-                } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: unit_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    format!("+{}", amount),
-                    FeedbackTone::Healing,
-                )),
-                BattleEvent::UnitIncapacitated { unit_id } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: unit_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    "INCAPACITATED".to_owned(),
-                    FeedbackTone::Status,
-                )),
-                BattleEvent::ObjectiveSecured { unit_id } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: unit_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    "OBJECTIVE SECURED".to_owned(),
-                    FeedbackTone::Status,
-                )),
-                BattleEvent::ExtractionCompleted { unit_id } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: unit_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    "EXTRACTED".to_owned(),
-                    FeedbackTone::Status,
-                )),
-                BattleEvent::ObjectiveDamaged { amount, .. } => Some((
-                    FeedbackAnchor::Objective,
-                    format!("OBJECTIVE -{}", amount),
-                    FeedbackTone::Damage,
-                )),
-                BattleEvent::ObjectiveDestroyed => Some((
-                    FeedbackAnchor::Objective,
-                    "OBJECTIVE DESTROYED".to_owned(),
-                    FeedbackTone::Status,
-                )),
-                BattleEvent::CoverDamaged {
-                    position, amount, ..
-                } => Some((
-                    FeedbackAnchor::Tile(*position),
-                    format!("COVER -{}", amount),
-                    FeedbackTone::Damage,
-                )),
-                BattleEvent::CoverDestroyed { position } => Some((
-                    FeedbackAnchor::Tile(*position),
-                    "COVER DESTROYED".to_owned(),
-                    FeedbackTone::Status,
-                )),
-                BattleEvent::StatusApplied { unit_id, status } => Some((
-                    FeedbackAnchor::Unit {
-                        unit_id: unit_id.clone(),
-                        fallback_unit_id: None,
-                    },
-                    format!("{:?}", status).to_uppercase(),
-                    FeedbackTone::Status,
-                )),
-                _ => None,
-            };
-            let Some((unit_id, label, tone)) = mapped else {
-                continue;
-            };
+        }
+        if let Some((anchor, label, tone)) = feedback_mapping(event) {
             self.callouts.push(CombatCallout {
-                anchor: unit_id,
+                anchor,
                 label,
                 tone,
                 remaining: lifetime,
             });
         }
-        if self.callouts.len() > 12 {
-            self.callouts.drain(..self.callouts.len() - 12);
-        }
+        pending_attack
     }
 
     pub fn draw(
@@ -314,6 +217,117 @@ impl CombatFeedback {
                 TextStyle::new(size, color).params(),
             );
         }
+    }
+}
+
+fn attack_feedback<'a>(
+    event: &'a BattleEvent,
+    lifetime: f32,
+    callouts: &mut Vec<CombatCallout>,
+) -> Option<(&'a str, &'a str, bool)> {
+    let BattleEvent::AttackRolled {
+        attacker_id,
+        target_id,
+        roll,
+        hit_chance,
+    } = event
+    else {
+        return None;
+    };
+    let hit = roll <= hit_chance;
+    callouts.push(CombatCallout {
+        anchor: FeedbackAnchor::Unit {
+            unit_id: target_id.clone(),
+            fallback_unit_id: Some(attacker_id.clone()),
+        },
+        label: if hit { "HIT" } else { "MISS" }.to_owned(),
+        tone: if hit {
+            FeedbackTone::Hit
+        } else {
+            FeedbackTone::Miss
+        },
+        remaining: lifetime,
+    });
+    Some((attacker_id, target_id, hit && *roll <= 10))
+}
+
+fn feedback_mapping(event: &BattleEvent) -> Option<(FeedbackAnchor, String, FeedbackTone)> {
+    match event {
+        BattleEvent::DamageApplied {
+            target_id, amount, ..
+        } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: target_id.clone(),
+                fallback_unit_id: None,
+            },
+            format!("-{}", amount),
+            FeedbackTone::Damage,
+        )),
+        BattleEvent::UnitHealed {
+            unit_id, amount, ..
+        } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: unit_id.clone(),
+                fallback_unit_id: None,
+            },
+            format!("+{}", amount),
+            FeedbackTone::Healing,
+        )),
+        BattleEvent::UnitIncapacitated { unit_id } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: unit_id.clone(),
+                fallback_unit_id: None,
+            },
+            "INCAPACITATED".to_owned(),
+            FeedbackTone::Status,
+        )),
+        BattleEvent::ObjectiveSecured { unit_id } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: unit_id.clone(),
+                fallback_unit_id: None,
+            },
+            "OBJECTIVE SECURED".to_owned(),
+            FeedbackTone::Status,
+        )),
+        BattleEvent::ExtractionCompleted { unit_id } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: unit_id.clone(),
+                fallback_unit_id: None,
+            },
+            "EXTRACTED".to_owned(),
+            FeedbackTone::Status,
+        )),
+        BattleEvent::ObjectiveDamaged { amount, .. } => Some((
+            FeedbackAnchor::Objective,
+            format!("OBJECTIVE -{}", amount),
+            FeedbackTone::Damage,
+        )),
+        BattleEvent::ObjectiveDestroyed => Some((
+            FeedbackAnchor::Objective,
+            "OBJECTIVE DESTROYED".to_owned(),
+            FeedbackTone::Status,
+        )),
+        BattleEvent::CoverDamaged {
+            position, amount, ..
+        } => Some((
+            FeedbackAnchor::Tile(*position),
+            format!("COVER -{}", amount),
+            FeedbackTone::Damage,
+        )),
+        BattleEvent::CoverDestroyed { position } => Some((
+            FeedbackAnchor::Tile(*position),
+            "COVER DESTROYED".to_owned(),
+            FeedbackTone::Status,
+        )),
+        BattleEvent::StatusApplied { unit_id, status } => Some((
+            FeedbackAnchor::Unit {
+                unit_id: unit_id.clone(),
+                fallback_unit_id: None,
+            },
+            format!("{:?}", status).to_uppercase(),
+            FeedbackTone::Status,
+        )),
+        _ => None,
     }
 }
 

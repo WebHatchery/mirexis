@@ -33,6 +33,158 @@ pub fn camera_art_insets(zoom: f32) -> CameraInsets {
     }
 }
 
+fn draw_tactical_world(
+    ctx: &UiContext<'_>,
+    view: GridView,
+    grid_rect: Rect,
+    hovered: Option<TilePos>,
+    tiles: &[TilePos],
+    preview_tile: TilePos,
+) {
+    crate::ui::set_ui_clip(ctx.ui, Some(grid_rect));
+    for position in tiles {
+        if view.terrain_is_visible(*position, grid_rect, 30.0) {
+            draw_terrain_tile(ctx, view, *position, hovered);
+        }
+    }
+    draw_obscuring_fields(ctx, view);
+    targeting_card::draw_class_action_target_tiles(ctx, view);
+    targeting_card::draw_skill_target_tiles(ctx, view);
+    for position in tiles {
+        if view.is_visible(*position, grid_rect, 90.0) {
+            draw_tile_contents(ctx, view, *position);
+        }
+    }
+    crate::cover_ui::draw_edges(view, &ctx.session.tactical.cover_edges);
+    crate::reinforcement_ui::draw(ctx.session, view, ctx.assets, ctx.visuals);
+    crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
+    crate::action_preview_ui::draw_route(ctx.session, preview_tile, view);
+
+    let mut units = ctx.session.tactical.units.iter().collect::<Vec<_>>();
+    units.sort_by_key(|unit| unit.position.x + unit.position.y);
+    for unit in units {
+        let targetable = targetable_unit(ctx, unit);
+        crate::tactical_unit_ui::draw_unit(
+            ctx.assets,
+            ctx.visuals,
+            view,
+            unit,
+            ctx.data.config.max_action_points,
+            ctx.session.tactical.selected_unit.as_deref() == Some(&unit.id),
+            targetable,
+        );
+    }
+    draw_foreground(ctx, view, hovered);
+    ctx.feedback
+        .draw(ctx.session, view, ctx.assets, ctx.visuals);
+    crate::ui::set_ui_clip(ctx.ui, None);
+}
+
+fn targetable_unit(ctx: &UiContext<'_>, unit: &crate::state::UnitState) -> bool {
+    match ctx.targeting {
+        Some(TargetingView::Equipment {
+            unit_id,
+            equipment_id,
+        }) => ctx
+            .session
+            .can_use_equipment(unit_id, equipment_id, &unit.id),
+        Some(TargetingView::ClassAction {
+            unit_id,
+            target_kind,
+        }) if target_kind != crate::data::TechniqueTarget::Tile => {
+            ctx.session.can_target_class_action(unit_id, &unit.id)
+        }
+        Some(TargetingView::Skill { unit_id, skill_id })
+            if crate::skills::target_kind(skill_id) != Some(crate::data::TechniqueTarget::Tile) =>
+        {
+            crate::skills::can_target_unit(ctx.session, unit_id, skill_id, &unit.id)
+        }
+        _ => false,
+    }
+}
+
+struct TacticalControlsContext<'a, 'b> {
+    ctx: &'a UiContext<'b>,
+    panel: Rect,
+    grid_rect: Rect,
+    view: GridView,
+    hovered_unit: Option<&'b crate::state::UnitState>,
+    hovered: Option<TilePos>,
+    preview_tile: TilePos,
+    zoom: f32,
+    mouse: Vec2,
+    input_enabled: bool,
+    map_input_enabled: bool,
+    suppress_map_click: bool,
+    actions: &'a mut Vec<UiAction>,
+}
+
+fn draw_tactical_controls(context: TacticalControlsContext<'_, '_>) {
+    let TacticalControlsContext {
+        ctx,
+        panel,
+        grid_rect,
+        view,
+        hovered_unit,
+        hovered,
+        preview_tile,
+        zoom,
+        mouse,
+        input_enabled,
+        map_input_enabled,
+        suppress_map_click,
+        actions,
+    } = context;
+    if input_enabled {
+        if let Some(unit) = hovered_unit {
+            let tooltip_viewport = if ctx.tactical_panel_open {
+                Rect::new(
+                    grid_rect.x,
+                    grid_rect.y,
+                    crate::ui::tactical_command_panel_rect().x - grid_rect.x - 8.0,
+                    grid_rect.h,
+                )
+            } else {
+                grid_rect
+            };
+            crate::tactical_unit_ui::draw_hover_card(unit, view, tooltip_viewport);
+        }
+    }
+    crate::first_hour_tactical_ui::draw_map_focus(ctx, view, grid_rect, input_enabled);
+    let preview_input_consumed = crate::action_preview_ui::draw(
+        ctx.session,
+        preview_tile,
+        panel,
+        ctx.assets,
+        ctx.visuals,
+        crate::action_preview_ui::PreviewInteraction {
+            mouse,
+            actions,
+            interactive: map_input_enabled && ctx.targeting.is_none(),
+        },
+    );
+    if ctx.targeting.is_some() {
+        targeting_card::draw(ctx, preview_tile, panel, mouse, actions);
+    }
+    draw_ui_text_ex(
+        &format!(
+            "TAP TILE TO MOVE OR INSPECT // DRAG TO PAN // WHEEL TO ZOOM // {:>3}%",
+            (zoom * 100.0) as i32
+        ),
+        panel.x + 22.0,
+        panel.bottom() - 7.0,
+        TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
+    );
+    handle_click(
+        ctx,
+        hovered,
+        grid_rect,
+        mouse,
+        suppress_map_click || preview_input_consumed || !map_input_enabled,
+        actions,
+    );
+}
+
 pub fn draw(
     ctx: &UiContext<'_>,
     camera: &mut WorldCamera,
@@ -93,7 +245,6 @@ pub fn draw(
     });
     let hovered_unit = hovered_unit.flatten();
     let hovered = hovered_unit.map(|unit| unit.position).or(ground_hovered);
-    crate::ui::set_ui_clip(ctx.ui, Some(grid_rect));
     let mut tiles = ctx
         .session
         .tactical
@@ -102,24 +253,6 @@ pub fn draw(
         .map(|(position, _)| position)
         .collect::<Vec<_>>();
     tiles.sort_by_key(|position| position.x + position.y);
-
-    for position in &tiles {
-        if view.terrain_is_visible(*position, grid_rect, 30.0) {
-            draw_terrain_tile(ctx, view, *position, hovered);
-        }
-    }
-    draw_obscuring_fields(ctx, view);
-    targeting_card::draw_class_action_target_tiles(ctx, view);
-    targeting_card::draw_skill_target_tiles(ctx, view);
-    for position in &tiles {
-        if view.is_visible(*position, grid_rect, 90.0) {
-            draw_tile_contents(ctx, view, *position);
-        }
-    }
-
-    crate::cover_ui::draw_edges(view, &ctx.session.tactical.cover_edges);
-    crate::reinforcement_ui::draw(ctx.session, view, ctx.assets, ctx.visuals);
-    crate::enemy_intent_ui::draw_forecast(ctx.session, ctx.data.config.max_action_points, view);
     let preview_tile = if crate::action_preview_ui::attack_card_bounds(panel).contains(mouse)
         && crate::action_preview_ui::attack_preview_is_valid(
             ctx.session,
@@ -129,95 +262,21 @@ pub fn draw(
     } else {
         hovered.unwrap_or(ctx.session.tactical.selected_tile)
     };
-    crate::action_preview_ui::draw_route(ctx.session, preview_tile, view);
-
-    let mut units = ctx.session.tactical.units.iter().collect::<Vec<_>>();
-    units.sort_by_key(|unit| unit.position.x + unit.position.y);
-    for unit in units {
-        let targetable = match ctx.targeting {
-            Some(TargetingView::Equipment {
-                unit_id,
-                equipment_id,
-            }) => ctx
-                .session
-                .can_use_equipment(unit_id, equipment_id, &unit.id),
-            Some(TargetingView::ClassAction {
-                unit_id,
-                target_kind,
-            }) if target_kind != crate::data::TechniqueTarget::Tile => {
-                ctx.session.can_target_class_action(unit_id, &unit.id)
-            }
-            Some(TargetingView::Skill { unit_id, skill_id })
-                if crate::skills::target_kind(skill_id)
-                    != Some(crate::data::TechniqueTarget::Tile) =>
-            {
-                crate::skills::can_target_unit(ctx.session, unit_id, skill_id, &unit.id)
-            }
-            None => false,
-            Some(TargetingView::ClassAction { .. }) => false,
-            Some(TargetingView::Skill { .. }) => false,
-        };
-        crate::tactical_unit_ui::draw_unit(
-            ctx.assets,
-            ctx.visuals,
-            view,
-            unit,
-            ctx.data.config.max_action_points,
-            ctx.session.tactical.selected_unit.as_deref() == Some(&unit.id),
-            targetable,
-        );
-    }
-    draw_foreground(ctx, view, hovered);
-    ctx.feedback
-        .draw(ctx.session, view, ctx.assets, ctx.visuals);
-    if input_enabled {
-        if let Some(unit) = hovered_unit {
-            let tooltip_viewport = if ctx.tactical_panel_open {
-                Rect::new(
-                    grid_rect.x,
-                    grid_rect.y,
-                    crate::ui::tactical_command_panel_rect().x - grid_rect.x - 8.0,
-                    grid_rect.h,
-                )
-            } else {
-                grid_rect
-            };
-            crate::tactical_unit_ui::draw_hover_card(unit, view, tooltip_viewport);
-        }
-    }
-    crate::first_hour_tactical_ui::draw_map_focus(ctx, view, grid_rect, input_enabled);
-    crate::ui::set_ui_clip(ctx.ui, None);
-    let preview_input_consumed = crate::action_preview_ui::draw(
-        ctx.session,
-        preview_tile,
-        panel,
-        ctx.assets,
-        ctx.visuals,
-        crate::action_preview_ui::PreviewInteraction {
-            mouse,
-            actions,
-            interactive: map_input_enabled && ctx.targeting.is_none(),
-        },
-    );
-    if ctx.targeting.is_some() {
-        targeting_card::draw(ctx, preview_tile, panel, mouse, actions);
-    }
-    draw_ui_text_ex(
-        &format!(
-            "TAP TILE TO MOVE OR INSPECT // DRAG TO PAN // WHEEL TO ZOOM // {:>3}%",
-            (camera.zoom * 100.0) as i32
-        ),
-        panel.x + 22.0,
-        panel.bottom() - 7.0,
-        TextStyle::new(10.0, Color::new(0.46, 0.68, 0.66, 1.0)).params(),
-    );
-    handle_click(
+    draw_tactical_world(ctx, view, grid_rect, hovered, &tiles, preview_tile);
+    draw_tactical_controls(TacticalControlsContext {
         ctx,
-        hovered,
+        panel,
         grid_rect,
+        view,
+        hovered_unit,
+        hovered,
+        preview_tile,
+        zoom: camera.zoom,
         mouse,
-        suppress_map_click || preview_input_consumed || !map_input_enabled,
+        input_enabled,
+        map_input_enabled,
+        suppress_map_click,
         actions,
-    );
+    });
     camera_dragged
 }

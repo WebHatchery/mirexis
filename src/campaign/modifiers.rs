@@ -15,7 +15,6 @@ pub fn equipment_cost(slot: &str) -> u32 {
 
 // This helper is part of the mutation validation seam and is intentionally
 // available to authored-content tests before a live campaign consumes it.
-#[allow(dead_code)]
 pub fn derived_mutation_traits(
     character: &CharacterRecord,
     data: &GameData,

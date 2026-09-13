@@ -39,6 +39,31 @@ pub struct ColonyMapContext<'a> {
     pub actions: &'a mut Vec<UiAction>,
 }
 
+struct ColonyArtContext<'a> {
+    campaign: &'a CampaignState,
+    data: &'a GameData,
+    assets: &'a AssetManager,
+    visuals: &'a VisualCatalog,
+    explorer: &'a crate::colony_exploration::ColonyExplorer,
+    view: ColonyView,
+    mouse: Vec2,
+    interaction_enabled: bool,
+}
+
+struct ColonyInteractionContext<'a> {
+    campaign: &'a CampaignState,
+    data: &'a GameData,
+    camera: &'a WorldCamera,
+    explorer: &'a crate::colony_exploration::ColonyExplorer,
+    view: ColonyView,
+    mouse: Vec2,
+    hovered: Option<[i32; 2]>,
+    clicked_npc: Option<String>,
+    interaction_enabled: bool,
+    suppress_map_release: bool,
+    actions: &'a mut Vec<UiAction>,
+}
+
 pub fn draw(context: ColonyMapContext<'_>) {
     let ColonyMapContext {
         campaign,
@@ -67,6 +92,66 @@ pub fn draw(context: ColonyMapContext<'_>) {
     crate::ui::set_ui_clip(ui, Some(viewport));
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
+    let hovered = hovered_plot(view, mouse);
+    let clicked_npc = draw_colony_art(ColonyArtContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        explorer,
+        view,
+        mouse,
+        interaction_enabled,
+    });
+    crate::ui::set_ui_clip(ui, None);
+    draw_colony_interactions(ColonyInteractionContext {
+        campaign,
+        data,
+        camera,
+        explorer,
+        view,
+        mouse,
+        hovered,
+        clicked_npc,
+        interaction_enabled,
+        suppress_map_release,
+        actions,
+    });
+    let instruction_y = if explorer.build_mode() {
+        panel.y + 42.0
+    } else {
+        panel.bottom() - 76.0
+    };
+    draw_text(
+        if explorer.build_mode() {
+            format!(
+                "BUILD MODE // TAP A PLOT TWICE TO CONFIRM // {}%",
+                (camera.zoom * 100.0) as i32
+            )
+        } else {
+            format!(
+                "TAP ANY GROUND POINT TO WALK // DRAG/WHEEL TO SCAN // {}%",
+                (camera.zoom * 100.0) as i32
+            )
+        },
+        panel.x + 14.0,
+        instruction_y,
+        11.0,
+        Color::new(0.46, 0.68, 0.66, 1.0),
+    );
+}
+
+fn draw_colony_art(context: ColonyArtContext<'_>) -> Option<String> {
+    let ColonyArtContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        explorer,
+        view,
+        mouse,
+        interaction_enabled,
+    } = context;
     let interaction_mouse = if interaction_enabled {
         mouse
     } else {
@@ -125,7 +210,23 @@ pub fn draw(context: ColonyMapContext<'_>) {
     draw_first_hour_route(campaign, explorer, view);
     crate::first_hour_consequences_ui::draw(campaign, view);
     draw_ending_manifestation(campaign, assets, visuals, view);
-    crate::ui::set_ui_clip(ui, None);
+    clicked_npc
+}
+
+fn draw_colony_interactions(context: ColonyInteractionContext<'_>) {
+    let ColonyInteractionContext {
+        campaign,
+        data,
+        camera,
+        explorer,
+        view,
+        mouse,
+        hovered,
+        clicked_npc,
+        interaction_enabled,
+        suppress_map_release,
+        actions,
+    } = context;
     if interaction_enabled {
         if let Some(npc_id) = clicked_npc.as_deref() {
             if crate::colony_exploration::npc_position(campaign, npc_id).is_some() {
@@ -162,28 +263,6 @@ pub fn draw(context: ColonyMapContext<'_>) {
     if interaction_enabled {
         explorer.draw_dialogue(campaign, data, mouse, actions);
     }
-    let instruction_y = if explorer.build_mode() {
-        panel.y + 42.0
-    } else {
-        panel.bottom() - 76.0
-    };
-    draw_text(
-        if explorer.build_mode() {
-            format!(
-                "BUILD MODE // TAP A PLOT TWICE TO CONFIRM // {}%",
-                (camera.zoom * 100.0) as i32
-            )
-        } else {
-            format!(
-                "TAP ANY GROUND POINT TO WALK // DRAG/WHEEL TO SCAN // {}%",
-                (camera.zoom * 100.0) as i32
-            )
-        },
-        panel.x + 14.0,
-        instruction_y,
-        11.0,
-        Color::new(0.46, 0.68, 0.66, 1.0),
-    );
 }
 
 const WORLD_POSITION_SCALE: f32 = 1_000.0;

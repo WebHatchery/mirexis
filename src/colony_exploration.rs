@@ -31,6 +31,79 @@ pub fn dialogue_continue_button_bounds() -> Rect {
     Rect::new(632.0, 532.0, 136.0, 30.0)
 }
 
+fn dialogue_copy<'a>(
+    campaign: &CampaignState,
+    character: &'a CharacterRecord,
+) -> (&'static str, &'a str, bool) {
+    let beat = colony_story::identity_arc_beat(
+        &campaign.strategy.mirexis_path_id,
+        &character.id,
+        campaign.strategy.campaign_complete,
+        campaign.strategy.post_campaign_operations_completed,
+        colony_story::IdentityArcProgress {
+            preparations_completed: campaign.identity_preparations_completed,
+            stewardship_completed: campaign.identity_stewardship_completed,
+        },
+        &campaign.colony_story,
+        campaign.identity_building_story_state(),
+    )
+    .or_else(|| {
+        colony_story::finale_beat(
+            &campaign.strategy.mirexis_path_id,
+            &character.id,
+            campaign.strategy.campaign_complete,
+            &campaign.colony_story,
+        )
+    })
+    .or_else(|| {
+        colony_story::contact_route_beat(
+            &campaign.strategy.contact_protocol_id,
+            &character.id,
+            campaign.strategy.contact_trace_completed,
+            campaign.strategy.contact_complete,
+        )
+    })
+    .or_else(|| {
+        campaign
+            .colony
+            .facility_upgrades
+            .iter()
+            .rev()
+            .find_map(|upgrade| {
+                colony_story::facility_upgrade_beat(
+                    &upgrade.upgrade_id,
+                    &character.id,
+                    &campaign.colony_story,
+                )
+            })
+    })
+    .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
+    .or_else(|| {
+        campaign
+            .last_operation_had_commons_meal()
+            .then(|| colony_story::commons_meal_beat(&character.id))
+            .flatten()
+    })
+    .or_else(|| {
+        colony_story::current_beat(
+            &character.id,
+            campaign.operations_completed,
+            campaign.first_hour.first_outcome_won,
+            campaign.first_hour.second_outcome_won,
+        )
+    });
+    beat.map_or(
+        ("COLONY BIOGRAPHY", character.biography.as_str(), true),
+        |beat| {
+            (
+                beat.title,
+                beat.text,
+                campaign.colony_story.has_heard(beat.id),
+            )
+        },
+    )
+}
+
 pub mod dialogue;
 pub use dialogue::{npc_action_button_label, npc_action_enabled};
 
@@ -350,73 +423,7 @@ impl ColonyExplorer {
             12.0,
             Color::new(0.45, 0.72, 0.66, 1.0),
         );
-        let beat = colony_story::identity_arc_beat(
-            &campaign.strategy.mirexis_path_id,
-            &character.id,
-            campaign.strategy.campaign_complete,
-            campaign.strategy.post_campaign_operations_completed,
-            colony_story::IdentityArcProgress {
-                preparations_completed: campaign.identity_preparations_completed,
-                stewardship_completed: campaign.identity_stewardship_completed,
-            },
-            &campaign.colony_story,
-            campaign.identity_building_story_state(),
-        )
-        .or_else(|| {
-            colony_story::finale_beat(
-                &campaign.strategy.mirexis_path_id,
-                &character.id,
-                campaign.strategy.campaign_complete,
-                &campaign.colony_story,
-            )
-        })
-        .or_else(|| {
-            colony_story::contact_route_beat(
-                &campaign.strategy.contact_protocol_id,
-                &character.id,
-                campaign.strategy.contact_trace_completed,
-                campaign.strategy.contact_complete,
-            )
-        })
-        .or_else(|| {
-            campaign
-                .colony
-                .facility_upgrades
-                .iter()
-                .rev()
-                .find_map(|upgrade| {
-                    colony_story::facility_upgrade_beat(
-                        &upgrade.upgrade_id,
-                        &character.id,
-                        &campaign.colony_story,
-                    )
-                })
-        })
-        .or_else(|| colony_story::phase_beat(&campaign.strategy.phase_id, &character.id))
-        .or_else(|| {
-            campaign
-                .last_operation_had_commons_meal()
-                .then(|| colony_story::commons_meal_beat(&character.id))
-                .flatten()
-        })
-        .or_else(|| {
-            colony_story::current_beat(
-                &character.id,
-                campaign.operations_completed,
-                campaign.first_hour.first_outcome_won,
-                campaign.first_hour.second_outcome_won,
-            )
-        });
-        let (title, text, heard) = beat.map_or(
-            ("COLONY BIOGRAPHY", character.biography.as_str(), true),
-            |beat| {
-                (
-                    beat.title,
-                    beat.text,
-                    campaign.colony_story.has_heard(beat.id),
-                )
-            },
-        );
+        let (title, text, heard) = dialogue_copy(campaign, character);
         draw_text(
             format!("FIELD NOTE // {title}"),
             84.0,

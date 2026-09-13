@@ -5,7 +5,6 @@ use crate::data::{GameData, UnitDef};
 
 // The option-bearing seam is used by campaign evolution and retained for
 // future authored evolution branches.
-#[allow(dead_code)]
 pub fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
     derive_unit_with_evolution_options(base, character, data, false, false)
 }

@@ -104,7 +104,6 @@ impl StrategyState {
 
     // Serialized strategy compatibility retains this accessor for older save
     // readers even when the current UI does not display it directly.
-    #[allow(dead_code)]
     pub fn resolve_mission(
         &mut self,
         outcome: &MissionOutcome,
