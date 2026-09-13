@@ -101,6 +101,7 @@ impl Game {
             tactical_camera,
             colony_camera,
             colony_explorer,
+            colony_suppress_map_release: false,
             colony_operations_open: false,
             facility_upgrade_open: false,
             salvage_open: false,

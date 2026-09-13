@@ -175,10 +175,61 @@ impl Game {
             self.notifications.warning("Controller disconnected");
         }
         self.gamepad_connected = pad.connected;
+        self.capture_colony_camera_input(&input);
         if self.capture_overlay_input(&input, &pad) {
             return false;
         }
         self.capture_state_input(&input, &pad)
+    }
+
+    fn capture_colony_camera_input(&mut self, input: &InputState) {
+        if self.state != AppState::Colony {
+            self.colony_suppress_map_release = false;
+            return;
+        }
+        let interaction_enabled = crate::colony_ui::colony_map_input_enabled(
+            self.campaign.first_hour.help_open,
+            self.show_settings,
+            self.show_field_notes,
+            self.show_memorial,
+            self.facility_upgrade_open,
+            self.salvage_open,
+        );
+        if !interaction_enabled {
+            self.colony_camera.clear_pointer_interaction();
+            self.colony_suppress_map_release = false;
+            return;
+        }
+
+        let ui = macroquad_toolkit::ui::VirtualUi::new(
+            crate::ui::LOGICAL_WIDTH,
+            crate::ui::LOGICAL_HEIGHT,
+        );
+        let mouse = ui.screen_to_ui(input.mouse_pos);
+        let panel = crate::colony_map_ui::panel_bounds(self.colony_operations_open);
+        let viewport = crate::colony_map_ui::viewport_bounds(panel);
+        let zoom_clicked = crate::camera_controls::zoom_factor(
+            mouse,
+            crate::colony_map_ui::zoom_controls_origin(panel),
+            !self.colony_camera.primary_gesture_active(),
+        );
+        if let Some(factor) = zoom_clicked {
+            self.colony_camera.zoom_center(viewport, factor);
+            self.colony_camera.guard_next_primary_release();
+        }
+        let camera_dragged = self.colony_camera.update(viewport, mouse);
+        if zoom_clicked.is_some() || camera_dragged {
+            self.colony_camera.clear_pending_colony_plot();
+        }
+        self.colony_camera.clamp_isometric_with_insets(
+            crate::colony::COLONY_WIDTH as usize,
+            crate::colony::COLONY_HEIGHT as usize,
+            crate::colony_map_ui::COLONY_HALF_WIDTH,
+            crate::colony_map_ui::COLONY_HALF_HEIGHT,
+            viewport,
+            crate::colony_map_ui::ColonyView::camera_insets(self.colony_camera.zoom),
+        );
+        self.colony_suppress_map_release = zoom_clicked.is_some() || camera_dragged;
     }
 
     fn capture_overlay_input(&mut self, input: &InputState, pad: &GamepadFrame) -> bool {
@@ -299,7 +350,7 @@ impl Game {
             self.colony_explorer
                 .set_keyboard_direction(direction.normalize_or_zero());
             if is_key_pressed(KeyCode::E) {
-                self.colony_explorer.interact(&self.campaign, &self.data);
+                self.events.push(UiAction::InteractColony);
             }
         } else {
             self.colony_explorer.set_keyboard_direction(vec2(0.0, 0.0));

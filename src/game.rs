@@ -88,6 +88,7 @@ pub struct Game {
     tactical_camera: WorldCamera,
     colony_camera: WorldCamera,
     colony_explorer: crate::colony_exploration::ColonyExplorer,
+    colony_suppress_map_release: bool,
     colony_operations_open: bool,
     facility_upgrade_open: bool,
     salvage_open: bool,
@@ -104,6 +105,8 @@ impl Game {
     pub fn update(&mut self, dt: f32) {
         if self.colony_explorer_can_update() {
             self.colony_explorer.update(dt, &self.campaign.colony);
+            self.colony_explorer
+                .update_approach(&self.campaign, &self.data);
         }
         self.update_playtest_metrics(dt);
         self.update_motion(dt);
@@ -129,7 +132,6 @@ impl Game {
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
         let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
-        let mut colony_result = None;
         let mut actions = match self.state {
             AppState::Title => ui::draw_title(ui::TitleDrawContext {
                 data: &self.data,
@@ -150,9 +152,10 @@ impl Game {
                     assets: &self.assets,
                     visuals: &self.visuals,
                     ui: &virtual_ui,
-                    camera: self.colony_camera,
-                    explorer: self.colony_explorer.clone(),
+                    camera: &self.colony_camera,
+                    explorer: &self.colony_explorer,
                     operations_open: self.colony_operations_open,
+                    suppress_map_release: self.colony_suppress_map_release,
                     facility_upgrade_open: self.facility_upgrade_open,
                     salvage_open: self.salvage_open,
                     settings_open: self.show_settings,
@@ -161,9 +164,7 @@ impl Game {
                     memorial_page: self.memorial_page,
                     selected_field_note: self.selected_field_note,
                 });
-                let actions = result.actions.clone();
-                colony_result = Some(result);
-                actions
+                result.actions
             }
             AppState::Roster => crate::roster_ui::draw_roster(
                 &self.campaign,
@@ -249,9 +250,6 @@ impl Game {
         self.draw_first_hour(&virtual_ui, &mut actions);
         self.draw_settings(&virtual_ui, &mut actions);
         end_virtual_ui_frame();
-        if let Some(result) = colony_result {
-            self.apply_colony_draw_result(result);
-        }
         for action in actions {
             self.events.push(action);
         }

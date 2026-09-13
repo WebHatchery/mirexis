@@ -11,11 +11,12 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
         assets,
         visuals,
         ui,
-        mut camera,
-        mut explorer,
+        camera,
+        explorer,
         operations_open,
-        mut facility_upgrade_open,
-        mut salvage_open,
+        suppress_map_release,
+        facility_upgrade_open,
+        salvage_open,
         settings_open,
         field_notes_open,
         memorial_open,
@@ -39,17 +40,18 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
         facility_upgrade_open,
         salvage_open,
     );
-    let suppress_actions = crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
+    crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
         campaign,
         data,
         assets,
         visuals,
         ui,
-        camera: &mut camera,
-        explorer: &mut explorer,
+        camera,
+        explorer,
         mouse,
         operations_open,
         interaction_enabled,
+        suppress_map_release,
         actions: &mut actions,
     });
     crate::colony_header_ui::draw(
@@ -66,8 +68,8 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
             assets,
             visuals,
             mouse,
-            facility_upgrade_open: &mut facility_upgrade_open,
-            salvage_open: &mut salvage_open,
+            facility_upgrade_open,
+            salvage_open,
             actions: &mut actions,
         });
     }
@@ -78,7 +80,6 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
             explorer.talking_to(),
         );
     }
-    crate::ui::suppress_map_release_actions(&mut actions, suppress_actions);
     if field_notes_open {
         crate::field_notes_ui::draw_modal(
             &campaign.colony_story,
@@ -89,14 +90,7 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
     } else if memorial_open {
         crate::memorial_ui::draw_modal(campaign, memorial_page, mouse, &mut actions);
     }
-    ColonyDrawResult {
-        actions,
-        camera,
-        explorer,
-        operations_open,
-        facility_upgrade_open,
-        salvage_open,
-    }
+    ColonyDrawResult { actions }
 }
 
 pub fn colony_map_input_enabled(

@@ -2,8 +2,6 @@
 
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
-use crate::colony_exploration::ColonyExplorer;
-use crate::data::GameData;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
@@ -116,30 +114,24 @@ pub fn draw_build_controls(campaign: &CampaignState, mouse: Vec2, actions: &mut 
 
 pub fn draw_exploration_controls(
     campaign: &CampaignState,
-    data: &GameData,
-    explorer: &mut ColonyExplorer,
+    build_mode: bool,
+    can_talk: bool,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
-    explorer.set_touch_direction(Vec2::ZERO);
-    if explorer.build_mode() {
+    if build_mode {
         if button(
             Rect::new(668.0, 654.0, 158.0, 42.0),
             "RETURN TO EXPLORE",
-            true,
+            can_talk,
             mouse,
         ) {
-            explorer.set_build_mode(false);
+            actions.push(UiAction::SetColonyBuildMode(false));
         }
         return;
     }
-    if button(
-        Rect::new(210.0, 654.0, 112.0, 42.0),
-        "TALK",
-        explorer.can_talk(campaign, data),
-        mouse,
-    ) {
-        explorer.interact(campaign, data);
+    if button(Rect::new(210.0, 654.0, 112.0, 42.0), "TALK", true, mouse) {
+        actions.push(UiAction::InteractColony);
     }
     if campaign.first_hour.stage == crate::first_hour::FirstHourStage::Complete
         && button(
@@ -149,7 +141,6 @@ pub fn draw_exploration_controls(
             mouse,
         )
     {
-        explorer.set_build_mode(true);
-        actions.clear();
+        actions.push(UiAction::SetColonyBuildMode(true));
     }
 }

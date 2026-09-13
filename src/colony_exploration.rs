@@ -306,7 +306,7 @@ impl ColonyExplorer {
     }
 
     pub fn draw_dialogue(
-        &mut self,
+        &self,
         campaign: &CampaignState,
         data: &GameData,
         mouse: Vec2,
@@ -446,12 +446,10 @@ impl ColonyExplorer {
             ) {
                 actions.push(action);
                 actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
-                self.close_dialogue();
             }
         }
         if button(dialogue_continue_button_bounds(), "CONTINUE", true, mouse) {
             actions.push(UiAction::AcknowledgeColonist(character.id.clone()));
-            self.close_dialogue();
         }
         true
     }

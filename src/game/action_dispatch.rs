@@ -16,6 +16,9 @@ impl Game {
         if self.apply_memorial_action(&action) {
             return;
         }
+        if self.apply_colony_action(&action) {
+            return;
+        }
         if self.guard_destructive_action(&action) {
             return;
         }

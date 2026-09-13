@@ -8,8 +8,8 @@ pub(super) struct OperationsDrawContext<'a> {
     pub(super) assets: &'a AssetManager,
     pub(super) visuals: &'a VisualCatalog,
     pub(super) mouse: Vec2,
-    pub(super) facility_upgrade_open: &'a mut bool,
-    pub(super) salvage_open: &'a mut bool,
+    pub(super) facility_upgrade_open: bool,
+    pub(super) salvage_open: bool,
     pub(super) actions: &'a mut Vec<UiAction>,
 }
 
@@ -24,12 +24,12 @@ pub(super) fn draw_operations(context: OperationsDrawContext<'_>) {
         salvage_open,
         actions,
     } = context;
-    if *facility_upgrade_open {
+    if facility_upgrade_open {
         actions.clear();
         upgrades::draw_modal(campaign, mouse, actions);
         return;
     }
-    if *salvage_open {
+    if salvage_open {
         actions.clear();
         salvage::draw_modal(campaign, mouse, actions);
         return;

@@ -89,6 +89,7 @@ impl Game {
             }
             UiAction::AcknowledgeColonist(character_id) => {
                 self.campaign.acknowledge_colonist(character_id);
+                self.colony_explorer.close_dialogue();
                 "Colony introduction autosaved"
             }
             UiAction::ToggleFirstHourHelp => {

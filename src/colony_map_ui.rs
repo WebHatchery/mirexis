@@ -30,15 +30,16 @@ pub struct ColonyMapContext<'a> {
     pub assets: &'a AssetManager,
     pub visuals: &'a VisualCatalog,
     pub ui: &'a VirtualUi,
-    pub camera: &'a mut WorldCamera,
-    pub explorer: &'a mut crate::colony_exploration::ColonyExplorer,
+    pub camera: &'a WorldCamera,
+    pub explorer: &'a crate::colony_exploration::ColonyExplorer,
     pub mouse: Vec2,
     pub operations_open: bool,
     pub interaction_enabled: bool,
+    pub suppress_map_release: bool,
     pub actions: &'a mut Vec<UiAction>,
 }
 
-pub fn draw(context: ColonyMapContext<'_>) -> bool {
+pub fn draw(context: ColonyMapContext<'_>) {
     let ColonyMapContext {
         campaign,
         data,
@@ -50,6 +51,7 @@ pub fn draw(context: ColonyMapContext<'_>) -> bool {
         mouse,
         operations_open,
         interaction_enabled,
+        suppress_map_release,
         actions,
     } = context;
     let panel = panel_bounds(operations_open);
@@ -60,43 +62,11 @@ pub fn draw(context: ColonyMapContext<'_>) -> bool {
             .with_inner_border(6.0, 1.0, Color::new(0.12, 0.28, 0.27, 0.7)),
     );
     let viewport = viewport_bounds(panel);
-    let camera_control_clicked = interaction_enabled
-        && crate::camera_controls::draw_zoom(
-            camera,
-            viewport,
-            mouse,
-            zoom_controls_origin(panel),
-            !camera.primary_gesture_active(),
-        );
-    let camera_dragged = if interaction_enabled {
-        camera.update(viewport, mouse)
-    } else {
-        camera.clear_pointer_interaction();
-        false
-    };
-    if camera_control_clicked {
-        camera.guard_next_primary_release();
-    }
-    if camera_control_clicked || camera_dragged {
-        camera.clear_pending_colony_plot();
-    }
-    let suppress_plot_click = camera_control_clicked || camera_dragged;
-    camera.clamp_isometric_with_insets(
-        COLONY_WIDTH as usize,
-        COLONY_HEIGHT as usize,
-        COLONY_HALF_WIDTH,
-        COLONY_HALF_HEIGHT,
-        viewport,
-        ColonyView::camera_insets(camera.zoom),
-    );
     let view = ColonyView::new(viewport, camera);
     draw_wetland_backdrop(viewport);
     crate::ui::set_ui_clip(ui, Some(viewport));
     draw_campaign_evolution(campaign, view);
     draw_service_paths(campaign, view);
-    if interaction_enabled {
-        explorer.update_approach(campaign, data);
-    }
     let interaction_mouse = if interaction_enabled {
         mouse
     } else {
@@ -158,39 +128,36 @@ pub fn draw(context: ColonyMapContext<'_>) -> bool {
     crate::ui::set_ui_clip(ui, None);
     if interaction_enabled {
         if let Some(npc_id) = clicked_npc.as_deref() {
-            if let Some(position) = crate::colony_exploration::npc_position(campaign, npc_id) {
-                explorer.request_approach(npc_id, position, &campaign.colony);
+            if crate::colony_exploration::npc_position(campaign, npc_id).is_some() {
+                actions.push(UiAction::ApproachColonist(npc_id.to_owned()));
             }
-            camera.guard_next_primary_release();
         }
     }
     if interaction_enabled && explorer.build_mode() {
         interaction::draw_hover_card(campaign, data, hovered, camera.pending_colony_plot());
-        interaction::handle_plot_click(
-            campaign,
-            data,
-            camera,
-            hovered,
-            suppress_plot_click,
-            actions,
-        );
+        interaction::handle_plot_click(campaign, data, hovered, suppress_map_release, actions);
         controls::draw_build_controls(campaign, mouse, actions);
     } else if interaction_enabled
         && !explorer.build_mode()
-        && !suppress_plot_click
+        && !suppress_map_release
         && clicked_npc.is_none()
         && !explorer.is_talking()
         && is_mouse_button_released(MouseButton::Left)
     {
         if let Some(position) = hovered {
-            explorer.request_walk(view.world_position(mouse, position), &campaign.colony);
+            actions.push(UiAction::WalkColony(encode_world_position(
+                view.world_position(mouse, position),
+            )));
         }
     }
     if interaction_enabled {
-        controls::draw_exploration_controls(campaign, data, explorer, mouse, actions);
-    } else {
-        explorer.set_keyboard_direction(Vec2::ZERO);
-        explorer.set_touch_direction(Vec2::ZERO);
+        controls::draw_exploration_controls(
+            campaign,
+            explorer.build_mode(),
+            explorer.can_talk(campaign, data),
+            mouse,
+            actions,
+        );
     }
     if interaction_enabled {
         explorer.draw_dialogue(campaign, data, mouse, actions);
@@ -217,7 +184,22 @@ pub fn draw(context: ColonyMapContext<'_>) -> bool {
         11.0,
         Color::new(0.46, 0.68, 0.66, 1.0),
     );
-    camera_dragged
+}
+
+const WORLD_POSITION_SCALE: f32 = 1_000.0;
+
+pub fn encode_world_position(position: Vec2) -> [i32; 2] {
+    [
+        (position.x * WORLD_POSITION_SCALE).round() as i32,
+        (position.y * WORLD_POSITION_SCALE).round() as i32,
+    ]
+}
+
+pub fn decode_world_position(encoded: [i32; 2]) -> Vec2 {
+    vec2(
+        encoded[0] as f32 / WORLD_POSITION_SCALE,
+        encoded[1] as f32 / WORLD_POSITION_SCALE,
+    )
 }
 
 pub fn zoom_controls_origin(panel: Rect) -> Vec2 {

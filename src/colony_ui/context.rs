@@ -6,18 +6,16 @@ use crate::visual_assets::VisualCatalog;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::ui::VirtualUi;
 
-use crate::colony_exploration::ColonyExplorer;
-use crate::grid_ui::WorldCamera;
-
 pub struct ColonyDrawContext<'a> {
     pub campaign: &'a CampaignState,
     pub data: &'a GameData,
     pub assets: &'a AssetManager,
     pub visuals: &'a VisualCatalog,
     pub ui: &'a VirtualUi,
-    pub camera: WorldCamera,
-    pub explorer: ColonyExplorer,
+    pub camera: &'a crate::grid_ui::WorldCamera,
+    pub explorer: &'a crate::colony_exploration::ColonyExplorer,
     pub operations_open: bool,
+    pub suppress_map_release: bool,
     pub facility_upgrade_open: bool,
     pub salvage_open: bool,
     pub settings_open: bool,
@@ -29,9 +27,4 @@ pub struct ColonyDrawContext<'a> {
 
 pub struct ColonyDrawResult {
     pub actions: Vec<crate::ui::UiAction>,
-    pub camera: WorldCamera,
-    pub explorer: ColonyExplorer,
-    pub operations_open: bool,
-    pub facility_upgrade_open: bool,
-    pub salvage_open: bool,
 }

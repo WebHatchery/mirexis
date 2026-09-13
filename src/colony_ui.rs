@@ -24,7 +24,7 @@ pub mod salvage;
 pub mod scene;
 pub mod upgrades;
 pub use context::{ColonyDrawContext, ColonyDrawResult};
-pub use scene::draw_colony;
+pub use scene::{colony_map_input_enabled, draw_colony};
 
 // Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
 // when every label shares the toolkit font. The hub's buttons and map labels

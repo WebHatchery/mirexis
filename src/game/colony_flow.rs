@@ -1,15 +1,53 @@
 //! Strategic colony actions that need application-level persistence feedback.
 
 use super::{AppState, Game};
-use crate::colony_ui::ColonyDrawResult;
 
 impl Game {
-    pub fn apply_colony_draw_result(&mut self, result: ColonyDrawResult) {
-        self.colony_camera = result.camera;
-        self.colony_explorer = result.explorer;
-        self.colony_operations_open = result.operations_open;
-        self.facility_upgrade_open = result.facility_upgrade_open;
-        self.salvage_open = result.salvage_open;
+    pub fn apply_colony_action(&mut self, action: &crate::ui::UiAction) -> bool {
+        match action {
+            crate::ui::UiAction::ConfirmColonyPlot(position) => {
+                let Some(construction) = crate::colony_map_ui::interaction::plot_action(
+                    &self.campaign,
+                    &self.data,
+                    *position,
+                ) else {
+                    self.colony_camera.clear_pending_colony_plot();
+                    return true;
+                };
+                if self.colony_camera.confirm_colony_plot(*position) {
+                    self.apply_action(construction);
+                }
+                true
+            }
+            crate::ui::UiAction::WalkColony(encoded) => {
+                let destination = crate::colony_map_ui::decode_world_position(*encoded);
+                self.colony_explorer
+                    .request_walk(destination, &self.campaign.colony);
+                true
+            }
+            crate::ui::UiAction::ApproachColonist(character_id) => {
+                if let Some(position) =
+                    crate::colony_exploration::npc_position(&self.campaign, character_id)
+                {
+                    self.colony_explorer.request_approach(
+                        character_id,
+                        position,
+                        &self.campaign.colony,
+                    );
+                }
+                true
+            }
+            crate::ui::UiAction::InteractColony => {
+                self.colony_explorer.interact(&self.campaign, &self.data);
+                true
+            }
+            crate::ui::UiAction::SetColonyBuildMode(enabled) => {
+                self.colony_explorer.set_build_mode(*enabled);
+                self.colony_camera.clear_pending_colony_plot();
+                true
+            }
+            _ => false,
+        }
     }
 
     pub fn colony_explorer_can_update(&self) -> bool {

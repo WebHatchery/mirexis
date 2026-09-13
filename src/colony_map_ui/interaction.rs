@@ -3,7 +3,6 @@
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 use crate::data::GameData;
-use crate::grid_ui::WorldCamera;
 use crate::ui::UiAction;
 use macroquad::prelude::*;
 
@@ -276,9 +275,8 @@ pub fn building_action(
 }
 
 pub fn handle_plot_click(
-    campaign: &CampaignState,
-    data: &GameData,
-    camera: &mut WorldCamera,
+    _campaign: &CampaignState,
+    _data: &GameData,
     hovered: Option<[i32; 2]>,
     suppress_click: bool,
     actions: &mut Vec<UiAction>,
@@ -287,12 +285,5 @@ pub fn handle_plot_click(
         return;
     }
     let Some(position) = hovered else { return };
-    let Some(action) = plot_action(campaign, data, position) else {
-        camera.clear_pending_colony_plot();
-        return;
-    };
-    if !camera.confirm_colony_plot(position) {
-        return;
-    }
-    actions.push(action);
+    actions.push(UiAction::ConfirmColonyPlot(position));
 }
