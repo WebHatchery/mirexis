@@ -163,7 +163,7 @@ pub struct UnitState {
 }
 
 impl UnitState {
-    pub(crate) fn from_def(def: &UnitDef, action_points: u8) -> Self {
+    pub fn from_def(def: &UnitDef, action_points: u8) -> Self {
         Self {
             id: def.id.clone(),
             name: def.name.clone(),
@@ -491,7 +491,7 @@ pub struct TacticalState {
 }
 
 impl TacticalState {
-    pub(crate) fn obscuring_penalty(&self, target: TilePos) -> i32 {
+    pub fn obscuring_penalty(&self, target: TilePos) -> i32 {
         if self.obscuring_fields.iter().any(|field| {
             field.remaining_phases > 0 && manhattan(field.center, target) <= i32::from(field.radius)
         }) {
@@ -502,25 +502,25 @@ impl TacticalState {
     }
 }
 
-pub(crate) fn terrain_cost(position: TilePos, costs: &[(TilePos, u8)]) -> u8 {
+pub fn terrain_cost(position: TilePos, costs: &[(TilePos, u8)]) -> u8 {
     costs
         .iter()
         .find(|(tile, _)| *tile == position)
         .map_or(1, |(_, cost)| *cost)
 }
 
-pub(crate) fn path_cost(path: &[TilePos], costs: &[(TilePos, u8)]) -> u8 {
+pub fn path_cost(path: &[TilePos], costs: &[(TilePos, u8)]) -> u8 {
     path.iter()
         .skip(1)
         .map(|tile| terrain_cost(*tile, costs))
         .sum()
 }
 
-pub(crate) fn manhattan(a: TilePos, b: TilePos) -> i32 {
+pub fn manhattan(a: TilePos, b: TilePos) -> i32 {
     (a.x - b.x).abs() + (a.y - b.y).abs()
 }
 
-pub(crate) fn line_between(from: TilePos, to: TilePos) -> Vec<TilePos> {
+pub fn line_between(from: TilePos, to: TilePos) -> Vec<TilePos> {
     let mut positions = Vec::new();
     let (mut x, mut y) = (from.x, from.y);
     let dx = (to.x - from.x).abs();

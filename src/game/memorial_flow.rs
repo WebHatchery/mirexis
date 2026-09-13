@@ -4,7 +4,7 @@ use super::Game;
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn apply_memorial_action(&mut self, action: &UiAction) -> bool {
+    pub fn apply_memorial_action(&mut self, action: &UiAction) -> bool {
         match action {
             UiAction::ToggleMemorial => {
                 self.show_memorial = !self.show_memorial;

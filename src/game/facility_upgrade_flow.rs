@@ -4,7 +4,7 @@ use super::Game;
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn apply_facility_upgrade_action(&mut self, action: &UiAction) -> bool {
+    pub fn apply_facility_upgrade_action(&mut self, action: &UiAction) -> bool {
         match action {
             UiAction::OpenFacilityUpgrade => {
                 let can_open = self.campaign.colony.buildings.iter().any(|building| {

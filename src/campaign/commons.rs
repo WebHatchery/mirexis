@@ -3,7 +3,7 @@
 use super::{Availability, CampaignState, SQUAD_LIMIT};
 use crate::colony::{BuildingKind, COMMUNITY_KITCHEN_UPGRADE};
 
-pub(crate) const COMMONS_MEAL_FOOD_COST: i32 = 4;
+pub const COMMONS_MEAL_FOOD_COST: i32 = 4;
 
 impl CampaignState {
     pub fn commons_meal_food_cost(&self) -> i32 {

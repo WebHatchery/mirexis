@@ -4,14 +4,14 @@ use crate::data::{CoverEdgeDef, EdgeDirection, GameData, HazardDef, MapRecipeDef
 
 // Campaign recipes retain their compact 12x8 authoring coordinates in JSON.
 // Materialization projects that vocabulary into the 40x40 runtime battlefield.
-const AUTHORED_MAX_Y: i32 = 7;
-const BATTLEFIELD_X_OFFSET: i32 = 10;
-const BATTLEFIELD_Y_OFFSET: i32 = 5;
-const BATTLEFIELD_X_STRIDE: i32 = 2;
-const BATTLEFIELD_Y_STRIDE: i32 = 4;
+pub const AUTHORED_MAX_Y: i32 = 7;
+pub const BATTLEFIELD_X_OFFSET: i32 = 10;
+pub const BATTLEFIELD_Y_OFFSET: i32 = 5;
+pub const BATTLEFIELD_X_STRIDE: i32 = 2;
+pub const BATTLEFIELD_Y_STRIDE: i32 = 4;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct MapLayout {
+pub struct MapLayout {
     pub blocked_tiles: Vec<[i32; 2]>,
     pub objective_tile: [i32; 2],
     pub terrain_costs: Vec<TerrainCostDef>,
@@ -19,7 +19,7 @@ pub(crate) struct MapLayout {
     pub cover_edges: Vec<CoverEdgeDef>,
 }
 
-pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> MapLayout {
+pub fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> MapLayout {
     let authored = MapLayout {
         blocked_tiles: recipe
             .blocked_tiles
@@ -100,14 +100,14 @@ pub(crate) fn materialize(recipe: &MapRecipeDef, data: &GameData, seed: u64) -> 
     }
 }
 
-pub(crate) fn project_authored_position(position: [i32; 2]) -> [i32; 2] {
+pub fn project_authored_position(position: [i32; 2]) -> [i32; 2] {
     [
         BATTLEFIELD_X_OFFSET + position[0] * BATTLEFIELD_X_STRIDE,
         BATTLEFIELD_Y_OFFSET + position[1] * BATTLEFIELD_Y_STRIDE,
     ]
 }
 
-fn mirror_battlefield_position(position: [i32; 2]) -> [i32; 2] {
+pub fn mirror_battlefield_position(position: [i32; 2]) -> [i32; 2] {
     let authored_span = AUTHORED_MAX_Y * BATTLEFIELD_Y_STRIDE;
     [
         position[0],
@@ -115,7 +115,7 @@ fn mirror_battlefield_position(position: [i32; 2]) -> [i32; 2] {
     ]
 }
 
-fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {
+pub fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {
     let in_bounds = |position: [i32; 2]| {
         position[0] >= 0
             && position[1] >= 0
@@ -144,6 +144,3 @@ fn layout_is_safe(layout: &MapLayout, data: &GameData) -> bool {
             .iter()
             .all(|unit| !layout.blocked_tiles.contains(&unit.position))
 }
-
-#[cfg(test)]
-mod tests;

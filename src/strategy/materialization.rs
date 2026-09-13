@@ -1,3 +1,5 @@
+//! Materializes authored mission recipes into safe runtime battle layouts.
+
 use super::StrategyState;
 use crate::colony::ColonyState;
 use crate::data::{CoverEdgeDef, EdgeDirection, GameData, MissionDef};

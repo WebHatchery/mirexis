@@ -6,7 +6,7 @@ use crate::tactical::ObjectiveState;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_text_block, TextStyle};
 
-pub(crate) fn action_label(kind: ObjectiveKind, state: ObjectiveState) -> &'static str {
+pub fn action_label(kind: ObjectiveKind, state: ObjectiveState) -> &'static str {
     match kind {
         ObjectiveKind::SecureAndClear => "SECURE OBJECTIVE",
         ObjectiveKind::EliminateAll => "ELIMINATE ALL HOSTILES",
@@ -18,11 +18,11 @@ pub(crate) fn action_label(kind: ObjectiveKind, state: ObjectiveState) -> &'stat
     }
 }
 
-pub(crate) fn action_button_bounds(panel: Rect) -> Rect {
+pub fn action_button_bounds(panel: Rect) -> Rect {
     Rect::new(panel.x + 18.0, panel.bottom() - 232.0, panel.w - 36.0, 34.0)
 }
 
-pub(crate) fn interaction_label(
+pub fn interaction_label(
     kind: ObjectiveKind,
     state: ObjectiveState,
     selected: Option<&UnitState>,
@@ -63,7 +63,7 @@ pub(crate) fn interaction_label(
     }
 }
 
-pub(crate) fn draw_summary(session: &GameSession, mission: &MissionDef, x: f32, panel: Rect) {
+pub fn draw_summary(session: &GameSession, mission: &MissionDef, x: f32, panel: Rect) {
     draw_text_ex(
         format!("OBJECTIVE // {}", progress(session, mission)),
         x,
@@ -90,7 +90,7 @@ pub(crate) fn draw_summary(session: &GameSession, mission: &MissionDef, x: f32, 
     );
 }
 
-pub(crate) fn progress(session: &GameSession, mission: &MissionDef) -> String {
+pub fn progress(session: &GameSession, mission: &MissionDef) -> String {
     let hostiles = session
         .tactical
         .units
@@ -143,9 +143,6 @@ pub(crate) fn progress(session: &GameSession, mission: &MissionDef) -> String {
     }
 }
 
-fn rounds_remaining(session: &GameSession, mission: &MissionDef) -> u32 {
+pub fn rounds_remaining(session: &GameSession, mission: &MissionDef) -> u32 {
     mission.round_limit.saturating_sub(session.tactical.round) + 1
 }
-
-#[cfg(test)]
-mod tests;

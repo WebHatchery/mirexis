@@ -3,7 +3,7 @@
 use crate::data::{MissionDef, Team, UnitDef};
 use std::collections::HashSet;
 
-pub(super) fn spread_hostile_deployment(
+pub fn spread_hostile_deployment(
     roster: &mut [UnitDef],
     mission: &MissionDef,
     width: i32,
@@ -39,7 +39,7 @@ pub(super) fn spread_hostile_deployment(
     }
 }
 
-fn hostile_entry_is_safe(
+pub fn hostile_entry_is_safe(
     position: [i32; 2],
     mission: &MissionDef,
     width: i32,

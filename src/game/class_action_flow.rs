@@ -4,7 +4,7 @@ use super::{Game, TacticalTargeting};
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn apply_class_action(&mut self, action: &UiAction, before_events: usize) -> bool {
+    pub fn apply_class_action(&mut self, action: &UiAction, before_events: usize) -> bool {
         let handled = match action {
             UiAction::ActivateClassAction => {
                 match self.session.activate_selected_class_action() {

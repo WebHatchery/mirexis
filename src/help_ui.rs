@@ -1,11 +1,12 @@
 //! In-battle quick reference that blocks tactical commands while open.
 
+use crate::data::TutorialCopy;
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw(copy: &TutorialCopy, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.82));
     let panel = Rect::new(190.0, 90.0, 900.0, 540.0);
     draw_surface(
@@ -14,14 +15,14 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
             .with_border(2.0, Color::new(0.32, 0.78, 0.63, 1.0)),
     );
     text(
-        "TACTICAL FIELD MANUAL",
+        &copy.tactical_manual_title,
         230.0,
         138.0,
         30.0,
         dark::TEXT_BRIGHT,
     );
     text(
-        "The battle is paused while this reference is open.",
+        &copy.tactical_manual_paused,
         230.0,
         166.0,
         15.0,
@@ -31,55 +32,35 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
         230.0,
         210.0,
         "1 // READ THE FIELD",
-        &[
-            "Tap/click a colonist to make them active.",
-            "Green tiles are reachable this activation.",
-            "Drag to pan; use the mouse wheel to zoom.",
-            "Tap a hostile to inspect its forecast, then tap ATTACK to fire.",
-        ],
+        &copy.tactical_read_field_lines,
     );
     section(
         230.0,
         350.0,
         "2 // SPEND THE PHASE",
-        &[
-            "Movement and weapons spend action points.",
-            "Class, mutation, gear, and overwatch add options.",
-            "End Phase warns once if colonists remain ready.",
-            "Orange intent lines forecast the first response.",
-        ],
+        &copy.tactical_spend_phase_lines,
     );
     section(
         660.0,
         210.0,
         "3 // SURVIVE THE GROUND",
-        &[
-            "+ Fire lane: 2 direct damage.",
-            "O Spore bloom: 1 damage and Hindered.",
-            "<> Static rift: Disrupted accuracy.",
-            "Each hostile faction ignores its own hazard.",
-        ],
+        &copy.tactical_survive_ground_lines,
     );
     section(
         660.0,
         350.0,
         "4 // WIN THE CONTRACT",
-        &[
-            "Read the objective and live progress at right.",
-            "Gold rings mark objectives and extraction.",
-            "Some missions require interaction; others survival.",
-            "Save and load remain available during battle.",
-        ],
+        &copy.tactical_win_contract_lines,
     );
     text(
-        "TOUCH // TAP MAP TO INSPECT · TAP NEXT READY / END PHASE / SAVE / LOAD / HELP / LOG",
+        &copy.tactical_touch_controls,
         230.0,
         516.0,
         15.0,
         dark::ACCENT,
     );
     text(
-        "OPTIONAL // KEYS ARROWS / TAB / ENTER / S / L / H / B · PAD D-PAD / A / B / X / Y / RB / START",
+        &copy.tactical_optional_controls,
         230.0,
         540.0,
         15.0,
@@ -100,11 +81,11 @@ pub(crate) fn draw(mouse: Vec2, actions: &mut Vec<UiAction>) {
     }
 }
 
-fn section(x: f32, y: f32, title: &str, lines: &[&str]) {
+pub fn section<S: AsRef<str>>(x: f32, y: f32, title: &str, lines: &[S]) {
     text(title, x, y, 17.0, Color::new(0.44, 0.88, 0.70, 1.0));
     for (index, line) in lines.iter().enumerate() {
         text(
-            *line,
+            line.as_ref(),
             x,
             y + 30.0 + index as f32 * 24.0,
             15.0,
@@ -113,6 +94,6 @@ fn section(x: f32, y: f32, title: &str, lines: &[&str]) {
     }
 }
 
-fn text(value: impl AsRef<str>, x: f32, y: f32, size: f32, color: Color) {
+pub fn text(value: impl AsRef<str>, x: f32, y: f32, size: f32, color: Color) {
     draw_text_ex(value.as_ref(), x, y, TextStyle::new(size, color).params());
 }

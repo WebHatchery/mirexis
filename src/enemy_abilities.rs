@@ -4,9 +4,9 @@ use crate::data::Team;
 use crate::state::GameSession;
 use crate::tactical::{manhattan, BattleEvent, Command, CommandCost, RuleError, StatusKind};
 
-const ABILITY_COST: u8 = 1;
+pub const ABILITY_COST: u8 = 1;
 
-pub(crate) fn ability_name(faction: Option<&str>) -> Option<&'static str> {
+pub fn ability_name(faction: Option<&str>) -> Option<&'static str> {
     match faction {
         Some("brood") => Some("PREDATORY SURGE"),
         Some("directorate") => Some("SUPPRESSION LOCK"),
@@ -15,7 +15,7 @@ pub(crate) fn ability_name(faction: Option<&str>) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn try_activate(session: &mut GameSession, unit_id: &str) {
+pub fn try_activate(session: &mut GameSession, unit_id: &str) {
     let faction = session
         .unit(unit_id)
         .and_then(|unit| unit.faction.as_deref())
@@ -32,7 +32,7 @@ pub(crate) fn try_activate(session: &mut GameSession, unit_id: &str) {
     }
 }
 
-pub(crate) fn validate(
+pub fn validate(
     session: &GameSession,
     unit_id: &str,
     target_id: Option<&str>,
@@ -62,7 +62,7 @@ pub(crate) fn validate(
     })
 }
 
-pub(crate) fn execute(
+pub fn execute(
     session: &mut GameSession,
     unit_id: &str,
     target_id: Option<&str>,
@@ -100,7 +100,7 @@ pub(crate) fn execute(
     events
 }
 
-fn disruption_target(session: &GameSession, unit_id: &str) -> Option<String> {
+pub fn disruption_target(session: &GameSession, unit_id: &str) -> Option<String> {
     let unit = session.unit(unit_id)?;
     let mut targets = session
         .tactical
@@ -116,6 +116,3 @@ fn disruption_target(session: &GameSession, unit_id: &str) -> Option<String> {
     targets.sort_by_key(|target| (target.health, target.id.clone()));
     targets.first().map(|target| target.id.clone())
 }
-
-#[cfg(test)]
-mod tests;

@@ -3,19 +3,19 @@
 use super::{AppState, Game};
 
 impl Game {
-    pub(super) fn capture_first_hour_enemy_phase(&mut self) {
+    pub fn capture_first_hour_enemy_phase(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
         self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::EnemyPhase;
     }
 
-    pub(super) fn capture_first_hour_replay(&mut self) {
+    pub fn capture_first_hour_replay(&mut self) {
         self.capture_phase_replay();
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::FirstOperation;
         self.campaign.first_hour.lesson = crate::first_hour::TacticalLesson::Objective;
     }
 
-    pub(super) fn capture_first_hour_guide(&mut self) {
+    pub fn capture_first_hour_guide(&mut self) {
         self.state = AppState::Colony;
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::SecondOperation;
         self.campaign.first_hour.help_open = true;
@@ -30,7 +30,7 @@ impl Game {
         metrics.guide_opens = 2;
     }
 
-    pub(super) fn capture_first_hour_return(&mut self) {
+    pub fn capture_first_hour_return(&mut self) {
         self.state = AppState::Colony;
         self.colony_explorer.reset();
         self.campaign.operations_completed = 1;
@@ -38,7 +38,7 @@ impl Game {
         self.campaign.first_hour.first_outcome_won = Some(false);
     }
 
-    pub(super) fn capture_first_hour_dialogue(&mut self) {
+    pub fn capture_first_hour_dialogue(&mut self) {
         self.state = AppState::Colony;
         self.colony_explorer.reset();
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::MeetCoordinator;
@@ -48,7 +48,7 @@ impl Game {
             .request_approach("mara_venn", position, &self.campaign.colony);
     }
 
-    pub(super) fn capture_first_hour_promise(&mut self) {
+    pub fn capture_first_hour_promise(&mut self) {
         self.state = AppState::Colony;
         self.colony_explorer.reset();
         self.campaign.operations_completed = 2;
@@ -57,7 +57,7 @@ impl Game {
         self.campaign.first_hour.second_outcome_won = Some(false);
     }
 
-    pub(super) fn capture_first_hour_operations(&mut self) {
+    pub fn capture_first_hour_operations(&mut self) {
         self.state = AppState::Colony;
         self.campaign.operations_completed = 1;
         self.campaign.first_hour.stage = crate::first_hour::FirstHourStage::SecondOperation;

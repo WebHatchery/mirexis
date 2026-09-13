@@ -11,7 +11,7 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, VirtualUi};
 
-fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
+pub fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
     if roster_len <= 5 {
         return (88.0, 72.0);
     }
@@ -19,7 +19,7 @@ fn character_list_row_layout(roster_len: usize) -> (f32, f32) {
     (row_step, (row_step - 4.0).max(50.0))
 }
 
-fn evolution_button_label(affordable: bool, biomass_cost: i32) -> String {
+pub fn evolution_button_label(affordable: bool, biomass_cost: i32) -> String {
     if affordable {
         format!("EVOLVE // {} BIOMASS", biomass_cost)
     } else {
@@ -27,14 +27,14 @@ fn evolution_button_label(affordable: bool, biomass_cost: i32) -> String {
     }
 }
 
-const EVOLUTION_OPTION_START_Y: f32 = 348.0;
-const EVOLUTION_OPTION_STEP_Y: f32 = 118.0;
+pub const EVOLUTION_OPTION_START_Y: f32 = 348.0;
+pub const EVOLUTION_OPTION_STEP_Y: f32 = 118.0;
 
-fn evolution_option_y(index: usize) -> f32 {
+pub fn evolution_option_y(index: usize) -> f32 {
     EVOLUTION_OPTION_START_Y + index as f32 * EVOLUTION_OPTION_STEP_Y
 }
 
-pub(crate) fn draw_gene_lab(
+pub fn draw_gene_lab(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
@@ -62,7 +62,7 @@ pub(crate) fn draw_gene_lab(
     actions
 }
 
-fn draw_header(campaign: &CampaignState) {
+pub fn draw_header(campaign: &CampaignState) {
     draw_surface(
         Rect::new(18.0, 16.0, LOGICAL_WIDTH - 36.0, 66.0),
         &SurfaceStyle::new(Color::new(0.045, 0.075, 0.085, 0.98))
@@ -94,7 +94,7 @@ fn draw_header(campaign: &CampaignState) {
     );
 }
 
-fn draw_character_list(
+pub fn draw_character_list(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
@@ -196,7 +196,7 @@ fn draw_character_list(
     );
 }
 
-fn draw_evolution_panel(
+pub fn draw_evolution_panel(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
@@ -344,7 +344,7 @@ fn draw_evolution_panel(
     }
 }
 
-fn draw_anatomy_scan(rect: Rect, mutation: &str) {
+pub fn draw_anatomy_scan(rect: Rect, mutation: &str) {
     let scan = Color::new(0.55, 0.95, 0.56, 0.72);
     for index in 0..3 {
         let y = rect.y + 28.0 + index as f32 * 36.0;
@@ -364,6 +364,3 @@ fn draw_anatomy_scan(rect: Rect, mutation: &str) {
         TextStyle::new(11.0, scan).params(),
     );
 }
-
-#[cfg(test)]
-mod tests;

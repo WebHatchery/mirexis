@@ -4,13 +4,13 @@ use crate::data::Team;
 use crate::state::GameSession;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub(crate) struct ReadinessCounts {
-    pub(crate) ready: usize,
-    pub(crate) spent: usize,
-    pub(crate) incapacitated: usize,
+pub struct ReadinessCounts {
+    pub ready: usize,
+    pub spent: usize,
+    pub incapacitated: usize,
 }
 
-pub(crate) fn counts(session: &GameSession) -> ReadinessCounts {
+pub fn counts(session: &GameSession) -> ReadinessCounts {
     let mut counts = ReadinessCounts::default();
     for unit in session
         .tactical
@@ -29,11 +29,11 @@ pub(crate) fn counts(session: &GameSession) -> ReadinessCounts {
     counts
 }
 
-pub(crate) fn ready_count(session: &GameSession) -> usize {
+pub fn ready_count(session: &GameSession) -> usize {
     counts(session).ready
 }
 
-pub(crate) fn select_next(session: &mut GameSession) -> Option<String> {
+pub fn select_next(session: &mut GameSession) -> Option<String> {
     let start = session
         .tactical
         .selected_unit
@@ -61,6 +61,3 @@ pub(crate) fn select_next(session: &mut GameSession) -> Option<String> {
         None
     }
 }
-
-#[cfg(test)]
-mod tests;

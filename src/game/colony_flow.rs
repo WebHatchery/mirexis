@@ -1,9 +1,18 @@
 //! Strategic colony actions that need application-level persistence feedback.
 
 use super::{AppState, Game};
+use crate::colony_ui::ColonyDrawResult;
 
 impl Game {
-    pub(super) fn colony_explorer_can_update(&self) -> bool {
+    pub fn apply_colony_draw_result(&mut self, result: ColonyDrawResult) {
+        self.colony_camera = result.camera;
+        self.colony_explorer = result.explorer;
+        self.colony_operations_open = result.operations_open;
+        self.facility_upgrade_open = result.facility_upgrade_open;
+        self.salvage_open = result.salvage_open;
+    }
+
+    pub fn colony_explorer_can_update(&self) -> bool {
         colony_explorer_can_update(
             self.state,
             self.campaign.first_hour.help_open,
@@ -15,14 +24,14 @@ impl Game {
         )
     }
 
-    pub(super) fn clear_colony_explorer_motion(&mut self) {
+    pub fn clear_colony_explorer_motion(&mut self) {
         self.colony_explorer
             .set_keyboard_direction(macroquad::prelude::Vec2::ZERO);
         self.colony_explorer
             .set_touch_direction(macroquad::prelude::Vec2::ZERO);
     }
 
-    pub(super) fn handle_commons_meal(&mut self) {
+    pub fn handle_commons_meal(&mut self) {
         match self.campaign.host_commons_meal() {
             Ok(summary) => {
                 self.notifications.success(summary);
@@ -32,7 +41,7 @@ impl Game {
         }
     }
 
-    pub(super) fn handle_relay_scan(&mut self) {
+    pub fn handle_relay_scan(&mut self) {
         match self.campaign.run_relay_scan(&self.data) {
             Ok(summary) => {
                 self.notifications.warning(summary);
@@ -42,7 +51,7 @@ impl Game {
         }
     }
 
-    pub(super) fn handle_identity_stewardship(&mut self) {
+    pub fn handle_identity_stewardship(&mut self) {
         match self.campaign.run_identity_stewardship() {
             Ok(summary) => {
                 self.notifications.success(summary);
@@ -52,7 +61,7 @@ impl Game {
         }
     }
 
-    pub(super) fn handle_identity_preparation(&mut self) {
+    pub fn handle_identity_preparation(&mut self) {
         match self.campaign.prepare_identity_building() {
             Ok(summary) => {
                 self.notifications.success(summary);
@@ -63,7 +72,7 @@ impl Game {
     }
 }
 
-fn colony_explorer_can_update(
+pub fn colony_explorer_can_update(
     state: AppState,
     first_hour_help_open: bool,
     settings_open: bool,
@@ -80,6 +89,3 @@ fn colony_explorer_can_update(
         && !facility_upgrade_open
         && !salvage_open
 }
-
-#[cfg(test)]
-mod tests;

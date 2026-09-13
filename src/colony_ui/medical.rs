@@ -3,7 +3,7 @@
 use crate::campaign::CampaignState;
 use crate::colony::BuildingKind;
 
-fn treatment_button_label_for_state(
+pub fn treatment_button_label_for_state(
     has_infirmary: bool,
     has_injury: bool,
     biomass: i32,
@@ -20,7 +20,7 @@ fn treatment_button_label_for_state(
     }
 }
 
-pub(super) fn treatment_button_label(campaign: &CampaignState) -> String {
+pub fn treatment_button_label(campaign: &CampaignState) -> String {
     let treatment_cost = campaign.treatment_cost();
     treatment_button_label_for_state(
         campaign.colony.has_facility(BuildingKind::Infirmary),
@@ -32,6 +32,3 @@ pub(super) fn treatment_button_label(campaign: &CampaignState) -> String {
         treatment_cost,
     )
 }
-
-#[cfg(test)]
-mod tests;

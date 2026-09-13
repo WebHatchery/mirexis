@@ -15,11 +15,24 @@ pub fn migrate_save_value(
     value: Value,
     data: &GameData,
 ) -> Result<SaveData, String> {
+    let detected_version_ref = detected_version.as_deref();
+    let payload = prepare_legacy_payload(detected_version_ref, value, data)?;
+    let mut save = build_migrated_save(payload, detected_version_ref, data)?;
+    restore_runtime_defaults(&mut save, detected_version_ref, data)?;
+    save.version = data.config.version.clone();
+    Ok(save)
+}
+
+fn prepare_legacy_payload(
+    detected_version: Option<&str>,
+    value: Value,
+    data: &GameData,
+) -> Result<Value, String> {
     let mut payload = value.get("data").cloned().unwrap_or(value);
-    if detected_version.as_deref() == Some("0.1.0") {
+    if detected_version == Some("0.1.0") {
         migrate_phase_zero_payload(&mut payload, &data.config)?;
     }
-    if matches!(detected_version.as_deref(), Some("0.1.0" | "0.2.0")) {
+    if matches!(detected_version, Some("0.1.0" | "0.2.0")) {
         let root = payload
             .as_object_mut()
             .ok_or_else(|| "Legacy save root is not an object".to_owned())?;
@@ -30,7 +43,7 @@ pub fn migrate_save_value(
         );
         add_character_runtime_defaults(&mut payload)?;
     }
-    if matches!(detected_version.as_deref(), Some("0.3.0" | "0.4.0")) {
+    if matches!(detected_version, Some("0.3.0" | "0.4.0")) {
         let campaign = payload
             .get_mut("campaign")
             .and_then(Value::as_object_mut)
@@ -46,6 +59,14 @@ pub fn migrate_save_value(
     }
     add_class_action_defaults(&mut payload)?;
     add_campaign_runtime_defaults(&mut payload)?;
+    Ok(payload)
+}
+
+fn build_migrated_save(
+    payload: Value,
+    detected_version: Option<&str>,
+    data: &GameData,
+) -> Result<SaveData, String> {
     let mut save = serde_json::from_value::<SaveData>(payload)
         .map_err(|err| format!("Unsupported Mirexis save {:?}: {}", detected_version, err))?;
     migrate_legacy_tactical_world(&mut save, &data.config)?;
@@ -53,16 +74,16 @@ pub fn migrate_save_value(
     save.campaign.colony.migrate_legacy_spatial_layout();
     save.campaign.ensure_roster_characters(data);
     save.campaign.strategy.ensure_character_events(data);
-    save.campaign.colony.ensure_phase_one_infrastructure(
-        detected_version.as_deref() != Some(data.config.version.as_str()),
-    );
+    save.campaign
+        .colony
+        .ensure_phase_one_infrastructure(detected_version != Some(data.config.version.as_str()));
     if !save.campaign.strategy.mirexis_path_id.is_empty() {
         save.campaign
             .colony
             .ensure_identity_building(&save.campaign.strategy.mirexis_path_id)?;
     }
     save.campaign.refresh_contact_completion(data);
-    if detected_version.as_deref() == Some("1.12.0")
+    if detected_version == Some("1.12.0")
         && save.campaign.strategy.contact_complete
         && save
             .campaign
@@ -72,7 +93,7 @@ pub fn migrate_save_value(
     {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() == Some("1.13.0")
+    if detected_version == Some("1.13.0")
         && save
             .campaign
             .roster
@@ -81,30 +102,24 @@ pub fn migrate_save_value(
     {
         save.campaign.colony.ensure_gene_lab();
     }
-    if detected_version.as_deref() == Some("1.18.0") && save.campaign.strategy.adaptation_complete {
+    if detected_version == Some("1.18.0") && save.campaign.strategy.adaptation_complete {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() == Some("1.20.0")
+    if detected_version == Some("1.20.0")
         && !save.campaign.strategy.escalation_response_id.is_empty()
     {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() == Some("1.21.0")
-        && save.campaign.strategy.phase_id == "escalation"
-    {
+    if detected_version == Some("1.21.0") && save.campaign.strategy.phase_id == "escalation" {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() == Some("1.24.0")
-        && !save.campaign.strategy.mirexis_path_id.is_empty()
-    {
+    if detected_version == Some("1.24.0") && !save.campaign.strategy.mirexis_path_id.is_empty() {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() == Some("1.95.0")
-        && !save.campaign.strategy.mirexis_path_id.is_empty()
-    {
+    if detected_version == Some("1.95.0") && !save.campaign.strategy.mirexis_path_id.is_empty() {
         save.campaign.refresh_mission_offers(data);
     }
-    if detected_version.as_deref() != Some(data.config.version.as_str())
+    if detected_version != Some(data.config.version.as_str())
         && !save.campaign.strategy.isolation_complete
     {
         save.campaign.strategy.isolation_victories =
@@ -114,6 +129,14 @@ pub fn migrate_save_value(
             .strategy
             .refresh_isolation_completion(&mut save.campaign.colony);
     }
+    Ok(save)
+}
+
+fn restore_runtime_defaults(
+    save: &mut SaveData,
+    detected_version: Option<&str>,
+    data: &GameData,
+) -> Result<(), String> {
     let mut selected = 0;
     for character in &mut save.campaign.roster {
         if character.deployment_selected {
@@ -137,18 +160,18 @@ pub fn migrate_save_value(
             .map(|character| character.id.clone())
             .unwrap_or_default();
     }
-    if version_predates_first_hour(detected_version.as_deref()) {
+    if version_predates_first_hour(detected_version) {
         save.campaign
             .first_hour
             .migrate_from_operations(save.campaign.operations_completed);
     }
-    if detected_version.as_deref() != Some(data.config.version.as_str())
+    if detected_version != Some(data.config.version.as_str())
         && save.campaign.operations_completed == 1
         && save.tactical.is_some()
     {
         save.campaign.first_hour.entered_second_operation_tactical();
     }
-    if detected_version.as_deref() != Some(data.config.version.as_str()) {
+    if detected_version != Some(data.config.version.as_str()) {
         if let Some(tactical) = &mut save.tactical {
             for unit in &mut tactical.units {
                 if unit.faction.is_none() {
@@ -200,11 +223,10 @@ pub fn migrate_save_value(
             }
         }
     }
-    save.version = data.config.version.clone();
-    Ok(save)
+    Ok(())
 }
 
-fn version_predates_first_hour(version: Option<&str>) -> bool {
+pub fn version_predates_first_hour(version: Option<&str>) -> bool {
     let Some(version) = version else {
         return true;
     };
@@ -215,7 +237,10 @@ fn version_predates_first_hour(version: Option<&str>) -> bool {
     pair < (1, 64)
 }
 
-fn migrate_legacy_tactical_world(save: &mut SaveData, config: &GameConfig) -> Result<(), String> {
+pub fn migrate_legacy_tactical_world(
+    save: &mut SaveData,
+    config: &GameConfig,
+) -> Result<(), String> {
     let Some(tactical) = &mut save.tactical else {
         return Ok(());
     };
@@ -264,7 +289,7 @@ fn migrate_legacy_tactical_world(save: &mut SaveData, config: &GameConfig) -> Re
     Ok(())
 }
 
-fn migrate_positional_events(tactical: &mut TacticalState) {
+pub fn migrate_positional_events(tactical: &mut TacticalState) {
     for event in &mut tactical.event_log {
         match event {
             BattleEvent::UnitMoved { path, .. } => {
@@ -282,12 +307,12 @@ fn migrate_positional_events(tactical: &mut TacticalState) {
     }
 }
 
-fn project_legacy_tile(position: TilePos) -> TilePos {
+pub fn project_legacy_tile(position: TilePos) -> TilePos {
     let projected = crate::map_variants::project_authored_position([position.x, position.y]);
     TilePos::new(projected[0], projected[1])
 }
 
-fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
+pub fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
     let Some(tactical) = &save.tactical else {
         return Ok(());
     };
@@ -348,7 +373,7 @@ fn validate_tactical_world(save: &SaveData) -> Result<(), String> {
     Ok(())
 }
 
-fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
+pub fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
     let Some(units) = value
         .get_mut("tactical")
         .and_then(Value::as_object_mut)
@@ -399,7 +424,7 @@ fn add_class_action_defaults(value: &mut Value) -> Result<(), String> {
     Ok(())
 }
 
-fn add_campaign_runtime_defaults(value: &mut Value) -> Result<(), String> {
+pub fn add_campaign_runtime_defaults(value: &mut Value) -> Result<(), String> {
     let Some(campaign) = value.get_mut("campaign").and_then(Value::as_object_mut) else {
         return Ok(());
     };
@@ -470,7 +495,7 @@ fn add_campaign_runtime_defaults(value: &mut Value) -> Result<(), String> {
     Ok(())
 }
 
-fn add_character_runtime_defaults(value: &mut Value) -> Result<(), String> {
+pub fn add_character_runtime_defaults(value: &mut Value) -> Result<(), String> {
     let units = value
         .get_mut("tactical")
         .and_then(|tactical| tactical.get_mut("units"))
@@ -485,7 +510,7 @@ fn add_character_runtime_defaults(value: &mut Value) -> Result<(), String> {
     Ok(())
 }
 
-fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<(), String> {
+pub fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<(), String> {
     let tactical = value
         .get_mut("tactical")
         .and_then(Value::as_object_mut)
@@ -533,6 +558,3 @@ fn migrate_phase_zero_payload(value: &mut Value, config: &GameConfig) -> Result<
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests;

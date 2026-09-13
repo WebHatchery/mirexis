@@ -3,30 +3,30 @@
 use super::CampaignState;
 use crate::colony::BuildingKind;
 
-pub(crate) const IDENTITY_STEWARDSHIP_ATTENTION: i32 = 5;
-pub(crate) const IDENTITY_PREPARATION_ATTENTION: i32 = 3;
+pub const IDENTITY_STEWARDSHIP_ATTENTION: i32 = 5;
+pub const IDENTITY_PREPARATION_ATTENTION: i32 = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum StewardshipResource {
+pub enum StewardshipResource {
     Materials,
     Biomass,
     Power,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct StewardshipDefinition {
-    pub(crate) building: BuildingKind,
-    pub(crate) action: &'static str,
-    pub(crate) resource: StewardshipResource,
-    pub(crate) resource_name: &'static str,
-    pub(crate) cost: i32,
-    pub(crate) faction_id: &'static str,
-    pub(crate) faction_name: &'static str,
-    pub(crate) summary: &'static str,
+pub struct StewardshipDefinition {
+    pub building: BuildingKind,
+    pub action: &'static str,
+    pub resource: StewardshipResource,
+    pub resource_name: &'static str,
+    pub cost: i32,
+    pub faction_id: &'static str,
+    pub faction_name: &'static str,
+    pub summary: &'static str,
 }
 
 impl StewardshipDefinition {
-    pub(crate) fn for_path(path_id: &str) -> Option<Self> {
+    pub fn for_path(path_id: &str) -> Option<Self> {
         match path_id {
             "human_redoubt" => Some(Self {
                 building: BuildingKind::RedoubtArsenal,
@@ -64,13 +64,13 @@ impl StewardshipDefinition {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct PreparationDefinition {
+pub struct PreparationDefinition {
     action: &'static str,
     summary: &'static str,
 }
 
 impl PreparationDefinition {
-    fn for_path(path_id: &str) -> Option<Self> {
+    pub fn for_path(path_id: &str) -> Option<Self> {
         match path_id {
             "human_redoubt" => Some(Self {
                 action: "DRILL THE WATCH",
@@ -90,7 +90,7 @@ impl PreparationDefinition {
 }
 
 impl CampaignState {
-    pub(crate) fn identity_preparation_available(&self) -> bool {
+    pub fn identity_preparation_available(&self) -> bool {
         let Some(definition) = self.identity_preparation_definition() else {
             return false;
         };
@@ -99,7 +99,7 @@ impl CampaignState {
             && self.identity_resource(definition.resource) >= definition.cost
     }
 
-    pub(crate) fn identity_preparation_copy(&self) -> Option<String> {
+    pub fn identity_preparation_copy(&self) -> Option<String> {
         let definition = self.identity_preparation_definition()?;
         let preparation = PreparationDefinition::for_path(&self.strategy.mirexis_path_id)?;
         if self.identity_preparation_operation == Some(self.operations_completed) {
@@ -135,13 +135,13 @@ impl CampaignState {
         ))
     }
 
-    pub(crate) fn identity_preparation_definition(&self) -> Option<StewardshipDefinition> {
+    pub fn identity_preparation_definition(&self) -> Option<StewardshipDefinition> {
         (!self.strategy.campaign_complete)
             .then(|| StewardshipDefinition::for_path(&self.strategy.mirexis_path_id))
             .flatten()
     }
 
-    pub(crate) fn prepare_identity_building(&mut self) -> Result<String, String> {
+    pub fn prepare_identity_building(&mut self) -> Result<String, String> {
         let definition = self
             .identity_preparation_definition()
             .ok_or_else(|| "Identity preparation unlocks before the campaign finale".to_owned())?;
@@ -187,14 +187,14 @@ impl CampaignState {
         ))
     }
 
-    pub(crate) fn identity_stewardship_definition(&self) -> Option<StewardshipDefinition> {
+    pub fn identity_stewardship_definition(&self) -> Option<StewardshipDefinition> {
         self.strategy
             .campaign_complete
             .then(|| StewardshipDefinition::for_path(&self.strategy.mirexis_path_id))
             .flatten()
     }
 
-    pub(crate) fn identity_stewardship_available(&self) -> bool {
+    pub fn identity_stewardship_available(&self) -> bool {
         let Some(definition) = self.identity_stewardship_definition() else {
             return false;
         };
@@ -203,7 +203,7 @@ impl CampaignState {
             && self.identity_resource(definition.resource) >= definition.cost
     }
 
-    pub(crate) fn identity_stewardship_copy(&self) -> Option<String> {
+    pub fn identity_stewardship_copy(&self) -> Option<String> {
         let definition = self.identity_stewardship_definition()?;
         if self.identity_stewardship_operation == Some(self.operations_completed) {
             return Some(format!(
@@ -238,7 +238,7 @@ impl CampaignState {
         ))
     }
 
-    pub(crate) fn run_identity_stewardship(&mut self) -> Result<String, String> {
+    pub fn run_identity_stewardship(&mut self) -> Result<String, String> {
         let definition = self
             .identity_stewardship_definition()
             .ok_or_else(|| "Identity stewardship unlocks after the campaign".to_owned())?;
@@ -281,7 +281,7 @@ impl CampaignState {
         ))
     }
 
-    fn identity_resource(&self, resource: StewardshipResource) -> i32 {
+    pub fn identity_resource(&self, resource: StewardshipResource) -> i32 {
         match resource {
             StewardshipResource::Materials => self.colony.resources.materials,
             StewardshipResource::Biomass => self.colony.resources.biomass,
@@ -289,7 +289,7 @@ impl CampaignState {
         }
     }
 
-    fn spend_identity_resource(&mut self, resource: StewardshipResource, amount: i32) {
+    pub fn spend_identity_resource(&mut self, resource: StewardshipResource, amount: i32) {
         match resource {
             StewardshipResource::Materials => self.colony.resources.materials -= amount,
             StewardshipResource::Biomass => self.colony.resources.biomass -= amount,

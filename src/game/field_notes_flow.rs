@@ -4,7 +4,7 @@ use super::Game;
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn apply_field_notes_action(&mut self, action: &UiAction) -> bool {
+    pub fn apply_field_notes_action(&mut self, action: &UiAction) -> bool {
         match action {
             UiAction::ToggleFieldNotes => {
                 self.show_field_notes = !self.show_field_notes;

@@ -9,7 +9,7 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 use macroquad_toolkit::ui::VirtualUi;
 
-pub(crate) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,

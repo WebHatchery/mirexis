@@ -3,21 +3,24 @@
 use super::*;
 use macroquad_toolkit::data_loader::{load_embedded_json, load_embedded_json_labeled};
 
-const GAME_CONFIG_JSON: &str =
+pub const GAME_CONFIG_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/game_config.json");
-const MISSION_JSON: &str = macroquad_toolkit::include_json_str!("../../assets/data/mission.json");
-const ROSTER_JSON: &str = macroquad_toolkit::include_json_str!("../../assets/data/roster.json");
-const RECRUITABLE_ROSTER_JSON: &str =
+pub const MISSION_JSON: &str =
+    macroquad_toolkit::include_json_str!("../../assets/data/mission.json");
+pub const ROSTER_JSON: &str = macroquad_toolkit::include_json_str!("../../assets/data/roster.json");
+pub const RECRUITABLE_ROSTER_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/recruitable_roster.json");
-const CHARACTERS_JSON: &str =
+pub const CHARACTERS_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/characters.json");
-const CLASSES_JSON: &str = macroquad_toolkit::include_json_str!("../../assets/data/classes.json");
-const MUTATIONS_JSON: &str =
+pub const CLASSES_JSON: &str =
+    macroquad_toolkit::include_json_str!("../../assets/data/classes.json");
+pub const MUTATIONS_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/mutations.json");
-const EQUIPMENT_JSON: &str =
+pub const EQUIPMENT_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/equipment.json");
-const CAMPAIGN_JSON: &str = macroquad_toolkit::include_json_str!("../../assets/data/campaign.json");
-const TEXTURE_MANIFEST_JSON: &str =
+pub const CAMPAIGN_JSON: &str =
+    macroquad_toolkit::include_json_str!("../../assets/data/campaign.json");
+pub const TEXTURE_MANIFEST_JSON: &str =
     macroquad_toolkit::include_json_str!("../../assets/data/texture_manifest.json");
 
 impl GameData {

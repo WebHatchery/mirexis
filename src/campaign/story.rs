@@ -1,9 +1,11 @@
+//! Campaign-facing adapters for authored colony story progression.
+
 use super::CampaignState;
 use crate::colony::BuildingKind;
 use crate::colony_story::{IdentityArcProgress, IdentityBuildingState};
 
 impl CampaignState {
-    pub(crate) fn identity_building_story_state(&self) -> Option<IdentityBuildingState> {
+    pub fn identity_building_story_state(&self) -> Option<IdentityBuildingState> {
         let kind = BuildingKind::identity_for_path(&self.strategy.mirexis_path_id)?;
         let (building_id, damaged) = self
             .colony

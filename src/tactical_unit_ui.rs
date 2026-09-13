@@ -8,10 +8,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-#[cfg(test)]
-mod tests;
-
-pub(crate) fn draw_unit(
+pub fn draw_unit(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     view: GridView,
@@ -37,11 +34,11 @@ pub(crate) fn draw_unit(
     }
 }
 
-pub(crate) fn hover_hit(view: GridView, unit: &UnitState, point: Vec2) -> bool {
+pub fn hover_hit(view: GridView, unit: &UnitState, point: Vec2) -> bool {
     unit_hit_bounds(view.tile_rect(unit.position)).contains(point)
 }
 
-pub(crate) fn draw_hover_card(unit: &UnitState, view: GridView, viewport: Rect) {
+pub fn draw_hover_card(unit: &UnitState, view: GridView, viewport: Rect) {
     let hit = unit_hit_bounds(view.tile_rect(unit.position));
     let size = vec2(224.0, 62.0);
     let right_x = hit.right() + 8.0;
@@ -98,7 +95,7 @@ pub(crate) fn draw_hover_card(unit: &UnitState, view: GridView, viewport: Rect) 
     );
 }
 
-fn unit_hit_bounds(tile: Rect) -> Rect {
+pub fn unit_hit_bounds(tile: Rect) -> Rect {
     Rect::new(
         tile.x + 2.0,
         tile.y - tile.w,
@@ -107,7 +104,7 @@ fn unit_hit_bounds(tile: Rect) -> Rect {
     )
 }
 
-fn vitality_condition(unit: &UnitState) -> &'static str {
+pub fn vitality_condition(unit: &UnitState) -> &'static str {
     let ratio = unit.health.max(0) as f32 / unit.max_health.max(1) as f32;
     if ratio > 0.6 {
         "STEADY"
@@ -118,7 +115,7 @@ fn vitality_condition(unit: &UnitState) -> &'static str {
     }
 }
 
-fn draw_allegiance_base(rect: Rect, accent: Color, selected: bool, hostile_notches: bool) {
+pub fn draw_allegiance_base(rect: Rect, accent: Color, selected: bool, hostile_notches: bool) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.70);
     draw_ellipse(
         center.x,
@@ -155,7 +152,7 @@ fn draw_allegiance_base(rect: Rect, accent: Color, selected: bool, hostile_notch
     }
 }
 
-fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
+pub fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
     let segments = 28;
     for index in 0..segments {
         let a = index as f32 / segments as f32 * std::f32::consts::TAU;
@@ -171,7 +168,7 @@ fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
     }
 }
 
-fn draw_state_markers(rect: Rect, unit: &UnitState, targetable: bool) {
+pub fn draw_state_markers(rect: Rect, unit: &UnitState, targetable: bool) {
     if unit.overwatching && !unit.incapacitated {
         draw_ellipse_ring(
             vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.66),
@@ -196,7 +193,7 @@ fn draw_state_markers(rect: Rect, unit: &UnitState, targetable: bool) {
     }
 }
 
-fn draw_selection_brackets(rect: Rect) {
+pub fn draw_selection_brackets(rect: Rect) {
     let color = Color::new(0.94, 1.0, 0.98, 1.0);
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
     for corner in [
@@ -209,7 +206,7 @@ fn draw_selection_brackets(rect: Rect) {
     }
 }
 
-fn draw_diamond_outline(rect: Rect, color: Color, width: f32) {
+pub fn draw_diamond_outline(rect: Rect, color: Color, width: f32) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
     let points = [
         vec2(center.x, rect.y),
@@ -230,7 +227,7 @@ fn draw_diamond_outline(rect: Rect, color: Color, width: f32) {
     }
 }
 
-fn draw_vitality(rect: Rect, unit: &UnitState) {
+pub fn draw_vitality(rect: Rect, unit: &UnitState) {
     let bar = Rect::new(rect.x + 7.0, rect.y - 14.0, rect.w - 14.0, 7.0);
     let ratio = if unit.max_health > 0 {
         (unit.health.max(0) as f32 / unit.max_health as f32).clamp(0.0, 1.0)
@@ -262,7 +259,7 @@ fn draw_vitality(rect: Rect, unit: &UnitState) {
     }
 }
 
-fn draw_readiness(rect: Rect, action_points: u8, max_action_points: u8) {
+pub fn draw_readiness(rect: Rect, action_points: u8, max_action_points: u8) {
     let count = max_action_points.max(1);
     let spacing = 8.0;
     let start = rect.x + rect.w * 0.5 - count.saturating_sub(1) as f32 * spacing * 0.5;

@@ -4,7 +4,7 @@ use super::{AppState, Game};
 use crate::colony::BuildingKind;
 
 impl Game {
-    pub(super) fn capture_colony_damage(&mut self) {
+    pub fn capture_colony_damage(&mut self) {
         self.campaign
             .colony
             .buildings
@@ -15,18 +15,20 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_colony_repair(&mut self) {
+    pub fn capture_colony_repair(&mut self) {
         self.capture_colony_damage();
-        let (name, cost) = self
+        let repair = self
             .campaign
             .colony
             .repair_building("workshop")
             .expect("capture colony can repair its workshop");
-        self.notifications
-            .success(format!("{name} repaired for {cost} materials"));
+        self.notifications.success(format!(
+            "{} repaired for {} materials",
+            repair.building_name, repair.materials_spent
+        ));
     }
 
-    pub(super) fn capture_power_outage(&mut self) {
+    pub fn capture_power_outage(&mut self) {
         self.campaign
             .colony
             .buildings
@@ -37,7 +39,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_power_construction(&mut self) {
+    pub fn capture_power_construction(&mut self) {
         self.campaign
             .colony
             .select_construction(BuildingKind::PowerPlant)
@@ -49,7 +51,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_facility_upgrades(&mut self) {
+    pub fn capture_facility_upgrades(&mut self) {
         self.campaign.colony.ensure_gene_lab();
         self.campaign.colony.resources.materials = 120;
         self.campaign.colony.resources.power = 20;

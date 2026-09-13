@@ -3,12 +3,14 @@
 use super::{derived_mutation_traits_with_options, CharacterRecord};
 use crate::data::{GameData, UnitDef};
 
+// The option-bearing seam is used by campaign evolution and retained for
+// future authored evolution branches.
 #[allow(dead_code)]
-pub(crate) fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
+pub fn derive_unit(base: &UnitDef, character: &CharacterRecord, data: &GameData) -> UnitDef {
     derive_unit_with_evolution_options(base, character, data, false, false)
 }
 
-pub(crate) fn derive_unit_with_evolution_options(
+pub fn derive_unit_with_evolution_options(
     base: &UnitDef,
     character: &CharacterRecord,
     data: &GameData,
@@ -93,6 +95,6 @@ pub(crate) fn derive_unit_with_evolution_options(
     unit
 }
 
-fn add_signed(value: u8, change: i8) -> u8 {
+pub fn add_signed(value: u8, change: i8) -> u8 {
     (i16::from(value) + i16::from(change)).clamp(1, i16::from(u8::MAX)) as u8
 }

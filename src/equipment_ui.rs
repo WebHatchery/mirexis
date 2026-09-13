@@ -5,11 +5,11 @@ use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::{action_button_label, button};
 use macroquad::prelude::{Color, Rect, Vec2, WHITE};
 
-fn action_button_enabled(targeting: bool, has_valid_target: bool) -> bool {
+pub fn action_button_enabled(targeting: bool, has_valid_target: bool) -> bool {
     targeting || has_valid_target
 }
 
-fn equipment_button_label<'a>(
+pub fn equipment_button_label<'a>(
     equipment_label: &'a str,
     selected: Option<&UnitState>,
     equipment_id: Option<&str>,
@@ -45,7 +45,7 @@ fn equipment_button_label<'a>(
     action_button_label(equipment_label, false, true, false)
 }
 
-pub(crate) fn draw_action_button(
+pub fn draw_action_button(
     ctx: &UiContext<'_>,
     selected: Option<&UnitState>,
     rect: Rect,
@@ -107,6 +107,3 @@ pub(crate) fn draw_action_button(
         actions.push(UiAction::ArmEquipment(equipment_id));
     }
 }
-
-#[cfg(test)]
-mod tests;

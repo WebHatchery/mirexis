@@ -8,11 +8,11 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
-const CALLOUT_BASE_OFFSET: f32 = 58.0;
-const CALLOUT_STACK_STEP: f32 = 26.0;
+pub const CALLOUT_BASE_OFFSET: f32 = 58.0;
+pub const CALLOUT_STACK_STEP: f32 = 26.0;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum FeedbackTone {
+pub enum FeedbackTone {
     Damage,
     Healing,
     Hit,
@@ -21,7 +21,7 @@ enum FeedbackTone {
 }
 
 #[derive(Debug, Clone)]
-enum FeedbackAnchor {
+pub enum FeedbackAnchor {
     Unit {
         unit_id: String,
         fallback_unit_id: Option<String>,
@@ -31,25 +31,25 @@ enum FeedbackAnchor {
 }
 
 #[derive(Debug, Clone)]
-struct CombatCallout {
-    anchor: FeedbackAnchor,
-    label: String,
-    tone: FeedbackTone,
-    remaining: f32,
+pub struct CombatCallout {
+    pub anchor: FeedbackAnchor,
+    pub label: String,
+    pub tone: FeedbackTone,
+    pub remaining: f32,
 }
 
 #[derive(Debug, Clone)]
-struct CombatImpact {
-    attacker_id: String,
-    target_id: String,
-    critical: bool,
-    remaining: f32,
+pub struct CombatImpact {
+    pub attacker_id: String,
+    pub target_id: String,
+    pub critical: bool,
+    pub remaining: f32,
 }
 
 #[derive(Debug, Default, Clone)]
-pub(crate) struct CombatFeedback {
-    callouts: Vec<CombatCallout>,
-    impacts: Vec<CombatImpact>,
+pub struct CombatFeedback {
+    pub callouts: Vec<CombatCallout>,
+    pub impacts: Vec<CombatImpact>,
 }
 
 impl CombatFeedback {
@@ -317,11 +317,11 @@ impl CombatFeedback {
     }
 }
 
-fn callout_y(rect: Rect, stack_index: usize) -> f32 {
+pub fn callout_y(rect: Rect, stack_index: usize) -> f32 {
     (rect.y - CALLOUT_BASE_OFFSET - stack_index as f32 * CALLOUT_STACK_STEP).max(24.0)
 }
 
-fn callout_baseline(
+pub fn callout_baseline(
     rect: Rect,
     stack_index: usize,
     label_width: f32,
@@ -342,7 +342,7 @@ fn callout_baseline(
     }
 }
 
-fn callout_bounds(center: Vec2, baseline: f32, label_width: f32, label_height: f32) -> Rect {
+pub fn callout_bounds(center: Vec2, baseline: f32, label_width: f32, label_height: f32) -> Rect {
     Rect::new(
         center.x - label_width * 0.5 - 6.0,
         baseline - label_height - 4.0,
@@ -351,14 +351,14 @@ fn callout_bounds(center: Vec2, baseline: f32, label_width: f32, label_height: f
     )
 }
 
-fn rectangles_overlap(left: Rect, right: Rect) -> bool {
+pub fn rectangles_overlap(left: Rect, right: Rect) -> bool {
     left.x < right.right()
         && left.right() > right.x
         && left.y < right.bottom()
         && left.bottom() > right.y
 }
 
-fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> Option<TilePos> {
+pub fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> Option<TilePos> {
     match anchor {
         FeedbackAnchor::Unit {
             unit_id,
@@ -376,7 +376,7 @@ fn feedback_anchor_position(session: &GameSession, anchor: &FeedbackAnchor) -> O
     }
 }
 
-fn same_feedback_anchor(left: &FeedbackAnchor, right: &FeedbackAnchor) -> bool {
+pub fn same_feedback_anchor(left: &FeedbackAnchor, right: &FeedbackAnchor) -> bool {
     match (left, right) {
         (
             FeedbackAnchor::Unit { unit_id: left, .. },
@@ -388,7 +388,7 @@ fn same_feedback_anchor(left: &FeedbackAnchor, right: &FeedbackAnchor) -> bool {
     }
 }
 
-fn draw_impact(
+pub fn draw_impact(
     session: &GameSession,
     view: GridView,
     impact: &CombatImpact,
@@ -511,6 +511,3 @@ fn draw_impact(
         );
     }
 }
-
-#[cfg(test)]
-mod tests;

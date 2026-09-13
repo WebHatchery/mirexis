@@ -13,24 +13,24 @@ pub use crate::ui_action::UiAction;
 
 pub const LOGICAL_WIDTH: f32 = 1280.0;
 pub const LOGICAL_HEIGHT: f32 = 720.0;
-const TACTICAL_WORLD_X: f32 = 10.0;
-const TACTICAL_WORLD_Y: f32 = 10.0;
-const TACTICAL_WORLD_WIDTH: f32 = LOGICAL_WIDTH - 20.0;
-const TACTICAL_WORLD_HEIGHT: f32 = LOGICAL_HEIGHT - 20.0;
-const TACTICAL_COMMAND_PANEL_X: f32 = 832.0;
-const TACTICAL_COMMAND_PANEL_Y: f32 = 76.0;
-const TACTICAL_COMMAND_PANEL_WIDTH: f32 = 344.0;
-const TACTICAL_COMMAND_PANEL_HEIGHT: f32 = 626.0;
-const BRIEFING_MODIFIER_X: f32 = 200.0;
-const BRIEFING_MODIFIER_Y: f32 = 326.0;
-const BRIEFING_MODIFIER_WIDTH: f32 = 430.0;
-const BRIEFING_MODIFIER_HEIGHT: f32 = 32.0;
+pub const TACTICAL_WORLD_X: f32 = 10.0;
+pub const TACTICAL_WORLD_Y: f32 = 10.0;
+pub const TACTICAL_WORLD_WIDTH: f32 = LOGICAL_WIDTH - 20.0;
+pub const TACTICAL_WORLD_HEIGHT: f32 = LOGICAL_HEIGHT - 20.0;
+pub const TACTICAL_COMMAND_PANEL_X: f32 = 832.0;
+pub const TACTICAL_COMMAND_PANEL_Y: f32 = 76.0;
+pub const TACTICAL_COMMAND_PANEL_WIDTH: f32 = 344.0;
+pub const TACTICAL_COMMAND_PANEL_HEIGHT: f32 = 626.0;
+pub const BRIEFING_MODIFIER_X: f32 = 200.0;
+pub const BRIEFING_MODIFIER_Y: f32 = 326.0;
+pub const BRIEFING_MODIFIER_WIDTH: f32 = 430.0;
+pub const BRIEFING_MODIFIER_HEIGHT: f32 = 32.0;
 
-pub(crate) fn pointer_position(ui: &VirtualUi) -> Vec2 {
+pub fn pointer_position(ui: &VirtualUi) -> Vec2 {
     pointer_position_for_capture(ui, macroquad_toolkit::capture::capture_requested("MIREXIS"))
 }
 
-pub(crate) fn tactical_world_rect() -> Rect {
+pub fn tactical_world_rect() -> Rect {
     Rect::new(
         TACTICAL_WORLD_X,
         TACTICAL_WORLD_Y,
@@ -39,7 +39,7 @@ pub(crate) fn tactical_world_rect() -> Rect {
     )
 }
 
-pub(crate) fn tactical_command_panel_rect() -> Rect {
+pub fn tactical_command_panel_rect() -> Rect {
     Rect::new(
         TACTICAL_COMMAND_PANEL_X,
         TACTICAL_COMMAND_PANEL_Y,
@@ -48,7 +48,7 @@ pub(crate) fn tactical_command_panel_rect() -> Rect {
     )
 }
 
-fn pointer_position_for_capture(ui: &VirtualUi, capturing: bool) -> Vec2 {
+pub fn pointer_position_for_capture(ui: &VirtualUi, capturing: bool) -> Vec2 {
     if capturing {
         vec2(-1_000.0, -1_000.0)
     } else {
@@ -59,7 +59,7 @@ fn pointer_position_for_capture(ui: &VirtualUi, capturing: bool) -> Vec2 {
 // Tactical screens combine dense prose, meters, fitted controls, and notifications.
 // Split ordinary labels and prose onto Macroquad's built-in atlas so neither font atlas
 // is exhausted by a long-running operation or deterministic capture.
-pub(crate) fn draw_ui_text_ex<'a>(
+pub fn draw_ui_text_ex<'a>(
     text: &str,
     x: f32,
     y: f32,
@@ -69,7 +69,7 @@ pub(crate) fn draw_ui_text_ex<'a>(
     draw_text_ex(text, x, y, params)
 }
 
-pub(crate) fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
+pub fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
     let clip = rect.map(|rect| ui_clip_pixels(ui, rect, screen_dpi_scale()));
     // Macroquad's scissor uses physical framebuffer pixels; callers use the
     // logical coordinate system established by `VirtualUi`.
@@ -78,7 +78,7 @@ pub(crate) fn set_ui_clip(ui: &VirtualUi, rect: Option<Rect>) {
     }
 }
 
-pub(crate) fn end_phase_button_bounds(panel: Rect) -> Rect {
+pub fn end_phase_button_bounds(panel: Rect) -> Rect {
     let phase_width = (panel.w - 44.0) * 0.46;
     Rect::new(
         panel.x + 18.0 + phase_width + 8.0,
@@ -88,7 +88,7 @@ pub(crate) fn end_phase_button_bounds(panel: Rect) -> Rect {
     )
 }
 
-fn ui_clip_pixels(ui: &VirtualUi, rect: Rect, dpi: f32) -> (i32, i32, i32, i32) {
+pub fn ui_clip_pixels(ui: &VirtualUi, rect: Rect, dpi: f32) -> (i32, i32, i32, i32) {
     let x = (ui.offset.x + rect.x * ui.scale) * dpi;
     let top = (ui.offset.y + rect.y * ui.scale) * dpi;
     let width = rect.w * ui.scale * dpi;
@@ -101,8 +101,10 @@ fn ui_clip_pixels(ui: &VirtualUi, rect: Rect, dpi: f32) -> (i32, i32, i32, i32) 
     )
 }
 
+// Mission briefing rendering deliberately keeps campaign, mission, assets,
+// and input sources explicit instead of hiding them in mutable UI state.
 #[allow(clippy::too_many_arguments)]
-fn draw_text_block(
+pub fn draw_text_block(
     text: &str,
     x: f32,
     y: f32,
@@ -164,21 +166,21 @@ pub struct UiContext<'a> {
 }
 
 pub struct TitleDrawContext<'a> {
-    pub(crate) data: &'a GameData,
-    pub(crate) save_exists: bool,
-    pub(crate) assets: &'a AssetManager,
-    pub(crate) visuals: &'a VisualCatalog,
-    pub(crate) ui: &'a VirtualUi,
-    pub(crate) controller_focus_continue: Option<bool>,
-    pub(crate) hover_preview: bool,
-    pub(crate) new_campaign_armed: bool,
+    pub data: &'a GameData,
+    pub save_exists: bool,
+    pub assets: &'a AssetManager,
+    pub visuals: &'a VisualCatalog,
+    pub ui: &'a VirtualUi,
+    pub controller_focus_continue: Option<bool>,
+    pub hover_preview: bool,
+    pub new_campaign_armed: bool,
 }
 
-pub(crate) fn draw_title(context: TitleDrawContext<'_>) -> Vec<UiAction> {
+pub fn draw_title(context: TitleDrawContext<'_>) -> Vec<UiAction> {
     crate::title_scene_ui::draw(context)
 }
 
-pub(crate) fn briefing_modifier_bounds() -> Rect {
+pub fn briefing_modifier_bounds() -> Rect {
     Rect::new(
         BRIEFING_MODIFIER_X,
         BRIEFING_MODIFIER_Y,
@@ -187,7 +189,7 @@ pub(crate) fn briefing_modifier_bounds() -> Rect {
     )
 }
 
-fn briefing_modifier_copy(mission: &MissionDef) -> String {
+pub fn briefing_modifier_copy(mission: &MissionDef) -> String {
     format!(
         "{} // {} // {}",
         if mission.operation_modifier.is_engine_effect() {
@@ -307,7 +309,7 @@ pub fn draw_mission_briefing(
     actions
 }
 
-fn draw_mission_vignette(
+pub fn draw_mission_vignette(
     data: &GameData,
     mission: &MissionDef,
     assets: &AssetManager,
@@ -391,7 +393,7 @@ pub fn draw_tactical(
     crate::first_hour_tactical_ui::draw_command_focus(&ctx);
     if ctx.show_help {
         actions.clear();
-        crate::help_ui::draw(mouse, &mut actions);
+        crate::help_ui::draw(&ctx.data.config.tutorial, mouse, &mut actions);
     } else if ctx.show_battle_log {
         actions.clear();
         crate::battle_log_ui::draw(ctx.session, ctx.battle_log_filter, mouse, &mut actions);
@@ -405,7 +407,7 @@ pub fn draw_tactical(
     actions
 }
 
-fn tactical_world_input_enabled(
+pub fn tactical_world_input_enabled(
     show_help: bool,
     show_log: bool,
     replay_active: bool,
@@ -415,13 +417,13 @@ fn tactical_world_input_enabled(
     !show_help && !show_log && !replay_active && !first_hour_help_open && !settings_open
 }
 
-pub(crate) fn suppress_map_release_actions(actions: &mut Vec<UiAction>, suppress: bool) {
+pub fn suppress_map_release_actions(actions: &mut Vec<UiAction>, suppress: bool) {
     if suppress {
         actions.clear();
     }
 }
 
-pub(crate) fn mutation_button_label(
+pub fn mutation_button_label(
     selected: Option<&crate::state::UnitState>,
     enabled: bool,
 ) -> &'static str {
@@ -449,7 +451,7 @@ pub(crate) fn mutation_button_label(
     "UNAVAILABLE"
 }
 
-fn mutation_action_label(mutation: &str) -> Option<&'static str> {
+pub fn mutation_action_label(mutation: &str) -> Option<&'static str> {
     match mutation {
         "Neural Bloom" => Some("NEURAL FOCUS"),
         "Chitinous Growth" => Some("HARDEN CARAPACE"),
@@ -473,6 +475,3 @@ pub fn tile_move_from_keys() -> Option<(i32, i32)> {
         None
     }
 }
-
-#[cfg(test)]
-mod tests;

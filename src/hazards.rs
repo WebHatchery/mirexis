@@ -3,7 +3,7 @@
 use crate::data::HazardKind;
 use crate::state::{BattleEvent, GameSession, StatusKind};
 
-pub(crate) fn resolve_after_move(session: &mut GameSession, unit_id: &str) -> Vec<BattleEvent> {
+pub fn resolve_after_move(session: &mut GameSession, unit_id: &str) -> Vec<BattleEvent> {
     let Some(unit) = session.unit(unit_id) else {
         return Vec::new();
     };
@@ -56,7 +56,7 @@ pub(crate) fn resolve_after_move(session: &mut GameSession, unit_id: &str) -> Ve
     events
 }
 
-fn immune_faction(kind: HazardKind) -> &'static str {
+pub fn immune_faction(kind: HazardKind) -> &'static str {
     match kind {
         HazardKind::FireLane => "directorate",
         HazardKind::SporeBloom => "brood",
@@ -64,7 +64,7 @@ fn immune_faction(kind: HazardKind) -> &'static str {
     }
 }
 
-fn apply_damage(
+pub fn apply_damage(
     session: &mut GameSession,
     unit_id: &str,
     damage: i32,
@@ -89,6 +89,3 @@ fn apply_damage(
         });
     }
 }
-
-#[cfg(test)]
-mod tests;

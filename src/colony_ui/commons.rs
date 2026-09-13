@@ -6,7 +6,7 @@ use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-fn commons_button_label(
+pub fn commons_button_label(
     already_hosted: bool,
     ready_squad_count: usize,
     food: i32,
@@ -23,7 +23,7 @@ fn commons_button_label(
     }
 }
 
-pub(super) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     routine_operations_visible: bool,
     mouse: Vec2,
@@ -48,6 +48,3 @@ pub(super) fn draw(
         actions.push(UiAction::HostCommonsMeal);
     }
 }
-
-#[cfg(test)]
-mod tests;

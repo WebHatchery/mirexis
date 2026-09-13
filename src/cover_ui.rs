@@ -9,7 +9,7 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
-pub(crate) fn draw_edges(view: GridView, edges: &[CoverEdgeDef]) {
+pub fn draw_edges(view: GridView, edges: &[CoverEdgeDef]) {
     for edge in edges {
         let tile = TilePos::new(edge.position[0], edge.position[1]);
         let diamond = view.diamond(tile);
@@ -49,7 +49,7 @@ pub(crate) fn draw_edges(view: GridView, edges: &[CoverEdgeDef]) {
     }
 }
 
-pub(crate) fn draw_cover(
+pub fn draw_cover(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     view: GridView,

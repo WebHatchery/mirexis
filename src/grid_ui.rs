@@ -7,30 +7,30 @@ use macroquad::prelude::{
 use macroquad_toolkit::camera::{CameraBounds, CameraBoundsPolicy, CameraTransform};
 use macroquad_toolkit::grid::TilePos;
 
-pub(crate) const TACTICAL_HALF_WIDTH: f32 = 24.0;
-pub(crate) const TACTICAL_HALF_HEIGHT: f32 = 12.0;
-pub(crate) const TERRAIN_ART_SCALE: f32 = 1.06;
-pub(crate) const TERRAIN_ART_PIVOT: [f32; 2] = [0.50, 0.58];
-pub(crate) const STRUCTURE_ART_SCALE: f32 = 1.10;
-pub(crate) const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.68];
-pub(crate) const CANOPY_ART_SCALE: f32 = 1.15;
-pub(crate) const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.65];
+pub const TACTICAL_HALF_WIDTH: f32 = 24.0;
+pub const TACTICAL_HALF_HEIGHT: f32 = 12.0;
+pub const TERRAIN_ART_SCALE: f32 = 1.06;
+pub const TERRAIN_ART_PIVOT: [f32; 2] = [0.50, 0.58];
+pub const STRUCTURE_ART_SCALE: f32 = 1.10;
+pub const STRUCTURE_ART_PIVOT: [f32; 2] = [0.50, 0.68];
+pub const CANOPY_ART_SCALE: f32 = 1.15;
+pub const CANOPY_ART_PIVOT: [f32; 2] = [0.50, 0.65];
 // Terrain and concept atlases are authored as square cells. Preserve that
 // source aspect so their isometric diamonds are not stretched vertically.
-pub(crate) const TERRAIN_ART_ASPECT: f32 = 1.0;
+pub const TERRAIN_ART_ASPECT: f32 = 1.0;
 
 #[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct CameraInsets {
-    pub(crate) left: f32,
-    pub(crate) top: f32,
-    pub(crate) right: f32,
-    pub(crate) bottom: f32,
+pub struct CameraInsets {
+    pub left: f32,
+    pub top: f32,
+    pub right: f32,
+    pub bottom: f32,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct WorldCamera {
-    pub(crate) center: Vec2,
-    pub(crate) zoom: f32,
+pub struct WorldCamera {
+    pub center: Vec2,
+    pub zoom: f32,
     drag_anchor: Option<Vec2>,
     primary_drag_start: Option<Vec2>,
     primary_drag_anchor: Option<Vec2>,
@@ -41,17 +41,17 @@ pub(crate) struct WorldCamera {
 }
 
 impl WorldCamera {
-    fn transform(&self) -> Option<CameraTransform> {
+    pub fn transform(&self) -> Option<CameraTransform> {
         CameraTransform::new(self.center, self.zoom).ok()
     }
 
-    pub(crate) fn projected_to_screen(&self, viewport: Rect, projected: Vec2) -> Vec2 {
+    pub fn projected_to_screen(&self, viewport: Rect, projected: Vec2) -> Vec2 {
         self.transform()
             .and_then(|transform| transform.world_to_screen(viewport, projected))
             .unwrap_or_else(|| viewport.center())
     }
 
-    pub(crate) fn tactical_start(tile: TilePos) -> Self {
+    pub fn tactical_start(tile: TilePos) -> Self {
         Self {
             center: projected_tile(tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
             zoom: 1.0,
@@ -65,7 +65,7 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn tactical_view(center_tile: TilePos, tracked_tile: TilePos, zoom: f32) -> Self {
+    pub fn tactical_view(center_tile: TilePos, tracked_tile: TilePos, zoom: f32) -> Self {
         Self {
             center: projected_tile(center_tile, TACTICAL_HALF_WIDTH, TACTICAL_HALF_HEIGHT),
             zoom: zoom.clamp(0.65, 1.85),
@@ -79,7 +79,7 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn colony_start(position: [i32; 2]) -> Self {
+    pub fn colony_start(position: [i32; 2]) -> Self {
         Self {
             center: projected_tile(
                 TilePos::new(position[0], position[1]),
@@ -97,7 +97,7 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn update(&mut self, viewport: Rect, mouse: Vec2) -> bool {
+    pub fn update(&mut self, viewport: Rect, mouse: Vec2) -> bool {
         let inside = viewport.contains(mouse);
         let dragging = inside
             && (is_mouse_button_down(MouseButton::Middle)
@@ -133,19 +133,19 @@ impl WorldCamera {
         suppress_primary_click
     }
 
-    pub(crate) fn primary_gesture_active(&self) -> bool {
+    pub fn primary_gesture_active(&self) -> bool {
         self.primary_drag_start.is_some()
     }
 
-    pub(crate) fn guard_next_primary_release(&mut self) {
+    pub fn guard_next_primary_release(&mut self) {
         self.primary_release_pending = true;
     }
 
-    pub(crate) fn pending_colony_plot(&self) -> Option<[i32; 2]> {
+    pub fn pending_colony_plot(&self) -> Option<[i32; 2]> {
         self.pending_colony_plot
     }
 
-    pub(crate) fn confirm_colony_plot(&mut self, position: [i32; 2]) -> bool {
+    pub fn confirm_colony_plot(&mut self, position: [i32; 2]) -> bool {
         if self.pending_colony_plot == Some(position) {
             self.pending_colony_plot = None;
             true
@@ -155,11 +155,11 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn clear_pending_colony_plot(&mut self) {
+    pub fn clear_pending_colony_plot(&mut self) {
         self.pending_colony_plot = None;
     }
 
-    pub(crate) fn clear_pointer_interaction(&mut self) {
+    pub fn clear_pointer_interaction(&mut self) {
         self.drag_anchor = None;
         self.primary_drag_start = None;
         self.primary_drag_anchor = None;
@@ -168,13 +168,13 @@ impl WorldCamera {
         self.pending_colony_plot = None;
     }
 
-    fn begin_primary_press(&mut self, inside: bool, pressed: bool) {
+    pub fn begin_primary_press(&mut self, inside: bool, pressed: bool) {
         if inside && pressed {
             self.primary_release_pending = false;
         }
     }
 
-    fn update_primary_drag(&mut self, down: bool, released: bool, mouse: Vec2) -> bool {
+    pub fn update_primary_drag(&mut self, down: bool, released: bool, mouse: Vec2) -> bool {
         if down {
             let start = *self.primary_drag_start.get_or_insert(mouse);
             let previous = *self.primary_drag_anchor.get_or_insert(mouse);
@@ -207,7 +207,7 @@ impl WorldCamera {
         suppress
     }
 
-    fn pan_screen(&mut self, delta: Vec2) {
+    pub fn pan_screen(&mut self, delta: Vec2) {
         if let Some(mut transform) = self.transform() {
             if transform.pan_screen(delta) {
                 self.center = transform.target();
@@ -215,11 +215,11 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn zoom_center(&mut self, viewport: Rect, factor: f32) {
+    pub fn zoom_center(&mut self, viewport: Rect, factor: f32) {
         self.zoom_at(viewport, viewport.center(), factor);
     }
 
-    fn zoom_at(&mut self, viewport: Rect, cursor: Vec2, factor: f32) {
+    pub fn zoom_at(&mut self, viewport: Rect, cursor: Vec2, factor: f32) {
         if let Some(mut transform) = self.transform() {
             if transform.zoom_at(viewport, cursor, factor, (0.65, 1.85)) {
                 self.center = transform.target();
@@ -228,7 +228,7 @@ impl WorldCamera {
         }
     }
 
-    pub(crate) fn reveal_changed_tactical_selection(&mut self, tile: TilePos, viewport: Rect) {
+    pub fn reveal_changed_tactical_selection(&mut self, tile: TilePos, viewport: Rect) {
         if self.tracked_tile == Some(tile) {
             return;
         }
@@ -245,9 +245,7 @@ impl WorldCamera {
             self.center = projected;
         }
     }
-
-    #[cfg(test)]
-    pub(crate) fn clamp_isometric(
+    pub fn clamp_isometric(
         &mut self,
         width: usize,
         height: usize,
@@ -265,7 +263,7 @@ impl WorldCamera {
         );
     }
 
-    pub(crate) fn clamp_isometric_with_insets(
+    pub fn clamp_isometric_with_insets(
         &mut self,
         width: usize,
         height: usize,
@@ -300,11 +298,11 @@ impl WorldCamera {
     }
 }
 
-fn primary_tracking(active: bool, inside: bool, pressed: bool, down: bool) -> bool {
+pub fn primary_tracking(active: bool, inside: bool, pressed: bool, down: bool) -> bool {
     down && (active || (inside && pressed))
 }
 
-fn projected_tile(tile: TilePos, half_width: f32, half_height: f32) -> Vec2 {
+pub fn projected_tile(tile: TilePos, half_width: f32, half_height: f32) -> Vec2 {
     vec2(
         (tile.x - tile.y) as f32 * half_width,
         (tile.x + tile.y) as f32 * half_height,
@@ -312,18 +310,17 @@ fn projected_tile(tile: TilePos, half_width: f32, half_height: f32) -> Vec2 {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct GridView {
-    origin: Vec2,
-    half_width: f32,
-    half_height: f32,
+pub struct GridView {
+    pub origin: Vec2,
+    pub half_width: f32,
+    pub half_height: f32,
     elevation_step: f32,
     width: usize,
     height: usize,
 }
 
 impl GridView {
-    #[cfg(test)]
-    pub(crate) fn new(width: usize, height: usize, rect: Rect) -> Self {
+    pub fn new(width: usize, height: usize, rect: Rect) -> Self {
         Self::with_camera(
             width,
             height,
@@ -335,12 +332,7 @@ impl GridView {
         )
     }
 
-    pub(crate) fn with_camera(
-        width: usize,
-        height: usize,
-        rect: Rect,
-        camera: &WorldCamera,
-    ) -> Self {
+    pub fn with_camera(width: usize, height: usize, rect: Rect, camera: &WorldCamera) -> Self {
         let half_width = TACTICAL_HALF_WIDTH * camera.zoom;
         let half_height = TACTICAL_HALF_HEIGHT * camera.zoom;
         let elevation_step = (half_height * 0.82).max(8.0);
@@ -354,7 +346,7 @@ impl GridView {
         }
     }
 
-    pub(crate) fn tile_center(self, tile: TilePos) -> Vec2 {
+    pub fn tile_center(self, tile: TilePos) -> Vec2 {
         let elevation = self.elevation(tile) as f32;
         vec2(
             self.origin.x + (tile.x - tile.y) as f32 * self.half_width,
@@ -363,11 +355,11 @@ impl GridView {
         )
     }
 
-    pub(crate) fn ground_anchor(self, tile: TilePos) -> Vec2 {
+    pub fn ground_anchor(self, tile: TilePos) -> Vec2 {
         self.tile_center(tile)
     }
 
-    pub(crate) fn art_bounds(self, tile: TilePos, scale: f32, pivot: [f32; 2]) -> Rect {
+    pub fn art_bounds(self, tile: TilePos, scale: f32, pivot: [f32; 2]) -> Rect {
         let anchor = self.ground_anchor(tile);
         let width = self.half_width * 2.0 * scale;
         let height = width * TERRAIN_ART_ASPECT;
@@ -379,7 +371,7 @@ impl GridView {
         )
     }
 
-    pub(crate) fn tile_rect(self, tile: TilePos) -> Rect {
+    pub fn tile_rect(self, tile: TilePos) -> Rect {
         let center = self.tile_center(tile);
         Rect::new(
             center.x - self.half_width,
@@ -389,7 +381,7 @@ impl GridView {
         )
     }
 
-    pub(crate) fn diamond(self, tile: TilePos) -> [Vec2; 4] {
+    pub fn diamond(self, tile: TilePos) -> [Vec2; 4] {
         let center = self.tile_center(tile);
         [
             vec2(center.x, center.y - self.half_height),
@@ -399,7 +391,7 @@ impl GridView {
         ]
     }
 
-    pub(crate) fn elevation(self, tile: TilePos) -> i8 {
+    pub fn elevation(self, tile: TilePos) -> i8 {
         if inside_region(tile, 12, 19, 3, 2) || inside_region(tile, 29, 17, 3, 3) {
             2
         } else if inside_region(tile, 12, 19, 6, 5) || inside_region(tile, 29, 17, 6, 5) {
@@ -411,11 +403,11 @@ impl GridView {
         }
     }
 
-    pub(crate) fn elevation_step(self) -> f32 {
+    pub fn elevation_step(self) -> f32 {
         self.elevation_step
     }
 
-    pub(crate) fn cliff_drop(self, tile: TilePos, neighbor: TilePos) -> u8 {
+    pub fn cliff_drop(self, tile: TilePos, neighbor: TilePos) -> u8 {
         if neighbor.x < 0
             || neighbor.y < 0
             || neighbor.x >= self.width as i32
@@ -428,7 +420,7 @@ impl GridView {
             .max(0) as u8
     }
 
-    pub(crate) fn is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
+    pub fn is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
         let rect = self.tile_rect(tile);
         rect.right() >= viewport.x - margin
             && rect.x <= viewport.right() + margin
@@ -436,7 +428,7 @@ impl GridView {
             && rect.y <= viewport.bottom() + margin
     }
 
-    pub(crate) fn terrain_is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
+    pub fn terrain_is_visible(self, tile: TilePos, viewport: Rect, margin: f32) -> bool {
         let bounds = self.art_bounds(tile, STRUCTURE_ART_SCALE, STRUCTURE_ART_PIVOT);
         bounds.right() >= viewport.x - margin
             && bounds.x <= viewport.right() + margin
@@ -444,7 +436,7 @@ impl GridView {
             && bounds.y <= viewport.bottom() + margin
     }
 
-    pub(crate) fn tile_at(self, point: Vec2) -> Option<TilePos> {
+    pub fn tile_at(self, point: Vec2) -> Option<TilePos> {
         let mut best = None;
         let mut best_depth = f32::NEG_INFINITY;
         for y in 0..self.height as i32 {
@@ -466,11 +458,8 @@ impl GridView {
     }
 }
 
-fn inside_region(tile: TilePos, cx: i32, cy: i32, rx: i32, ry: i32) -> bool {
+pub fn inside_region(tile: TilePos, cx: i32, cy: i32, rx: i32, ry: i32) -> bool {
     let dx = tile.x - cx;
     let dy = tile.y - cy;
     dx * dx * ry * ry + dy * dy * rx * rx <= rx * rx * ry * ry
 }
-
-#[cfg(test)]
-mod tests;

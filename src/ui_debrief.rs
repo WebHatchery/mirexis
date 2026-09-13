@@ -11,10 +11,7 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::VirtualUi;
 
-#[cfg(test)]
-mod tests;
-
-fn experience_summary(outcome: &MissionOutcome) -> String {
+pub fn experience_summary(outcome: &MissionOutcome) -> String {
     format!(
         "Field experience: +{} XP each // {} deployed colonists",
         crate::campaign::operation_experience(outcome.result),
@@ -22,11 +19,11 @@ fn experience_summary(outcome: &MissionOutcome) -> String {
     )
 }
 
-fn show_early_debrief_voice(campaign: &CampaignState) -> bool {
+pub fn show_early_debrief_voice(campaign: &CampaignState) -> bool {
     !campaign.strategy.campaign_complete && campaign.operations_completed <= 2
 }
 
-fn return_button_label(campaign: &CampaignState) -> &'static str {
+pub fn return_button_label(campaign: &CampaignState) -> &'static str {
     if crate::demo::campaign_is_complete(campaign.operations_completed) {
         "FINISH DEMO"
     } else {
@@ -35,13 +32,13 @@ fn return_button_label(campaign: &CampaignState) -> &'static str {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum SquadStatus {
+pub enum SquadStatus {
     Returned,
     Scar,
     Reserve,
 }
 
-fn squad_status(
+pub fn squad_status(
     character_id: &str,
     deployed_ids: &[String],
     incapacitated: &[CharacterConsequence],
@@ -55,7 +52,7 @@ fn squad_status(
     }
 }
 
-fn debrief_roster_indices(
+pub fn debrief_roster_indices(
     roster: &[crate::campaign::CharacterRecord],
     deployed_ids: &[String],
 ) -> Vec<usize> {
@@ -229,7 +226,7 @@ pub fn draw_debrief(
     actions
 }
 
-fn draw_field_record(
+pub fn draw_field_record(
     mission: &MissionDef,
     outcome: &MissionOutcome,
     assets: &AssetManager,
@@ -333,7 +330,7 @@ fn draw_field_record(
     );
 }
 
-fn draw_squad_tableau(
+pub fn draw_squad_tableau(
     campaign: &CampaignState,
     outcome: &MissionOutcome,
     deployed_ids: &[String],

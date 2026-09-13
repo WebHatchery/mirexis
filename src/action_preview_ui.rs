@@ -14,16 +14,13 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-#[cfg(test)]
-mod tests;
-
-pub(crate) struct PreviewInteraction<'a> {
-    pub(crate) mouse: Vec2,
-    pub(crate) actions: &'a mut Vec<UiAction>,
-    pub(crate) interactive: bool,
+pub struct PreviewInteraction<'a> {
+    pub mouse: Vec2,
+    pub actions: &'a mut Vec<UiAction>,
+    pub interactive: bool,
 }
 
-pub(crate) fn draw(
+pub fn draw(
     session: &GameSession,
     tile: macroquad_toolkit::grid::TilePos,
     panel: Rect,
@@ -113,24 +110,26 @@ pub(crate) fn draw(
     false
 }
 
-pub(crate) fn attack_card_bounds(panel: Rect) -> Rect {
+pub fn attack_card_bounds(panel: Rect) -> Rect {
     let width = (panel.w - 32.0).min(560.0);
     Rect::new(panel.x + 16.0, panel.bottom() - 94.0, width, 84.0)
 }
 
-pub(crate) fn attack_button_bounds(card: Rect) -> Rect {
+pub fn attack_button_bounds(card: Rect) -> Rect {
     Rect::new(card.right() - 205.0, card.y + 22.0, 126.0, 40.0)
 }
 
-pub(crate) fn attack_preview_is_valid(session: &GameSession, tile: TilePos) -> bool {
+pub fn attack_preview_is_valid(session: &GameSession, tile: TilePos) -> bool {
     matches!(
         action_preview::for_tile(session, tile),
         Some(ActionPreview::Attack { .. })
     )
 }
 
+// The preview renderer receives immutable view inputs plus the shared UI
+// surface; keeping them explicit makes the draw seam easy to audit.
 #[allow(clippy::too_many_arguments)]
-fn draw_attack_comparison(
+pub fn draw_attack_comparison(
     session: &GameSession,
     target_position: macroquad_toolkit::grid::TilePos,
     target_name: &str,
@@ -215,7 +214,7 @@ fn draw_attack_comparison(
     interaction.interactive && rect.contains(interaction.mouse)
 }
 
-pub(crate) fn rule_error_label(error: &RuleError) -> &'static str {
+pub fn rule_error_label(error: &RuleError) -> &'static str {
     match error {
         RuleError::WrongPhase => "WRONG PHASE",
         RuleError::UnknownUnit => "UNKNOWN UNIT",
@@ -238,11 +237,7 @@ pub(crate) fn rule_error_label(error: &RuleError) -> &'static str {
     }
 }
 
-pub(crate) fn draw_route(
-    session: &GameSession,
-    tile: macroquad_toolkit::grid::TilePos,
-    view: GridView,
-) {
+pub fn draw_route(session: &GameSession, tile: macroquad_toolkit::grid::TilePos, view: GridView) {
     let Some(preview) = action_preview::for_tile(session, tile) else {
         return;
     };
@@ -288,19 +283,19 @@ pub(crate) fn draw_route(
     }
 }
 
-fn tile_center(view: GridView, tile: macroquad_toolkit::grid::TilePos) -> Vec2 {
+pub fn tile_center(view: GridView, tile: macroquad_toolkit::grid::TilePos) -> Vec2 {
     view.tile_center(tile)
 }
 
-fn shot_color() -> Color {
+pub fn shot_color() -> Color {
     Color::new(0.55, 0.94, 0.58, 0.95)
 }
 
-fn route_color() -> Color {
+pub fn route_color() -> Color {
     Color::new(0.48, 0.90, 1.0, 0.9)
 }
 
-fn hazard_effect(kind: HazardKind) -> &'static str {
+pub fn hazard_effect(kind: HazardKind) -> &'static str {
     match kind {
         HazardKind::FireLane => "FIRE LANE: 2 DAMAGE",
         HazardKind::SporeBloom => "SPORE BLOOM: 1 DAMAGE + HINDERED",

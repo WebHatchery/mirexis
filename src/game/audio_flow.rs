@@ -6,7 +6,7 @@ use crate::ui::UiAction;
 use macroquad_toolkit::ui::VirtualUi;
 
 impl Game {
-    pub(super) fn apply_audio_action(&mut self, action: &UiAction) -> bool {
+    pub fn apply_audio_action(&mut self, action: &UiAction) -> bool {
         let game_name = self.data.config.game_name.clone();
         match action {
             UiAction::ToggleSettings => {
@@ -43,7 +43,7 @@ impl Game {
         true
     }
 
-    pub(super) fn update_motion(&mut self, dt: f32) {
+    pub fn update_motion(&mut self, dt: f32) {
         if self.audio.settings.reduced_motion {
             self.session.tactical.update_presentation(1.0);
             self.combat_feedback.update(1.0);
@@ -55,14 +55,14 @@ impl Game {
         }
     }
 
-    pub(super) fn finish_action_audio(&mut self, action: &UiAction, before_events: usize) {
+    pub fn finish_action_audio(&mut self, action: &UiAction, before_events: usize) {
         if tactical_command(action) && self.session.tactical.event_log.len() == before_events {
             self.audio.play(SoundCue::Invalid);
             self.campaign.first_hour.metrics.invalid_command();
         }
     }
 
-    pub(super) fn draw_settings(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
+    pub fn draw_settings(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
         crate::settings_ui::draw_modal(
             self.audio.settings,
             self.show_settings,
@@ -71,7 +71,7 @@ impl Game {
         );
     }
 
-    pub(super) fn sync_audio(&mut self) {
+    pub fn sync_audio(&mut self) {
         if let Some(start) = unplayed_event_start(
             &mut self.played_audio_event_count,
             self.session.tactical.event_log.len(),
@@ -82,7 +82,7 @@ impl Game {
     }
 }
 
-fn unplayed_event_start(played_count: &mut usize, event_count: usize) -> Option<usize> {
+pub fn unplayed_event_start(played_count: &mut usize, event_count: usize) -> Option<usize> {
     if event_count < *played_count {
         *played_count = 0;
     }
@@ -94,7 +94,7 @@ fn unplayed_event_start(played_count: &mut usize, event_count: usize) -> Option<
     Some(start)
 }
 
-fn tactical_command(action: &UiAction) -> bool {
+pub fn tactical_command(action: &UiAction) -> bool {
     matches!(
         action,
         UiAction::MoveSelected(_)
@@ -113,6 +113,3 @@ fn tactical_command(action: &UiAction) -> bool {
             | UiAction::EndPhase
     )
 }
-
-#[cfg(test)]
-mod tests;

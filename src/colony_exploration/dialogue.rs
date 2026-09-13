@@ -5,10 +5,7 @@ use crate::colony::BuildingKind;
 use crate::data::GameData;
 use crate::ui::UiAction;
 
-#[cfg(test)]
-mod tests;
-
-pub(super) fn npc_action_button_label(
+pub fn npc_action_button_label(
     campaign: &CampaignState,
     data: &GameData,
     character: &CharacterRecord,
@@ -36,7 +33,7 @@ pub(super) fn npc_action_button_label(
     )
 }
 
-fn treatment_button_label(campaign: &CampaignState) -> String {
+pub fn treatment_button_label(campaign: &CampaignState) -> String {
     let has_infirmary = campaign.colony.has_facility(BuildingKind::Infirmary);
     treatment_button_label_for_state(
         has_infirmary,
@@ -45,7 +42,7 @@ fn treatment_button_label(campaign: &CampaignState) -> String {
     )
 }
 
-fn treatment_button_label_for_state(
+pub fn treatment_button_label_for_state(
     has_infirmary: bool,
     biomass: i32,
     treatment_cost: i32,
@@ -60,13 +57,13 @@ fn treatment_button_label_for_state(
 }
 
 #[derive(Clone, Copy)]
-enum GeneLabState {
+pub enum GeneLabState {
     Damaged,
     Unpowered,
     Powered,
 }
 
-fn gene_lab_button_label(campaign: &CampaignState) -> String {
+pub fn gene_lab_button_label(campaign: &CampaignState) -> String {
     let building = campaign
         .colony
         .buildings
@@ -90,7 +87,7 @@ fn gene_lab_button_label(campaign: &CampaignState) -> String {
         .to_owned()
 }
 
-fn gene_lab_button_label_for_state(
+pub fn gene_lab_button_label_for_state(
     unlocked: bool,
     project_queued: bool,
     state: Option<GeneLabState>,
@@ -109,7 +106,7 @@ fn gene_lab_button_label_for_state(
     }
 }
 
-fn recruitment_button_label(cost: i32, resource: &str, available: i32) -> String {
+pub fn recruitment_button_label(cost: i32, resource: &str, available: i32) -> String {
     let resource = resource.to_uppercase();
     if available < cost {
         format!("RECRUIT // NEED {cost} {resource}")
@@ -118,7 +115,7 @@ fn recruitment_button_label(cost: i32, resource: &str, available: i32) -> String
     }
 }
 
-pub(super) fn npc_action_enabled(
+pub fn npc_action_enabled(
     campaign: &CampaignState,
     data: &GameData,
     action: &UiAction,

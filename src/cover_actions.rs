@@ -34,7 +34,7 @@ impl GameSession {
     }
 }
 
-pub(crate) fn validate(
+pub fn validate(
     session: &GameSession,
     attacker_id: &str,
     position: TilePos,
@@ -62,7 +62,7 @@ pub(crate) fn validate(
     })
 }
 
-pub(crate) fn execute(
+pub fn execute(
     session: &mut GameSession,
     attacker_id: &str,
     position: TilePos,
@@ -81,11 +81,7 @@ pub(crate) fn execute(
     damage_cover(session, position, attacker.effective_weapon_damage().max(1))
 }
 
-pub(crate) fn damage_cover(
-    session: &mut GameSession,
-    position: TilePos,
-    damage: i32,
-) -> Vec<BattleEvent> {
+pub fn damage_cover(session: &mut GameSession, position: TilePos, damage: i32) -> Vec<BattleEvent> {
     let cover = session
         .tactical
         .destructible_cover
@@ -113,6 +109,3 @@ pub(crate) fn damage_cover(
     }
     events
 }
-
-#[cfg(test)]
-mod tests;

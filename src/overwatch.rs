@@ -4,9 +4,9 @@ use crate::data::Team;
 use crate::state::{GameSession, UnitState};
 use crate::tactical::{manhattan, BattleEvent, CommandCost, RuleError};
 
-const REACTION_ACCURACY_PENALTY: i32 = 15;
+pub const REACTION_ACCURACY_PENALTY: i32 = 15;
 
-pub(crate) fn overwatch_button_label(selected: Option<&UnitState>, enabled: bool) -> &'static str {
+pub fn overwatch_button_label(selected: Option<&UnitState>, enabled: bool) -> &'static str {
     let Some(unit) = selected else {
         return "SELECT UNIT";
     };
@@ -45,7 +45,7 @@ impl GameSession {
     }
 }
 
-pub(crate) fn validate(session: &GameSession, unit_id: &str) -> Result<CommandCost, RuleError> {
+pub fn validate(session: &GameSession, unit_id: &str) -> Result<CommandCost, RuleError> {
     let unit = session.active_unit_for_phase(unit_id)?;
     if unit.team != Team::Colony || unit.overwatching {
         return Err(RuleError::OverwatchUnavailable);
@@ -58,7 +58,7 @@ pub(crate) fn validate(session: &GameSession, unit_id: &str) -> Result<CommandCo
     })
 }
 
-pub(crate) fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEvent> {
+pub fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEvent> {
     let unit = session
         .tactical
         .units
@@ -72,10 +72,7 @@ pub(crate) fn execute(session: &mut GameSession, unit_id: &str) -> Vec<BattleEve
     }]
 }
 
-pub(crate) fn resolve_after_hostile_move(
-    session: &mut GameSession,
-    target_id: &str,
-) -> Vec<BattleEvent> {
+pub fn resolve_after_hostile_move(session: &mut GameSession, target_id: &str) -> Vec<BattleEvent> {
     let Some(target) = session.unit(target_id) else {
         return Vec::new();
     };
@@ -109,7 +106,7 @@ pub(crate) fn resolve_after_hostile_move(
     events
 }
 
-fn resolve_reaction(
+pub fn resolve_reaction(
     session: &mut GameSession,
     attacker_id: &str,
     target_id: &str,
@@ -167,6 +164,3 @@ fn resolve_reaction(
     }
     events
 }
-
-#[cfg(test)]
-mod tests;

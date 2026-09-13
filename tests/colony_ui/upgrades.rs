@@ -1,0 +1,7 @@
+//! Integration tests for the colony_ui\upgrades module.
+
+use mirexis::test_prelude::*;
+use mirexis::colony_ui::upgrades::*;
+
+#[path = "upgrades/tests.rs"]
+mod tests;

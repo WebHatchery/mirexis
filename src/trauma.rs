@@ -4,7 +4,7 @@ use crate::campaign::CharacterRecord;
 use crate::data::UnitDef;
 use serde::{Deserialize, Serialize};
 
-const MAX_TRAUMAS: usize = 2;
+pub const MAX_TRAUMAS: usize = 2;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TraumaRecord {
@@ -13,13 +13,13 @@ pub struct TraumaRecord {
     pub effect: String,
 }
 
-struct TraumaDefinition {
+pub struct TraumaDefinition {
     id: &'static str,
     name: &'static str,
     effect: &'static str,
 }
 
-const TRAUMAS: [TraumaDefinition; 3] = [
+pub const TRAUMAS: [TraumaDefinition; 3] = [
     TraumaDefinition {
         id: "clouded_eye",
         name: "Clouded Eye",
@@ -37,7 +37,7 @@ const TRAUMAS: [TraumaDefinition; 3] = [
     },
 ];
 
-pub(crate) fn record_incapacitation(character: &mut CharacterRecord, operation: u32) -> bool {
+pub fn record_incapacitation(character: &mut CharacterRecord, operation: u32) -> bool {
     if character.traumas.len() >= MAX_TRAUMAS {
         return false;
     }
@@ -64,11 +64,11 @@ pub(crate) fn record_incapacitation(character: &mut CharacterRecord, operation: 
     true
 }
 
-pub(crate) fn apply_deployment_traits(unit: &mut UnitDef, traumas: &[TraumaRecord]) {
+pub fn apply_deployment_traits(unit: &mut UnitDef, traumas: &[TraumaRecord]) {
     apply_deployment_traits_with_options(unit, traumas, false);
 }
 
-pub(crate) fn apply_deployment_traits_with_options(
+pub fn apply_deployment_traits_with_options(
     unit: &mut UnitDef,
     traumas: &[TraumaRecord],
     soften_tradeoffs: bool,
@@ -94,7 +94,7 @@ pub(crate) fn apply_deployment_traits_with_options(
     }
 }
 
-pub(crate) fn effective_effect(trauma: &TraumaRecord, soften_tradeoffs: bool) -> String {
+pub fn effective_effect(trauma: &TraumaRecord, soften_tradeoffs: bool) -> String {
     if !soften_tradeoffs {
         return trauma.effect.clone();
     }
@@ -105,6 +105,3 @@ pub(crate) fn effective_effect(trauma: &TraumaRecord, soften_tradeoffs: bool) ->
         _ => trauma.effect.clone(),
     }
 }
-
-#[cfg(test)]
-mod tests;

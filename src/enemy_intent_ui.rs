@@ -13,7 +13,7 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 use std::collections::HashSet;
 
-pub(crate) fn inspected_hostile(session: &GameSession) -> Option<&crate::state::UnitState> {
+pub fn inspected_hostile(session: &GameSession) -> Option<&crate::state::UnitState> {
     session.tactical.units.iter().find(|unit| {
         unit.team == Team::Hostile
             && !unit.incapacitated
@@ -21,7 +21,7 @@ pub(crate) fn inspected_hostile(session: &GameSession) -> Option<&crate::state::
     })
 }
 
-pub(crate) fn draw_inspector(
+pub fn draw_inspector(
     session: &GameSession,
     max_ap: u8,
     panel: Rect,
@@ -120,7 +120,7 @@ pub(crate) fn draw_inspector(
     true
 }
 
-pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
+pub fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     let Some(unit) = inspected_hostile(session) else {
         return;
     };
@@ -158,7 +158,7 @@ pub(crate) fn draw_forecast(session: &GameSession, max_ap: u8, view: GridView) {
     );
 }
 
-fn draw_weapon_range(session: &GameSession, hostile_id: &str, max_ap: u8, view: GridView) {
+pub fn draw_weapon_range(session: &GameSession, hostile_id: &str, max_ap: u8, view: GridView) {
     let stationary = threatened_tiles(session, hostile_id)
         .into_iter()
         .collect::<HashSet<_>>();
@@ -193,7 +193,7 @@ fn draw_weapon_range(session: &GameSession, hostile_id: &str, max_ap: u8, view: 
     }
 }
 
-pub(crate) fn threatened_tiles(session: &GameSession, hostile_id: &str) -> Vec<TilePos> {
+pub fn threatened_tiles(session: &GameSession, hostile_id: &str) -> Vec<TilePos> {
     let Some(hostile) = session.unit(hostile_id) else {
         return Vec::new();
     };
@@ -210,11 +210,7 @@ pub(crate) fn threatened_tiles(session: &GameSession, hostile_id: &str) -> Vec<T
         .collect()
 }
 
-pub(crate) fn danger_reach_tiles(
-    session: &GameSession,
-    hostile_id: &str,
-    max_ap: u8,
-) -> Vec<TilePos> {
+pub fn danger_reach_tiles(session: &GameSession, hostile_id: &str, max_ap: u8) -> Vec<TilePos> {
     let mut forecast = session.clone();
     forecast.tactical.phase = TacticalPhase::Enemy;
     let Some(hostile) = forecast
@@ -254,7 +250,7 @@ pub(crate) fn danger_reach_tiles(
     threatened
 }
 
-fn action_label(session: &GameSession, action: &IntentAction) -> String {
+pub fn action_label(session: &GameSession, action: &IntentAction) -> String {
     match action {
         IntentAction::AttackUnit(target_id) => {
             let name = session
@@ -268,7 +264,7 @@ fn action_label(session: &GameSession, action: &IntentAction) -> String {
     }
 }
 
-fn faction_label(faction: Option<&str>) -> &'static str {
+pub fn faction_label(faction: Option<&str>) -> &'static str {
     match faction {
         Some("directorate") => "DIRECTORATE",
         Some("brood") => "BROOD",
@@ -276,6 +272,3 @@ fn faction_label(faction: Option<&str>) -> &'static str {
         _ => "UNKNOWN POWER",
     }
 }
-
-#[cfg(test)]
-mod tests;

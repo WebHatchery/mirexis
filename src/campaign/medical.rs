@@ -6,7 +6,7 @@ use crate::data::GameData;
 use crate::state::MissionOutcome;
 
 impl CampaignState {
-    pub(super) fn apply_injury_consequences(&mut self, outcome: &MissionOutcome, data: &GameData) {
+    pub fn apply_injury_consequences(&mut self, outcome: &MissionOutcome, data: &GameData) {
         let stabilisation_wing_active = self.colony.has_active_upgrade(
             BuildingKind::GeneLab,
             crate::colony::STABILISATION_WING_UPGRADE,

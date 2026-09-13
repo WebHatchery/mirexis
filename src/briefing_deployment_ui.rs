@@ -10,11 +10,11 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-const DEPLOYMENT_HEADING_Y: f32 = 374.0;
-const DEPLOYMENT_ROW_Y: f32 = 384.0;
-const DEPLOYMENT_ACTION_Y: f32 = 580.0;
+pub const DEPLOYMENT_HEADING_Y: f32 = 374.0;
+pub const DEPLOYMENT_ROW_Y: f32 = 384.0;
+pub const DEPLOYMENT_ACTION_Y: f32 = 580.0;
 
-fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
+pub fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
     if roster_len <= 5 {
         return (32.0, 29.0);
     }
@@ -22,7 +22,7 @@ fn deployment_row_layout(roster_len: usize) -> (f32, f32) {
     (row_step, (row_step - 2.0).max(20.0))
 }
 
-fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> String {
+pub fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> String {
     if selected_count == 0 {
         "SELECT COLONISTS".to_owned()
     } else if food < food_cost {
@@ -32,7 +32,7 @@ fn deployment_button_label(selected_count: usize, food: i32, food_cost: i32) -> 
     }
 }
 
-pub(crate) fn deployment_row_bounds(roster_len: usize, index: usize) -> Rect {
+pub fn deployment_row_bounds(roster_len: usize, index: usize) -> Rect {
     let (row_step, row_height) = deployment_row_layout(roster_len);
     Rect::new(
         200.0,
@@ -42,11 +42,11 @@ pub(crate) fn deployment_row_bounds(roster_len: usize, index: usize) -> Rect {
     )
 }
 
-pub(crate) fn deploy_button_bounds() -> Rect {
+pub fn deploy_button_bounds() -> Rect {
     Rect::new(820.0, DEPLOYMENT_ACTION_Y, 250.0, 48.0)
 }
 
-pub(crate) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     data: &GameData,
     formation: FormationKind,
@@ -143,6 +143,3 @@ pub(crate) fn draw(
         actions.push(UiAction::ReturnToColony);
     }
 }
-
-#[cfg(test)]
-mod tests;

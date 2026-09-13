@@ -6,7 +6,7 @@ use crate::phase_replay::PhaseReplay;
 use crate::ui_action::BattleLogFilter;
 
 impl Game {
-    pub(super) fn reset_tactical_transients(&mut self, play_initial_phase_audio: bool) {
+    pub fn reset_tactical_transients(&mut self, play_initial_phase_audio: bool) {
         self.targeting = None;
         self.show_tactical_help = false;
         self.show_battle_log = false;
@@ -28,7 +28,7 @@ impl Game {
     }
 }
 
-fn reset_tactical_presentation(
+pub fn reset_tactical_presentation(
     combat_feedback: &mut CombatFeedback,
     phase_replay: &mut PhaseReplay,
     observed_event_count: &mut usize,
@@ -48,6 +48,3 @@ fn reset_tactical_presentation(
     *played_audio_event_count = initial_event_count;
     *end_phase_armed = false;
 }
-
-#[cfg(test)]
-mod tests;

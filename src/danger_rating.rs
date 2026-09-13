@@ -5,7 +5,7 @@ use crate::strategy::MissionInstance;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum DangerLevel {
+pub enum DangerLevel {
     Routine,
     Contested,
     Severe,
@@ -13,9 +13,15 @@ pub(crate) enum DangerLevel {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct DangerRating {
+pub struct DangerRating {
     pub score: u8,
     pub level: DangerLevel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HostileProfile {
+    pub hostile_count: usize,
+    pub hostile_powers: usize,
 }
 
 impl DangerRating {
@@ -29,9 +35,8 @@ impl DangerRating {
     }
 }
 
-pub(crate) fn for_instance(instance: &MissionInstance, data: &GameData) -> DangerRating {
-    let (hostile_count, hostile_powers) =
-        hostile_profile(&instance.hostile_unit_ids, &instance.faction_id, data);
+pub fn for_instance(instance: &MissionInstance, data: &GameData) -> DangerRating {
+    let profile = hostile_profile(&instance.hostile_unit_ids, &instance.faction_id, data);
     let hazard_count = data
         .campaign
         .map_recipes
@@ -39,8 +44,8 @@ pub(crate) fn for_instance(instance: &MissionInstance, data: &GameData) -> Dange
         .find(|recipe| recipe.id == instance.map_recipe)
         .map_or(0, |recipe| recipe.hazards.len());
     rate(
-        hostile_count,
-        hostile_powers,
+        profile.hostile_count,
+        profile.hostile_powers,
         instance.objective_kind,
         instance.round_limit,
         hazard_count,
@@ -48,12 +53,11 @@ pub(crate) fn for_instance(instance: &MissionInstance, data: &GameData) -> Dange
     )
 }
 
-pub(crate) fn for_mission(mission: &MissionDef, data: &GameData) -> DangerRating {
-    let (hostile_count, hostile_powers) =
-        hostile_profile(&mission.hostile_unit_ids, &mission.hostile_faction, data);
+pub fn for_mission(mission: &MissionDef, data: &GameData) -> DangerRating {
+    let profile = hostile_profile(&mission.hostile_unit_ids, &mission.hostile_faction, data);
     rate(
-        hostile_count,
-        hostile_powers,
+        profile.hostile_count,
+        profile.hostile_powers,
         mission.objective_kind,
         mission.round_limit,
         mission.hazards.len(),
@@ -61,7 +65,7 @@ pub(crate) fn for_mission(mission: &MissionDef, data: &GameData) -> DangerRating
     )
 }
 
-fn hostile_profile(ids: &[String], faction: &str, data: &GameData) -> (usize, usize) {
+pub fn hostile_profile(ids: &[String], faction: &str, data: &GameData) -> HostileProfile {
     let hostiles = data.roster.iter().filter(|unit| {
         unit.team == Team::Hostile
             && if ids.is_empty() {
@@ -78,10 +82,13 @@ fn hostile_profile(ids: &[String], faction: &str, data: &GameData) -> (usize, us
             }
         })
         .count();
-    (count, powers.len())
+    HostileProfile {
+        hostile_count: count,
+        hostile_powers: powers.len(),
+    }
 }
 
-fn rate(
+pub fn rate(
     hostile_count: usize,
     hostile_powers: usize,
     objective: ObjectiveKind,
@@ -129,6 +136,3 @@ fn rate(
     };
     DangerRating { score, level }
 }
-
-#[cfg(test)]
-mod tests;

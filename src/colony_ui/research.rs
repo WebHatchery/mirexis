@@ -7,15 +7,12 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-const RESEARCH_HEADING_Y: f32 = 518.0;
-const RESEARCH_ROW_START_Y: f32 = 524.0;
-const RESEARCH_ROW_STEP_Y: f32 = 40.0;
-const RESEARCH_ROW_HEIGHT: f32 = 34.0;
+pub const RESEARCH_HEADING_Y: f32 = 518.0;
+pub const RESEARCH_ROW_START_Y: f32 = 524.0;
+pub const RESEARCH_ROW_STEP_Y: f32 = 40.0;
+pub const RESEARCH_ROW_HEIGHT: f32 = 34.0;
 
-#[cfg(test)]
-mod tests;
-
-pub(super) fn has_pending(campaign: &CampaignState) -> bool {
+pub fn has_pending(campaign: &CampaignState) -> bool {
     campaign
         .strategy
         .research
@@ -23,7 +20,7 @@ pub(super) fn has_pending(campaign: &CampaignState) -> bool {
         .any(|research| !research.completed)
 }
 
-pub(super) fn draw_available(
+pub fn draw_available(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -90,7 +87,7 @@ pub(super) fn draw_available(
     }
 }
 
-pub(super) fn draw_completed_summary(
+pub fn draw_completed_summary(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -162,7 +159,7 @@ pub(super) fn draw_completed_summary(
     }
 }
 
-fn research_row_bounds(index: usize) -> Rect {
+pub fn research_row_bounds(index: usize) -> Rect {
     Rect::new(
         878.0,
         RESEARCH_ROW_START_Y + index as f32 * RESEARCH_ROW_STEP_Y,
@@ -171,7 +168,7 @@ fn research_row_bounds(index: usize) -> Rect {
     )
 }
 
-fn research_icon_cell(id: &str) -> usize {
+pub fn research_icon_cell(id: &str) -> usize {
     match id {
         "xeno_triage" => 8,
         "salvage_doctrine" => 10,

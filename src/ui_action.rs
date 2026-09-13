@@ -38,6 +38,7 @@ pub enum UiAction {
     Continue,
     ReturnToTitle,
     ReturnToColony,
+    ToggleOperations,
     OpenRoster,
     OpenGeneLab,
     SelectColonist(String),

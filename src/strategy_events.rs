@@ -3,7 +3,7 @@
 use crate::data::CharacterEventDef;
 use crate::strategy::CharacterEventState;
 
-pub(crate) fn from_definition(event: &CharacterEventDef) -> CharacterEventState {
+pub fn from_definition(event: &CharacterEventDef) -> CharacterEventState {
     CharacterEventState {
         id: event.id.clone(),
         title: event.title.clone(),
@@ -22,11 +22,7 @@ pub(crate) fn from_definition(event: &CharacterEventDef) -> CharacterEventState 
     }
 }
 
-pub(crate) fn is_available(
-    event: &CharacterEventState,
-    protocol_id: &str,
-    trace_complete: bool,
-) -> bool {
+pub fn is_available(event: &CharacterEventState, protocol_id: &str, trace_complete: bool) -> bool {
     !event.resolved
         && (event.required_protocol.is_empty() || event.required_protocol == protocol_id)
         && (!event.requires_contact_trace || trace_complete)

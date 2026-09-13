@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use std::collections::BTreeSet;
-use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Deserialize)]
@@ -17,18 +16,16 @@ struct TextureManifestEntry {
 #[test]
 fn registry_matches_external_texture_manifest_assets() {
     let project_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let registry: AssetRegistry = serde_json::from_str(
-        &fs::read_to_string(project_root.join("asset_registry.json"))
-            .expect("asset registry exists"),
+    let registry: AssetRegistry = macroquad_toolkit::data_loader::load_json_file_sync(
+        project_root.join("asset_registry.json"),
     )
-    .expect("asset registry is valid JSON");
+    .expect("asset registry exists and is valid JSON");
     assert_eq!(registry.version, 1, "asset registry version is supported");
 
-    let manifest: Vec<TextureManifestEntry> = serde_json::from_str(
-        &fs::read_to_string(project_root.join("assets/data/texture_manifest.json"))
-            .expect("texture manifest exists"),
+    let manifest: Vec<TextureManifestEntry> = macroquad_toolkit::data_loader::load_json_file_sync(
+        project_root.join("assets/data/texture_manifest.json"),
     )
-    .expect("texture manifest is valid JSON");
+    .expect("texture manifest exists and is valid JSON");
 
     let registered = registry.assets.iter().cloned().collect::<BTreeSet<_>>();
     let runtime = manifest

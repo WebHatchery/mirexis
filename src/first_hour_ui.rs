@@ -1,5 +1,6 @@
 //! Non-blocking first-hour goal banner and revisitable help surface.
 
+use crate::data::TutorialCopy;
 use crate::first_hour::{FirstHourProgress, FirstHourStage};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
@@ -7,36 +8,46 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, draw_text_block, SurfaceStyle, TextStyle};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-struct GoalBannerLayout {
-    panel: Rect,
-    text_origin: Vec2,
-    text_width: f32,
-    text_height: f32,
-    help_button: Rect,
+pub struct GoalBannerLayout {
+    pub panel: Rect,
+    pub text_origin: Vec2,
+    pub text_width: f32,
+    pub text_height: f32,
+    pub help_button: Rect,
 }
 
-pub(crate) fn draw(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw(
+    progress: &FirstHourProgress,
+    copy: &TutorialCopy,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     if progress.help_open {
         actions.clear();
-        draw_help(progress, mouse, actions);
+        draw_help(progress, copy, mouse, actions);
         return;
     }
-    draw_goal(progress, mouse, actions);
+    draw_goal(progress, copy, mouse, actions);
 }
 
-pub(crate) fn debrief_return_button_bounds() -> Rect {
+pub fn debrief_return_button_bounds() -> Rect {
     Rect::new(200.0, 574.0, 220.0, 48.0)
 }
 
-fn begin_arrival_button_bounds() -> Rect {
+pub fn begin_arrival_button_bounds() -> Rect {
     Rect::new(342.0, 114.0, 182.0, 26.0)
 }
 
-fn continue_campaign_button_bounds() -> Rect {
+pub fn continue_campaign_button_bounds() -> Rect {
     Rect::new(330.0, 114.0, 194.0, 26.0)
 }
 
-fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_goal(
+    progress: &FirstHourProgress,
+    copy: &TutorialCopy,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     let layout = goal_banner_layout(progress.stage);
     draw_surface(
         layout.panel,
@@ -45,7 +56,7 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
             .with_left_accent(5.0, Color::new(0.34, 0.86, 0.68, 1.0)),
     );
     text(
-        "PRIMARY GOAL",
+        &copy.primary_goal_label,
         layout.text_origin.x,
         layout.text_origin.y - 10.0,
         12.0,
@@ -87,14 +98,14 @@ fn draw_goal(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
     }
 }
 
-fn focus_target(progress: &FirstHourProgress) -> Option<Rect> {
+pub fn focus_target(progress: &FirstHourProgress) -> Option<Rect> {
     if !progress.guidance_enabled {
         return None;
     }
     advance_focus_target(progress.stage).or_else(|| debrief_focus_target(progress.stage))
 }
 
-fn advance_focus_target(stage: FirstHourStage) -> Option<Rect> {
+pub fn advance_focus_target(stage: FirstHourStage) -> Option<Rect> {
     match stage {
         FirstHourStage::Arrival => Some(begin_arrival_button_bounds()),
         FirstHourStage::Promise => Some(continue_campaign_button_bounds()),
@@ -102,7 +113,7 @@ fn advance_focus_target(stage: FirstHourStage) -> Option<Rect> {
     }
 }
 
-fn debrief_focus_target(stage: FirstHourStage) -> Option<Rect> {
+pub fn debrief_focus_target(stage: FirstHourStage) -> Option<Rect> {
     matches!(
         stage,
         FirstHourStage::FirstReturn | FirstHourStage::SecondReturn
@@ -110,7 +121,7 @@ fn debrief_focus_target(stage: FirstHourStage) -> Option<Rect> {
     .then_some(debrief_return_button_bounds())
 }
 
-fn draw_focus(rect: Rect) {
+pub fn draw_focus(rect: Rect) {
     let color = Color::new(1.0, 0.74, 0.18, 0.96);
     draw_rectangle_lines(
         rect.x - 4.0,
@@ -131,7 +142,7 @@ fn draw_focus(rect: Rect) {
     text("NEXT", rect.x + 2.0, rect.y - 7.0, 10.0, dark::ACCENT);
 }
 
-fn goal_banner_layout(stage: FirstHourStage) -> GoalBannerLayout {
+pub fn goal_banner_layout(stage: FirstHourStage) -> GoalBannerLayout {
     if matches!(
         stage,
         FirstHourStage::FirstReturn | FirstHourStage::SecondReturn
@@ -154,7 +165,12 @@ fn goal_banner_layout(stage: FirstHourStage) -> GoalBannerLayout {
     }
 }
 
-fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_help(
+    progress: &FirstHourProgress,
+    copy: &TutorialCopy,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     draw_rectangle(0.0, 0.0, 1280.0, 720.0, Color::new(0.01, 0.02, 0.025, 0.84));
     let panel = Rect::new(200.0, 92.0, 880.0, 536.0);
     draw_surface(
@@ -163,34 +179,22 @@ fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
             .with_border(2.0, Color::new(0.34, 0.86, 0.68, 1.0)),
     );
     text(
-        "FIRST-HOUR FIELD GUIDE",
+        &copy.first_hour_help_title,
         240.0,
         138.0,
         30.0,
         dark::TEXT_BRIGHT,
     );
-    text("CURRENT GOAL", 240.0, 184.0, 13.0, dark::ACCENT);
-    text(progress.visible_goal(), 240.0, 212.0, 17.0, dark::TEXT);
-    section(
+    text(
+        &copy.first_hour_current_goal_label,
         240.0,
-        262.0,
-        "COLONY",
-        &[
-            "Tap ground to walk; tap a speech marker to approach a colonist.",
-            "Tap OPERATIONS for missions and timely preparation choices.",
-            "Tap TITLE to leave safely; campaign changes autosave.",
-        ],
+        184.0,
+        13.0,
+        dark::ACCENT,
     );
-    section(
-        650.0,
-        262.0,
-        "TACTICAL",
-        &[
-            "Tap a colonist, then a green tile, hostile, or visible action.",
-            "Forecasts show deterministic accuracy, cover, armour, and damage.",
-            "Tap HELP in battle for the full field manual; tap SAVE at any time.",
-        ],
-    );
+    text(progress.visible_goal(), 240.0, 212.0, 17.0, dark::TEXT);
+    section(240.0, 262.0, "COLONY", &copy.first_hour_colony_lines);
+    section(650.0, 262.0, "TACTICAL", &copy.first_hour_tactical_lines);
     draw_metrics(progress);
     if button(Rect::new(240.0, 542.0, 210.0, 42.0), "RETURN", true, mouse) {
         actions.push(UiAction::ToggleFirstHourHelp);
@@ -216,7 +220,7 @@ fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
         actions.push(UiAction::SkipFirstHourTutorial);
     }
     text(
-        "Skipping hides teaching prompts but preserves every campaign goal.",
+        &copy.first_hour_skip_notice,
         240.0,
         608.0,
         13.0,
@@ -224,7 +228,7 @@ fn draw_help(progress: &FirstHourProgress, mouse: Vec2, actions: &mut Vec<UiActi
     );
 }
 
-fn draw_metrics(progress: &FirstHourProgress) {
+pub fn draw_metrics(progress: &FirstHourProgress) {
     let metrics = &progress.metrics;
     text("SESSION METRICS", 240.0, 390.0, 16.0, dark::ACCENT);
     text(
@@ -269,25 +273,25 @@ fn draw_metrics(progress: &FirstHourProgress) {
     );
 }
 
-fn operation(millis: Option<u64>, rounds: Option<u32>) -> String {
+pub fn operation(millis: Option<u64>, rounds: Option<u32>) -> String {
     match (millis, rounds) {
         (Some(millis), Some(rounds)) => format!("{} / R{}", duration(Some(millis)), rounds),
         _ => "pending".to_owned(),
     }
 }
 
-fn duration(millis: Option<u64>) -> String {
+pub fn duration(millis: Option<u64>) -> String {
     let Some(total_seconds) = millis.map(|value| value / 1_000) else {
         return "—".to_owned();
     };
     format!("{}:{:02}", total_seconds / 60, total_seconds % 60)
 }
 
-fn section(x: f32, y: f32, title: &str, lines: &[&str]) {
+pub fn section<S: AsRef<str>>(x: f32, y: f32, title: &str, lines: &[S]) {
     text(title, x, y, 16.0, dark::ACCENT);
     for (index, line) in lines.iter().enumerate() {
         text(
-            line,
+            line.as_ref(),
             x,
             y + 30.0 + index as f32 * 28.0,
             14.0,
@@ -296,9 +300,6 @@ fn section(x: f32, y: f32, title: &str, lines: &[&str]) {
     }
 }
 
-fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
+pub fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
     draw_text_ex(value, x, y, TextStyle::new(size, color).params());
 }
-
-#[cfg(test)]
-mod tests;

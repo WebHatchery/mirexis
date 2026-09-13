@@ -11,7 +11,7 @@ use macroquad_toolkit::events::EventBus;
 use macroquad_toolkit::notifications::NotificationManager;
 
 impl Game {
-    pub(super) fn reset_capture_world(&mut self) {
+    pub fn reset_capture_world(&mut self) {
         let campaign = CampaignState::new(&self.data);
         let active_mission = campaign
             .strategy

@@ -3,7 +3,7 @@
 use super::{BuildingKind, ColonyState};
 
 impl ColonyState {
-    pub(crate) fn repair_cost_for(&self, building_id: &str) -> Option<i32> {
+    pub fn repair_cost_for(&self, building_id: &str) -> Option<i32> {
         let building = self
             .buildings
             .iter()
@@ -20,7 +20,7 @@ impl ColonyState {
         Some((building.kind.repair_cost() - discount).max(5))
     }
 
-    pub(crate) fn can_repair_building(&self, building_id: &str) -> bool {
+    pub fn can_repair_building(&self, building_id: &str) -> bool {
         self.repair_cost_for(building_id)
             .is_some_and(|cost| self.resources.materials >= cost)
     }

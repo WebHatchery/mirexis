@@ -81,7 +81,7 @@ impl CampaignState {
     }
 }
 
-pub(crate) fn learn_after_operation(
+pub fn learn_after_operation(
     campaign: &mut CampaignState,
     deployed_ids: &[String],
     data: &GameData,
@@ -123,7 +123,7 @@ pub(crate) fn learn_after_operation(
     learned
 }
 
-pub(crate) fn normalize_loadout(character: &mut CharacterRecord, class: &ClassDef) {
+pub fn normalize_loadout(character: &mut CharacterRecord, class: &ClassDef) {
     let fundamental = format!("{}_fundamentals", class.id);
     if !character.learned_skills.contains(&fundamental) {
         character.learned_skills.push(fundamental.clone());
@@ -172,7 +172,7 @@ pub(crate) fn normalize_loadout(character: &mut CharacterRecord, class: &ClassDe
     });
 }
 
-fn technique_for_character(
+pub fn technique_for_character(
     campaign: &CampaignState,
     character_id: &str,
     skill_id: &str,
@@ -197,7 +197,7 @@ fn technique_for_character(
     Ok((class.clone(), technique))
 }
 
-pub(crate) fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
+pub fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
     let mut technique_ids = std::collections::HashSet::new();
     for class in classes {
         if class.technique_slots > class.skill_slots {
@@ -235,6 +235,3 @@ pub(crate) fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests;

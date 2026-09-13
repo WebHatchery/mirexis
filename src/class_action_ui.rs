@@ -5,7 +5,7 @@ use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-fn class_action_button_label<'a>(
+pub fn class_action_button_label<'a>(
     label: &'a str,
     unit: &UnitState,
     targeting: bool,
@@ -33,7 +33,7 @@ fn class_action_button_label<'a>(
     label
 }
 
-pub(crate) fn draw_action_button(
+pub fn draw_action_button(
     ctx: &UiContext<'_>,
     selected: Option<&UnitState>,
     rect: Rect,
@@ -70,6 +70,3 @@ pub(crate) fn draw_action_button(
         UiAction::ActivateClassAction
     });
 }
-
-#[cfg(test)]
-mod tests;

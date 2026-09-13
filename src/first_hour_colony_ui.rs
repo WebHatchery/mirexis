@@ -4,11 +4,11 @@ use crate::first_hour::{FirstHourProgress, FirstHourStage};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-const OPERATIONS_BUTTON: Rect = Rect::new(1028.0, 22.0, 124.0, 28.0);
-const BRIEFING_BUTTON: Rect = Rect::new(878.0, 478.0, 362.0, 30.0);
-const INVESTMENT_CHOICES: Rect = Rect::new(878.0, 348.0, 362.0, 212.0);
+pub const OPERATIONS_BUTTON: Rect = Rect::new(1028.0, 22.0, 124.0, 28.0);
+pub const BRIEFING_BUTTON: Rect = Rect::new(878.0, 478.0, 362.0, 30.0);
+pub const INVESTMENT_CHOICES: Rect = Rect::new(878.0, 348.0, 362.0, 212.0);
 
-pub(crate) fn draw_focus(
+pub fn draw_focus(
     progress: &FirstHourProgress,
     operations_open: bool,
     dialogue_target: Option<&str>,
@@ -19,7 +19,7 @@ pub(crate) fn draw_focus(
     draw_focus_rect(rect);
 }
 
-pub(crate) fn draw_briefing_focus(
+pub fn draw_briefing_focus(
     campaign: &crate::campaign::CampaignState,
     data: &crate::data::GameData,
 ) {
@@ -28,7 +28,7 @@ pub(crate) fn draw_briefing_focus(
     }
 }
 
-fn draw_focus_rect(rect: Rect) {
+pub fn draw_focus_rect(rect: Rect) {
     let color = focus_color();
     draw_rectangle_lines(
         rect.x - 4.0,
@@ -54,7 +54,7 @@ fn draw_focus_rect(rect: Rect) {
     );
 }
 
-fn focus_target(
+pub fn focus_target(
     progress: &FirstHourProgress,
     operations_open: bool,
     dialogue_target: Option<&str>,
@@ -85,7 +85,7 @@ fn focus_target(
     }
 }
 
-fn briefing_focus_target(
+pub fn briefing_focus_target(
     progress: &FirstHourProgress,
     campaign: &crate::campaign::CampaignState,
     data: &crate::data::GameData,
@@ -111,9 +111,6 @@ fn briefing_focus_target(
         })
 }
 
-fn focus_color() -> Color {
+pub fn focus_color() -> Color {
     Color::new(1.0, 0.74, 0.18, 0.96)
 }
-
-#[cfg(test)]
-mod tests;

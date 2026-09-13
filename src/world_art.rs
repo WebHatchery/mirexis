@@ -1,15 +1,12 @@
 //! Runtime use of the promoted concept sprites in the tactical world.
 
-#[cfg(test)]
-mod tests;
-
 use crate::grid_ui::GridView;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::grid::TilePos;
 
-pub(crate) fn draw_title_dressing(assets: &AssetManager, visuals: &VisualCatalog) {
+pub fn draw_title_dressing(assets: &AssetManager, visuals: &VisualCatalog) {
     draw_concept_cell(
         assets,
         visuals,
@@ -36,14 +33,14 @@ pub(crate) fn draw_title_dressing(assets: &AssetManager, visuals: &VisualCatalog
     );
 }
 
-pub(crate) struct TacticalDressingContext<'a> {
-    pub(crate) assets: &'a AssetManager,
-    pub(crate) visuals: &'a VisualCatalog,
-    pub(crate) view: GridView,
-    pub(crate) position: TilePos,
+pub struct TacticalDressingContext<'a> {
+    pub assets: &'a AssetManager,
+    pub visuals: &'a VisualCatalog,
+    pub view: GridView,
+    pub position: TilePos,
 }
 
-pub(crate) fn draw_tactical_dressing(
+pub fn draw_tactical_dressing(
     context: TacticalDressingContext<'_>,
     blocked: bool,
     occupied: bool,
@@ -90,7 +87,7 @@ pub(crate) fn draw_tactical_dressing(
     }
 }
 
-pub(crate) fn draw_colony_dressing(
+pub fn draw_colony_dressing(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     view: crate::colony_map_ui::view::ColonyView,
@@ -137,7 +134,7 @@ pub(crate) fn draw_colony_dressing(
     }
 }
 
-fn draw_tile_cell(
+pub fn draw_tile_cell(
     context: &TacticalDressingContext<'_>,
     atlas_id: &str,
     index: usize,
@@ -158,7 +155,7 @@ fn draw_tile_cell(
     );
 }
 
-fn draw_concept_cell(
+pub fn draw_concept_cell(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     atlas_id: &str,
@@ -176,7 +173,7 @@ fn draw_concept_cell(
     );
 }
 
-fn draw_art_grounding(destination: Rect, tint: Color) {
+pub fn draw_art_grounding(destination: Rect, tint: Color) {
     if destination.w > 150.0 || destination.h > 150.0 {
         return;
     }
@@ -190,7 +187,7 @@ fn draw_art_grounding(destination: Rect, tint: Color) {
     );
 }
 
-fn square_bounds(center: Vec2, size: f32, pivot: [f32; 2]) -> Rect {
+pub fn square_bounds(center: Vec2, size: f32, pivot: [f32; 2]) -> Rect {
     Rect::new(
         center.x - size * pivot[0],
         center.y - size * pivot[1],
@@ -199,7 +196,7 @@ fn square_bounds(center: Vec2, size: f32, pivot: [f32; 2]) -> Rect {
     )
 }
 
-fn faction_emplacement_cell(faction: &str, signature: u32) -> usize {
+pub fn faction_emplacement_cell(faction: &str, signature: u32) -> usize {
     let base = if faction.contains("directorate") {
         6
     } else if faction.contains("ascendant") {
@@ -212,21 +209,21 @@ fn faction_emplacement_cell(faction: &str, signature: u32) -> usize {
     base + (signature % 3) as usize
 }
 
-fn flora_cell(signature: u32) -> usize {
+pub fn flora_cell(signature: u32) -> usize {
     [0, 1, 2, 7, 8, 9, 11][(signature % 7) as usize]
 }
 
-fn open_tile_flora_cell(signature: u32) -> Option<usize> {
+pub fn open_tile_flora_cell(signature: u32) -> Option<usize> {
     match signature % 23 {
         0..=2 => Some(flora_cell(signature)),
         _ => None,
     }
 }
 
-fn tile_signature(position: TilePos) -> u32 {
+pub fn tile_signature(position: TilePos) -> u32 {
     tile_signature_xy(position.x, position.y)
 }
 
-fn tile_signature_xy(x: i32, y: i32) -> u32 {
+pub fn tile_signature_xy(x: i32, y: i32) -> u32 {
     (x as u32).wrapping_mul(73_856_093) ^ (y as u32).wrapping_mul(19_349_663)
 }

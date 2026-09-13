@@ -7,9 +7,9 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(crate) const INVESTMENT_COST: i32 = 24;
+pub const INVESTMENT_COST: i32 = 24;
 
-pub(crate) fn label(id: &str) -> &'static str {
+pub fn label(id: &str) -> &'static str {
     match id {
         "bastion_mesh" => "Bastion Mesh",
         "survey_uplink" => "Survey Uplink",
@@ -18,7 +18,7 @@ pub(crate) fn label(id: &str) -> &'static str {
     }
 }
 
-pub(crate) fn effect(id: &str) -> &'static str {
+pub fn effect(id: &str) -> &'static str {
     match id {
         "bastion_mesh" => "+1 ARMOUR",
         "survey_uplink" => "+8 ACCURACY",
@@ -27,7 +27,7 @@ pub(crate) fn effect(id: &str) -> &'static str {
     }
 }
 
-pub(crate) fn active_summary(id: &str) -> Option<&'static str> {
+pub fn active_summary(id: &str) -> Option<&'static str> {
     match id {
         "bastion_mesh" => Some("PREP // BASTION MESH // SQUAD +1 ARM"),
         "survey_uplink" => Some("PREP // SURVEY UPLINK // SQUAD +8 ACC"),
@@ -36,7 +36,7 @@ pub(crate) fn active_summary(id: &str) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn button_label(name: &str, materials: i32) -> String {
+pub fn button_label(name: &str, materials: i32) -> String {
     if materials < INVESTMENT_COST {
         format!("{name} // NEED {INVESTMENT_COST} MAT")
     } else {
@@ -44,13 +44,13 @@ pub(crate) fn button_label(name: &str, materials: i32) -> String {
     }
 }
 
-pub(crate) fn tactical_summary(progress: &FirstHourProgress) -> Option<&'static str> {
+pub fn tactical_summary(progress: &FirstHourProgress) -> Option<&'static str> {
     (progress.stage == FirstHourStage::SecondOperationTactical)
         .then(|| active_summary(&progress.investment_name))
         .flatten()
 }
 
-pub(crate) fn draw_tactical_summary(progress: &FirstHourProgress, origin: Vec2) {
+pub fn draw_tactical_summary(progress: &FirstHourProgress, origin: Vec2) {
     let Some(summary) = tactical_summary(progress) else {
         return;
     };
@@ -62,7 +62,7 @@ pub(crate) fn draw_tactical_summary(progress: &FirstHourProgress, origin: Vec2) 
     );
 }
 
-pub(crate) fn draw_active_summary(campaign: &CampaignState, origin: Vec2) {
+pub fn draw_active_summary(campaign: &CampaignState, origin: Vec2) {
     if campaign.operations_completed != 1 {
         return;
     }
@@ -77,7 +77,7 @@ pub(crate) fn draw_active_summary(campaign: &CampaignState, origin: Vec2) {
     );
 }
 
-pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     text(
         "CHOOSE ONE FIELD PREPARATION",
         878.0,
@@ -123,9 +123,6 @@ pub(crate) fn draw(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAc
     }
 }
 
-fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
+pub fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
     draw_text_ex(value, x, y, TextStyle::new(size, color).params());
 }
-
-#[cfg(test)]
-mod tests;

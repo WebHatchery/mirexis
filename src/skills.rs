@@ -1,4 +1,6 @@
 //! Data-backed base-class techniques and their deterministic tactical effects.
+pub mod actions;
+pub use actions::*;
 
 use crate::data::{CoverEdgeDef, EdgeDirection, HazardKind, Team, TechniqueTarget};
 use crate::state::{
@@ -7,7 +9,7 @@ use crate::state::{
 use crate::tactical::{manhattan, path_cost, StatusKind, UnitAnimationState, UnitFacing};
 use macroquad_toolkit::grid::TilePos;
 
-pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
+pub fn skill_name(skill_id: &str) -> Option<&'static str> {
     match skill_id {
         "controlled_burst" => Some("CONTROLLED BURST"),
         "armour_drill" => Some("ARMOUR DRILL"),
@@ -27,7 +29,7 @@ pub(crate) fn skill_name(skill_id: &str) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn target_kind(skill_id: &str) -> Option<TechniqueTarget> {
+pub fn target_kind(skill_id: &str) -> Option<TechniqueTarget> {
     match skill_id {
         "controlled_burst" | "spotters_mark" | "kinetic_draw" | "premonition" => {
             Some(TechniqueTarget::Hostile)
@@ -41,11 +43,11 @@ pub(crate) fn target_kind(skill_id: &str) -> Option<TechniqueTarget> {
     }
 }
 
-pub(crate) fn requires_target(skill_id: &str) -> bool {
+pub fn requires_target(skill_id: &str) -> bool {
     !matches!(target_kind(skill_id), Some(TechniqueTarget::SelfTarget))
 }
 
-pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str, skill_id: &str) -> bool {
+pub fn has_valid_target(session: &GameSession, unit_id: &str, skill_id: &str) -> bool {
     match target_kind(skill_id) {
         Some(TechniqueTarget::Tile) => session
             .tactical
@@ -69,7 +71,7 @@ pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str, skill_id: &
     }
 }
 
-pub(crate) fn can_target_unit(
+pub fn can_target_unit(
     session: &GameSession,
     unit_id: &str,
     skill_id: &str,
@@ -85,7 +87,7 @@ pub(crate) fn can_target_unit(
         .is_ok()
 }
 
-pub(crate) fn can_target_tile(
+pub fn can_target_tile(
     session: &GameSession,
     unit_id: &str,
     skill_id: &str,
@@ -160,7 +162,7 @@ impl GameSession {
     }
 }
 
-pub(crate) fn validate(
+pub fn validate(
     session: &GameSession,
     unit_id: &str,
     skill_id: &str,
@@ -207,7 +209,7 @@ pub(crate) fn validate(
         .ok_or(RuleError::InsufficientActionPoints)
 }
 
-fn validate_hostile_target(
+pub fn validate_hostile_target(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
@@ -243,7 +245,7 @@ fn validate_hostile_target(
     Ok(())
 }
 
-fn validate_ally_target(
+pub fn validate_ally_target(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
@@ -270,7 +272,7 @@ fn validate_ally_target(
     Ok(())
 }
 
-fn valid_tile_target(
+pub fn valid_tile_target(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
@@ -294,7 +296,7 @@ fn valid_tile_target(
     }
 }
 
-fn valid_cover_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
+pub fn valid_cover_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
     manhattan(unit.position, tile) == 1
         && session.tactical.fog.is_valid(tile)
         && !session.tactical.blocked.contains(&tile)
@@ -321,7 +323,7 @@ fn valid_cover_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> b
             .any(|edge| edge.position == [tile.x, tile.y])
 }
 
-fn valid_veil_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
+pub fn valid_veil_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
     manhattan(unit.position, tile) > 0
         && manhattan(unit.position, tile) <= 3
         && session.tactical.fog.is_valid(tile)
@@ -340,7 +342,7 @@ fn valid_veil_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bo
             .any(|field| field.center == tile)
 }
 
-fn valid_self_target(unit: &UnitState, skill_id: &str) -> bool {
+pub fn valid_self_target(unit: &UnitState, skill_id: &str) -> bool {
     skill_id != "overcharge"
         || unit.equipment_ids.iter().any(|equipment_id| {
             crate::equipment_actions::action_name(equipment_id).is_some()
@@ -348,7 +350,7 @@ fn valid_self_target(unit: &UnitState, skill_id: &str) -> bool {
         })
 }
 
-pub(crate) fn adaptive_hazard(session: &GameSession, target_id: &str) -> Option<HazardKind> {
+pub fn adaptive_hazard(session: &GameSession, target_id: &str) -> Option<HazardKind> {
     let target = session.unit(target_id)?;
     session
         .tactical
@@ -365,7 +367,7 @@ pub(crate) fn adaptive_hazard(session: &GameSession, target_id: &str) -> Option<
         .map(|hazard| hazard.kind)
 }
 
-fn kinetic_draw_destination(
+pub fn kinetic_draw_destination(
     session: &GameSession,
     source: TilePos,
     target: TilePos,
@@ -387,7 +389,7 @@ fn kinetic_draw_destination(
     })
 }
 
-fn skill_cost(
+pub fn skill_cost(
     session: &GameSession,
     unit: &UnitState,
     skill_id: &str,
@@ -403,191 +405,20 @@ fn skill_cost(
     }
 }
 
-pub(crate) fn execute(
-    session: &mut GameSession,
-    unit_id: &str,
-    skill_id: &str,
-    target_id: Option<&str>,
-    target_tile: Option<TilePos>,
-) -> Vec<BattleEvent> {
-    mark_used(session, unit_id, skill_id);
-    let mut events = vec![BattleEvent::SkillActivated {
-        unit_id: unit_id.to_owned(),
-        skill_id: skill_id.to_owned(),
-    }];
-    match skill_id {
-        "controlled_burst" => {
-            let target_id = target_id.expect("validated burst target");
-            events.extend(session.execute_attack(unit_id, target_id));
-            if session
-                .unit(target_id)
-                .is_some_and(|target| !target.incapacitated)
-            {
-                events.extend(session.execute_attack(unit_id, target_id));
-            }
-        }
-        "armour_drill" => {
-            spend_one_action_point(session, unit_id);
-            unit_mut(session, unit_id)
-                .expect("validated skill user")
-                .next_attack_ignores_armour = true;
-        }
-        "interpose" => {
-            spend_one_action_point(session, unit_id);
-            crate::class_actions::apply_status(
-                session,
-                target_id.expect("validated ally target"),
-                StatusKind::Guarded,
-                1,
-                &mut events,
-            );
-            crate::class_actions::apply_status(
-                session,
-                unit_id,
-                StatusKind::Guarded,
-                1,
-                &mut events,
-            );
-        }
-        "anchor_point" => {
-            spend_one_action_point(session, unit_id);
-            crate::class_actions::apply_status(
-                session,
-                unit_id,
-                StatusKind::Guarded,
-                1,
-                &mut events,
-            );
-        }
-        "slipstep" => {
-            spend_one_action_point(session, unit_id);
-            events.extend(
-                session.execute_move(unit_id, target_tile.expect("validated slipstep tile")),
-            );
-        }
-        "spotters_mark" => {
-            spend_one_action_point(session, unit_id);
-            crate::class_actions::apply_status(
-                session,
-                target_id.expect("validated mark target"),
-                StatusKind::Marked,
-                1,
-                &mut events,
-            );
-        }
-        "kinetic_draw" => {
-            spend_one_action_point(session, unit_id);
-            let target_id = target_id.expect("validated kinetic draw target");
-            if let Some(destination) = kinetic_draw_destination(
-                session,
-                session.unit(unit_id).expect("validated draw user").position,
-                session
-                    .unit(target_id)
-                    .expect("validated draw target")
-                    .position,
-            ) {
-                let target = unit_mut(session, target_id).expect("validated draw target");
-                let from = target.position;
-                target.position = destination;
-                target.facing = UnitFacing::toward(from, destination);
-                events.push(BattleEvent::UnitMoved {
-                    unit_id: target_id.to_owned(),
-                    path: vec![from, destination],
-                    cost: 0,
-                });
-                events.extend(crate::hazards::resolve_after_move(session, target_id));
-            }
-        }
-        "premonition" => {
-            spend_one_action_point(session, unit_id);
-            crate::class_actions::apply_status(
-                session,
-                target_id.expect("validated premonition target"),
-                StatusKind::Disrupted,
-                1,
-                &mut events,
-            );
-        }
-        "adaptive_secretion" => {
-            spend_one_action_point(session, unit_id);
-            let target_id = target_id.expect("validated adaptive secretion target");
-            let hazard = adaptive_hazard(session, target_id).expect("validated visible hazard");
-            unit_mut(session, target_id)
-                .expect("validated adaptive secretion target")
-                .hazard_resistance = Some(hazard);
-            crate::class_actions::apply_status(
-                session,
-                target_id,
-                StatusKind::Adapted,
-                1,
-                &mut events,
-            );
-        }
-        "spore_veil" => {
-            spend_one_action_point(session, unit_id);
-            session.tactical.obscuring_fields.push(ObscuringField {
-                center: target_tile.expect("validated spore veil tile"),
-                radius: 1,
-                remaining_phases: 1,
-            });
-        }
-        "stabilise" => {
-            spend_one_action_point(session, unit_id);
-            stabilise_target(
-                session,
-                target_id.expect("validated stabilise target"),
-                &mut events,
-            );
-        }
-        "combat_stimulant" => {
-            spend_one_action_point(session, unit_id);
-            let target_id = target_id.expect("validated stimulant target");
-            let target = unit_mut(session, target_id).expect("validated stimulant target");
-            target.action_points = target.action_points.saturating_add(2);
-            crate::class_actions::apply_status(
-                session,
-                target_id,
-                StatusKind::Hindered,
-                2,
-                &mut events,
-            );
-        }
-        "portable_cover" => {
-            spend_one_action_point(session, unit_id);
-            place_portable_cover(
-                session,
-                unit_id,
-                target_tile.expect("validated portable cover tile"),
-            );
-        }
-        "overcharge" => {
-            spend_one_action_point(session, unit_id);
-            unit_mut(session, unit_id)
-                .expect("validated overcharge user")
-                .next_equipment_overcharged = true;
-        }
-        _ => unreachable!("validated skill has an implementation"),
-    }
-    if skill_id != "controlled_burst" {
-        session.check_outcome(&mut events);
-    }
-    events
-}
-
-fn mark_used(session: &mut GameSession, unit_id: &str, skill_id: &str) {
+pub fn mark_used(session: &mut GameSession, unit_id: &str, skill_id: &str) {
     unit_mut(session, unit_id)
         .expect("validated skill user")
         .used_skill_ids
         .push(skill_id.to_owned());
 }
 
-fn spend_one_action_point(session: &mut GameSession, unit_id: &str) {
+pub fn spend_one_action_point(session: &mut GameSession, unit_id: &str) {
     unit_mut(session, unit_id)
         .expect("validated skill user")
         .action_points -= 1;
 }
 
-fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
+pub fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
     let target = unit_mut(session, target_id).expect("validated stabilise target");
     let before = target.health;
     target.health = 1.min(target.max_health);
@@ -601,7 +432,7 @@ fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec
     });
 }
 
-fn place_portable_cover(session: &mut GameSession, unit_id: &str, position: TilePos) {
+pub fn place_portable_cover(session: &mut GameSession, unit_id: &str, position: TilePos) {
     let origin = session
         .unit(unit_id)
         .expect("validated cover user")
@@ -622,7 +453,7 @@ fn place_portable_cover(session: &mut GameSession, unit_id: &str, position: Tile
     });
 }
 
-fn cover_direction(origin: TilePos, position: TilePos) -> EdgeDirection {
+pub fn cover_direction(origin: TilePos, position: TilePos) -> EdgeDirection {
     if origin.x < position.x {
         EdgeDirection::West
     } else if origin.x > position.x {
@@ -634,13 +465,10 @@ fn cover_direction(origin: TilePos, position: TilePos) -> EdgeDirection {
     }
 }
 
-fn unit_mut<'a>(session: &'a mut GameSession, unit_id: &str) -> Option<&'a mut UnitState> {
+pub fn unit_mut<'a>(session: &'a mut GameSession, unit_id: &str) -> Option<&'a mut UnitState> {
     session
         .tactical
         .units
         .iter_mut()
         .find(|unit| unit.id == unit_id)
 }
-
-#[cfg(test)]
-mod tests;

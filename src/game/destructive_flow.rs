@@ -4,7 +4,7 @@ use super::Game;
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn guard_destructive_action(&mut self, action: &UiAction) -> bool {
+    pub fn guard_destructive_action(&mut self, action: &UiAction) -> bool {
         match action {
             UiAction::StartMission if self.save_exists && !self.new_campaign_armed => {
                 self.new_campaign_armed = true;

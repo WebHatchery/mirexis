@@ -4,7 +4,7 @@ use super::{AppState, Game};
 use crate::{data::Team, state::ObjectiveState};
 
 impl Game {
-    pub(super) fn capture_debrief(&mut self) {
+    pub fn capture_debrief(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.objective_state = ObjectiveState::Victory;
         for unit in &mut self.session.tactical.units {
@@ -33,7 +33,7 @@ impl Game {
         self.state = AppState::Debrief;
     }
 
-    pub(super) fn capture_trauma_debrief(&mut self) {
+    pub fn capture_trauma_debrief(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.objective_state = ObjectiveState::Victory;
         for unit in &mut self.session.tactical.units {

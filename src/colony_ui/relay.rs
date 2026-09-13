@@ -6,7 +6,7 @@ use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-fn relay_button_label(
+pub fn relay_button_label(
     campaign_complete: bool,
     already_scanned: bool,
     power: i32,
@@ -28,7 +28,7 @@ fn relay_button_label(
     }
 }
 
-pub(super) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     routine_operations_visible: bool,
     mouse: Vec2,
@@ -53,6 +53,3 @@ pub(super) fn draw(
         actions.push(UiAction::RunRelayScan);
     }
 }
-
-#[cfg(test)]
-mod tests;

@@ -5,13 +5,13 @@ use macroquad::prelude::*;
 use macroquad_toolkit::{assets::AssetManager, prelude::dark, ui::draw_ui_text};
 
 #[derive(Clone, Copy)]
-pub(crate) enum DecisionKind {
+pub enum DecisionKind {
     Contact,
     Escalation,
     Mirexis,
 }
 
-pub(crate) fn draw_decision_dossier(
+pub fn draw_decision_dossier(
     kind: DecisionKind,
     campaign: &CampaignState,
     assets: &AssetManager,

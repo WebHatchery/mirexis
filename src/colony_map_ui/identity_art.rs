@@ -3,13 +3,7 @@
 use crate::colony::BuildingKind;
 use macroquad::prelude::*;
 
-pub(super) fn draw_ambient(
-    kind: BuildingKind,
-    center: Vec2,
-    zoom: f32,
-    powered: bool,
-    damaged: bool,
-) {
+pub fn draw_ambient(kind: BuildingKind, center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.26, 0.20, 0.72)
     } else {

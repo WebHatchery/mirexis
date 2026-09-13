@@ -3,7 +3,7 @@
 use crate::data::TechniqueTarget;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum AppState {
+pub enum AppState {
     Title,
     Colony,
     Roster,
@@ -15,7 +15,7 @@ pub(super) enum AppState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) enum TacticalTargeting {
+pub enum TacticalTargeting {
     Equipment {
         unit_id: String,
         equipment_id: String,

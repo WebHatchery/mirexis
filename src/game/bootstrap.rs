@@ -34,7 +34,8 @@ impl Game {
             }
         }
         let loaded_assets = assets.load_texture_configs(&data.texture_manifest).await;
-        let visuals = VisualCatalog::load();
+        let visuals = VisualCatalog::load()
+            .unwrap_or_else(|error| panic!("Mirexis visual catalog failed validation: {error}"));
         let missing_visuals = visuals.validate_loaded(&assets);
         let visual_summary = visuals.diagnostic_summary(&assets);
         println!("Mirexis visual catalog: {visual_summary}");
@@ -64,6 +65,7 @@ impl Game {
 
         let tactical_camera = WorldCamera::tactical_start(session.tactical.selected_tile);
         let colony_camera = WorldCamera::colony_start(crate::colony::SETTLEMENT_CENTER);
+        let colony_explorer = crate::colony_exploration::ColonyExplorer::from_config(&data.config);
         Self {
             data,
             session,
@@ -98,7 +100,7 @@ impl Game {
             delete_save_armed: false,
             tactical_camera,
             colony_camera,
-            colony_explorer: crate::colony_exploration::ColonyExplorer::default(),
+            colony_explorer,
             colony_operations_open: false,
             facility_upgrade_open: false,
             salvage_open: false,
@@ -114,11 +116,11 @@ impl Game {
 }
 
 #[cfg(target_arch = "wasm32")]
-fn should_load_runtime_asset_pack(_path: &str) -> bool {
+pub fn should_load_runtime_asset_pack(_path: &str) -> bool {
     true
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn should_load_runtime_asset_pack(path: &str) -> bool {
+pub fn should_load_runtime_asset_pack(path: &str) -> bool {
     std::path::Path::new(path).is_file()
 }

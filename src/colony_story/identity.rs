@@ -3,26 +3,26 @@
 use super::{ColonyBeat, ColonyStoryState};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct IdentityBuildingState {
-    pub(crate) damaged: bool,
-    pub(crate) powered: bool,
+pub struct IdentityBuildingState {
+    pub damaged: bool,
+    pub powered: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub(crate) struct IdentityArcProgress {
-    pub(crate) preparations_completed: u32,
-    pub(crate) stewardship_completed: u32,
+pub struct IdentityArcProgress {
+    pub preparations_completed: u32,
+    pub stewardship_completed: u32,
 }
 
 #[derive(Debug, Clone, Copy)]
-struct IdentityCivicArc {
+pub struct IdentityCivicArc {
     damage: ColonyBeat,
     repair: ColonyBeat,
     power_failure: ColonyBeat,
     power_restored: ColonyBeat,
 }
 
-pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
+pub fn identity_npc(path_id: &str) -> Option<&'static str> {
     match path_id {
         "human_redoubt" => Some("mara_venn"),
         "living_commonwealth" => Some("nadi_vale"),
@@ -31,7 +31,7 @@ pub(crate) fn identity_npc(path_id: &str) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn identity_beat(
+pub fn identity_beat(
     path_id: &str,
     character_id: &str,
     campaign_complete: bool,
@@ -75,7 +75,7 @@ pub(crate) fn identity_beat(
     Some(ColonyBeat { id, title, text })
 }
 
-pub(crate) fn identity_arc_beat(
+pub fn identity_arc_beat(
     path_id: &str,
     character_id: &str,
     campaign_complete: bool,
@@ -122,7 +122,7 @@ pub(crate) fn identity_arc_beat(
         })
 }
 
-fn identity_condition_beat(
+pub fn identity_condition_beat(
     path_id: &str,
     character_id: &str,
     state: Option<IdentityBuildingState>,
@@ -147,7 +147,7 @@ fn identity_condition_beat(
     (!story.has_heard(candidate.id)).then_some(candidate)
 }
 
-fn identity_civic_arc(path_id: &str) -> Option<&'static IdentityCivicArc> {
+pub fn identity_civic_arc(path_id: &str) -> Option<&'static IdentityCivicArc> {
     match path_id {
         "human_redoubt" => Some(&REDOUBT_CIVIC_ARC),
         "living_commonwealth" => Some(&COMMONWEALTH_CIVIC_ARC),
@@ -156,7 +156,7 @@ fn identity_civic_arc(path_id: &str) -> Option<&'static IdentityCivicArc> {
     }
 }
 
-const REDOUBT_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
+pub const REDOUBT_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     damage: ColonyBeat {
         id: "civic_redoubt_damage",
         title: "THE WALL TAKES A HIT",
@@ -179,7 +179,7 @@ const REDOUBT_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     },
 };
 
-const COMMONWEALTH_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
+pub const COMMONWEALTH_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     damage: ColonyBeat {
         id: "civic_commonwealth_damage",
         title: "THE GARDEN CAN BLEED",
@@ -202,7 +202,7 @@ const COMMONWEALTH_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     },
 };
 
-const THRESHOLD_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
+pub const THRESHOLD_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     damage: ColonyBeat {
         id: "civic_threshold_damage",
         title: "THE DOOR BENDS",
@@ -225,7 +225,7 @@ const THRESHOLD_CIVIC_ARC: IdentityCivicArc = IdentityCivicArc {
     },
 };
 
-fn stewardship_beat(
+pub fn stewardship_beat(
     path_id: &str,
     character_id: &str,
     completed_actions: u32,
@@ -255,7 +255,7 @@ fn stewardship_beat(
     (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
 }
 
-fn preparation_beat(
+pub fn preparation_beat(
     path_id: &str,
     character_id: &str,
     completed_actions: u32,
@@ -285,7 +285,7 @@ fn preparation_beat(
     (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
 }
 
-fn post_ending_beat(
+pub fn post_ending_beat(
     path_id: &str,
     character_id: &str,
     story: &ColonyStoryState,
@@ -315,7 +315,7 @@ fn post_ending_beat(
     (!story.has_heard(id)).then_some(ColonyBeat { id, title, text })
 }
 
-fn post_campaign_operation_beat(
+pub fn post_campaign_operation_beat(
     path_id: &str,
     character_id: &str,
     completed_operations: u32,

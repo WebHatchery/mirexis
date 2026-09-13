@@ -5,16 +5,16 @@ use crate::grid_ui::{CameraInsets, WorldCamera};
 use macroquad::prelude::{vec2, Rect, Vec2};
 
 #[derive(Clone, Copy)]
-pub(crate) struct ColonyView {
-    pub(crate) viewport: Rect,
+pub struct ColonyView {
+    pub viewport: Rect,
     origin: Vec2,
-    pub(crate) half_width: f32,
-    pub(crate) half_height: f32,
-    pub(crate) zoom: f32,
+    pub half_width: f32,
+    pub half_height: f32,
+    pub zoom: f32,
 }
 
 impl ColonyView {
-    pub(crate) fn new(viewport: Rect, camera: &WorldCamera) -> Self {
+    pub fn new(viewport: Rect, camera: &WorldCamera) -> Self {
         Self {
             viewport,
             origin: camera.projected_to_screen(viewport, Vec2::ZERO),
@@ -24,7 +24,7 @@ impl ColonyView {
         }
     }
 
-    pub(crate) fn plot_center(self, position: [i32; 2]) -> Vec2 {
+    pub fn plot_center(self, position: [i32; 2]) -> Vec2 {
         let elevation = self.elevation(position) as f32;
         vec2(
             self.origin.x + (position[0] - position[1]) as f32 * self.half_width,
@@ -33,7 +33,7 @@ impl ColonyView {
         )
     }
 
-    pub(crate) fn world_center(self, position: Vec2) -> Vec2 {
+    pub fn world_center(self, position: Vec2) -> Vec2 {
         let elevation =
             self.elevation([position.x.round() as i32, position.y.round() as i32]) as f32;
         vec2(
@@ -43,14 +43,14 @@ impl ColonyView {
         )
     }
 
-    pub(crate) fn world_position(self, screen: Vec2, elevation_plot: [i32; 2]) -> Vec2 {
+    pub fn world_position(self, screen: Vec2, elevation_plot: [i32; 2]) -> Vec2 {
         let horizontal = (screen.x - self.origin.x) / self.half_width;
         let elevation = self.elevation(elevation_plot) as f32 * self.elevation_step();
         let vertical = (screen.y - self.origin.y + elevation) / self.half_height;
         vec2((horizontal + vertical) * 0.5, (vertical - horizontal) * 0.5)
     }
 
-    pub(super) fn elevation(self, position: [i32; 2]) -> i8 {
+    pub fn elevation(self, position: [i32; 2]) -> i8 {
         let distance = (position[0] - 10).abs() + (position[1] - 10).abs();
         if distance <= 4 {
             2
@@ -64,11 +64,11 @@ impl ColonyView {
         }
     }
 
-    pub(super) fn elevation_step(self) -> f32 {
+    pub fn elevation_step(self) -> f32 {
         (self.half_height * 0.62).max(6.0)
     }
 
-    pub(super) fn cliff_drop(self, position: [i32; 2], neighbor: [i32; 2]) -> u8 {
+    pub fn cliff_drop(self, position: [i32; 2], neighbor: [i32; 2]) -> u8 {
         if neighbor[0] < 0
             || neighbor[1] < 0
             || neighbor[0] >= crate::colony::COLONY_WIDTH
@@ -81,7 +81,7 @@ impl ColonyView {
             .max(0) as u8
     }
 
-    pub(super) fn plot_render_bounds(self, position: [i32; 2]) -> Rect {
+    pub fn plot_render_bounds(self, position: [i32; 2]) -> Rect {
         let center = self.plot_center(position);
         let horizontal = self.half_width.max(35.0 * self.zoom).max(36.0);
         let above = self.half_height.max(52.0 * self.zoom).max(61.0);
@@ -94,7 +94,7 @@ impl ColonyView {
         )
     }
 
-    pub(super) fn visible(self, position: [i32; 2]) -> bool {
+    pub fn visible(self, position: [i32; 2]) -> bool {
         let bounds = self.plot_render_bounds(position);
         bounds.right() >= self.viewport.x
             && bounds.x <= self.viewport.right()
@@ -102,7 +102,7 @@ impl ColonyView {
             && bounds.y <= self.viewport.bottom()
     }
 
-    pub(super) fn camera_insets(zoom: f32) -> CameraInsets {
+    pub fn camera_insets(zoom: f32) -> CameraInsets {
         let half_width = COLONY_HALF_WIDTH * zoom;
         let half_height = COLONY_HALF_HEIGHT * zoom;
         let horizontal = half_width.max(35.0 * zoom).max(36.0);

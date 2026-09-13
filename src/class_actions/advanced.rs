@@ -6,9 +6,9 @@ use crate::state::{BattleEvent, GameSession, UnitState};
 use crate::tactical::{manhattan, path_cost, StatusKind};
 use macroquad_toolkit::grid::TilePos;
 
-const CARDINAL: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
+pub const CARDINAL: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
-pub(super) fn valid_rescue_target(
+pub fn valid_rescue_target(
     session: &GameSession,
     rescuer: &UnitState,
     target_id: Option<&str>,
@@ -23,11 +23,7 @@ pub(super) fn valid_rescue_target(
         && rescue_plan(session, rescuer, ally).is_some()
 }
 
-pub(super) fn valid_chorus_warden_tile(
-    session: &GameSession,
-    unit: &UnitState,
-    tile: TilePos,
-) -> bool {
+pub fn valid_chorus_warden_tile(session: &GameSession, unit: &UnitState, tile: TilePos) -> bool {
     session
         .tactical
         .hazards
@@ -43,7 +39,7 @@ pub(super) fn valid_chorus_warden_tile(
             .any(|field| field.center == tile)
 }
 
-pub(super) fn execute_rescue_specialist(
+pub fn execute_rescue_specialist(
     session: &mut GameSession,
     unit_id: &str,
     target_id: &str,
@@ -82,7 +78,7 @@ pub(super) fn execute_rescue_specialist(
     apply_status(session, target_id, StatusKind::Guarded, 1, events);
 }
 
-pub(super) fn execute_chorus_warden(
+pub fn execute_chorus_warden(
     session: &mut GameSession,
     unit_id: &str,
     tile: TilePos,
@@ -130,13 +126,17 @@ pub(super) fn execute_chorus_warden(
 }
 
 #[derive(Debug, Clone)]
-struct RescuePlan {
+pub struct RescuePlan {
     route: Vec<TilePos>,
     ally_destination: TilePos,
     rescuer_destination: TilePos,
 }
 
-fn rescue_plan(session: &GameSession, rescuer: &UnitState, ally: &UnitState) -> Option<RescuePlan> {
+pub fn rescue_plan(
+    session: &GameSession,
+    rescuer: &UnitState,
+    ally: &UnitState,
+) -> Option<RescuePlan> {
     let nearest_hostile = session
         .tactical
         .units
@@ -198,7 +198,12 @@ fn rescue_plan(session: &GameSession, rescuer: &UnitState, ally: &UnitState) -> 
         .map(|(plan, _)| plan)
 }
 
-fn open_pair_tile(session: &GameSession, tile: TilePos, rescuer_id: &str, ally_id: &str) -> bool {
+pub fn open_pair_tile(
+    session: &GameSession,
+    tile: TilePos,
+    rescuer_id: &str,
+    ally_id: &str,
+) -> bool {
     session.tactical.fog.is_valid(tile)
         && !session.tactical.blocked.contains(&tile)
         && tile != session.tactical.objective_tile
@@ -214,11 +219,11 @@ fn open_pair_tile(session: &GameSession, tile: TilePos, rescuer_id: &str, ally_i
             .any(|unit| unit.position == tile && unit.id != rescuer_id && unit.id != ally_id)
 }
 
-fn offset(origin: TilePos, dx: i32, dy: i32) -> TilePos {
+pub fn offset(origin: TilePos, dx: i32, dy: i32) -> TilePos {
     TilePos::new(origin.x + dx, origin.y + dy)
 }
 
-fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
+pub fn stabilise_target(session: &mut GameSession, target_id: &str, events: &mut Vec<BattleEvent>) {
     let target = session
         .tactical
         .units

@@ -6,7 +6,7 @@ use crate::tactical::{manhattan, ObjectiveState};
 use macroquad_toolkit::grid::TilePos;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum IntentAction {
+pub enum IntentAction {
     AttackUnit(String),
     AttackObjective,
     Advance {
@@ -17,12 +17,12 @@ pub(crate) enum IntentAction {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct EnemyIntent {
+pub struct EnemyIntent {
     pub ability: Option<&'static str>,
     pub action: IntentAction,
 }
 
-pub(crate) fn preview(
+pub fn preview(
     session: &GameSession,
     enemy_id: &str,
     max_action_points: u8,
@@ -58,7 +58,7 @@ pub(crate) fn preview(
     Some(EnemyIntent { ability, action })
 }
 
-fn pressure_target(session: &GameSession, enemy_id: &str) -> Option<String> {
+pub fn pressure_target(session: &GameSession, enemy_id: &str) -> Option<String> {
     if session.tactical.objective_kind == ObjectiveKind::DefendAsset
         && session.tactical.objective_state == ObjectiveState::Active
     {
@@ -73,6 +73,3 @@ fn pressure_target(session: &GameSession, enemy_id: &str) -> Option<String> {
         .min_by_key(|unit| (manhattan(enemy.position, unit.position), unit.id.clone()))
         .map(|unit| unit.name.to_uppercase())
 }
-
-#[cfg(test)]
-mod tests;

@@ -6,15 +6,7 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-#[cfg(test)]
-mod tests;
-
-pub(crate) fn draw_modal(
-    settings: AudioSettings,
-    open: bool,
-    mouse: Vec2,
-    actions: &mut Vec<UiAction>,
-) {
+pub fn draw_modal(settings: AudioSettings, open: bool, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if !open {
         return;
     }
@@ -110,14 +102,14 @@ pub(crate) fn draw_modal(
     );
 }
 
-fn volume_meter_bounds() -> Rect {
+pub fn volume_meter_bounds() -> Rect {
     Rect::new(432.0, 322.0, 386.0, 6.0)
 }
 
-fn volume_meter_fill_width(volume_percent: u8) -> f32 {
+pub fn volume_meter_fill_width(volume_percent: u8) -> f32 {
     volume_meter_bounds().w * volume_percent.min(100) as f32 / 100.0
 }
 
-fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
+pub fn text(value: &str, x: f32, y: f32, size: f32, color: Color) {
     draw_text_ex(value, x, y, TextStyle::new(size, color).params());
 }

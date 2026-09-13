@@ -7,15 +7,15 @@ use crate::ui::{self, UiAction};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::ui::VirtualUi;
 
-const FIRST_HOUR_COVER_POSITION: [i32; 2] = [6, 18];
-const FIRST_HOUR_ATTACK_POSITION: [i32; 2] = [12, 18];
-const FIRST_HOUR_OBJECTIVE_POSITION: [i32; 2] = [18, 22];
+pub const FIRST_HOUR_COVER_POSITION: [i32; 2] = [6, 18];
+pub const FIRST_HOUR_ATTACK_POSITION: [i32; 2] = [12, 18];
+pub const FIRST_HOUR_OBJECTIVE_POSITION: [i32; 2] = [18, 22];
 
-fn first_hour_attack_position() -> TilePos {
+pub fn first_hour_attack_position() -> TilePos {
     TilePos::new(FIRST_HOUR_ATTACK_POSITION[0], FIRST_HOUR_ATTACK_POSITION[1])
 }
 
-fn first_hour_objective_position() -> TilePos {
+pub fn first_hour_objective_position() -> TilePos {
     TilePos::new(
         FIRST_HOUR_OBJECTIVE_POSITION[0],
         FIRST_HOUR_OBJECTIVE_POSITION[1],
@@ -23,7 +23,7 @@ fn first_hour_objective_position() -> TilePos {
 }
 
 impl Game {
-    pub(super) fn handle_objective_interaction(&mut self) {
+    pub fn handle_objective_interaction(&mut self) {
         match self.session.interact_selected() {
             Ok(_) => {
                 self.campaign.first_hour.touched_objective();
@@ -38,7 +38,7 @@ impl Game {
         }
     }
 
-    pub(super) fn create_first_hour_session(
+    pub fn create_first_hour_session(
         &self,
         roster: &[crate::data::UnitDef],
     ) -> crate::state::GameSession {
@@ -50,13 +50,13 @@ impl Game {
         session
     }
 
-    pub(super) fn record_first_hour_move(&mut self, tile: TilePos) {
+    pub fn record_first_hour_move(&mut self, tile: TilePos) {
         let on_cover =
             crate::cover_rules::is_cover_position(&self.session.tactical.cover_edges, tile);
         self.campaign.first_hour.moved(on_cover);
     }
 
-    pub(super) fn select_next_ready_for_first_hour(&mut self) -> bool {
+    pub fn select_next_ready_for_first_hour(&mut self) -> bool {
         advance_first_hour_selection(
             &mut self.session,
             &mut self.campaign.first_hour,
@@ -64,7 +64,7 @@ impl Game {
         )
     }
 
-    pub(super) fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
+    pub fn draw_first_hour(&self, ui: &VirtualUi, actions: &mut Vec<UiAction>) {
         if !self.show_field_notes
             && !self.show_memorial
             && self.state != AppState::Title
@@ -74,13 +74,14 @@ impl Game {
         {
             crate::first_hour_ui::draw(
                 &self.campaign.first_hour,
+                &self.data.config.tutorial,
                 ui::pointer_position(ui),
                 actions,
             );
         }
     }
 
-    pub(super) fn apply_first_hour_action(&mut self, action: &UiAction) -> bool {
+    pub fn apply_first_hour_action(&mut self, action: &UiAction) -> bool {
         let save_message = match action {
             UiAction::AdvanceFirstHour => {
                 self.campaign.first_hour.advance_arrival();
@@ -148,7 +149,7 @@ impl Game {
         true
     }
 
-    fn autosave_first_hour_action(&mut self, success_message: &str) {
+    pub fn autosave_first_hour_action(&mut self, success_message: &str) {
         if first_hour_action_needs_current_save(self.state) {
             self.autosave_current(success_message);
         } else {
@@ -156,7 +157,7 @@ impl Game {
         }
     }
 
-    pub(super) fn record_first_hour_outcome(&mut self) {
+    pub fn record_first_hour_outcome(&mut self) {
         let won = self
             .last_outcome
             .as_ref()
@@ -168,7 +169,7 @@ impl Game {
         );
     }
 
-    pub(super) fn ensure_first_hour_recovery_reserve(&mut self) {
+    pub fn ensure_first_hour_recovery_reserve(&mut self) {
         if matches!(
             self.campaign.first_hour.stage,
             crate::first_hour::FirstHourStage::FirstReturn
@@ -183,7 +184,7 @@ impl Game {
         }
     }
 
-    pub(super) fn first_hour_ability_success(
+    pub fn first_hour_ability_success(
         &mut self,
         events: Vec<crate::tactical::BattleEvent>,
         fallback: &str,
@@ -198,11 +199,11 @@ impl Game {
     }
 }
 
-fn first_hour_action_needs_current_save(state: AppState) -> bool {
+pub fn first_hour_action_needs_current_save(state: AppState) -> bool {
     matches!(state, AppState::Tactical | AppState::Debrief)
 }
 
-pub(super) fn advance_first_hour_selection(
+pub fn advance_first_hour_selection(
     session: &mut GameSession,
     progress: &mut crate::first_hour::FirstHourProgress,
     targeting: &mut Option<TacticalTargeting>,
@@ -215,7 +216,7 @@ pub(super) fn advance_first_hour_selection(
     selected
 }
 
-fn first_hour_help_overlay_state(
+pub fn first_hour_help_overlay_state(
     help_open: bool,
     _tactical_help_open: bool,
     _battle_log_open: bool,
@@ -223,7 +224,7 @@ fn first_hour_help_overlay_state(
     (!help_open, false, false)
 }
 
-pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mission: &MissionDef) {
+pub fn prepare_first_hour_tactical_session(session: &mut GameSession, mission: &MissionDef) {
     if !session
         .tactical
         .cover_edges
@@ -296,7 +297,7 @@ pub(super) fn prepare_first_hour_tactical_session(session: &mut GameSession, mis
     }
 }
 
-pub(super) fn prepare_first_hour_ability_selection(session: &mut GameSession) {
+pub fn prepare_first_hour_ability_selection(session: &mut GameSession) {
     let selected_has_ability = session
         .tactical
         .selected_unit
@@ -322,7 +323,7 @@ pub(super) fn prepare_first_hour_ability_selection(session: &mut GameSession) {
     }
 }
 
-fn first_hour_ability_available(session: &GameSession, unit_id: &str) -> bool {
+pub fn first_hour_ability_available(session: &GameSession, unit_id: &str) -> bool {
     let Some(unit) = session.unit(unit_id) else {
         return false;
     };
@@ -355,6 +356,3 @@ fn first_hour_ability_available(session: &GameSession, unit_id: &str) -> bool {
         crate::equipment_actions::has_valid_target(session, unit_id, &equipment_id)
     })
 }
-
-#[cfg(test)]
-mod tests;

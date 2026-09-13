@@ -4,25 +4,25 @@ use crate::data::{ObjectiveKind, Team};
 use crate::state::GameSession;
 use crate::tactical::{manhattan, BattleEvent, Command, CommandCost, RuleError};
 
-const OBJECTIVE_TARGET_ID: &str = "field_asset";
-const STARTING_INTEGRITY: i32 = 12;
+pub const OBJECTIVE_TARGET_ID: &str = "field_asset";
+pub const STARTING_INTEGRITY: i32 = 12;
 
-pub(crate) fn initial_integrity(kind: ObjectiveKind) -> i32 {
+pub fn initial_integrity(kind: ObjectiveKind) -> i32 {
     i32::from(kind == ObjectiveKind::DefendAsset) * STARTING_INTEGRITY
 }
 
-pub(crate) fn is_destroyed(session: &GameSession) -> bool {
+pub fn is_destroyed(session: &GameSession) -> bool {
     session.tactical.objective_kind == ObjectiveKind::DefendAsset
         && session.tactical.objective_integrity <= 0
 }
 
-pub(crate) fn survives_deadline(session: &GameSession) -> bool {
+pub fn survives_deadline(session: &GameSession) -> bool {
     session.tactical.objective_kind == ObjectiveKind::DefendAsset
         && session.tactical.objective_integrity > 0
 }
 
 impl GameSession {
-    pub(crate) fn can_attack_defense_objective(&self, attacker_id: &str) -> bool {
+    pub fn can_attack_defense_objective(&self, attacker_id: &str) -> bool {
         self.validate(&Command::AttackObjective {
             attacker_id: attacker_id.to_owned(),
         })
@@ -30,7 +30,7 @@ impl GameSession {
     }
 }
 
-pub(crate) fn validate(session: &GameSession, attacker_id: &str) -> Result<CommandCost, RuleError> {
+pub fn validate(session: &GameSession, attacker_id: &str) -> Result<CommandCost, RuleError> {
     let attacker = session.active_unit_for_phase(attacker_id)?;
     if attacker.team != Team::Hostile
         || session.tactical.objective_kind != ObjectiveKind::DefendAsset
@@ -54,7 +54,7 @@ pub(crate) fn validate(session: &GameSession, attacker_id: &str) -> Result<Comma
     })
 }
 
-pub(crate) fn execute(session: &mut GameSession, attacker_id: &str) -> Vec<BattleEvent> {
+pub fn execute(session: &mut GameSession, attacker_id: &str) -> Vec<BattleEvent> {
     let attacker = session.unit(attacker_id).unwrap().clone();
     let hit_chance = attacker.effective_accuracy().clamp(5, 95) as u8;
     let roll = session.tactical.rng.range_i32(1, 101) as u8;
@@ -86,6 +86,3 @@ pub(crate) fn execute(session: &mut GameSession, attacker_id: &str) -> Vec<Battl
     session.check_outcome(&mut events);
     events
 }
-
-#[cfg(test)]
-mod tests;

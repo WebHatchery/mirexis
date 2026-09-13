@@ -3,24 +3,24 @@
 use super::CampaignState;
 use crate::colony::BuildingKind;
 
-pub(crate) const SALVAGE_MATERIALS_REWARD: i32 = 24;
-pub(crate) const SALVAGE_RESEARCH_INSIGHT: i32 = 12;
+pub const SALVAGE_MATERIALS_REWARD: i32 = 24;
+pub const SALVAGE_RESEARCH_INSIGHT: i32 = 12;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum SalvageChoice {
+pub enum SalvageChoice {
     Materials,
     ResearchInsight,
     Prototype,
 }
 
 impl CampaignState {
-    pub(crate) fn salvage_available(&self) -> bool {
+    pub fn salvage_available(&self) -> bool {
         self.colony.has_facility(BuildingKind::SalvageYard)
             && self.salvage_cache_count > 0
             && self.salvage_yard_operation != Some(self.operations_completed)
     }
 
-    pub(crate) fn process_salvage(&mut self, choice: SalvageChoice) -> Result<String, String> {
+    pub fn process_salvage(&mut self, choice: SalvageChoice) -> Result<String, String> {
         if !self.colony.has_facility(BuildingKind::SalvageYard) {
             return Err("An operational Salvage Yard is required".to_owned());
         }

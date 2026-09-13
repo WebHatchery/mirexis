@@ -5,7 +5,7 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 
-pub(super) fn draw_ground(
+pub fn draw_ground(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     view: ColonyView,
@@ -62,7 +62,7 @@ pub(super) fn draw_ground(
     draw_surface_detail(view, center, position, elevation, occupied, hovered);
 }
 
-fn surface_color(base: Color, position: [i32; 2], elevation: i8) -> Color {
+pub fn surface_color(base: Color, position: [i32; 2], elevation: i8) -> Color {
     let variation = ((position[0] * 13 + position[1] * 29).unsigned_abs() % 5) as f32 * 0.008;
     let lift = f32::from(elevation.max(0)) * 0.012;
     Color::new(
@@ -73,7 +73,7 @@ fn surface_color(base: Color, position: [i32; 2], elevation: i8) -> Color {
     )
 }
 
-fn terrain_art_tint(cell: usize, hovered: bool) -> Color {
+pub fn terrain_art_tint(cell: usize, hovered: bool) -> Color {
     let alpha = if hovered { 0.84 } else { 0.64 };
     match cell {
         8 => Color::new(0.64, 0.92, 0.70, alpha),
@@ -82,7 +82,7 @@ fn terrain_art_tint(cell: usize, hovered: bool) -> Color {
     }
 }
 
-fn draw_surface_detail(
+pub fn draw_surface_detail(
     view: ColonyView,
     center: Vec2,
     position: [i32; 2],
@@ -141,7 +141,7 @@ fn draw_surface_detail(
     }
 }
 
-fn diamond(view: ColonyView, center: Vec2) -> [Vec2; 4] {
+pub fn diamond(view: ColonyView, center: Vec2) -> [Vec2; 4] {
     [
         vec2(center.x, center.y - view.half_height),
         vec2(center.x + view.half_width, center.y),
@@ -150,12 +150,12 @@ fn diamond(view: ColonyView, center: Vec2) -> [Vec2; 4] {
     ]
 }
 
-fn draw_fill(points: [Vec2; 4], color: Color) {
+pub fn draw_fill(points: [Vec2; 4], color: Color) {
     draw_triangle(points[0], points[1], points[2], color);
     draw_triangle(points[0], points[2], points[3], color);
 }
 
-fn draw_cliff(view: ColonyView, position: [i32; 2], neighbor: [i32; 2], a: Vec2, b: Vec2) {
+pub fn draw_cliff(view: ColonyView, position: [i32; 2], neighbor: [i32; 2], a: Vec2, b: Vec2) {
     let drop = view.cliff_drop(position, neighbor);
     if drop == 0 {
         return;

@@ -10,7 +10,7 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_ui_text_ex, TextStyle};
 use macroquad_toolkit::ui::wrap_text_ex;
 
-pub(crate) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -89,14 +89,14 @@ pub(crate) fn draw(
     }
 }
 
-fn affordable(campaign: &CampaignState, choice: &OutsiderChoice) -> bool {
+pub fn affordable(campaign: &CampaignState, choice: &OutsiderChoice) -> bool {
     campaign.colony.resources.materials >= choice.materials_cost
         && campaign.colony.resources.food >= choice.food_cost
         && campaign.colony.resources.power >= choice.power_cost
         && campaign.colony.resources.biomass >= choice.biomass_cost
 }
 
-fn cost_label(resources: &Resources, choice: &OutsiderChoice) -> String {
+pub fn cost_label(resources: &Resources, choice: &OutsiderChoice) -> String {
     let mut shortfalls = Vec::new();
     if resources.materials < choice.materials_cost {
         shortfalls.push(format!("{} MAT", choice.materials_cost));
@@ -133,6 +133,3 @@ fn cost_label(resources: &Resources, choice: &OutsiderChoice) -> String {
         costs.join(" // ")
     }
 }
-
-#[cfg(test)]
-mod tests;

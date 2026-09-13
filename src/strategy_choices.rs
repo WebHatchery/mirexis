@@ -104,7 +104,7 @@ impl StrategyState {
     }
 }
 
-fn mission_offer_limit(colony: &ColonyState) -> usize {
+pub fn mission_offer_limit(colony: &ColonyState) -> usize {
     if colony.has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE) {
         3
     } else {

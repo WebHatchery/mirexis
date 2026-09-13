@@ -4,7 +4,7 @@ use crate::data::{GameConfig, MissionDef, Team, UnitDef};
 use std::collections::HashSet;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum FormationKind {
+pub enum FormationKind {
     #[default]
     Wedge,
     Line,
@@ -31,7 +31,7 @@ impl FormationKind {
         }
     }
 
-    pub(crate) fn next_with_doctrine_yard(self, doctrine_yard_active: bool) -> Self {
+    pub fn next_with_doctrine_yard(self, doctrine_yard_active: bool) -> Self {
         match self {
             Self::Column if doctrine_yard_active => Self::Rally,
             Self::Rally => Self::Wedge,
@@ -39,7 +39,7 @@ impl FormationKind {
         }
     }
 
-    pub(crate) fn without_doctrine_yard(self) -> Self {
+    pub fn without_doctrine_yard(self) -> Self {
         if self == Self::Rally {
             Self::Wedge
         } else {
@@ -48,7 +48,7 @@ impl FormationKind {
     }
 }
 
-pub(crate) fn apply(
+pub fn apply(
     roster: &mut [UnitDef],
     mission: &MissionDef,
     config: &GameConfig,
@@ -83,7 +83,7 @@ pub(crate) fn apply(
     }
 }
 
-fn is_safe(
+pub fn is_safe(
     position: [i32; 2],
     mission: &MissionDef,
     config: &GameConfig,
@@ -101,6 +101,3 @@ fn is_safe(
             .any(|hazard| hazard.position == position)
         && !occupied.contains(&position)
 }
-
-#[cfg(test)]
-mod tests;

@@ -8,7 +8,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, draw_text_block_ex, TextStyle};
 
-pub(crate) fn draw(context: TitleDrawContext<'_>) -> Vec<UiAction> {
+pub fn draw(context: TitleDrawContext<'_>) -> Vec<UiAction> {
     let TitleDrawContext {
         data,
         save_exists,
@@ -94,7 +94,7 @@ pub(crate) fn draw(context: TitleDrawContext<'_>) -> Vec<UiAction> {
     actions
 }
 
-fn draw_background() {
+pub fn draw_background() {
     draw_rectangle(
         0.0,
         0.0,
@@ -145,7 +145,7 @@ fn draw_background() {
     );
 }
 
-fn draw_title_copy(data: &GameData) {
+pub fn draw_title_copy(data: &GameData) {
     draw_ui_text_ex(
         "WEBHATCHERY / TACTICAL FRONTIER",
         78.0,
@@ -186,7 +186,7 @@ fn draw_title_copy(data: &GameData) {
     );
 }
 
-fn draw_character_tableau(data: &GameData, assets: &AssetManager, visuals: &VisualCatalog) {
+pub fn draw_character_tableau(data: &GameData, assets: &AssetManager, visuals: &VisualCatalog) {
     let cards = [
         (
             Rect::new(690.0, 174.0, 190.0, 356.0),

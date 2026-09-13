@@ -1,4 +1,6 @@
 //! Colony hub presentation and strategic intent production.
+pub mod operations;
+pub use operations::*;
 
 use crate::campaign::{Availability, CampaignState};
 use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};
@@ -9,444 +11,51 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::*;
 
-mod commons;
-mod context;
-mod decision_affordance;
-mod decisions;
-mod event_affordance;
-mod medical;
-mod recruitment;
-mod relay;
-mod research;
-mod research_affordance;
-mod salvage;
-mod scene;
-mod upgrades;
-pub(crate) use context::ColonyDrawContext;
-pub(crate) use scene::draw_colony;
+pub mod commons;
+pub mod context;
+pub mod decision_affordance;
+pub mod decisions;
+pub mod event_affordance;
+pub mod medical;
+pub mod recruitment;
+pub mod relay;
+pub mod research;
+pub mod research_affordance;
+pub mod salvage;
+pub mod scene;
+pub mod upgrades;
+pub use context::{ColonyDrawContext, ColonyDrawResult};
+pub use scene::draw_colony;
 
 // Dense late-campaign hubs can exhaust Macroquad's per-font-size glyph atlas
 // when every label shares the toolkit font. The hub's buttons and map labels
 // already use the built-in font, so keep all colony text on that stable atlas.
-fn draw_ui_text_ex<'a>(text: &str, x: f32, y: f32, mut params: TextParams<'a>) -> TextDimensions {
+pub fn draw_ui_text_ex<'a>(
+    text: &str,
+    x: f32,
+    y: f32,
+    mut params: TextParams<'a>,
+) -> TextDimensions {
     params.font = None;
     draw_text_ex(text, x, y, params)
 }
 
+// Operations panels combine several read-only presentation sources and a
+// single returned action sink; the explicit arguments preserve that boundary.
 #[allow(clippy::too_many_arguments)]
-pub(super) fn draw_operations(
-    campaign: &CampaignState,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    mouse: Vec2,
-    facility_upgrade_open: &mut bool,
-    salvage_open: &mut bool,
-    actions: &mut Vec<UiAction>,
-) {
-    if *facility_upgrade_open {
-        actions.clear();
-        upgrades::draw_modal(campaign, mouse, actions);
-        return;
-    }
-    if *salvage_open {
-        actions.clear();
-        salvage::draw_modal(campaign, mouse, actions);
-        return;
-    }
-    let panel = Rect::new(862.0, 74.0, 408.0, 608.0);
-    draw_surface_with_title(
-        panel,
-        Some("COLONY OPERATIONS"),
-        &SurfaceStyle::new(Color::new(0.055, 0.07, 0.08, 0.98))
-            .with_border(1.0, Color::new(0.25, 0.38, 0.40, 0.8))
-            .with_header(42.0, Color::new(0.08, 0.105, 0.115, 1.0)),
-        TextStyle::new(17.0, dark::TEXT),
-    );
-    let resources = &campaign.colony.resources;
-    draw_ui_text_ex(
-        &format!(
-            "MATERIALS {:>3}  //  POWER {:>2}/{:>2}  //  FOOD {:>3}",
-            resources.materials,
-            campaign.colony.power_supply(),
-            campaign.colony.power_demand(),
-            resources.food
-        ),
-        878.0,
-        166.0,
-        TextStyle::new(15.0, dark::TEXT).params(),
-    );
-    draw_ui_text_ex(
-        &format!(
-            "BIOMASS {:>2}  //  ALIEN COMPONENTS {:>2}",
-            resources.biomass, resources.alien_components
-        ),
-        878.0,
-        192.0,
-        TextStyle::new(15.0, dark::TEXT).params(),
-    );
-    crate::field_notes_ui::draw_launcher(&campaign.colony_story, mouse, actions);
-    crate::memorial_ui::draw_launcher(campaign, mouse, actions);
-    if campaign.first_hour.stage == crate::first_hour::FirstHourStage::MakeInvestment {
-        crate::first_hour_investment_ui::draw(campaign, mouse, actions);
-        return;
-    }
-    let attention = campaign
-        .strategy
-        .factions
-        .iter()
-        .map(|faction| format!("{} {}", faction.name, faction.attention))
-        .collect::<Vec<_>>()
-        .join("  /  ");
-    draw_ui_text_ex(
-        &attention,
-        878.0,
-        218.0,
-        TextStyle::new(12.0, dark::TEXT_DIM).params(),
-    );
-    let doctrine_complete = campaign
-        .strategy
-        .research
-        .iter()
-        .any(|research| research.completed);
-    let pending_research = research::has_pending(campaign);
-    let phase_progress = if campaign.strategy.campaign_complete {
-        data.campaign
-            .mirexis_paths
-            .iter()
-            .find(|path| path.id == campaign.strategy.mirexis_path_id)
-            .map_or_else(
-                || "MIREXIS // FINAL OPERATION WON // COLONY ENDURES".to_owned(),
-                |path| {
-                    format!(
-                        "MIREXIS // {} // FINAL OPERATION WON",
-                        path.name.to_uppercase()
-                    )
-                },
-            )
-    } else if campaign.strategy.escalation_complete {
-        data.campaign
-            .mirexis_paths
-            .iter()
-            .find(|path| path.id == campaign.strategy.mirexis_path_id)
-            .map_or_else(
-                || {
-                    "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING // PHASE FIVE"
-                        .to_owned()
-                },
-                |path| {
-                    format!(
-                        "ESCALATION // ADAPTATION COMPLETE // PHASE FIVE // {}",
-                        path.name.to_uppercase()
-                    )
-                },
-            )
-    } else if campaign.strategy.adaptation_complete {
-        if !campaign.strategy.escalation_operation_completed {
-            "ESCALATION // ADAPTATION COMPLETE // THREE POWERS CLOSING".to_owned()
-        } else {
-            data.campaign
-                .escalation_responses
-                .iter()
-                .find(|response| response.id == campaign.strategy.escalation_response_id)
-                .map_or_else(
-                    || "ESCALATION // THREE KNIVES WON // RESPONSE REQUIRED".to_owned(),
-                    |response| {
-                        format!(
-                            "ESCALATION // {} // BRANCH {}",
-                            response.name.to_uppercase(),
-                            if campaign.strategy.escalation_branch_completed {
-                                "WON"
-                            } else {
-                                "PENDING"
-                            }
-                        )
-                    },
-                )
-        }
-    } else if campaign.strategy.contact_complete {
-        let (operation, evolved, lab) = campaign.adaptation_completion_progress();
-        format!(
-            "ADAPTATION // GLASS {} // EVOLVED {}/2 // LAB {}",
-            if operation { "WON" } else { "PENDING" },
-            evolved.min(2),
-            if lab { "READY" } else { "PENDING" }
-        )
-    } else if campaign.strategy.isolation_complete {
-        data.campaign
-            .contact_protocols
-            .iter()
-            .find(|protocol| protocol.id == campaign.strategy.contact_protocol_id)
-            .map_or_else(
-                || "CONTACT // CHOOSE A PROTOCOL // 2 COMPONENTS AVAILABLE".to_owned(),
-                |_protocol| {
-                    let (trace, aftermath, prototype) = campaign.contact_completion_progress(data);
-                    format!(
-                        "CONTACT // TRACE {} // AFTERMATH {} // PROTOTYPE {}",
-                        if trace { "READY" } else { "PENDING" },
-                        if aftermath { "READY" } else { "PENDING" },
-                        if prototype { "READY" } else { "PENDING" }
-                    )
-                },
-            )
-    } else {
-        format!(
-            "ISOLATION // VICTORIES {}/3 // DOCTRINE {} // ASSAULT {}",
-            campaign.strategy.isolation_victories,
-            if doctrine_complete {
-                "READY"
-            } else {
-                "PENDING"
-            },
-            if campaign.strategy.first_assault_repulsed {
-                "REPELLED"
-            } else {
-                "PENDING"
-            }
-        )
-    };
-    draw_ui_text_ex(
-        &phase_progress,
-        878.0,
-        232.0,
-        TextStyle::new(
-            10.0,
-            if campaign.strategy.isolation_complete {
-                dark::POSITIVE
-            } else {
-                dark::TEXT_DIM
-            },
-        )
-        .params(),
-    );
-    if let Some(threat) = campaign.strategy.active_threat() {
-        draw_ui_text_ex(
-            &format!(
-                "{}  //  {} OPERATIONS  //  STRENGTH {}",
-                threat.name, threat.operations_until, threat.strength
-            ),
-            878.0,
-            248.0,
-            TextStyle::new(12.0, dark::WARNING).params(),
-        );
-    }
-    let ready = campaign
-        .roster
-        .iter()
-        .filter(|character| character.availability == Availability::Ready)
-        .count();
-    let recovering = campaign.roster.len() - ready;
-    let defense = campaign.colony.defense_map();
-    draw_ui_text_ex(
-        &format!(
-            "ROSTER READY {} / RECOVERING {}  //  DEFENCE {} COVER / {} CRITICAL",
-            ready,
-            recovering,
-            defense.cover_tiles.len(),
-            defense.critical_objectives.len()
-        ),
-        878.0,
-        262.0,
-        TextStyle::new(12.0, dark::TEXT_DIM).params(),
-    );
-    if colony_button(
-        Rect::new(878.0, 274.0, 362.0, 32.0),
-        "MANAGE ROSTER // TRAINING & GEAR",
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::OpenRoster);
-    }
-    if colony_button(
-        Rect::new(878.0, 312.0, 176.0, 32.0),
-        &medical::treatment_button_label(campaign),
-        campaign.can_treat_first_injury(),
-        mouse,
-    ) {
-        actions.push(UiAction::TreatInjury);
-    }
-    upgrades::draw_launcher(campaign, mouse, actions);
-    salvage::draw_launcher(campaign, mouse, actions);
-    let choosing_contact =
-        campaign.strategy.isolation_complete && campaign.strategy.contact_protocol_id.is_empty();
-    let choosing_escalation = campaign.strategy.escalation_operation_completed
-        && campaign.strategy.escalation_response_id.is_empty();
-    let choosing_mirexis =
-        campaign.strategy.escalation_complete && campaign.strategy.mirexis_path_id.is_empty();
-    let decision = if choosing_contact {
-        Some(crate::colony_decision_ui::DecisionKind::Contact)
-    } else if choosing_escalation {
-        Some(crate::colony_decision_ui::DecisionKind::Escalation)
-    } else if choosing_mirexis {
-        Some(crate::colony_decision_ui::DecisionKind::Mirexis)
-    } else {
-        None
-    };
-    commons::draw(campaign, decision.is_none(), mouse, actions);
-    relay::draw(campaign, decision.is_none(), mouse, actions);
-    if let Some(decision) = decision {
-        crate::colony_decision_ui::draw_decision_dossier(decision, campaign, assets, visuals);
-    } else {
-        draw_ui_text_ex(
-            if campaign
-                .colony
-                .has_active_upgrade(BuildingKind::CommandCentre, SIGNAL_CARTOGRAPHY_UPGRADE)
-            {
-                "MISSION ROUTES // SIGNAL CARTOGRAPHY ONLINE"
-            } else {
-                "MISSION OFFERS"
-            },
-            878.0,
-            380.0,
-            TextStyle::new(15.0, dark::ACCENT).params(),
-        );
-        crate::first_hour_investment_ui::draw_active_summary(campaign, vec2(1002.0, 380.0));
-        for (index, mission) in campaign.strategy.mission_offers.iter().take(3).enumerate() {
-            let selected = mission.id == campaign.strategy.selected_mission_id;
-            let danger = crate::danger_rating::for_instance(mission, data);
-            if colony_button(
-                Rect::new(878.0, 386.0 + index as f32 * 28.0, 362.0, 26.0),
-                &format!(
-                    "{}{} // {}",
-                    if selected { "> " } else { "" },
-                    mission.name,
-                    danger.label()
-                ),
-                true,
-                mouse,
-            ) {
-                actions.push(UiAction::SelectMission(mission.id.clone()));
-            }
-        }
-        if colony_button(
-            mission_briefing_bounds(),
-            "BRIEF SELECTED MISSION",
-            campaign.strategy.selected_mission().is_some(),
-            mouse,
-        ) {
-            actions.push(UiAction::OpenMissionBriefing);
-        }
-    }
-    let evolution_pending = campaign.strategy.contact_complete
-        && campaign.roster.iter().any(|character| {
-            character.mutation_evolution_id.is_empty()
-                && data
-                    .mutations
-                    .iter()
-                    .find(|mutation| mutation.id == character.mutation_id)
-                    .is_some_and(|mutation| !mutation.evolutions.is_empty())
-        });
-    let research_surface_visible = pending_research
-        && !evolution_pending
-        && campaign.strategy.available_event().is_none()
-        && !campaign.outsider_recruit_available(data)
-        && decision.is_none();
-    if campaign.strategy.campaign_complete {
-        if let Some(path) = data
-            .campaign
-            .mirexis_paths
-            .iter()
-            .find(|path| path.id == campaign.strategy.mirexis_path_id)
-        {
-            draw_ending_card(campaign, assets, visuals);
-            draw_ui_text_ex(
-                &path.ending_title,
-                968.0,
-                526.0,
-                TextStyle::new(14.0, dark::POSITIVE).params(),
-            );
-            draw_ui_text_ex(
-                &path.revelation,
-                968.0,
-                548.0,
-                TextStyle::new(9.5, dark::TEXT).params(),
-            );
-            draw_ui_text_ex(
-                &path.legacy,
-                968.0,
-                565.0,
-                TextStyle::new(9.5, dark::TEXT_DIM).params(),
-            );
-            if let Some(dossier) = crate::epilogue::derive(campaign) {
-                draw_epilogue_dossier(&dossier);
-            }
-        }
-    } else if let Some(decision) = decision {
-        decisions::draw_choice_panel(decision, campaign, data, mouse, actions);
-    } else if evolution_pending {
-        let lab_exists = campaign
-            .colony
-            .buildings
-            .iter()
-            .any(|building| building.kind == BuildingKind::GeneLab);
-        let lab_ready = campaign.colony.has_facility(BuildingKind::GeneLab);
-        draw_ui_text_ex(
-            if lab_ready {
-                "GENE LAB READY // TAP THE FACILITY TO EVOLVE A COLONIST"
-            } else if lab_exists {
-                "GENE LAB OFFLINE // RESTORE POWER OR REPAIR THE FACILITY"
-            } else {
-                "GENE LAB REQUIRED // PLAN IT ON AN OPEN COLONY PLOT"
-            },
-            878.0,
-            514.0,
-            TextStyle::new(11.0, dark::ACCENT).params(),
-        );
-    } else {
-        if let Some(event) = campaign.strategy.available_event() {
-            draw_character_event(campaign, data, assets, visuals, event, mouse, actions);
-        } else if campaign.outsider_arc_available() {
-            crate::outsider_ui::draw(campaign, assets, visuals, mouse, actions);
-        } else if !campaign.outsider_recruit_available(data) {
-            research::draw_available(campaign, assets, visuals, mouse, actions);
-        }
-    }
-    if !choosing_contact
-        && !choosing_escalation
-        && !choosing_mirexis
-        && !evolution_pending
-        && campaign.strategy.available_event().is_none()
-        && !campaign.outsider_recruit_available(data)
-    {
-        research::draw_completed_summary(campaign, assets, visuals, research_surface_visible);
-    }
-    recruitment::draw(
-        campaign,
-        data,
-        mouse,
-        choosing_contact,
-        choosing_escalation,
-        choosing_mirexis,
-        actions,
-    );
-    if should_draw_colony_plan(campaign) {
-        draw_ui_text_ex(
-            &format!(
-                "Plan: {} // {} materials // one operation // {} structures mapped",
-                campaign.colony.planned_construction.name(),
-                campaign.colony.planned_construction.material_cost(),
-                defense.blocked_tiles.len()
-            ),
-            878.0,
-            colony_plan_baseline(campaign, research_surface_visible),
-            TextStyle::new(12.0, dark::TEXT_DIM).params(),
-        );
-    }
-}
-
-fn should_draw_colony_plan(campaign: &CampaignState) -> bool {
+pub fn should_draw_colony_plan(campaign: &CampaignState) -> bool {
     !campaign.strategy.campaign_complete
 }
 
-fn mission_briefing_bounds() -> Rect {
+pub fn mission_briefing_bounds() -> Rect {
     Rect::new(878.0, 478.0, 362.0, 30.0)
 }
 
-fn character_event_card_bounds() -> Rect {
+pub fn character_event_card_bounds() -> Rect {
     Rect::new(878.0, 514.0, 362.0, 162.0)
 }
 
-fn colony_plan_baseline(campaign: &CampaignState, research_surface_visible: bool) -> f32 {
+pub fn colony_plan_baseline(campaign: &CampaignState, research_surface_visible: bool) -> f32 {
     if research_surface_visible {
         676.0
     } else if campaign.strategy.available_event().is_some() {
@@ -456,7 +65,7 @@ fn colony_plan_baseline(campaign: &CampaignState, research_surface_visible: bool
     }
 }
 
-fn draw_character_event(
+pub fn draw_character_event(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
@@ -597,7 +206,7 @@ fn draw_character_event(
     }
 }
 
-fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &VisualCatalog) {
+pub fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &VisualCatalog) {
     let (cell, accent) = match campaign.strategy.mirexis_path_id.as_str() {
         "human_redoubt" => (10, Color::new(0.36, 0.70, 0.88, 1.0)),
         "living_commonwealth" => (9, Color::new(0.64, 0.92, 0.38, 1.0)),
@@ -617,7 +226,7 @@ fn draw_ending_card(campaign: &CampaignState, assets: &AssetManager, visuals: &V
     );
 }
 
-fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
+pub fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
     draw_ui_text_ex(
         "COLONY LEGACY REGISTER",
         878.0,
@@ -634,9 +243,6 @@ fn draw_epilogue_dossier(dossier: &crate::epilogue::EpilogueDossier) {
     }
 }
 
-fn colony_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
+pub fn colony_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
     crate::ui_widgets::button(rect, label, enabled, mouse)
 }
-
-#[cfg(test)]
-mod tests;

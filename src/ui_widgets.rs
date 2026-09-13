@@ -8,7 +8,7 @@ use macroquad_toolkit::prelude::{
 };
 use macroquad_toolkit::ui::RectExt;
 
-pub(crate) fn event_summary(event: &BattleEvent) -> String {
+pub fn event_summary(event: &BattleEvent) -> String {
     match event {
         BattleEvent::UnitMoved { unit_id, cost, .. } => {
             format!("{} moved · {} AP", display_identifier(unit_id), cost)
@@ -95,7 +95,7 @@ pub(crate) fn event_summary(event: &BattleEvent) -> String {
     }
 }
 
-fn display_identifier(identifier: &str) -> String {
+pub fn display_identifier(identifier: &str) -> String {
     identifier
         .split('_')
         .filter(|word| !word.is_empty())
@@ -110,7 +110,7 @@ fn display_identifier(identifier: &str) -> String {
         .join(" ")
 }
 
-pub(crate) fn action_status(unit: &UnitState) -> String {
+pub fn action_status(unit: &UnitState) -> String {
     if unit.overwatching {
         return "OVERWATCH ARMED · REACTION READY".to_owned();
     }
@@ -136,7 +136,7 @@ pub(crate) fn action_status(unit: &UnitState) -> String {
     }
 }
 
-pub(crate) fn active_status_summary(unit: &UnitState) -> String {
+pub fn active_status_summary(unit: &UnitState) -> String {
     if unit.statuses.is_empty() {
         "EFFECTS // NONE".to_owned()
     } else {
@@ -144,7 +144,7 @@ pub(crate) fn active_status_summary(unit: &UnitState) -> String {
     }
 }
 
-fn active_status_details(unit: &UnitState) -> String {
+pub fn active_status_details(unit: &UnitState) -> String {
     unit.statuses
         .iter()
         .map(|status| {
@@ -158,7 +158,7 @@ fn active_status_details(unit: &UnitState) -> String {
         .join(" / ")
 }
 
-fn status_kind_label(kind: StatusKind) -> &'static str {
+pub fn status_kind_label(kind: StatusKind) -> &'static str {
     match kind {
         StatusKind::Focused => "FOCUSED",
         StatusKind::Guarded => "GUARDED",
@@ -171,11 +171,11 @@ fn status_kind_label(kind: StatusKind) -> &'static str {
     }
 }
 
-pub(crate) fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
+pub fn button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
     button_with_state(rect, label, enabled, false, mouse)
 }
 
-pub(crate) fn action_button_label(
+pub fn action_button_label(
     label: &str,
     targeting: bool,
     requires_target: bool,
@@ -190,7 +190,7 @@ pub(crate) fn action_button_label(
     }
 }
 
-pub(crate) fn button_with_state(
+pub fn button_with_state(
     rect: Rect,
     label: &str,
     enabled: bool,
@@ -255,6 +255,3 @@ pub(crate) fn button_with_state(
     );
     hovered && is_mouse_button_released(MouseButton::Left)
 }
-
-#[cfg(test)]
-mod tests;

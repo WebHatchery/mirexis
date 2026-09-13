@@ -4,7 +4,7 @@ use crate::campaign::CampaignState;
 use crate::colony_map_ui::view::ColonyView;
 use macroquad::prelude::*;
 
-pub(crate) fn draw(campaign: &CampaignState, view: ColonyView) {
+pub fn draw(campaign: &CampaignState, view: ColonyView) {
     if campaign.operations_completed >= 1 {
         draw_refuge_signal(campaign, view);
     }
@@ -13,7 +13,7 @@ pub(crate) fn draw(campaign: &CampaignState, view: ColonyView) {
     }
 }
 
-fn draw_refuge_signal(campaign: &CampaignState, view: ColonyView) {
+pub fn draw_refuge_signal(campaign: &CampaignState, view: ColonyView) {
     let center = view.plot_center([12, 8]);
     let won = campaign.first_hour.first_outcome_won == Some(true);
     let accent = if won {
@@ -42,7 +42,7 @@ fn draw_refuge_signal(campaign: &CampaignState, view: ColonyView) {
     );
 }
 
-fn draw_outer_barricade(campaign: &CampaignState, view: ColonyView) {
+pub fn draw_outer_barricade(campaign: &CampaignState, view: ColonyView) {
     let center = view.plot_center([8, 12]);
     let breached = outer_route_is_breached(campaign.first_hour.second_outcome_won);
     let accent = outer_route_accent(campaign.first_hour.second_outcome_won);
@@ -84,11 +84,11 @@ fn draw_outer_barricade(campaign: &CampaignState, view: ColonyView) {
     );
 }
 
-fn outer_route_is_breached(second_outcome_won: Option<bool>) -> bool {
+pub fn outer_route_is_breached(second_outcome_won: Option<bool>) -> bool {
     second_outcome_won == Some(false)
 }
 
-fn outer_route_accent(second_outcome_won: Option<bool>) -> Color {
+pub fn outer_route_accent(second_outcome_won: Option<bool>) -> Color {
     if outer_route_is_breached(second_outcome_won) {
         Color::new(0.96, 0.48, 0.24, 0.92)
     } else {
@@ -96,7 +96,7 @@ fn outer_route_accent(second_outcome_won: Option<bool>) -> Color {
     }
 }
 
-fn outer_route_label(second_outcome_won: Option<bool>) -> &'static str {
+pub fn outer_route_label(second_outcome_won: Option<bool>) -> &'static str {
     match second_outcome_won {
         Some(true) => "OUTER ROUTES HARDENED",
         Some(false) => "OUTER ROUTE BREACHED",
@@ -104,7 +104,7 @@ fn outer_route_label(second_outcome_won: Option<bool>) -> &'static str {
     }
 }
 
-fn label(origin: Vec2, value: &str, accent: Color) {
+pub fn label(origin: Vec2, value: &str, accent: Color) {
     let width = measure_text(value, None, 11, 1.0).width + 12.0;
     draw_rectangle(
         origin.x,
@@ -117,9 +117,6 @@ fn label(origin: Vec2, value: &str, accent: Color) {
     draw_text(value, origin.x + 6.0, origin.y + 13.0, 11.0, accent);
 }
 
-fn darken(color: Color) -> Color {
+pub fn darken(color: Color) -> Color {
     Color::new(color.r * 0.28, color.g * 0.28, color.b * 0.28, color.a)
 }
-
-#[cfg(test)]
-mod tests;

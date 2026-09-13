@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum FirstHourStage {
+pub enum FirstHourStage {
     #[default]
     Arrival,
     MeetCoordinator,
@@ -23,7 +23,7 @@ pub(crate) enum FirstHourStage {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum TacticalLesson {
+pub enum TacticalLesson {
     #[default]
     Select,
     MoveToCover,
@@ -35,7 +35,7 @@ pub(crate) enum TacticalLesson {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct FirstHourProgress {
+pub struct FirstHourProgress {
     #[serde(default)]
     pub stage: FirstHourStage,
     #[serde(default)]
@@ -69,12 +69,12 @@ impl Default for FirstHourProgress {
     }
 }
 
-fn enabled() -> bool {
+pub fn enabled() -> bool {
     true
 }
 
 impl FirstHourProgress {
-    pub(crate) fn primary_goal(&self) -> &'static str {
+    pub fn primary_goal(&self) -> &'static str {
         match self.stage {
             FirstHourStage::Arrival => "Tap BEGIN ARRIVAL to answer the refuge distress call.",
             FirstHourStage::MeetCoordinator => "Tap Mara Venn's speech marker, then tap CONTINUE.",
@@ -107,7 +107,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn visible_goal(&self) -> &'static str {
+    pub fn visible_goal(&self) -> &'static str {
         if self.guidance_enabled {
             return self.primary_goal();
         }
@@ -122,7 +122,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn colony_guidance_target(&self) -> Option<&'static str> {
+    pub fn colony_guidance_target(&self) -> Option<&'static str> {
         if !self.guidance_enabled {
             return None;
         }
@@ -133,7 +133,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn advance_arrival(&mut self) {
+    pub fn advance_arrival(&mut self) {
         if self.stage == FirstHourStage::Arrival {
             self.stage = FirstHourStage::MeetCoordinator;
         } else if self.stage == FirstHourStage::Promise {
@@ -142,7 +142,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn acknowledge_colonist(&mut self, id: &str) {
+    pub fn acknowledge_colonist(&mut self, id: &str) {
         self.metrics.city_interacted();
         if self.stage == FirstHourStage::MeetCoordinator && id == "mara_venn" {
             self.stage = FirstHourStage::PrepareFirstOperation;
@@ -151,7 +151,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn deployed(&mut self, operations_completed: u32) {
+    pub fn deployed(&mut self, operations_completed: u32) {
         self.metrics.operation_started();
         if operations_completed == 0 {
             self.stage = FirstHourStage::FirstOperation;
@@ -161,54 +161,54 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn entered_second_operation_tactical(&mut self) {
+    pub fn entered_second_operation_tactical(&mut self) {
         if self.stage == FirstHourStage::SecondOperation {
             self.stage = FirstHourStage::SecondOperationTactical;
             self.lesson = TacticalLesson::ApplyLearning;
         }
     }
 
-    pub(crate) fn is_tactical_stage(&self) -> bool {
+    pub fn is_tactical_stage(&self) -> bool {
         matches!(
             self.stage,
             FirstHourStage::FirstOperation | FirstHourStage::SecondOperationTactical
         )
     }
 
-    pub(crate) fn opened_briefing(&mut self, operations_completed: u32) {
+    pub fn opened_briefing(&mut self, operations_completed: u32) {
         if operations_completed == 0 && self.stage == FirstHourStage::PrepareFirstOperation {
             self.stage = FirstHourStage::FirstBriefing;
         }
     }
 
-    pub(crate) fn selected(&mut self) {
+    pub fn selected(&mut self) {
         self.advance_lesson(TacticalLesson::Select, TacticalLesson::MoveToCover);
     }
 
-    pub(crate) fn moved(&mut self, on_cover: bool) {
+    pub fn moved(&mut self, on_cover: bool) {
         if on_cover {
             self.advance_lesson(TacticalLesson::MoveToCover, TacticalLesson::Attack);
         }
     }
 
-    pub(crate) fn attacked(&mut self) {
+    pub fn attacked(&mut self) {
         self.metrics.tactical_attack();
         self.advance_lesson(TacticalLesson::Attack, TacticalLesson::EnemyPhase);
     }
 
-    pub(crate) fn ended_phase(&mut self) {
+    pub fn ended_phase(&mut self) {
         self.advance_lesson(TacticalLesson::EnemyPhase, TacticalLesson::Objective);
     }
 
-    pub(crate) fn touched_objective(&mut self) {
+    pub fn touched_objective(&mut self) {
         self.advance_lesson(TacticalLesson::Objective, TacticalLesson::Ability);
     }
 
-    pub(crate) fn used_ability(&mut self) {
+    pub fn used_ability(&mut self) {
         self.advance_lesson(TacticalLesson::Ability, TacticalLesson::ApplyLearning);
     }
 
-    pub(crate) fn operation_resolved(&mut self, operation_number: u32, won: bool, rounds: u32) {
+    pub fn operation_resolved(&mut self, operation_number: u32, won: bool, rounds: u32) {
         self.metrics.operation_resolved(operation_number, rounds);
         match operation_number {
             1 => {
@@ -223,7 +223,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn returned_to_colony(&mut self) {
+    pub fn returned_to_colony(&mut self) {
         if self.stage == FirstHourStage::FirstReturn {
             self.stage = FirstHourStage::FirstReturnColony;
         } else if self.stage == FirstHourStage::SecondReturn {
@@ -231,14 +231,14 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn invested(&mut self, name: impl Into<String>) {
+    pub fn invested(&mut self, name: impl Into<String>) {
         if self.stage == FirstHourStage::MakeInvestment {
             self.investment_name = name.into();
             self.stage = FirstHourStage::SecondOperation;
         }
     }
 
-    pub(crate) fn apply_second_operation_bonus(
+    pub fn apply_second_operation_bonus(
         &self,
         operations_completed: u32,
         units: &mut [crate::data::UnitDef],
@@ -259,7 +259,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn restart(&mut self) {
+    pub fn restart(&mut self) {
         self.guidance_enabled = true;
         self.help_open = false;
         match self.stage {
@@ -269,7 +269,7 @@ impl FirstHourProgress {
         }
     }
 
-    pub(crate) fn migrate_from_operations(&mut self, operations_completed: u32) {
+    pub fn migrate_from_operations(&mut self, operations_completed: u32) {
         self.stage = match operations_completed {
             0 => FirstHourStage::Arrival,
             1 => FirstHourStage::MakeInvestment,
@@ -280,14 +280,14 @@ impl FirstHourProgress {
         }
     }
 
-    fn advance_lesson(&mut self, expected: TacticalLesson, next: TacticalLesson) {
+    pub fn advance_lesson(&mut self, expected: TacticalLesson, next: TacticalLesson) {
         if self.stage == FirstHourStage::FirstOperation && self.lesson == expected {
             self.lesson = next;
         }
     }
 }
 
-fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
+pub fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
     match lesson {
         TacticalLesson::Select => "Tap a colonist to select them.",
         TacticalLesson::MoveToCover => "Tap the gold-marked cover tile to move into cover.",
@@ -304,6 +304,3 @@ fn lesson_prompt(lesson: TacticalLesson) -> &'static str {
         }
     }
 }
-
-#[cfg(test)]
-mod tests;

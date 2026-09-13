@@ -1,6 +1,6 @@
 //! Touch-visible labels for persistent character-event choices.
 
-pub(super) fn button_label(
+pub fn button_label(
     participant: &str,
     legacy_amount: i32,
     legacy_stat: &str,
@@ -17,6 +17,3 @@ pub(super) fn button_label(
         )
     }
 }
-
-#[cfg(test)]
-mod tests;

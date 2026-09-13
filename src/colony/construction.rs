@@ -2,7 +2,7 @@
 
 use super::BuildingKind;
 
-pub(super) fn is_unique_kind(kind: BuildingKind) -> bool {
+pub fn is_unique_kind(kind: BuildingKind) -> bool {
     matches!(
         kind,
         BuildingKind::GeneLab

@@ -5,7 +5,7 @@ use crate::state::{Command, GameSession, RuleError};
 use macroquad_toolkit::grid::TilePos;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum ActionPreview {
+pub enum ActionPreview {
     Move {
         cost: u8,
         hazard: Option<HazardKind>,
@@ -27,7 +27,7 @@ pub(crate) enum ActionPreview {
     },
 }
 
-pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPreview> {
+pub fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPreview> {
     let unit_id = session.tactical.selected_unit.as_ref()?;
     let selected = session.unit(unit_id)?;
     if let Some(target) = session
@@ -96,6 +96,3 @@ pub(crate) fn for_tile(session: &GameSession, tile: TilePos) -> Option<ActionPre
         path,
     })
 }
-
-#[cfg(test)]
-mod tests;

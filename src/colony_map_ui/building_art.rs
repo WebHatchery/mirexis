@@ -2,7 +2,7 @@
 
 use macroquad::prelude::*;
 
-pub(super) fn draw_waystation(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_waystation(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -40,7 +40,7 @@ pub(super) fn draw_waystation(center: Vec2, zoom: f32, powered: bool, damaged: b
     );
 }
 
-pub(super) fn draw_commons(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_commons(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -81,7 +81,7 @@ pub(super) fn draw_commons(center: Vec2, zoom: f32, powered: bool, damaged: bool
     }
 }
 
-pub(super) fn draw_relay_mast(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_relay_mast(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -125,7 +125,7 @@ pub(super) fn draw_relay_mast(center: Vec2, zoom: f32, powered: bool, damaged: b
     );
 }
 
-pub(super) fn draw_watchtower(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_watchtower(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -187,7 +187,7 @@ pub(super) fn draw_watchtower(center: Vec2, zoom: f32, powered: bool, damaged: b
     }
 }
 
-pub(super) fn draw_redoubt_arsenal(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_redoubt_arsenal(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -222,7 +222,7 @@ pub(super) fn draw_redoubt_arsenal(center: Vec2, zoom: f32, powered: bool, damag
     );
 }
 
-pub(super) fn draw_choir_garden(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_choir_garden(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -261,7 +261,7 @@ pub(super) fn draw_choir_garden(center: Vec2, zoom: f32, powered: bool, damaged:
     );
 }
 
-pub(super) fn draw_threshold_spire(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_threshold_spire(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -295,7 +295,7 @@ pub(super) fn draw_threshold_spire(center: Vec2, zoom: f32, powered: bool, damag
     }
 }
 
-pub(super) fn draw_research_annex(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_research_annex(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {
@@ -349,7 +349,7 @@ pub(super) fn draw_research_annex(center: Vec2, zoom: f32, powered: bool, damage
     );
 }
 
-pub(super) fn draw_salvage_yard(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
+pub fn draw_salvage_yard(center: Vec2, zoom: f32, powered: bool, damaged: bool) {
     let accent = if damaged {
         Color::new(1.0, 0.28, 0.20, 0.92)
     } else if powered {

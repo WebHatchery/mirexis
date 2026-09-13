@@ -11,35 +11,34 @@ use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{draw_surface, SurfaceStyle};
 use macroquad_toolkit::ui::VirtualUi;
 
-pub(crate) const COLONY_HALF_WIDTH: f32 = 26.0;
-pub(crate) const COLONY_HALF_HEIGHT: f32 = 13.0;
+pub const COLONY_HALF_WIDTH: f32 = 26.0;
+pub const COLONY_HALF_HEIGHT: f32 = 13.0;
 
-mod building_art;
-mod controls;
-mod identity_art;
-mod interaction;
-mod plot;
-mod terrain;
-pub(crate) mod view;
-#[cfg(test)]
-use plot::in_clearance_zone;
-use view::ColonyView;
+pub mod building_art;
+pub mod controls;
+pub mod identity_art;
+pub mod interaction;
+pub mod plot;
+pub mod terrain;
+pub mod view;
+pub use plot::in_clearance_zone;
+pub use view::ColonyView;
 
-pub(crate) struct ColonyMapContext<'a> {
-    pub(crate) campaign: &'a CampaignState,
-    pub(crate) data: &'a GameData,
-    pub(crate) assets: &'a AssetManager,
-    pub(crate) visuals: &'a VisualCatalog,
-    pub(crate) ui: &'a VirtualUi,
-    pub(crate) camera: &'a mut WorldCamera,
-    pub(crate) explorer: &'a mut crate::colony_exploration::ColonyExplorer,
-    pub(crate) mouse: Vec2,
-    pub(crate) operations_open: bool,
-    pub(crate) interaction_enabled: bool,
-    pub(crate) actions: &'a mut Vec<UiAction>,
+pub struct ColonyMapContext<'a> {
+    pub campaign: &'a CampaignState,
+    pub data: &'a GameData,
+    pub assets: &'a AssetManager,
+    pub visuals: &'a VisualCatalog,
+    pub ui: &'a VirtualUi,
+    pub camera: &'a mut WorldCamera,
+    pub explorer: &'a mut crate::colony_exploration::ColonyExplorer,
+    pub mouse: Vec2,
+    pub operations_open: bool,
+    pub interaction_enabled: bool,
+    pub actions: &'a mut Vec<UiAction>,
 }
 
-pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
+pub fn draw(context: ColonyMapContext<'_>) -> bool {
     let ColonyMapContext {
         campaign,
         data,
@@ -221,11 +220,11 @@ pub(crate) fn draw(context: ColonyMapContext<'_>) -> bool {
     camera_dragged
 }
 
-fn zoom_controls_origin(panel: Rect) -> Vec2 {
+pub fn zoom_controls_origin(panel: Rect) -> Vec2 {
     vec2(panel.right() - 104.0, panel.bottom() - 56.0)
 }
 
-fn panel_bounds(operations_open: bool) -> Rect {
+pub fn panel_bounds(operations_open: bool) -> Rect {
     Rect::new(
         10.0,
         74.0,
@@ -234,11 +233,11 @@ fn panel_bounds(operations_open: bool) -> Rect {
     )
 }
 
-fn viewport_bounds(panel: Rect) -> Rect {
+pub fn viewport_bounds(panel: Rect) -> Rect {
     Rect::new(panel.x + 8.0, panel.y + 8.0, panel.w - 16.0, panel.h - 76.0)
 }
 
-fn draw_ending_manifestation(
+pub fn draw_ending_manifestation(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -326,7 +325,7 @@ fn draw_ending_manifestation(
     }
 }
 
-fn draw_campaign_evolution(campaign: &CampaignState, view: ColonyView) {
+pub fn draw_campaign_evolution(campaign: &CampaignState, view: ColonyView) {
     let (accent, label) = if campaign.strategy.campaign_complete {
         match campaign.strategy.mirexis_path_id.as_str() {
             "human_redoubt" => (Color::new(0.35, 0.72, 0.92, 0.54), "REDOUBT BULWARK"),
@@ -379,7 +378,7 @@ fn draw_campaign_evolution(campaign: &CampaignState, view: ColonyView) {
     );
 }
 
-fn hovered_plot(view: ColonyView, mouse: Vec2) -> Option<[i32; 2]> {
+pub fn hovered_plot(view: ColonyView, mouse: Vec2) -> Option<[i32; 2]> {
     if !view.viewport.contains(mouse) {
         return None;
     }
@@ -397,7 +396,7 @@ fn hovered_plot(view: ColonyView, mouse: Vec2) -> Option<[i32; 2]> {
     hovered
 }
 
-fn draw_wetland_backdrop(panel: Rect) {
+pub fn draw_wetland_backdrop(panel: Rect) {
     let field = Rect::new(
         panel.x + 14.0,
         panel.y + 48.0,
@@ -428,7 +427,7 @@ fn draw_wetland_backdrop(panel: Rect) {
     draw_circle_lines(690.0, 226.0, 70.0, 2.0, Color::new(0.13, 0.34, 0.34, 0.4));
 }
 
-fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
+pub fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
     let hub = view.plot_center(SETTLEMENT_CENTER);
     for building in &campaign.colony.buildings {
         if building.position == SETTLEMENT_CENTER {
@@ -454,14 +453,14 @@ fn draw_service_paths(campaign: &CampaignState, view: ColonyView) {
     }
 }
 
-fn first_hour_destination(campaign: &CampaignState) -> Option<Vec2> {
+pub fn first_hour_destination(campaign: &CampaignState) -> Option<Vec2> {
     campaign
         .first_hour
         .colony_guidance_target()
         .and_then(|id| crate::colony_exploration::npc_position(campaign, id))
 }
 
-fn draw_first_hour_route(
+pub fn draw_first_hour_route(
     campaign: &CampaignState,
     explorer: &crate::colony_exploration::ColonyExplorer,
     view: ColonyView,
@@ -513,6 +512,3 @@ fn draw_first_hour_route(
         Color::new(0.95, 0.78, 0.30, 0.92),
     );
 }
-
-#[cfg(test)]
-mod tests;

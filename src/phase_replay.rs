@@ -6,18 +6,18 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-const BEAT_SECONDS: f32 = 0.48;
-const MAX_BEATS: usize = 8;
+pub const BEAT_SECONDS: f32 = 0.48;
+pub const MAX_BEATS: usize = 8;
 
-pub(crate) fn skip_button_bounds() -> Rect {
+pub fn skip_button_bounds() -> Rect {
     Rect::new(650.0, 560.0, 168.0, 36.0)
 }
 
 #[derive(Debug, Default, Clone)]
-pub(crate) struct PhaseReplay {
-    beats: Vec<String>,
-    current: usize,
-    remaining: f32,
+pub struct PhaseReplay {
+    pub beats: Vec<String>,
+    pub current: usize,
+    pub remaining: f32,
 }
 
 impl PhaseReplay {
@@ -146,7 +146,7 @@ impl PhaseReplay {
     }
 }
 
-fn is_replay_event(event: &BattleEvent) -> bool {
+pub fn is_replay_event(event: &BattleEvent) -> bool {
     matches!(
         event,
         BattleEvent::UnitMoved { .. }
@@ -164,7 +164,7 @@ fn is_replay_event(event: &BattleEvent) -> bool {
     )
 }
 
-fn grouped_replay_summaries(events: &[&BattleEvent]) -> Vec<String> {
+pub fn grouped_replay_summaries(events: &[&BattleEvent]) -> Vec<String> {
     let mut summaries = Vec::new();
     let mut index = 0;
     while index < events.len() {
@@ -186,13 +186,13 @@ fn grouped_replay_summaries(events: &[&BattleEvent]) -> Vec<String> {
     summaries
 }
 
-fn replay_summary(event: &BattleEvent) -> String {
+pub fn replay_summary(event: &BattleEvent) -> String {
     crate::ui_widgets::event_summary(event)
         .replace('_', " ")
         .to_uppercase()
 }
 
-fn replay_attack_result_suffix(event: &BattleEvent) -> Option<String> {
+pub fn replay_attack_result_suffix(event: &BattleEvent) -> Option<String> {
     Some(match event {
         BattleEvent::DamageApplied {
             amount, remaining, ..
@@ -201,6 +201,3 @@ fn replay_attack_result_suffix(event: &BattleEvent) -> Option<String> {
         _ => return None,
     })
 }
-
-#[cfg(test)]
-mod tests;

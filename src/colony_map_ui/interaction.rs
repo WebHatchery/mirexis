@@ -7,7 +7,7 @@ use crate::grid_ui::WorldCamera;
 use crate::ui::UiAction;
 use macroquad::prelude::*;
 
-pub(super) fn draw_hover_card(
+pub fn draw_hover_card(
     campaign: &CampaignState,
     data: &GameData,
     hovered: Option<[i32; 2]>,
@@ -180,7 +180,7 @@ pub(super) fn draw_hover_card(
     draw_text(&text, 84.0, 585.0, 14.0, Color::new(0.70, 0.92, 0.84, 1.0));
 }
 
-fn identity_building_copy(
+pub fn identity_building_copy(
     campaign: &CampaignState,
     building: &crate::colony::BuildingState,
 ) -> String {
@@ -211,7 +211,7 @@ fn identity_building_copy(
     }
 }
 
-pub(super) fn plot_action(
+pub fn plot_action(
     campaign: &CampaignState,
     data: &GameData,
     position: [i32; 2],
@@ -231,7 +231,7 @@ pub(super) fn plot_action(
     }
 }
 
-fn building_action(
+pub fn building_action(
     campaign: &CampaignState,
     data: &GameData,
     building: &crate::colony::BuildingState,
@@ -275,7 +275,7 @@ fn building_action(
     }
 }
 
-pub(super) fn handle_plot_click(
+pub fn handle_plot_click(
     campaign: &CampaignState,
     data: &GameData,
     camera: &mut WorldCamera,

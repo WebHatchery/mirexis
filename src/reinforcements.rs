@@ -5,7 +5,7 @@ use crate::state::{BattleEvent, GameSession, ReinforcementWave, UnitState};
 use crate::tactical::manhattan;
 use macroquad_toolkit::grid::TilePos;
 
-pub(crate) fn create_waves(
+pub fn create_waves(
     config: &GameConfig,
     mission: &MissionDef,
     units: &[UnitState],
@@ -49,7 +49,7 @@ pub(crate) fn create_waves(
         .collect()
 }
 
-pub(crate) fn deploy(session: &mut GameSession, action_points: u8) {
+pub fn deploy(session: &mut GameSession, action_points: u8) {
     let round = session.tactical.round;
     let mut arriving = Vec::new();
     session.tactical.reinforcement_waves.retain(|wave| {
@@ -77,11 +77,11 @@ pub(crate) fn deploy(session: &mut GameSession, action_points: u8) {
     }
 }
 
-pub(crate) fn briefing_forecast(data: &GameData, mission: &MissionDef) -> Option<String> {
+pub fn briefing_forecast(data: &GameData, mission: &MissionDef) -> Option<String> {
     briefing_forecast_with_detail(data, mission, true)
 }
 
-pub(crate) fn briefing_forecast_with_detail(
+pub fn briefing_forecast_with_detail(
     data: &GameData,
     mission: &MissionDef,
     reveal_roles: bool,
@@ -115,7 +115,7 @@ pub(crate) fn briefing_forecast_with_detail(
     })
 }
 
-pub(crate) fn next_wave_forecast(session: &GameSession) -> Option<String> {
+pub fn next_wave_forecast(session: &GameSession) -> Option<String> {
     let wave = session
         .tactical
         .reinforcement_waves
@@ -133,7 +133,7 @@ pub(crate) fn next_wave_forecast(session: &GameSession) -> Option<String> {
     ))
 }
 
-pub(crate) fn telegraphed_wave(session: &GameSession) -> Option<&ReinforcementWave> {
+pub fn telegraphed_wave(session: &GameSession) -> Option<&ReinforcementWave> {
     session
         .tactical
         .reinforcement_waves
@@ -142,7 +142,7 @@ pub(crate) fn telegraphed_wave(session: &GameSession) -> Option<&ReinforcementWa
         .min_by_key(|wave| wave.round)
 }
 
-fn wave_rounds(mission: &MissionDef) -> impl Iterator<Item = u32> + '_ {
+pub fn wave_rounds(mission: &MissionDef) -> impl Iterator<Item = u32> + '_ {
     [3, 5].into_iter().filter(|round| {
         matches!(
             mission.objective_kind,
@@ -151,7 +151,7 @@ fn wave_rounds(mission: &MissionDef) -> impl Iterator<Item = u32> + '_ {
     })
 }
 
-fn forecast_role(role: &str) -> String {
+pub fn forecast_role(role: &str) -> String {
     match role {
         "Line Infantry" => "INFANTRY".to_owned(),
         "Energy Construct" => "CONSTRUCT".to_owned(),
@@ -161,7 +161,7 @@ fn forecast_role(role: &str) -> String {
     }
 }
 
-fn reinforcement_position(session: &GameSession, preferred: TilePos) -> Option<TilePos> {
+pub fn reinforcement_position(session: &GameSession, preferred: TilePos) -> Option<TilePos> {
     let width = session.tactical.fog.width as i32;
     let height = session.tactical.fog.height as i32;
     (0..width)
@@ -185,6 +185,3 @@ fn reinforcement_position(session: &GameSession, preferred: TilePos) -> Option<T
         })
         .min_by_key(|position| manhattan(*position, preferred))
 }
-
-#[cfg(test)]
-mod tests;

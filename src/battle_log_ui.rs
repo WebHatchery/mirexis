@@ -7,15 +7,15 @@ use crate::ui_widgets::{button, button_with_state, event_summary};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-const VISIBLE_EVENTS: usize = 9;
-const FILTERS: [(BattleLogFilter, &str); 4] = [
+pub const VISIBLE_EVENTS: usize = 9;
+pub const FILTERS: [(BattleLogFilter, &str); 4] = [
     (BattleLogFilter::All, "ALL"),
     (BattleLogFilter::Combat, "COMBAT"),
     (BattleLogFilter::Ground, "GROUND"),
     (BattleLogFilter::System, "SYSTEM"),
 ];
 
-pub(crate) fn draw(
+pub fn draw(
     session: &GameSession,
     filter: BattleLogFilter,
     mouse: Vec2,
@@ -122,11 +122,11 @@ pub(crate) fn draw(
     }
 }
 
-fn filter_matches(filter: BattleLogFilter, event: &BattleEvent) -> bool {
+pub fn filter_matches(filter: BattleLogFilter, event: &BattleEvent) -> bool {
     filter == BattleLogFilter::All || event_filter(event) == filter
 }
 
-fn filtered_event_count(session: &GameSession, filter: BattleLogFilter) -> usize {
+pub fn filtered_event_count(session: &GameSession, filter: BattleLogFilter) -> usize {
     session
         .tactical
         .event_log
@@ -135,7 +135,7 @@ fn filtered_event_count(session: &GameSession, filter: BattleLogFilter) -> usize
         .count()
 }
 
-fn event_filter(event: &BattleEvent) -> BattleLogFilter {
+pub fn event_filter(event: &BattleEvent) -> BattleLogFilter {
     use BattleEvent::*;
     match event {
         AttackRolled { .. }
@@ -164,7 +164,7 @@ fn event_filter(event: &BattleEvent) -> BattleLogFilter {
     }
 }
 
-fn event_kind(event: &BattleEvent) -> &'static str {
+pub fn event_kind(event: &BattleEvent) -> &'static str {
     use BattleEvent::*;
     match event {
         UnitMoved { .. } => "MOVEMENT",
@@ -190,7 +190,7 @@ fn event_kind(event: &BattleEvent) -> &'static str {
     }
 }
 
-fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
+pub fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
     let color = event_color(event);
     match event_kind(event) {
         "ATTACK" | "IMPACT" => {
@@ -248,7 +248,7 @@ fn draw_event_icon(event: &crate::state::BattleEvent, center: Vec2) {
     }
 }
 
-fn event_color(event: &BattleEvent) -> Color {
+pub fn event_color(event: &BattleEvent) -> Color {
     match event {
         BattleEvent::DamageApplied { .. }
         | BattleEvent::UnitIncapacitated { .. }
@@ -275,6 +275,3 @@ fn event_color(event: &BattleEvent) -> Color {
         _ => dark::TEXT_DIM,
     }
 }
-
-#[cfg(test)]
-mod tests;

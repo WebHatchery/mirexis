@@ -9,16 +9,13 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::TextStyle;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum AbilityFocusSlot {
+pub enum AbilityFocusSlot {
     Mutation,
     ClassAction,
     Equipment,
 }
 
-pub(crate) fn map_focus_tile(
-    progress: &FirstHourProgress,
-    session: &GameSession,
-) -> Option<TilePos> {
+pub fn map_focus_tile(progress: &FirstHourProgress, session: &GameSession) -> Option<TilePos> {
     if !progress.guidance_enabled || !progress.is_tactical_stage() {
         return None;
     }
@@ -43,12 +40,7 @@ pub(crate) fn map_focus_tile(
     }
 }
 
-pub(crate) fn draw_map_focus(
-    ctx: &UiContext<'_>,
-    view: GridView,
-    viewport: Rect,
-    input_enabled: bool,
-) {
+pub fn draw_map_focus(ctx: &UiContext<'_>, view: GridView, viewport: Rect, input_enabled: bool) {
     if !input_enabled || !guidance_is_active(ctx) {
         return;
     }
@@ -90,7 +82,7 @@ pub(crate) fn draw_map_focus(
     );
 }
 
-pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
+pub fn draw_command_focus(ctx: &UiContext<'_>) {
     if !guidance_is_active(ctx) {
         return;
     }
@@ -129,18 +121,18 @@ pub(crate) fn draw_command_focus(ctx: &UiContext<'_>) {
     draw_focus(rect);
 }
 
-pub(crate) fn draw_replay_focus(ctx: &UiContext<'_>) {
+pub fn draw_replay_focus(ctx: &UiContext<'_>) {
     if !ctx.phase_replay.is_active() || !replay_guidance_is_active(ctx) {
         return;
     }
     draw_focus(replay_focus_target());
 }
 
-fn replay_focus_target() -> Rect {
+pub fn replay_focus_target() -> Rect {
     crate::phase_replay::skip_button_bounds()
 }
 
-fn draw_focus(rect: Rect) {
+pub fn draw_focus(rect: Rect) {
     let color = focus_color();
     draw_rectangle_lines(
         rect.x - 4.0,
@@ -166,7 +158,7 @@ fn draw_focus(rect: Rect) {
     );
 }
 
-fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
+pub fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
     crate::action_preview_ui::attack_preview_is_valid(session, session.tactical.selected_tile).then(
         || {
             let panel = crate::ui::tactical_world_rect();
@@ -176,7 +168,7 @@ fn attack_focus_rect(session: &GameSession) -> Option<Rect> {
     )
 }
 
-fn objective_focus_rect(session: &GameSession) -> Option<Rect> {
+pub fn objective_focus_rect(session: &GameSession) -> Option<Rect> {
     session
         .can_interact_selected()
         .then_some(crate::objective_ui::action_button_bounds(
@@ -184,7 +176,7 @@ fn objective_focus_rect(session: &GameSession) -> Option<Rect> {
         ))
 }
 
-fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
+pub fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
     if session.can_activate_selected_mutation() {
         return Some(AbilityFocusSlot::Mutation);
     }
@@ -203,7 +195,7 @@ fn ability_focus_slot(session: &GameSession) -> Option<AbilityFocusSlot> {
     })
 }
 
-fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
+pub fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
     let action_width = (crate::ui::tactical_command_panel_rect().w - 52.0) / 3.0;
     let offset = match slot {
         AbilityFocusSlot::Mutation => 0.0,
@@ -213,11 +205,11 @@ fn ability_focus_rect(x: f32, y: f32, slot: AbilityFocusSlot) -> Rect {
     Rect::new(x + offset, y, action_width, 34.0)
 }
 
-fn guidance_is_active(ctx: &UiContext<'_>) -> bool {
+pub fn guidance_is_active(ctx: &UiContext<'_>) -> bool {
     replay_guidance_is_active(ctx) && !ctx.phase_replay.is_active()
 }
 
-fn replay_guidance_is_active(ctx: &UiContext<'_>) -> bool {
+pub fn replay_guidance_is_active(ctx: &UiContext<'_>) -> bool {
     ctx.first_hour.guidance_enabled
         && ctx.first_hour.is_tactical_stage()
         && !ctx.first_hour.help_open
@@ -226,7 +218,7 @@ fn replay_guidance_is_active(ctx: &UiContext<'_>) -> bool {
         && !ctx.show_settings
 }
 
-fn move_focus_tile(session: &GameSession) -> Option<TilePos> {
+pub fn move_focus_tile(session: &GameSession) -> Option<TilePos> {
     let selected = session.selected_unit()?;
     let cover_tiles = session
         .tactical
@@ -254,7 +246,7 @@ fn move_focus_tile(session: &GameSession) -> Option<TilePos> {
     })
 }
 
-fn nearest_cover_distance(tile: TilePos, cover_tiles: &[TilePos]) -> i32 {
+pub fn nearest_cover_distance(tile: TilePos, cover_tiles: &[TilePos]) -> i32 {
     cover_tiles
         .iter()
         .map(|cover| manhattan(tile, *cover))
@@ -262,13 +254,13 @@ fn nearest_cover_distance(tile: TilePos, cover_tiles: &[TilePos]) -> i32 {
         .unwrap_or(i32::MAX)
 }
 
-fn focus_distance(session: &GameSession, tile: TilePos) -> i32 {
+pub fn focus_distance(session: &GameSession, tile: TilePos) -> i32 {
     session
         .selected_unit()
         .map_or(0, |selected| manhattan(selected.position, tile))
 }
 
-fn apply_learning_focus_tile(session: &GameSession) -> Option<TilePos> {
+pub fn apply_learning_focus_tile(session: &GameSession) -> Option<TilePos> {
     let hostiles = session
         .tactical
         .units
@@ -282,15 +274,15 @@ fn apply_learning_focus_tile(session: &GameSession) -> Option<TilePos> {
         .map(|unit| unit.position)
 }
 
-fn focus_key(session: &GameSession, tile: TilePos) -> (i32, i32, i32) {
+pub fn focus_key(session: &GameSession, tile: TilePos) -> (i32, i32, i32) {
     (focus_distance(session, tile), tile.y, tile.x)
 }
 
-fn manhattan(from: TilePos, to: TilePos) -> i32 {
+pub fn manhattan(from: TilePos, to: TilePos) -> i32 {
     (from.x - to.x).abs() + (from.y - to.y).abs()
 }
 
-fn map_label(lesson: TacticalLesson) -> &'static str {
+pub fn map_label(lesson: TacticalLesson) -> &'static str {
     match lesson {
         TacticalLesson::Select => "NEXT // TAP COLONIST",
         TacticalLesson::MoveToCover => "NEXT // MOVE TO COVER",
@@ -301,9 +293,6 @@ fn map_label(lesson: TacticalLesson) -> &'static str {
     }
 }
 
-fn focus_color() -> Color {
+pub fn focus_color() -> Color {
     Color::new(1.0, 0.74, 0.18, 0.96)
 }
-
-#[cfg(test)]
-mod tests;

@@ -4,7 +4,7 @@ use super::CampaignState;
 use crate::colony::{BuildingKind, EVOLUTION_CHAMBER_UPGRADE};
 use crate::data::{GameData, MutationEvolutionDef};
 
-const EVOLUTION_CHAMBER_BIOMASS_DISCOUNT: i32 = 4;
+pub const EVOLUTION_CHAMBER_BIOMASS_DISCOUNT: i32 = 4;
 
 impl CampaignState {
     pub fn mutation_evolution_cost(&self, evolution: &MutationEvolutionDef) -> i32 {
@@ -68,22 +68,23 @@ impl CampaignState {
         Ok(evolution.name.clone())
     }
 
-    pub fn adaptation_completion_progress(&self) -> (bool, usize, bool) {
-        (
-            self.strategy.adaptation_operation_completed,
-            self.roster
+    pub fn adaptation_completion_progress(&self) -> super::AdaptationCompletionProgress {
+        super::AdaptationCompletionProgress {
+            operation_completed: self.strategy.adaptation_operation_completed,
+            evolved_count: self
+                .roster
                 .iter()
                 .filter(|character| !character.mutation_evolution_id.is_empty())
                 .count(),
-            self.colony.has_facility(BuildingKind::GeneLab),
-        )
+            gene_lab_ready: self.colony.has_facility(BuildingKind::GeneLab),
+        }
     }
 
     pub fn refresh_adaptation_completion(&mut self, data: &GameData) -> bool {
-        let (_, evolved, lab) = self.adaptation_completion_progress();
+        let progress = self.adaptation_completion_progress();
         let changed = self
             .strategy
-            .refresh_adaptation_completion(evolved >= 2, lab);
+            .refresh_adaptation_completion(progress.evolved_count >= 2, progress.gene_lab_ready);
         if changed {
             self.refresh_mission_offers(data);
         }

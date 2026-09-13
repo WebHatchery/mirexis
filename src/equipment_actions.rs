@@ -6,7 +6,7 @@ use crate::state::{
 };
 use crate::tactical::manhattan;
 
-pub(crate) fn action_name(equipment_id: &str) -> Option<&'static str> {
+pub fn action_name(equipment_id: &str) -> Option<&'static str> {
     match equipment_id {
         "field_medkit" => Some("FIELD PATCH"),
         "field_toolkit" => Some("FIELD FORTIFY"),
@@ -42,7 +42,7 @@ impl GameSession {
     }
 }
 
-pub(crate) fn available_action(session: &GameSession, unit_id: &str) -> Option<String> {
+pub fn available_action(session: &GameSession, unit_id: &str) -> Option<String> {
     let unit = session.unit(unit_id)?;
     unit.equipment_ids
         .iter()
@@ -52,7 +52,7 @@ pub(crate) fn available_action(session: &GameSession, unit_id: &str) -> Option<S
         .cloned()
 }
 
-pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str, equipment_id: &str) -> bool {
+pub fn has_valid_target(session: &GameSession, unit_id: &str, equipment_id: &str) -> bool {
     session
         .tactical
         .units
@@ -60,7 +60,7 @@ pub(crate) fn has_valid_target(session: &GameSession, unit_id: &str, equipment_i
         .any(|target| validate(session, unit_id, equipment_id, &target.id).is_ok())
 }
 
-pub(crate) fn validate(
+pub fn validate(
     session: &GameSession,
     unit_id: &str,
     equipment_id: &str,
@@ -135,7 +135,7 @@ pub(crate) fn validate(
     target_result.map(|()| CommandCost { action_points: 1 })
 }
 
-fn validate_target(
+pub fn validate_target(
     target: &crate::state::UnitState,
     team: Team,
     distance: i32,
@@ -151,7 +151,7 @@ fn validate_target(
     extra.then_some(()).ok_or(RuleError::InvalidTarget)
 }
 
-pub(crate) fn execute(
+pub fn execute(
     session: &mut GameSession,
     unit_id: &str,
     equipment_id: &str,
@@ -264,6 +264,3 @@ pub(crate) fn execute(
     session.check_outcome(&mut events);
     events
 }
-
-#[cfg(test)]
-mod tests;

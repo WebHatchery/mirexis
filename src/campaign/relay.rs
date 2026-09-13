@@ -4,8 +4,8 @@ use super::CampaignState;
 use crate::colony::BuildingKind;
 use crate::data::GameData;
 
-pub(crate) const RELAY_SCAN_POWER_COST: i32 = 2;
-pub(crate) const RELAY_SIGNAL_ATTENTION: i32 = 4;
+pub const RELAY_SCAN_POWER_COST: i32 = 2;
+pub const RELAY_SIGNAL_ATTENTION: i32 = 4;
 
 impl CampaignState {
     pub fn relay_scan_available(&self) -> bool {

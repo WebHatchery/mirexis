@@ -4,9 +4,9 @@ use crate::campaign::{Availability, CampaignState};
 use crate::colony::BuildingKind;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct EpilogueDossier {
-    pub(crate) institution: String,
-    pub(crate) institution_status: &'static str,
+pub struct EpilogueDossier {
+    pub institution: String,
+    pub institution_status: &'static str,
     people: String,
     ready: usize,
     recovering: usize,
@@ -25,7 +25,7 @@ pub(crate) struct EpilogueDossier {
 }
 
 impl EpilogueDossier {
-    pub(crate) fn debrief_summary_lines(&self) -> [String; 3] {
+    pub fn debrief_summary_lines(&self) -> [String; 3] {
         [
             format!(
                 "COLONY LEGACY // {} {} // {} COLONISTS",
@@ -52,7 +52,7 @@ impl EpilogueDossier {
         ]
     }
 
-    pub(crate) fn register_lines(&self) -> [String; 7] {
+    pub fn register_lines(&self) -> [String; 7] {
         [
             format!(
                 "CIVIC // {} // {}",
@@ -82,7 +82,7 @@ impl EpilogueDossier {
     }
 }
 
-pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
+pub fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
     if !campaign.strategy.campaign_complete {
         return None;
     }
@@ -188,7 +188,7 @@ pub(crate) fn derive(campaign: &CampaignState) -> Option<EpilogueDossier> {
     })
 }
 
-fn navigator_voice(campaign: &CampaignState) -> String {
+pub fn navigator_voice(campaign: &CampaignState) -> String {
     let line = match campaign.strategy.mirexis_path_id.as_str() {
         "human_redoubt" => "THE SIGNAL FALLS QUIET BEHIND THE WALL.",
         "living_commonwealth" => "THE MANY VOICES KEEP THEIR OWN NAMES.",
@@ -198,7 +198,7 @@ fn navigator_voice(campaign: &CampaignState) -> String {
     format!("{} // {}", character_name(campaign, "kira_voss"), line)
 }
 
-fn engine_relationship(path_id: &str) -> &'static str {
+pub fn engine_relationship(path_id: &str) -> &'static str {
     match path_id {
         "human_redoubt" => "HUMAN BOUNDARY",
         "living_commonwealth" => "LIVING ACCORD",
@@ -207,7 +207,7 @@ fn engine_relationship(path_id: &str) -> &'static str {
     }
 }
 
-fn engine_response(response_id: &str) -> &'static str {
+pub fn engine_response(response_id: &str) -> &'static str {
     match response_id {
         "bastion_beacon" => "ARMOURED",
         "living_decoy" => "SHELTERED",
@@ -216,7 +216,7 @@ fn engine_response(response_id: &str) -> &'static str {
     }
 }
 
-fn faction_pressure(campaign: &CampaignState) -> String {
+pub fn faction_pressure(campaign: &CampaignState) -> String {
     campaign
         .strategy
         .factions
@@ -228,7 +228,7 @@ fn faction_pressure(campaign: &CampaignState) -> String {
         )
 }
 
-fn character_voice(campaign: &CampaignState) -> String {
+pub fn character_voice(campaign: &CampaignState) -> String {
     let (character_id, ready_line, recovering_line) =
         match campaign.strategy.mirexis_path_id.as_str() {
             "human_redoubt" => (
@@ -271,7 +271,7 @@ fn character_voice(campaign: &CampaignState) -> String {
     }
 }
 
-fn character_name(campaign: &CampaignState, character_id: &str) -> String {
+pub fn character_name(campaign: &CampaignState, character_id: &str) -> String {
     campaign
         .roster
         .iter()
@@ -281,6 +281,3 @@ fn character_name(campaign: &CampaignState, character_id: &str) -> String {
             |character| character.name.clone(),
         )
 }
-
-#[cfg(test)]
-mod tests;

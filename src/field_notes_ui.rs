@@ -6,26 +6,21 @@ use crate::ui_widgets::{button, button_with_state};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
-const LAUNCHER_BOUNDS: Rect = Rect::new(878.0, 130.0, 176.0, 24.0);
-const NOTE_ROWS: usize = 8;
-const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
-
-#[cfg(test)]
-mod tests;
-
-#[cfg(test)]
-fn launcher_bounds() -> Rect {
+pub const LAUNCHER_BOUNDS: Rect = Rect::new(878.0, 130.0, 176.0, 24.0);
+pub const NOTE_ROWS: usize = 8;
+pub const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
+pub fn launcher_bounds() -> Rect {
     LAUNCHER_BOUNDS
 }
 
-pub(crate) fn draw_launcher(story: &ColonyStoryState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_launcher(story: &ColonyStoryState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let label = format!("FIELD NOTES // {} ARCHIVED", story.archived_notes().len());
     if button(LAUNCHER_BOUNDS, &label, true, mouse) {
         actions.push(UiAction::ToggleFieldNotes);
     }
 }
 
-pub(crate) fn draw_modal(
+pub fn draw_modal(
     story: &ColonyStoryState,
     selected_index: usize,
     mouse: Vec2,
@@ -138,7 +133,7 @@ pub(crate) fn draw_modal(
     }
 }
 
-fn note_window_start(selected: usize, note_count: usize) -> usize {
+pub fn note_window_start(selected: usize, note_count: usize) -> usize {
     if note_count <= NOTE_ROWS {
         0
     } else {
@@ -148,11 +143,11 @@ fn note_window_start(selected: usize, note_count: usize) -> usize {
     }
 }
 
-fn note_row_bounds(row: usize) -> Rect {
+pub fn note_row_bounds(row: usize) -> Rect {
     Rect::new(190.0, 176.0 + row as f32 * 42.0, 286.0, 36.0)
 }
 
-fn draw_wrapped(value: &str, x: f32, y: f32, width: f32) {
+pub fn draw_wrapped(value: &str, x: f32, y: f32, width: f32) {
     macroquad_toolkit::ui::draw_text_block_ex(
         value,
         x,
@@ -165,6 +160,6 @@ fn draw_wrapped(value: &str, x: f32, y: f32, width: f32) {
         16.0,
     );
 }
-fn draw_ui_text_ex<'a>(value: &str, x: f32, y: f32, params: TextParams<'a>) -> TextDimensions {
+pub fn draw_ui_text_ex<'a>(value: &str, x: f32, y: f32, params: TextParams<'a>) -> TextDimensions {
     crate::ui::draw_ui_text_ex(value, x, y, params)
 }

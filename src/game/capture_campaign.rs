@@ -5,7 +5,7 @@ use crate::data::{OperationModifier, Team};
 use crate::state::ObjectiveState;
 
 impl Game {
-    pub(super) fn capture_research(&mut self) {
+    pub fn capture_research(&mut self) {
         for event in &mut self.campaign.strategy.character_events {
             event.resolved = true;
         }
@@ -13,7 +13,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_field_notes(&mut self) {
+    pub fn capture_field_notes(&mut self) {
         let notes = [
             (
                 "mara_venn",
@@ -51,7 +51,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_memorial(&mut self) {
+    pub fn capture_memorial(&mut self) {
         let kira = self
             .campaign
             .roster
@@ -129,12 +129,12 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_memorial_page_two(&mut self) {
+    pub fn capture_memorial_page_two(&mut self) {
         self.capture_memorial();
         self.memorial_page = 1;
     }
 
-    pub(super) fn capture_advanced_roster(&mut self) {
+    pub fn capture_advanced_roster(&mut self) {
         self.campaign.strategy.phase_id = "adaptation".to_owned();
         self.campaign.colony.resources.materials = 480;
         self.campaign.selected_character_id = "mara_venn".to_owned();
@@ -151,7 +151,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_relationships(&mut self, state: AppState) {
+    pub fn capture_relationships(&mut self, state: AppState) {
         let kira_mara = vec!["kira_voss".to_owned(), "mara_venn".to_owned()];
         for _ in 0..3 {
             self.campaign.strengthen_shared_victory(&kira_mara);
@@ -162,7 +162,7 @@ impl Game {
         self.state = state;
     }
 
-    pub(super) fn capture_trauma(&mut self) {
+    pub fn capture_trauma(&mut self) {
         let kira = self
             .campaign
             .roster
@@ -174,7 +174,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_contact(&mut self) {
+    pub fn capture_contact(&mut self) {
         self.campaign.strategy.isolation_victories = 3;
         self.campaign.strategy.first_assault_repulsed = true;
         self.campaign.strategy.research[0].completed = true;
@@ -185,7 +185,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_contact_gear(&mut self) {
+    pub fn capture_contact_gear(&mut self) {
         self.capture_contact();
         self.campaign
             .strategy
@@ -195,7 +195,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_contact_event(&mut self) {
+    pub fn capture_contact_event(&mut self) {
         self.capture_contact_gear();
         self.campaign
             .resolve_first_character_event(&self.data)
@@ -207,7 +207,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_adaptation(&mut self) {
+    pub fn capture_adaptation(&mut self) {
         self.capture_contact_event();
         self.campaign
             .resolve_first_character_event(&self.data)
@@ -223,7 +223,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_gene_lab(&mut self) {
+    pub fn capture_gene_lab(&mut self) {
         self.capture_adaptation();
         self.campaign
             .colony
@@ -238,7 +238,7 @@ impl Game {
         self.state = AppState::GeneLab;
     }
 
-    pub(super) fn capture_evolution(&mut self) {
+    pub fn capture_evolution(&mut self) {
         self.capture_gene_lab();
         self.campaign
             .choose_mutation_evolution("kira_voss", "expanded_cortex", &self.data)
@@ -247,7 +247,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_mara_evolution(&mut self) {
+    pub fn capture_mara_evolution(&mut self) {
         self.capture_gene_lab();
         self.campaign
             .choose_mutation_evolution("mara_venn", "razor_plating", &self.data)
@@ -256,7 +256,7 @@ impl Game {
         self.state = AppState::GeneLab;
     }
 
-    pub(super) fn capture_ilya_evolution(&mut self) {
+    pub fn capture_ilya_evolution(&mut self) {
         self.capture_gene_lab();
         self.campaign
             .choose_mutation_evolution("ilya_reed", "clean_marrow", &self.data)
@@ -265,7 +265,7 @@ impl Game {
         self.state = AppState::GeneLab;
     }
 
-    pub(super) fn capture_sol_evolution(&mut self) {
+    pub fn capture_sol_evolution(&mut self) {
         self.capture_gene_lab();
         self.campaign
             .choose_mutation_evolution("sol_cairn", "lattice_tendons", &self.data)
@@ -274,7 +274,7 @@ impl Game {
         self.state = AppState::GeneLab;
     }
 
-    pub(super) fn capture_nadi_evolution(&mut self) {
+    pub fn capture_nadi_evolution(&mut self) {
         self.capture_gene_lab();
         self.campaign.colony.resources.biomass += 4;
         self.campaign
@@ -284,7 +284,7 @@ impl Game {
         self.state = AppState::GeneLab;
     }
 
-    pub(super) fn capture_escalation(&mut self) {
+    pub fn capture_escalation(&mut self) {
         self.capture_gene_lab();
         self.campaign.colony.resources.biomass += 10;
         self.campaign
@@ -299,7 +299,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_escalation_operation(&mut self) {
+    pub fn capture_escalation_operation(&mut self) {
         self.capture_escalation();
         let mission_id = self
             .campaign
@@ -321,7 +321,7 @@ impl Game {
         self.reset_capture_session(AppState::MissionBriefing);
     }
 
-    pub(super) fn capture_escalation_response(&mut self) {
+    pub fn capture_escalation_response(&mut self) {
         self.capture_escalation();
         self.campaign.strategy.escalation_operation_completed = true;
         self.campaign.colony.resources.materials = 60;
@@ -331,7 +331,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_mirexis(&mut self) {
+    pub fn capture_mirexis(&mut self) {
         self.capture_escalation_response();
         self.campaign
             .strategy
@@ -343,7 +343,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_mirexis_path(&mut self) {
+    pub fn capture_mirexis_path(&mut self) {
         self.capture_mirexis();
         self.campaign
             .strategy
@@ -353,7 +353,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_mirexis_end(&mut self, path_id: &str) {
+    pub fn capture_mirexis_end(&mut self, path_id: &str) {
         self.capture_mirexis();
         self.campaign.colony.resources.materials = 100;
         self.campaign.colony.resources.biomass = 30;
@@ -373,7 +373,7 @@ impl Game {
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_finale_debrief(&mut self) {
+    pub fn capture_finale_debrief(&mut self) {
         self.capture_template_operation(
             "mirexis_threshold_door_of_light",
             24,
@@ -397,7 +397,7 @@ impl Game {
         self.state = AppState::Debrief;
     }
 
-    pub(super) fn capture_adaptation_operation(&mut self) {
+    pub fn capture_adaptation_operation(&mut self) {
         self.capture_evolution();
         let mission_id = self
             .campaign
@@ -419,7 +419,7 @@ impl Game {
         self.reset_capture_session(AppState::MissionBriefing);
     }
 
-    pub(super) fn capture_legacy(&mut self) {
+    pub fn capture_legacy(&mut self) {
         self.campaign
             .resolve_first_character_event(&self.data)
             .expect("first capture event resolves");
@@ -430,7 +430,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_pressure(&mut self) {
+    pub fn capture_pressure(&mut self) {
         self.active_mission.operation_modifier = OperationModifier::BroodFrenzy;
         self.state = AppState::MissionBriefing;
     }

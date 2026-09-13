@@ -6,10 +6,10 @@ use macroquad_toolkit::persistence::{load_from_slot, save_to_slot};
 use macroquad_toolkit::synth::{render_wav, SynthConfig, Voice, Wave};
 use serde::{Deserialize, Serialize};
 
-const SETTINGS_SLOT: &str = "audio_preferences";
+pub const SETTINGS_SLOT: &str = "audio_preferences";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) enum SoundCue {
+pub enum SoundCue {
     Focus,
     Invalid,
     Move,
@@ -26,7 +26,7 @@ pub(crate) enum SoundCue {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct AudioSettings {
+pub struct AudioSettings {
     pub volume_percent: u8,
     pub muted: bool,
     #[serde(default)]
@@ -44,20 +44,20 @@ impl Default for AudioSettings {
 }
 
 impl AudioSettings {
-    fn normalized(mut self) -> Self {
+    pub fn normalized(mut self) -> Self {
         self.volume_percent = self.volume_percent.min(100);
         self
     }
 }
 
-pub(crate) struct AudioSystem {
+pub struct AudioSystem {
     sounds: SoundManager<SoundCue>,
     pub settings: AudioSettings,
     pub load_failures: Vec<String>,
 }
 
 impl AudioSystem {
-    pub(crate) async fn new(game_name: &str) -> Self {
+    pub async fn new(game_name: &str) -> Self {
         let settings = load_from_slot::<AudioSettings>(game_name, SETTINGS_SLOT)
             .unwrap_or_default()
             .normalized();
@@ -75,14 +75,14 @@ impl AudioSystem {
         system
     }
 
-    pub(crate) fn play(&mut self, cue: SoundCue) {
+    pub fn play(&mut self, cue: SoundCue) {
         self.apply_volume();
         if !self.settings.muted {
             self.sounds.play_sfx(cue, 1.0);
         }
     }
 
-    pub(crate) fn report_failures(
+    pub fn report_failures(
         &self,
         notifications: &mut macroquad_toolkit::notifications::NotificationManager,
     ) {
@@ -94,14 +94,14 @@ impl AudioSystem {
         }
     }
 
-    pub(crate) fn play_events(&mut self, events: &[BattleEvent]) {
+    pub fn play_events(&mut self, events: &[BattleEvent]) {
         let cue = prioritized_event_cue(events);
         if let Some(cue) = cue {
             self.play(cue);
         }
     }
 
-    pub(crate) fn adjust_volume(&mut self, delta: i8, game_name: &str) {
+    pub fn adjust_volume(&mut self, delta: i8, game_name: &str) {
         self.settings.volume_percent =
             (self.settings.volume_percent as i16 + delta as i16).clamp(0, 100) as u8;
         if self.settings.volume_percent > 0 {
@@ -111,25 +111,25 @@ impl AudioSystem {
         self.apply_volume();
     }
 
-    pub(crate) fn toggle_mute(&mut self, game_name: &str) {
+    pub fn toggle_mute(&mut self, game_name: &str) {
         self.settings.muted = !self.settings.muted;
         self.persist(game_name);
         self.apply_volume();
     }
 
-    pub(crate) fn toggle_reduced_motion(&mut self, game_name: &str) {
+    pub fn toggle_reduced_motion(&mut self, game_name: &str) {
         self.settings.reduced_motion = !self.settings.reduced_motion;
         self.persist(game_name);
     }
 
-    fn persist(&mut self, game_name: &str) {
+    pub fn persist(&mut self, game_name: &str) {
         if let Err(error) = save_to_slot(game_name, SETTINGS_SLOT, &self.settings) {
             self.load_failures
                 .push(format!("Could not persist audio settings: {error}"));
         }
     }
 
-    fn apply_volume(&mut self) {
+    pub fn apply_volume(&mut self) {
         self.sounds.sfx_volume = if self.settings.muted {
             0.0
         } else {
@@ -138,7 +138,7 @@ impl AudioSystem {
     }
 }
 
-fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
+pub fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
     match event {
         BattleEvent::BattleEnded {
             outcome: ObjectiveState::Victory,
@@ -171,14 +171,14 @@ fn event_cue(event: &BattleEvent) -> Option<SoundCue> {
     }
 }
 
-fn prioritized_event_cue(events: &[BattleEvent]) -> Option<SoundCue> {
+pub fn prioritized_event_cue(events: &[BattleEvent]) -> Option<SoundCue> {
     events
         .iter()
         .filter_map(event_cue)
         .max_by_key(|cue| cue_priority(*cue))
 }
 
-fn cue_priority(cue: SoundCue) -> u8 {
+pub fn cue_priority(cue: SoundCue) -> u8 {
     match cue {
         SoundCue::Victory | SoundCue::Defeat => 100,
         SoundCue::Objective => 90,
@@ -192,7 +192,7 @@ fn cue_priority(cue: SoundCue) -> u8 {
     }
 }
 
-fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
+pub fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
     use SoundCue::*;
     vec![
         (Focus, vec![tone(0.06, 880.0, 1160.0, 0.30)], 1),
@@ -273,15 +273,12 @@ fn palette() -> Vec<(SoundCue, Vec<Voice>, u64)> {
     ]
 }
 
-fn tone(duration: f32, from: f32, to: f32, gain: f32) -> Voice {
+pub fn tone(duration: f32, from: f32, to: f32, gain: f32) -> Voice {
     Voice::tone(0.0, duration, from, gain)
         .glide(to)
         .wave(Wave::Triangle)
 }
 
-fn noise(duration: f32, gain: f32) -> Voice {
+pub fn noise(duration: f32, gain: f32) -> Voice {
     Voice::tone(0.0, duration, 440.0, gain).wave(Wave::Noise)
 }
-
-#[cfg(test)]
-mod tests;

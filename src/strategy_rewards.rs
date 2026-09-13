@@ -2,7 +2,7 @@
 
 use crate::data::GameData;
 
-pub(crate) fn bonus(
+pub fn bonus(
     contact_protocol_id: &str,
     escalation_response_id: &str,
     mirexis_path_id: &str,

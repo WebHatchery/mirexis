@@ -4,7 +4,7 @@ use super::{Game, TacticalTargeting};
 use crate::ui::UiAction;
 
 impl Game {
-    pub(super) fn apply_skill_action(&mut self, action: &UiAction, before_events: usize) -> bool {
+    pub fn apply_skill_action(&mut self, action: &UiAction, before_events: usize) -> bool {
         let handled = match action {
             UiAction::LearnSelectedSkill(skill_id) => {
                 let character_id = self.campaign.selected_character_id.clone();

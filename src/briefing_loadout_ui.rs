@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(crate) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     data: &GameData,
     assets: &AssetManager,
@@ -100,6 +100,3 @@ pub(crate) fn draw(
         );
     }
 }
-
-#[cfg(test)]
-mod tests;

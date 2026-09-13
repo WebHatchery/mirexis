@@ -2,12 +2,7 @@
 
 use crate::colony::Resources;
 
-pub(super) fn button_label(
-    name: &str,
-    effect: &str,
-    affordable: bool,
-    requirement: &str,
-) -> String {
+pub fn button_label(name: &str, effect: &str, affordable: bool, requirement: &str) -> String {
     let name = name.to_uppercase();
     if affordable {
         format!("{name} // {effect}")
@@ -16,7 +11,7 @@ pub(super) fn button_label(
     }
 }
 
-pub(super) fn resource_shortfalls(
+pub fn resource_shortfalls(
     resources: &Resources,
     materials_cost: i32,
     biomass_cost: i32,
@@ -34,6 +29,3 @@ pub(super) fn resource_shortfalls(
     }
     shortfalls.join(" // ")
 }
-
-#[cfg(test)]
-mod tests;

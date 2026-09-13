@@ -5,13 +5,14 @@ use crate::state::UnitState;
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
+use macroquad_toolkit::data_loader::load_embedded_json_labeled;
 use serde::Deserialize;
 
-const DEFINITIONS_JSON: &str =
+pub const DEFINITIONS_JSON: &str =
     macroquad_toolkit::include_json_str!("../assets/data/sprite_definitions.json");
 
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct AtlasDefinition {
+pub struct AtlasDefinition {
     #[serde(default)]
     pub id: String,
     pub texture: String,
@@ -20,7 +21,7 @@ pub(crate) struct AtlasDefinition {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct UnitSpriteDefinition {
+pub struct UnitSpriteDefinition {
     pub id: String,
     #[serde(default)]
     pub id_prefixes: Vec<String>,
@@ -35,7 +36,7 @@ pub(crate) struct UnitSpriteDefinition {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct FactionChannelDefinition {
+pub struct FactionChannelDefinition {
     pub id: String,
     pub accent: [f32; 4],
     pub terrain_cell: usize,
@@ -44,7 +45,7 @@ pub(crate) struct FactionChannelDefinition {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub(crate) struct VisualCatalog {
+pub struct VisualCatalog {
     pub unit_columns: usize,
     pub facing_rows: usize,
     pub faction_channels: Vec<FactionChannelDefinition>,
@@ -58,12 +59,85 @@ pub(crate) struct VisualCatalog {
 }
 
 impl VisualCatalog {
-    pub(crate) fn load() -> Self {
-        serde_json::from_str(DEFINITIONS_JSON)
-            .unwrap_or_else(|error| panic!("Mirexis sprite definitions are invalid: {error}"))
+    pub fn load() -> Result<Self, String> {
+        let catalog: Self = load_embedded_json_labeled("sprite_definitions", DEFINITIONS_JSON)?;
+        catalog.validate_registry()?;
+        Ok(catalog)
     }
 
-    fn unit_definition_for(&self, unit_id: &str, name: &str) -> Option<&UnitSpriteDefinition> {
+    pub fn validate_registry(&self) -> Result<(), String> {
+        if self.unit_columns == 0 || self.facing_rows == 0 {
+            return Err("sprite_definitions: unit atlas dimensions must be non-zero".to_owned());
+        }
+        if self
+            .faction_channels
+            .iter()
+            .all(|channel| channel.id != "colony")
+        {
+            return Err(
+                "sprite_definitions: required colony faction channel is missing".to_owned(),
+            );
+        }
+        validate_unique_ids(
+            "faction channel",
+            self.faction_channels
+                .iter()
+                .map(|channel| channel.id.as_str()),
+        )?;
+        validate_unique_ids("unit", self.units.iter().map(|unit| unit.id.as_str()))?;
+        validate_atlas("terrain", &self.terrain)?;
+        validate_atlas("colony", &self.colony)?;
+        validate_atlas("equipment", &self.equipment)?;
+        validate_atlas("effects", &self.effects)?;
+        validate_unique_ids(
+            "concept atlas",
+            self.concepts.iter().map(|atlas| atlas.id.as_str()),
+        )?;
+        for atlas in &self.concepts {
+            validate_atlas("concept", atlas)?;
+        }
+        for channel in &self.faction_channels {
+            if channel.terrain_cell >= self.terrain.columns * self.terrain.rows {
+                return Err(format!(
+                    "sprite_definitions: faction '{}' terrain cell {} is outside the terrain atlas",
+                    channel.id, channel.terrain_cell
+                ));
+            }
+            if channel.effect_cell >= self.effects.columns * self.effects.rows {
+                return Err(format!(
+                    "sprite_definitions: faction '{}' effect cell {} is outside the effects atlas",
+                    channel.id, channel.effect_cell
+                ));
+            }
+        }
+        for unit in &self.units {
+            if unit.texture.is_empty() || unit.portrait_texture.is_empty() {
+                return Err(format!(
+                    "sprite_definitions: unit '{}' must declare tactical and portrait textures",
+                    unit.id
+                ));
+            }
+            if unit.portrait_columns == 0 || unit.scale <= 0.0 {
+                return Err(format!(
+                    "sprite_definitions: unit '{}' has invalid portrait columns or scale",
+                    unit.id
+                ));
+            }
+            if unit
+                .pivot
+                .iter()
+                .any(|component| !(0.0..=1.0).contains(component))
+            {
+                return Err(format!(
+                    "sprite_definitions: unit '{}' pivot must stay within 0..=1",
+                    unit.id
+                ));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn unit_definition_for(&self, unit_id: &str, name: &str) -> Option<&UnitSpriteDefinition> {
         if let Some(definition) = self
             .units
             .iter()
@@ -71,12 +145,12 @@ impl VisualCatalog {
         {
             return Some(definition);
         }
-        let name = name.to_ascii_lowercase();
+        let lowercase_name = name.to_ascii_lowercase();
         if let Some(definition) = self.units.iter().find(|definition| {
             definition
                 .name_contains
                 .iter()
-                .any(|needle| name.contains(needle))
+                .any(|needle| lowercase_name.contains(needle))
         }) {
             return Some(definition);
         }
@@ -88,7 +162,7 @@ impl VisualCatalog {
         })
     }
 
-    pub(crate) fn faction_channel(&self, faction: &str) -> &FactionChannelDefinition {
+    pub fn faction_channel(&self, faction: &str) -> &FactionChannelDefinition {
         self.faction_channels
             .iter()
             .find(|channel| faction.contains(&channel.id))
@@ -100,7 +174,7 @@ impl VisualCatalog {
             .expect("visual catalog requires a colony faction channel")
     }
 
-    pub(crate) fn unit_faction_channel(&self, unit: &UnitState) -> &FactionChannelDefinition {
+    pub fn unit_faction_channel(&self, unit: &UnitState) -> &FactionChannelDefinition {
         if unit.team == Team::Colony {
             self.faction_channel("colony")
         } else {
@@ -108,27 +182,27 @@ impl VisualCatalog {
         }
     }
 
-    pub(crate) fn faction_accent(&self, unit: &UnitState) -> Color {
+    pub fn faction_accent(&self, unit: &UnitState) -> Color {
         let [r, g, b, a] = self.unit_faction_channel(unit).accent;
         Color::new(r, g, b, a)
     }
 
-    pub(crate) fn faction_terrain_cell(&self, faction: &str) -> usize {
+    pub fn faction_terrain_cell(&self, faction: &str) -> usize {
         self.faction_channel(faction).terrain_cell
     }
 
-    pub(crate) fn faction_effect_cell(&self, faction: &str) -> usize {
+    pub fn faction_effect_cell(&self, faction: &str) -> usize {
         self.faction_channel(faction).effect_cell
     }
 
-    pub(crate) fn concept_atlas(&self, id: &str) -> &AtlasDefinition {
+    pub fn concept_atlas(&self, id: &str) -> &AtlasDefinition {
         self.concepts
             .iter()
             .find(|atlas| atlas.id == id)
             .unwrap_or_else(|| panic!("Mirexis concept atlas is undefined: {id}"))
     }
 
-    pub(crate) fn validate_loaded(&self, assets: &AssetManager) -> Vec<String> {
+    pub fn validate_loaded(&self, assets: &AssetManager) -> Vec<String> {
         let mut missing = Vec::new();
         for definition in &self.units {
             for key in [&definition.texture, &definition.portrait_texture] {
@@ -155,7 +229,7 @@ impl VisualCatalog {
         missing
     }
 
-    pub(crate) fn diagnostic_summary(&self, assets: &AssetManager) -> String {
+    pub fn diagnostic_summary(&self, assets: &AssetManager) -> String {
         let describe = |atlas: &AtlasDefinition| {
             assets.get_texture(&atlas.texture).map_or_else(
                 || format!("{}=MISSING", atlas.texture),
@@ -182,7 +256,7 @@ impl VisualCatalog {
         )
     }
 
-    pub(crate) fn draw_unit_sprite(
+    pub fn draw_unit_sprite(
         &self,
         assets: &AssetManager,
         unit: &UnitState,
@@ -200,8 +274,10 @@ impl VisualCatalog {
         )
     }
 
+    // A sprite pose is a pure render request; explicit geometry and tint
+    // inputs prevent hidden asset or camera state.
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn draw_unit_pose(
+    pub fn draw_unit_pose(
         &self,
         assets: &AssetManager,
         unit_id: &str,
@@ -225,11 +301,11 @@ impl VisualCatalog {
             texture.width() / columns as f32,
             texture.height() / rows as f32,
         );
-        let facing = facing_row(facing).min(rows - 1);
-        let state = animation_column(state).min(columns - 1);
+        let facing_row_index = facing_row(facing).min(rows - 1);
+        let animation_column_index = animation_column(state).min(columns - 1);
         let source = Rect::new(
-            state as f32 * cell.x,
-            facing as f32 * cell.y,
+            animation_column_index as f32 * cell.x,
+            facing_row_index as f32 * cell.y,
             cell.x,
             cell.y,
         );
@@ -257,7 +333,7 @@ impl VisualCatalog {
         true
     }
 
-    pub(crate) fn draw_portrait(
+    pub fn draw_portrait(
         &self,
         assets: &AssetManager,
         unit_id: &str,
@@ -305,7 +381,7 @@ impl VisualCatalog {
         true
     }
 
-    pub(crate) fn draw_atlas_cell(
+    pub fn draw_atlas_cell(
         &self,
         assets: &AssetManager,
         atlas: &AtlasDefinition,
@@ -344,7 +420,29 @@ impl VisualCatalog {
     }
 }
 
-fn draw_sprite_shadow(ground: Vec2, width: f32, height: f32) {
+fn validate_unique_ids<'a>(label: &str, ids: impl Iterator<Item = &'a str>) -> Result<(), String> {
+    let mut seen = std::collections::BTreeSet::new();
+    for id in ids {
+        if id.is_empty() || !seen.insert(id) {
+            return Err(format!(
+                "sprite_definitions: {label} id '{id}' is empty or duplicated"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn validate_atlas(label: &str, atlas: &AtlasDefinition) -> Result<(), String> {
+    if atlas.texture.is_empty() || atlas.columns == 0 || atlas.rows == 0 {
+        return Err(format!(
+            "sprite_definitions: {label} atlas '{}' has an empty texture or zero dimensions",
+            atlas.id
+        ));
+    }
+    Ok(())
+}
+
+pub fn draw_sprite_shadow(ground: Vec2, width: f32, height: f32) {
     draw_ellipse(
         ground.x + width * 0.04,
         ground.y + height * 0.025,
@@ -355,7 +453,7 @@ fn draw_sprite_shadow(ground: Vec2, width: f32, height: f32) {
     );
 }
 
-fn aspect_fit(source: Vec2, destination: Rect) -> Rect {
+pub fn aspect_fit(source: Vec2, destination: Rect) -> Rect {
     let scale = (destination.w / source.x).min(destination.h / source.y);
     let size = source * scale;
     Rect::new(
@@ -366,7 +464,7 @@ fn aspect_fit(source: Vec2, destination: Rect) -> Rect {
     )
 }
 
-pub(crate) fn equipment_index(id: &str) -> Option<usize> {
+pub fn equipment_index(id: &str) -> Option<usize> {
     if id == "directorate_cipher" {
         return Some(9);
     }
@@ -394,7 +492,7 @@ pub(crate) fn equipment_index(id: &str) -> Option<usize> {
     .position(|candidate| *candidate == id)
 }
 
-pub(crate) fn diagnostic_placeholder_image(size: u16) -> Image {
+pub fn diagnostic_placeholder_image(size: u16) -> Image {
     let mut image = Image::gen_image_color(size, size, MAGENTA);
     for y in 0..size {
         for x in 0..size {
@@ -406,7 +504,7 @@ pub(crate) fn diagnostic_placeholder_image(size: u16) -> Image {
     image
 }
 
-pub(crate) fn draw_missing_asset(rect: Rect, id: &str) {
+pub fn draw_missing_asset(rect: Rect, id: &str) {
     let block = 8.0;
     for y in 0..=((rect.h / block) as i32) {
         for x in 0..=((rect.w / block) as i32) {
@@ -425,7 +523,7 @@ pub(crate) fn draw_missing_asset(rect: Rect, id: &str) {
     }
 }
 
-fn facing_row(facing: UnitFacing) -> usize {
+pub fn facing_row(facing: UnitFacing) -> usize {
     match facing {
         UnitFacing::SouthEast => 0,
         UnitFacing::SouthWest => 1,
@@ -434,7 +532,7 @@ fn facing_row(facing: UnitFacing) -> usize {
     }
 }
 
-fn animation_column(state: UnitAnimationState) -> usize {
+pub fn animation_column(state: UnitAnimationState) -> usize {
     match state {
         UnitAnimationState::Idle => 0,
         UnitAnimationState::Move => 1,
@@ -444,6 +542,3 @@ fn animation_column(state: UnitAnimationState) -> usize {
         UnitAnimationState::Incapacitated => 5,
     }
 }
-
-#[cfg(test)]
-mod tests;

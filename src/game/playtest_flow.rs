@@ -4,7 +4,7 @@ use super::{AppState, Game};
 use crate::first_hour::FirstHourStage;
 
 impl Game {
-    pub(super) fn update_playtest_metrics(&mut self, dt: f32) {
+    pub fn update_playtest_metrics(&mut self, dt: f32) {
         if self.state == AppState::Title
             || self.campaign.first_hour.stage == FirstHourStage::Complete
         {

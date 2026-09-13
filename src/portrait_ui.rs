@@ -4,7 +4,7 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 
-pub(crate) fn draw_character_portrait(
+pub fn draw_character_portrait(
     assets: &AssetManager,
     visuals: &VisualCatalog,
     rect: Rect,

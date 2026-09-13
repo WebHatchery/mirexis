@@ -1,6 +1,7 @@
 {
   "title": "Mirexis",
   "wasm": "mirexis",
+  "roost_slug": "mirexis",
   "status": { "text": "In Development", "class": "in-development" },
   "canvas_rendering": "auto",
   "about": [
@@ -10,10 +11,10 @@
   "controls": [
     { "key": "Mouse", "desc": "Manage the colony, select missions, move colonists, attack, and complete objectives" },
     { "key": "Arrow Keys", "desc": "Move the tactical cursor" },
-    { "key": "Enter", "desc": "Confirm screens or end the tactical colony phase" },
+    { "key": "Enter", "desc": "Confirm screens; tap CONTINUE or END PHASE for the visible equivalent" },
     { "key": "Controller", "desc": "D-pad moves focus; A confirms; B cancels; X opens the log; Y opens help; Start ends the tactical phase" },
-    { "key": "S / L", "desc": "Save / load an in-progress battle" },
-    { "key": "Escape", "desc": "Step back or return to title" }
+    { "key": "S / L", "desc": "Save / load; tap SAVE or LOAD in the battle rail" },
+    { "key": "Escape", "desc": "Step back; tap the visible BACK, CLOSE, or RETURN control" }
   ],
   "details": [
     { "label": "Genre", "value": "Turn-Based Grid Tactics" },

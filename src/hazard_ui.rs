@@ -4,7 +4,7 @@ use crate::data::HazardKind;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(crate) fn draw_legend(panel: Rect) {
+pub fn draw_legend(panel: Rect) {
     draw_text_ex(
         "HAZARDS // + FIRE LANE   O SPORE BLOOM   <> STATIC RIFT",
         panel.x + 310.0,
@@ -13,7 +13,7 @@ pub(crate) fn draw_legend(panel: Rect) {
     );
 }
 
-pub(crate) fn draw_tile(rect: Rect, kind: HazardKind) {
+pub fn draw_tile(rect: Rect, kind: HazardKind) {
     let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.5);
     let color = match kind {
         HazardKind::FireLane => Color::new(0.96, 0.34, 0.18, 0.9),

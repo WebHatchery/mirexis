@@ -4,10 +4,10 @@ use crate::grid_ui::WorldCamera;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-pub(crate) const CONTROL_WIDTH: f32 = 38.0;
-pub(crate) const CONTROL_HEIGHT: f32 = 28.0;
+pub const CONTROL_WIDTH: f32 = 38.0;
+pub const CONTROL_HEIGHT: f32 = 28.0;
 
-pub(crate) fn draw_zoom(
+pub fn draw_zoom(
     camera: &mut WorldCamera,
     viewport: Rect,
     mouse: Vec2,

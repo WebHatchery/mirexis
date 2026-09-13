@@ -9,18 +9,15 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
-const LAUNCHER_BOUNDS: Rect = Rect::new(1064.0, 130.0, 176.0, 24.0);
-const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
-const PAGE_SIZE: usize = 6;
+pub const LAUNCHER_BOUNDS: Rect = Rect::new(1064.0, 130.0, 176.0, 24.0);
+pub const PANEL: Rect = Rect::new(160.0, 60.0, 960.0, 600.0);
+pub const PAGE_SIZE: usize = 6;
 
-#[cfg(test)]
-mod tests;
-
-pub(crate) fn record_count(campaign: &CampaignState) -> usize {
+pub fn record_count(campaign: &CampaignState) -> usize {
     memorial_entries(campaign).len()
 }
 
-pub(crate) fn page_count(campaign: &CampaignState) -> usize {
+pub fn page_count(campaign: &CampaignState) -> usize {
     let entry_count = memorial_entries(campaign).len();
     if entry_count == 0 {
         1
@@ -29,15 +26,15 @@ pub(crate) fn page_count(campaign: &CampaignState) -> usize {
     }
 }
 
-pub(crate) fn previous_page(page: usize) -> usize {
+pub fn previous_page(page: usize) -> usize {
     page.saturating_sub(1)
 }
 
-pub(crate) fn next_page(page: usize, pages: usize) -> usize {
+pub fn next_page(page: usize, pages: usize) -> usize {
     page.saturating_add(1).min(pages.saturating_sub(1))
 }
 
-pub(crate) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let count = record_count(campaign);
     let label = if count == 0 {
         "MEMORIAL // READY".to_owned()
@@ -49,7 +46,7 @@ pub(crate) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut
     }
 }
 
-pub(crate) fn draw_modal(
+pub fn draw_modal(
     campaign: &CampaignState,
     requested_page: usize,
     mouse: Vec2,
@@ -103,7 +100,7 @@ pub(crate) fn draw_modal(
     draw_page_controls(page, pages, start, end, entries.len(), mouse, actions);
 }
 
-fn draw_page_controls(
+pub fn draw_page_controls(
     page: usize,
     pages: usize,
     start: usize,
@@ -157,13 +154,13 @@ fn draw_page_controls(
 }
 
 #[derive(Clone, Copy)]
-enum CharacterDetail<'a> {
+pub enum CharacterDetail<'a> {
     Trauma(&'a TraumaRecord),
     Injury(&'a InjuryRecord),
     Legacy(&'a CharacterLegacy),
 }
 
-enum MemorialEntry<'a> {
+pub enum MemorialEntry<'a> {
     Character {
         character: &'a CharacterRecord,
         detail: CharacterDetail<'a>,
@@ -171,7 +168,7 @@ enum MemorialEntry<'a> {
     LostObjective(&'a LostObjectiveRecord),
 }
 
-fn memorial_entries(campaign: &CampaignState) -> Vec<MemorialEntry<'_>> {
+pub fn memorial_entries(campaign: &CampaignState) -> Vec<MemorialEntry<'_>> {
     let mut entries = Vec::new();
     for character in &campaign.roster {
         entries.extend(
@@ -211,7 +208,7 @@ fn memorial_entries(campaign: &CampaignState) -> Vec<MemorialEntry<'_>> {
     entries
 }
 
-fn draw_record_row(character: &CharacterRecord, detail: CharacterDetail<'_>, index: usize) {
+pub fn draw_record_row(character: &CharacterRecord, detail: CharacterDetail<'_>, index: usize) {
     let row = Rect::new(190.0, 160.0 + index as f32 * 70.0, 860.0, 60.0);
     draw_rectangle(
         row.x,
@@ -261,7 +258,7 @@ fn draw_record_row(character: &CharacterRecord, detail: CharacterDetail<'_>, ind
     );
 }
 
-fn draw_lost_objective_row(objective: &LostObjectiveRecord, index: usize) {
+pub fn draw_lost_objective_row(objective: &LostObjectiveRecord, index: usize) {
     let row = Rect::new(190.0, 160.0 + index as f32 * 70.0, 860.0, 60.0);
     draw_rectangle(
         row.x,

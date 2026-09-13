@@ -9,7 +9,7 @@ use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-pub(super) fn draw_choice_panel(
+pub fn draw_choice_panel(
     kind: DecisionKind,
     campaign: &CampaignState,
     data: &GameData,
@@ -23,7 +23,7 @@ pub(super) fn draw_choice_panel(
     }
 }
 
-fn draw_contact(
+pub fn draw_contact(
     campaign: &CampaignState,
     data: &GameData,
     mouse: Vec2,
@@ -62,7 +62,7 @@ fn draw_contact(
     }
 }
 
-fn draw_escalation(
+pub fn draw_escalation(
     campaign: &CampaignState,
     data: &GameData,
     mouse: Vec2,
@@ -116,7 +116,7 @@ fn draw_escalation(
     }
 }
 
-fn draw_mirexis(
+pub fn draw_mirexis(
     campaign: &CampaignState,
     data: &GameData,
     mouse: Vec2,
@@ -169,7 +169,7 @@ fn draw_mirexis(
     }
 }
 
-fn resources_can_pay(
+pub fn resources_can_pay(
     resources: &Resources,
     materials_cost: i32,
     biomass_cost: i32,

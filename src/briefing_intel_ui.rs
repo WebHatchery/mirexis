@@ -6,11 +6,11 @@ use crate::data::{GameData, HazardKind, MissionDef, ObjectiveKind, Team};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, fit_text_to_box_ex, TextLayoutResult, TextStyle};
 
-const INTEL_TEXT_WIDTH: f32 = 232.0;
-const INTEL_LINE_HEIGHT: f32 = 17.0;
-const INTEL_MIN_FONT_SIZE: f32 = 8.5;
+pub const INTEL_TEXT_WIDTH: f32 = 232.0;
+pub const INTEL_LINE_HEIGHT: f32 = 17.0;
+pub const INTEL_MIN_FONT_SIZE: f32 = 8.5;
 
-pub(crate) fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionDef, origin: Vec2) {
+pub fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionDef, origin: Vec2) {
     let danger = crate::danger_rating::for_mission(mission, data);
     draw_text_ex(
         format!("THREAT INTELLIGENCE // {} {}", danger.label(), danger.score),
@@ -31,7 +31,7 @@ pub(crate) fn draw(campaign: &CampaignState, data: &GameData, mission: &MissionD
     }
 }
 
-fn intel_line_layout(line: &str) -> TextLayoutResult {
+pub fn intel_line_layout(line: &str) -> TextLayoutResult {
     fit_text_to_box_ex(
         line,
         INTEL_TEXT_WIDTH,
@@ -41,7 +41,7 @@ fn intel_line_layout(line: &str) -> TextLayoutResult {
     )
 }
 
-fn draw_intel_line(line: &str, x: f32, y: f32) {
+pub fn draw_intel_line(line: &str, x: f32, y: f32) {
     let layout = intel_line_layout(line);
     let content = layout.lines.first().map(String::as_str).unwrap_or("");
     draw_text_ex(
@@ -52,11 +52,11 @@ fn draw_intel_line(line: &str, x: f32, y: f32) {
     );
 }
 
-fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
+pub fn intel_lines(data: &GameData, mission: &MissionDef) -> Vec<String> {
     intel_lines_with_cartography(data, mission, true)
 }
 
-fn intel_lines_with_cartography(
+pub fn intel_lines_with_cartography(
     data: &GameData,
     mission: &MissionDef,
     cartography_active: bool,
@@ -131,7 +131,7 @@ fn intel_lines_with_cartography(
     ]
 }
 
-fn objective_label(kind: ObjectiveKind) -> &'static str {
+pub fn objective_label(kind: ObjectiveKind) -> &'static str {
     match kind {
         ObjectiveKind::SecureAndClear => "SECURE + CLEAR",
         ObjectiveKind::EliminateAll => "ELIMINATE",
@@ -141,6 +141,3 @@ fn objective_label(kind: ObjectiveKind) -> &'static str {
         ObjectiveKind::DefendAsset => "DEFEND ASSET",
     }
 }
-
-#[cfg(test)]
-mod tests;

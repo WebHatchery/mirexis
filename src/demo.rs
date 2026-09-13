@@ -9,6 +9,3 @@ pub const fn is_demo_build() -> bool {
 pub const fn campaign_is_complete(operations_completed: u32) -> bool {
     is_demo_build() && operations_completed >= MISSION_LIMIT
 }
-
-#[cfg(test)]
-mod tests;

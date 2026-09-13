@@ -6,5 +6,62 @@
   "world_width": 40,
   "world_height": 40,
   "max_action_points": 5,
-  "battle_seed": 1296651091
+  "battle_seed": 1296651091,
+  "starting_resources": {
+    "materials": 120,
+    "power": 4,
+    "food": 24,
+    "biomass": 12,
+    "alien_components": 0
+  },
+  "exploration": {
+    "player_start": [9.0, 10.0],
+    "walk_speed": 3.6,
+    "player_radius": 0.22,
+    "interaction_distance": 1.15
+  },
+  "tutorial": {
+    "primary_goal_label": "PRIMARY GOAL",
+    "first_hour_help_title": "FIRST-HOUR FIELD GUIDE",
+    "first_hour_current_goal_label": "CURRENT GOAL",
+    "first_hour_colony_lines": [
+      "Tap ground to walk; tap a speech marker to approach a colonist.",
+      "Tap OPERATIONS for missions and timely preparation choices.",
+      "Tap TITLE to leave safely; campaign changes autosave."
+    ],
+    "first_hour_tactical_lines": [
+      "Tap a colonist, then a green tile, hostile, or visible action.",
+      "Forecasts show deterministic accuracy, cover, armour, and damage.",
+      "Tap HELP in battle for the full field manual; tap SAVE at any time."
+    ],
+    "first_hour_skip_notice": "Skipping hides teaching prompts but preserves every campaign goal.",
+    "tactical_manual_title": "TACTICAL FIELD MANUAL",
+    "tactical_manual_paused": "The battle is paused while this reference is open.",
+    "tactical_read_field_lines": [
+      "Tap/click a colonist to make them active.",
+      "Green tiles are reachable this activation.",
+      "Drag to pan; use the mouse wheel to zoom.",
+      "Tap a hostile to inspect its forecast, then tap ATTACK to fire."
+    ],
+    "tactical_spend_phase_lines": [
+      "Movement and weapons spend action points.",
+      "Class, mutation, gear, and overwatch add options.",
+      "End Phase warns once if colonists remain ready.",
+      "Orange intent lines forecast the first response."
+    ],
+    "tactical_survive_ground_lines": [
+      "+ Fire lane: 2 direct damage.",
+      "O Spore bloom: 1 damage and Hindered.",
+      "<> Static rift: Disrupted accuracy.",
+      "Each hostile faction ignores its own hazard."
+    ],
+    "tactical_win_contract_lines": [
+      "Read the objective and live progress at right.",
+      "Gold rings mark objectives and extraction.",
+      "Some missions require interaction; others survival.",
+      "Save and load remain available during battle."
+    ],
+    "tactical_touch_controls": "TOUCH // TAP MAP TO INSPECT · DRAG MAP TO PAN · TAP +/- TO ZOOM · TAP NEXT READY / END PHASE / SAVE / LOAD / HELP / LOG",
+    "tactical_optional_controls": "OPTIONAL // KEYS ARROWS / TAB / ENTER / S / L / H / B · PAD D-PAD / A / B / X / Y / RB / START"
+  }
 }

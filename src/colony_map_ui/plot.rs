@@ -7,7 +7,7 @@ use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 
-pub(super) fn draw_ground(
+pub fn draw_ground(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -69,7 +69,7 @@ pub(super) fn draw_ground(
     );
 }
 
-pub(super) fn draw_contents(
+pub fn draw_contents(
     campaign: &CampaignState,
     assets: &AssetManager,
     visuals: &VisualCatalog,
@@ -162,11 +162,11 @@ pub(super) fn draw_contents(
     }
 }
 
-pub(super) fn in_clearance_zone(anchor: [i32; 2], position: [i32; 2]) -> bool {
+pub fn in_clearance_zone(anchor: [i32; 2], position: [i32; 2]) -> bool {
     (anchor[0] - position[0]).abs() <= 1 && (anchor[1] - position[1]).abs() <= 1
 }
 
-pub(super) fn building_index(kind: BuildingKind) -> usize {
+pub fn building_index(kind: BuildingKind) -> usize {
     match kind {
         BuildingKind::CommandCentre => 0,
         BuildingKind::Barracks => 1,
@@ -184,7 +184,7 @@ pub(super) fn building_index(kind: BuildingKind) -> usize {
     }
 }
 
-fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
+pub fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
     if damaged {
         draw_poly(
             center.x + 24.0,
@@ -235,7 +235,7 @@ fn draw_building_state(center: Vec2, damaged: bool, powered: bool) {
     }
 }
 
-fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
+pub fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
     let points = [
         vec2(center.x, center.y - view.half_height),
         vec2(center.x + view.half_width, center.y),
@@ -255,7 +255,7 @@ fn draw_diamond_outline(view: ColonyView, center: Vec2, color: Color) {
     }
 }
 
-fn draw_project(center: Vec2, kind: BuildingKind) {
+pub fn draw_project(center: Vec2, kind: BuildingKind) {
     draw_rectangle_lines(
         center.x - 25.0,
         center.y - 30.0,
@@ -281,7 +281,7 @@ fn draw_project(center: Vec2, kind: BuildingKind) {
     );
 }
 
-fn draw_blueprint(center: Vec2, kind: BuildingKind) {
+pub fn draw_blueprint(center: Vec2, kind: BuildingKind) {
     draw_rectangle(
         center.x - 20.0,
         center.y - 23.0,

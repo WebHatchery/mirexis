@@ -2,7 +2,7 @@
 
 use crate::data::EquipmentDef;
 
-pub(crate) fn validate_definitions(equipment: &[EquipmentDef]) -> Result<(), String> {
+pub fn validate_definitions(equipment: &[EquipmentDef]) -> Result<(), String> {
     for item in equipment {
         if item.description.trim().is_empty() {
             return Err(format!("Equipment {} has no description", item.id));

@@ -1,7 +1,9 @@
+//! Mission-result transition flow and debrief presentation state.
+
 use super::{AppState, Game};
 
 impl Game {
-    pub(super) fn enter_debrief_if_finished(&mut self) {
+    pub fn enter_debrief_if_finished(&mut self) {
         if self.state != AppState::Tactical {
             return;
         }

@@ -114,7 +114,7 @@ impl CampaignState {
     }
 }
 
-pub(crate) fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
+pub fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
     for class in classes {
         if class.description.trim().is_empty() {
             return Err(format!("Class {} has no tactical description", class.id));
@@ -134,7 +134,7 @@ pub(crate) fn validate_definitions(classes: &[ClassDef]) -> Result<(), String> {
     Ok(())
 }
 
-fn campaign_phase_rank(phase: &str) -> u8 {
+pub fn campaign_phase_rank(phase: &str) -> u8 {
     match phase {
         "isolation" | "" => 0,
         "contact" => 1,

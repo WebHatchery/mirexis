@@ -8,7 +8,7 @@ use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-fn build_button_label(
+pub fn build_button_label(
     kind: BuildingKind,
     selected: bool,
     materials: i32,
@@ -31,11 +31,7 @@ fn build_button_label(
     )
 }
 
-pub(super) fn draw_build_controls(
-    campaign: &CampaignState,
-    mouse: Vec2,
-    actions: &mut Vec<UiAction>,
-) {
+pub fn draw_build_controls(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let mut kinds = vec![BuildingKind::Barricade, BuildingKind::PowerPlant];
     kinds.push(BuildingKind::Commons);
     kinds.push(BuildingKind::RelayMast);
@@ -118,10 +114,7 @@ pub(super) fn draw_build_controls(
     }
 }
 
-#[cfg(test)]
-mod tests;
-
-pub(super) fn draw_exploration_controls(
+pub fn draw_exploration_controls(
     campaign: &CampaignState,
     data: &GameData,
     explorer: &mut ColonyExplorer,

@@ -11,15 +11,15 @@ use macroquad_toolkit::prelude::{
 };
 use macroquad_toolkit::ui::{truncate_text_to_width_with_style, RectExt};
 
-const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
-const UPGRADE_PANEL: Rect = Rect::new(862.0, 44.0, 408.0, 660.0);
-const CONTENT_RECT: Rect = Rect::new(884.0, 0.0, 364.0, 0.0);
-const FACILITY_LIST_Y: f32 = 164.0;
-const FACILITY_ROW_STEP: f32 = 66.0;
-const FACILITY_ROW_HEIGHT: f32 = 62.0;
-const OPTION_CARD_WIDTH: f32 = 170.0;
-const OPTION_CARD_HEIGHT: f32 = 42.0;
-const UPGRADEABLE_FACILITIES: [BuildingKind; 7] = [
+pub const UPGRADE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
+pub const UPGRADE_PANEL: Rect = Rect::new(862.0, 44.0, 408.0, 660.0);
+pub const CONTENT_RECT: Rect = Rect::new(884.0, 0.0, 364.0, 0.0);
+pub const FACILITY_LIST_Y: f32 = 164.0;
+pub const FACILITY_ROW_STEP: f32 = 66.0;
+pub const FACILITY_ROW_HEIGHT: f32 = 62.0;
+pub const OPTION_CARD_WIDTH: f32 = 170.0;
+pub const OPTION_CARD_HEIGHT: f32 = 42.0;
+pub const UPGRADEABLE_FACILITIES: [BuildingKind; 7] = [
     BuildingKind::CommandCentre,
     BuildingKind::Barracks,
     BuildingKind::Infirmary,
@@ -29,7 +29,7 @@ const UPGRADEABLE_FACILITIES: [BuildingKind; 7] = [
     BuildingKind::GeneLab,
 ];
 
-pub(super) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let available = UPGRADEABLE_FACILITIES.iter().any(|kind| {
         campaign.colony.buildings.iter().any(|building| {
             building.kind == *kind
@@ -67,7 +67,7 @@ pub(super) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut
     }
 }
 
-pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_rectangle(
         0.0,
         0.0,
@@ -172,7 +172,7 @@ pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Ve
     }
 }
 
-fn draw_facility_row(
+pub fn draw_facility_row(
     campaign: &CampaignState,
     kind: BuildingKind,
     building: &crate::colony::BuildingState,
@@ -244,13 +244,13 @@ fn draw_facility_row(
     }
 }
 
-struct UpgradeCardState<'a> {
+pub struct UpgradeCardState<'a> {
     queue_label: &'a str,
     can_queue: bool,
     cost: i32,
 }
 
-fn draw_option_card(
+pub fn draw_option_card(
     card: Rect,
     option_index: usize,
     option: &crate::colony::FacilityUpgradeOption,
@@ -335,7 +335,7 @@ fn draw_option_card(
     }
 }
 
-fn choice_action_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
+pub fn choice_action_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> bool {
     let hovered = enabled && rect.contains_point(mouse);
     let fill = if !enabled {
         Color::new(0.045, 0.075, 0.075, 1.0)
@@ -369,7 +369,7 @@ fn choice_action_button(rect: Rect, label: &str, enabled: bool, mouse: Vec2) -> 
     hovered && is_mouse_button_released(MouseButton::Left)
 }
 
-fn compact_action_label(label: &str) -> &str {
+pub fn compact_action_label(label: &str) -> &str {
     match label {
         "LEVEL 2 ACTIVE" => "ACTIVE",
         "REPAIR FIRST" => "REPAIR",
@@ -380,7 +380,7 @@ fn compact_action_label(label: &str) -> &str {
     }
 }
 
-fn facility_status_color(status: &str) -> Color {
+pub fn facility_status_color(status: &str) -> Color {
     match status {
         "READY" | "LEVEL 2 ACTIVE" => dark::POSITIVE,
         "PROJECT QUEUED" => dark::ACCENT,
@@ -389,7 +389,7 @@ fn facility_status_color(status: &str) -> Color {
     }
 }
 
-fn upgrade_button_state(
+pub fn upgrade_button_state(
     level: u8,
     damaged: bool,
     powered: bool,
@@ -412,7 +412,7 @@ fn upgrade_button_state(
     }
 }
 
-fn upgrade_queued(campaign: &CampaignState, building_id: &str) -> bool {
+pub fn upgrade_queued(campaign: &CampaignState, building_id: &str) -> bool {
     campaign
         .colony
         .facility_upgrade_queue
@@ -420,10 +420,7 @@ fn upgrade_queued(campaign: &CampaignState, building_id: &str) -> bool {
         .any(|project| project.building_id == building_id)
 }
 
-#[cfg(test)]
-mod tests;
-
-fn facility_status(
+pub fn facility_status(
     campaign: &CampaignState,
     kind: BuildingKind,
     building: &crate::colony::BuildingState,
@@ -443,7 +440,7 @@ fn facility_status(
     }
 }
 
-fn upgrade_message(campaign: &CampaignState) -> Option<&'static str> {
+pub fn upgrade_message(campaign: &CampaignState) -> Option<&'static str> {
     if UPGRADEABLE_FACILITIES.iter().any(|kind| {
         campaign.colony.buildings.iter().any(|building| {
             building.kind == *kind

@@ -7,7 +7,7 @@ use macroquad_toolkit::pathfinding::{find_path_with, Heuristic, Pos};
 use std::collections::HashSet;
 
 impl GameSession {
-    pub(super) fn path_for(
+    pub fn path_for(
         &self,
         start: TilePos,
         goal: TilePos,
@@ -46,7 +46,7 @@ impl GameSession {
         )
     }
 
-    pub(crate) fn movement_path(&self, unit_id: &str, goal: TilePos) -> Option<Vec<TilePos>> {
+    pub fn movement_path(&self, unit_id: &str, goal: TilePos) -> Option<Vec<TilePos>> {
         let unit = self.unit(unit_id)?;
         self.path_for(unit.position, goal, Some(unit_id))
     }

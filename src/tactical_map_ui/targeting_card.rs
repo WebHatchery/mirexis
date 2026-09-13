@@ -8,18 +8,15 @@ use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-#[cfg(test)]
-mod tests;
-
-pub(super) fn card_bounds(panel: Rect) -> Rect {
+pub fn card_bounds(panel: Rect) -> Rect {
     Rect::new(panel.x + 16.0, panel.bottom() - 94.0, panel.w - 32.0, 80.0)
 }
 
-pub(super) fn cancel_bounds(card: Rect) -> Rect {
+pub fn cancel_bounds(card: Rect) -> Rect {
     Rect::new(card.right() - 232.0, card.bottom() - 36.0, 146.0, 28.0)
 }
 
-pub(crate) fn draw_skill_target_tiles(ctx: &UiContext<'_>, view: GridView) {
+pub fn draw_skill_target_tiles(ctx: &UiContext<'_>, view: GridView) {
     let Some(TargetingView::Skill { unit_id, skill_id }) = ctx.targeting else {
         return;
     };
@@ -38,7 +35,7 @@ pub(crate) fn draw_skill_target_tiles(ctx: &UiContext<'_>, view: GridView) {
     }
 }
 
-pub(crate) fn draw_class_action_target_tiles(ctx: &UiContext<'_>, view: GridView) {
+pub fn draw_class_action_target_tiles(ctx: &UiContext<'_>, view: GridView) {
     let Some(TargetingView::ClassAction {
         unit_id,
         target_kind,
@@ -61,7 +58,7 @@ pub(crate) fn draw_class_action_target_tiles(ctx: &UiContext<'_>, view: GridView
     }
 }
 
-pub(crate) fn draw(
+pub fn draw(
     ctx: &UiContext<'_>,
     tile: TilePos,
     panel: Rect,
@@ -132,7 +129,7 @@ pub(crate) fn draw(
     }
 }
 
-fn draw_equipment(
+pub fn draw_equipment(
     ctx: &UiContext<'_>,
     card: Rect,
     target: Option<&crate::state::UnitState>,
@@ -181,7 +178,7 @@ fn draw_equipment(
     );
 }
 
-fn draw_class_action(
+pub fn draw_class_action(
     ctx: &UiContext<'_>,
     card: Rect,
     target: Option<&crate::state::UnitState>,
@@ -231,7 +228,7 @@ fn draw_class_action(
     );
 }
 
-fn draw_skill(
+pub fn draw_skill(
     ctx: &UiContext<'_>,
     card: Rect,
     target: Option<&crate::state::UnitState>,
@@ -310,12 +307,12 @@ fn draw_skill(
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct TargetStatus {
+pub struct TargetStatus {
     label: &'static str,
     valid: bool,
 }
 
-fn targeting_status(ctx: &UiContext<'_>, tile: TilePos) -> TargetStatus {
+pub fn targeting_status(ctx: &UiContext<'_>, tile: TilePos) -> TargetStatus {
     let Some(targeting) = ctx.targeting else {
         return TargetStatus {
             label: "NO TARGETING",
@@ -331,7 +328,7 @@ fn targeting_status(ctx: &UiContext<'_>, tile: TilePos) -> TargetStatus {
     status_from_validation(ctx.session.validate(&command))
 }
 
-fn status_from_validation(
+pub fn status_from_validation(
     result: Result<crate::state::CommandCost, crate::state::RuleError>,
 ) -> TargetStatus {
     match result {
@@ -346,7 +343,7 @@ fn status_from_validation(
     }
 }
 
-fn targeting_command(
+pub fn targeting_command(
     targeting: TargetingView<'_>,
     tile: TilePos,
     session: &crate::state::GameSession,
@@ -399,7 +396,7 @@ fn targeting_command(
     }
 }
 
-fn validity_color(valid: bool) -> Color {
+pub fn validity_color(valid: bool) -> Color {
     if valid {
         dark::POSITIVE
     } else {

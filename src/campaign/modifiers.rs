@@ -13,6 +13,8 @@ pub fn equipment_cost(slot: &str) -> u32 {
     }
 }
 
+// This helper is part of the mutation validation seam and is intentionally
+// available to authored-content tests before a live campaign consumes it.
 #[allow(dead_code)]
 pub fn derived_mutation_traits(
     character: &CharacterRecord,
@@ -21,7 +23,7 @@ pub fn derived_mutation_traits(
     derived_mutation_traits_with_options(character, data, false)
 }
 
-pub(crate) fn derived_mutation_traits_with_options(
+pub fn derived_mutation_traits_with_options(
     character: &CharacterRecord,
     data: &GameData,
     suppress_evolution_complications: bool,
@@ -51,7 +53,7 @@ pub(crate) fn derived_mutation_traits_with_options(
     traits
 }
 
-pub(crate) fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
+pub fn apply_mutation(mutation: &MutationDef, traits: &mut BTreeMap<String, i32>) {
     for modifier in mutation.gift.iter().chain(&mutation.complication) {
         *traits.entry(modifier.stat.clone()).or_default() += modifier.amount;
     }

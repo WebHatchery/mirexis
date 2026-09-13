@@ -5,7 +5,7 @@ use crate::state::GameSession;
 use crate::tactical::StatusKind;
 
 impl GameSession {
-    pub(crate) fn advance_obscuring_fields(&mut self) {
+    pub fn advance_obscuring_fields(&mut self) {
         for field in &mut self.tactical.obscuring_fields {
             field.remaining_phases = field.remaining_phases.saturating_sub(1);
         }
@@ -14,7 +14,7 @@ impl GameSession {
             .retain(|field| field.remaining_phases > 0);
     }
 
-    pub(crate) fn refresh_team(&mut self, team: Team, action_points: u8) {
+    pub fn refresh_team(&mut self, team: Team, action_points: u8) {
         for unit in &mut self.tactical.units {
             if unit.team == team && !unit.incapacitated {
                 unit.overwatching = false;

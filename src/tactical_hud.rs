@@ -8,16 +8,16 @@ use macroquad_toolkit::prelude::{
     dark, draw_badge, draw_surface, draw_surface_with_title, meter, SurfaceStyle, TextStyle,
 };
 
-const EDGE_X: f32 = 1184.0;
-const EDGE_WIDTH: f32 = 80.0;
-const EDGE_BUTTON_HEIGHT: f32 = 38.0;
-const EDGE_GAP: f32 = 6.0;
+pub const EDGE_X: f32 = 1184.0;
+pub const EDGE_WIDTH: f32 = 80.0;
+pub const EDGE_BUTTON_HEIGHT: f32 = 38.0;
+pub const EDGE_GAP: f32 = 6.0;
 
-pub(crate) fn command_button_bounds() -> Rect {
+pub fn command_button_bounds() -> Rect {
     Rect::new(EDGE_X, 126.0, EDGE_WIDTH, EDGE_BUTTON_HEIGHT)
 }
 
-pub(crate) fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_world_chrome(ctx);
     draw_edge_controls(ctx, mouse, actions);
     if ctx.tactical_panel_open {
@@ -25,7 +25,7 @@ pub(crate) fn draw(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>
     }
 }
 
-fn draw_world_chrome(ctx: &UiContext<'_>) {
+pub fn draw_world_chrome(ctx: &UiContext<'_>) {
     let identity = Rect::new(24.0, 18.0, 350.0, 42.0);
     draw_surface(
         identity,
@@ -98,7 +98,7 @@ fn draw_world_chrome(ctx: &UiContext<'_>) {
     crate::first_hour_investment_ui::draw_tactical_summary(ctx.first_hour, vec2(548.0, 56.0));
 }
 
-fn draw_edge_controls(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_edge_controls(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_ui_text_ex(
         "VIEW",
         EDGE_X + 22.0,
@@ -175,7 +175,7 @@ fn draw_edge_controls(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiActi
     );
 }
 
-fn edge_button_bounds(index: usize) -> Rect {
+pub fn edge_button_bounds(index: usize) -> Rect {
     let first = command_button_bounds();
     Rect::new(
         EDGE_X,
@@ -185,7 +185,7 @@ fn edge_button_bounds(index: usize) -> Rect {
     )
 }
 
-fn edge_button(
+pub fn edge_button(
     rect: Rect,
     label: &str,
     mouse: Vec2,
@@ -197,7 +197,7 @@ fn edge_button(
     }
 }
 
-fn draw_command_panel(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_command_panel(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let panel = crate::ui::tactical_command_panel_rect();
     draw_surface_with_title(
         panel,
@@ -265,7 +265,7 @@ fn draw_command_panel(ctx: &UiContext<'_>, mouse: Vec2, actions: &mut Vec<UiActi
     }
 }
 
-fn draw_selected_unit(
+pub fn draw_selected_unit(
     ctx: &UiContext<'_>,
     panel: Rect,
     x: f32,
@@ -349,7 +349,7 @@ fn draw_selected_unit(
     );
 }
 
-fn draw_objective_action(
+pub fn draw_objective_action(
     ctx: &UiContext<'_>,
     panel: Rect,
     selected: Option<&crate::state::UnitState>,
@@ -376,7 +376,7 @@ fn draw_objective_action(
     }
 }
 
-fn draw_ability_actions(
+pub fn draw_ability_actions(
     ctx: &UiContext<'_>,
     panel: Rect,
     selected: Option<&crate::state::UnitState>,
@@ -419,7 +419,7 @@ fn draw_ability_actions(
     );
 }
 
-fn draw_phase_actions(
+pub fn draw_phase_actions(
     ctx: &UiContext<'_>,
     panel: Rect,
     selected: Option<&crate::state::UnitState>,

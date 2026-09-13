@@ -1,3 +1,5 @@
+//! Touch-visible outsider recruitment affordances and cost copy.
+
 use super::{colony_button, draw_ui_text_ex};
 use crate::campaign::CampaignState;
 use crate::data::GameData;
@@ -5,7 +7,7 @@ use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, TextStyle};
 
-fn recruit_button_label(name: &str, cost: i32, resource: &str, available: i32) -> String {
+pub fn recruit_button_label(name: &str, cost: i32, resource: &str, available: i32) -> String {
     let name = name.to_uppercase();
     let resource = resource.to_uppercase();
     if available < cost {
@@ -15,7 +17,7 @@ fn recruit_button_label(name: &str, cost: i32, resource: &str, available: i32) -
     }
 }
 
-pub(super) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     data: &GameData,
     mouse: Vec2,
@@ -64,6 +66,3 @@ pub(super) fn draw(
         actions.push(UiAction::RecruitOutsider);
     }
 }
-
-#[cfg(test)]
-mod tests;

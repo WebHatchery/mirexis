@@ -3,7 +3,7 @@
 use crate::data::{CoverEdgeDef, EdgeDirection};
 use macroquad_toolkit::grid::TilePos;
 
-pub(crate) fn penalty(edges: &[CoverEdgeDef], target: TilePos, attacker: TilePos) -> i32 {
+pub fn penalty(edges: &[CoverEdgeDef], target: TilePos, attacker: TilePos) -> i32 {
     let direction = if (attacker.x - target.x).abs() >= (attacker.y - target.y).abs() {
         if attacker.x < target.x {
             EdgeDirection::West
@@ -24,7 +24,7 @@ pub(crate) fn penalty(edges: &[CoverEdgeDef], target: TilePos, attacker: TilePos
         .map_or(0, |edge| i32::from(edge.strength))
 }
 
-pub(crate) fn is_cover_position(edges: &[CoverEdgeDef], tile: TilePos) -> bool {
+pub fn is_cover_position(edges: &[CoverEdgeDef], tile: TilePos) -> bool {
     edges
         .iter()
         .any(|edge| TilePos::new(edge.position[0], edge.position[1]) == tile)

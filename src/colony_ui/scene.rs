@@ -1,19 +1,21 @@
-use super::ColonyDrawContext;
-use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
+//! Colony scene composition: map, overlays, and returned UI intents.
+
+use super::{ColonyDrawContext, ColonyDrawResult};
+use crate::ui::{LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 
-pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
+pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
     let ColonyDrawContext {
         campaign,
         data,
         assets,
         visuals,
         ui,
-        camera,
-        explorer,
+        mut camera,
+        mut explorer,
         operations_open,
-        facility_upgrade_open,
-        salvage_open,
+        mut facility_upgrade_open,
+        mut salvage_open,
         settings_open,
         field_notes_open,
         memorial_open,
@@ -34,8 +36,8 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         settings_open,
         field_notes_open,
         memorial_open,
-        *facility_upgrade_open,
-        *salvage_open,
+        facility_upgrade_open,
+        salvage_open,
     );
     let suppress_actions = crate::colony_map_ui::draw(crate::colony_map_ui::ColonyMapContext {
         campaign,
@@ -43,10 +45,10 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         assets,
         visuals,
         ui,
-        camera,
-        explorer,
+        camera: &mut camera,
+        explorer: &mut explorer,
         mouse,
-        operations_open: *operations_open,
+        operations_open,
         interaction_enabled,
         actions: &mut actions,
     });
@@ -57,22 +59,22 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
         interaction_enabled,
         &mut actions,
     );
-    if *operations_open {
+    if operations_open {
         super::draw_operations(
             campaign,
             data,
             assets,
             visuals,
             mouse,
-            facility_upgrade_open,
-            salvage_open,
+            &mut facility_upgrade_open,
+            &mut salvage_open,
             &mut actions,
         );
     }
-    if !*facility_upgrade_open && !*salvage_open && !field_notes_open && !memorial_open {
+    if !facility_upgrade_open && !salvage_open && !field_notes_open && !memorial_open {
         crate::first_hour_colony_ui::draw_focus(
             &campaign.first_hour,
-            *operations_open,
+            operations_open,
             explorer.talking_to(),
         );
     }
@@ -87,10 +89,17 @@ pub(crate) fn draw_colony(context: ColonyDrawContext<'_>) -> Vec<UiAction> {
     } else if memorial_open {
         crate::memorial_ui::draw_modal(campaign, memorial_page, mouse, &mut actions);
     }
-    actions
+    ColonyDrawResult {
+        actions,
+        camera,
+        explorer,
+        operations_open,
+        facility_upgrade_open,
+        salvage_open,
+    }
 }
 
-fn colony_map_input_enabled(
+pub fn colony_map_input_enabled(
     first_hour_help_open: bool,
     settings_open: bool,
     field_notes_open: bool,
@@ -105,6 +114,3 @@ fn colony_map_input_enabled(
         && !facility_upgrade_open
         && !salvage_open
 }
-
-#[cfg(test)]
-mod tests;

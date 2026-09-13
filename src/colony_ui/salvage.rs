@@ -9,9 +9,9 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface_with_title, SurfaceStyle, TextStyle};
 
-const SALVAGE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
+pub const SALVAGE_RECT: Rect = Rect::new(1064.0, 312.0, 176.0, 32.0);
 
-pub(super) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     if !campaign
         .colony
         .buildings
@@ -40,7 +40,7 @@ pub(super) fn draw_launcher(campaign: &CampaignState, mouse: Vec2, actions: &mut
     }
 }
 
-pub(super) fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_modal(campaign: &CampaignState, mouse: Vec2, actions: &mut Vec<UiAction>) {
     let panel = Rect::new(862.0, 44.0, 408.0, 660.0);
     draw_surface_with_title(
         panel,

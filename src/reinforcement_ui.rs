@@ -7,12 +7,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
 use macroquad_toolkit::prelude::TextStyle;
 
-pub(crate) fn draw(
-    session: &GameSession,
-    view: GridView,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-) {
+pub fn draw(session: &GameSession, view: GridView, assets: &AssetManager, visuals: &VisualCatalog) {
     let Some(wave) = crate::reinforcements::telegraphed_wave(session) else {
         return;
     };

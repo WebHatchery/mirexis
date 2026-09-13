@@ -4,8 +4,8 @@ use crate::campaign::CampaignState;
 use crate::data::{GameData, Team, UnitDef};
 use serde::{Deserialize, Serialize};
 
-const TRUSTED_BOND: u8 = 3;
-const BONDED_BOND: u8 = 5;
+pub const TRUSTED_BOND: u8 = 3;
+pub const BONDED_BOND: u8 = 5;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RelationshipRecord {
@@ -93,7 +93,7 @@ impl CampaignState {
         Some(bond_name(strongest))
     }
 
-    fn strengthen_relationship(
+    pub fn strengthen_relationship(
         &mut self,
         first_id: &str,
         second_id: &str,
@@ -126,10 +126,7 @@ impl CampaignState {
     }
 }
 
-pub(crate) fn apply_deployment_bonuses(
-    deployment: &mut [UnitDef],
-    relationships: &[RelationshipRecord],
-) {
+pub fn apply_deployment_bonuses(deployment: &mut [UnitDef], relationships: &[RelationshipRecord]) {
     let deployed_ids = deployment
         .iter()
         .filter(|unit| unit.team == Team::Colony)
@@ -164,7 +161,7 @@ pub(crate) fn apply_deployment_bonuses(
     }
 }
 
-pub(crate) fn validate_event_definitions(data: &GameData) -> Result<(), String> {
+pub fn validate_event_definitions(data: &GameData) -> Result<(), String> {
     for event in &data.campaign.events {
         if event.participants.len() < 2 {
             return Err(format!(
@@ -229,7 +226,7 @@ pub(crate) fn validate_event_definitions(data: &GameData) -> Result<(), String> 
     Ok(())
 }
 
-fn ordered_pair<'a>(first: &'a str, second: &'a str) -> (&'a str, &'a str) {
+pub fn ordered_pair<'a>(first: &'a str, second: &'a str) -> (&'a str, &'a str) {
     if first <= second {
         (first, second)
     } else {
@@ -237,7 +234,7 @@ fn ordered_pair<'a>(first: &'a str, second: &'a str) -> (&'a str, &'a str) {
     }
 }
 
-fn bond_name(bond: u8) -> &'static str {
+pub fn bond_name(bond: u8) -> &'static str {
     match bond {
         BONDED_BOND.. => "BONDED",
         TRUSTED_BOND.. => "TRUSTED",
@@ -245,6 +242,3 @@ fn bond_name(bond: u8) -> &'static str {
         _ => "TESTED",
     }
 }
-
-#[cfg(test)]
-mod tests;

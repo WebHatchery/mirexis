@@ -6,25 +6,22 @@ use crate::ui_widgets::button;
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::{dark, draw_surface, SurfaceStyle, TextStyle};
 
-#[cfg(test)]
-mod tests;
-
-fn title_bounds() -> Rect {
+pub fn title_bounds() -> Rect {
     Rect::new(1160.0, 22.0, 88.0, 28.0)
 }
 
-fn operations_bounds() -> Rect {
+pub fn operations_bounds() -> Rect {
     Rect::new(1028.0, 22.0, 124.0, 28.0)
 }
 
-fn settings_bounds() -> Rect {
+pub fn settings_bounds() -> Rect {
     Rect::new(924.0, 22.0, 96.0, 28.0)
 }
 
-pub(crate) fn draw(
+pub fn draw(
     campaign: &CampaignState,
     mouse: Vec2,
-    operations_open: &mut bool,
+    operations_open: bool,
     interaction_enabled: bool,
     actions: &mut Vec<UiAction>,
 ) {
@@ -66,7 +63,7 @@ pub(crate) fn draw(
     }
     if button(
         operations_bounds(),
-        if *operations_open {
+        if operations_open {
             "CLOSE"
         } else {
             "OPERATIONS"
@@ -74,14 +71,14 @@ pub(crate) fn draw(
         interaction_enabled,
         mouse,
     ) {
-        *operations_open = !*operations_open;
+        actions.push(UiAction::ToggleOperations);
     }
     if button(title_bounds(), "TITLE", interaction_enabled, mouse) {
         actions.push(UiAction::ReturnToTitle);
     }
 }
 
-fn text<'a>(value: &str, x: f32, y: f32, mut params: TextParams<'a>) -> TextDimensions {
+pub fn text<'a>(value: &str, x: f32, y: f32, mut params: TextParams<'a>) -> TextDimensions {
     params.font = None;
     draw_text_ex(value, x, y, params)
 }

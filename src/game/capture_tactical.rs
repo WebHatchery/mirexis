@@ -7,7 +7,7 @@ use crate::tactical::{StatusEffect, UnitAnimationState};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
-    pub(super) fn capture_danger_reach(&mut self) {
+    pub fn capture_danger_reach(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.blocked.clear();
         self.session.tactical.destructible_cover.clear();
@@ -25,7 +25,7 @@ impl Game {
         self.session.tactical.selected_tile = hostile_tile;
     }
 
-    pub(super) fn capture_threat_range(&mut self) {
+    pub fn capture_threat_range(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.blocked.clear();
         self.session.tactical.destructible_cover.clear();
@@ -43,7 +43,7 @@ impl Game {
         self.session.tactical.selected_tile = hostile_tile;
     }
 
-    pub(super) fn capture_valid_shot(&mut self) {
+    pub fn capture_valid_shot(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session
             .tactical
@@ -75,7 +75,7 @@ impl Game {
         self.session.tactical.selected_tile = hostile_tile;
     }
 
-    pub(super) fn capture_invalid_command(&mut self) {
+    pub fn capture_invalid_command(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session
             .tactical
@@ -98,7 +98,7 @@ impl Game {
         self.session.tactical.selected_tile = hostile_tile;
     }
 
-    pub(super) fn capture_cover_edges(&mut self) {
+    pub fn capture_cover_edges(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.tactical.cover_edges = vec![
             CoverEdgeDef {
@@ -125,7 +125,7 @@ impl Game {
         self.session.tactical.selected_tile = self.session.selected_unit().unwrap().position;
     }
 
-    pub(super) fn capture_movement_route(&mut self) {
+    pub fn capture_movement_route(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         let origin = self
             .session
@@ -144,7 +144,7 @@ impl Game {
         self.session.tactical.selected_tile = TilePos::new(origin.x - 2, origin.y);
     }
 
-    pub(super) fn capture_breach(&mut self) {
+    pub fn capture_breach(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         let position = self
             .session
@@ -198,7 +198,7 @@ impl Game {
         self.refresh_capture_unit();
     }
 
-    fn refresh_capture_unit(&mut self) {
+    pub fn refresh_capture_unit(&mut self) {
         if let Some(unit) = self
             .session
             .tactical
@@ -210,7 +210,7 @@ impl Game {
         }
     }
 
-    pub(super) fn capture_vitality_markers(&mut self) {
+    pub fn capture_vitality_markers(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.tactical_panel_open = true;
         for unit in &mut self.session.tactical.units {
@@ -239,7 +239,7 @@ impl Game {
         self.capture_pointer = Some(macroquad::prelude::vec2(772.0, 342.0));
     }
 
-    pub(super) fn capture_readiness_markers(&mut self) {
+    pub fn capture_readiness_markers(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.tactical_panel_open = true;
         for unit in self
@@ -259,7 +259,7 @@ impl Game {
         self.session.tactical.selected_tile = self.session.unit("mara_venn").unwrap().position;
     }
 
-    pub(super) fn capture_line_formation(&mut self) {
+    pub fn capture_line_formation(&mut self) {
         let mut roster = self
             .campaign
             .deployment_roster(&self.data, &self.active_mission);
@@ -274,7 +274,7 @@ impl Game {
         self.tactical_panel_open = true;
     }
 
-    pub(super) fn capture_phase_replay(&mut self) {
+    pub fn capture_phase_replay(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.phase_replay.hold_for_capture(&[
             BattleEvent::AttackRolled {
@@ -304,7 +304,7 @@ impl Game {
         ]);
     }
 
-    pub(super) fn capture_battle_log(&mut self) {
+    pub fn capture_battle_log(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         self.session.end_player_phase(&self.data.config);
         self.session.tactical.event_log.extend([
@@ -342,7 +342,7 @@ impl Game {
         self.show_battle_log = true;
     }
 
-    pub(super) fn capture_combat_feedback(&mut self) {
+    pub fn capture_combat_feedback(&mut self) {
         self.reset_capture_session(AppState::Tactical);
         let feedback_origin = self
             .session
@@ -412,7 +412,7 @@ impl Game {
         );
     }
 
-    pub(super) fn capture_enemy_ability(&mut self, template_id: &str, faction: &str, seed: u64) {
+    pub fn capture_enemy_ability(&mut self, template_id: &str, faction: &str, seed: u64) {
         self.capture_template_operation(template_id, seed, OperationModifier::None);
         let colonist = self
             .session
@@ -443,7 +443,7 @@ impl Game {
         self.session.tactical.selected_tile = TilePos::new(5, 3);
     }
 
-    pub(super) fn capture_hazard(&mut self) {
+    pub fn capture_hazard(&mut self) {
         self.capture_template_operation("sporefield_extraction", 4, OperationModifier::BroodFrenzy);
         let unit_id = self.session.tactical.selected_unit.clone().unwrap();
         self.session
@@ -459,7 +459,7 @@ impl Game {
         });
     }
 
-    pub(super) fn capture_enemy_intent(&mut self) {
+    pub fn capture_enemy_intent(&mut self) {
         self.capture_template_operation("nest_suppression", 7, OperationModifier::BroodFrenzy);
         let hostile = self
             .session
@@ -481,7 +481,7 @@ impl Game {
         self.session.tactical.selected_tile = hostile.position;
     }
 
-    pub(super) fn capture_player_action_preview(&mut self) {
+    pub fn capture_player_action_preview(&mut self) {
         self.capture_template_operation("nest_suppression", 7, OperationModifier::BroodFrenzy);
         self.session
             .tactical

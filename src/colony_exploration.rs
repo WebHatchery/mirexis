@@ -1,21 +1,23 @@
 //! Touch-first colony walking, inhabitants, and contextual conversations.
+pub mod rendering;
+pub use rendering::*;
 
 use crate::campaign::{Availability, CampaignState, CharacterRecord};
 use crate::colony::{BuildingKind, ColonyState, COLONY_HEIGHT, COLONY_WIDTH};
 use crate::colony_map_ui::view::ColonyView;
 use crate::colony_story;
-use crate::data::GameData;
+use crate::data::{GameConfig, GameData};
 use crate::tactical::{UnitAnimationState, UnitFacing};
 use crate::ui::UiAction;
 use crate::ui_widgets::button;
 use crate::visual_assets::VisualCatalog;
 use macroquad::prelude::*;
 use macroquad_toolkit::assets::AssetManager;
-const PLAYER_START: Vec2 = Vec2::new(9.0, 10.0);
-const WALK_SPEED: f32 = 3.6;
-const PLAYER_RADIUS: f32 = 0.22;
-const INTERACTION_DISTANCE: f32 = 1.15;
-const NPC_STATIONS: [[i32; 2]; 7] = [
+pub const PLAYER_START: Vec2 = Vec2::new(9.0, 10.0);
+pub const WALK_SPEED: f32 = 3.6;
+pub const PLAYER_RADIUS: f32 = 0.22;
+pub const INTERACTION_DISTANCE: f32 = 1.15;
+pub const NPC_STATIONS: [[i32; 2]; 7] = [
     [8, 10],
     [7, 9],
     [10, 8],
@@ -25,23 +27,27 @@ const NPC_STATIONS: [[i32; 2]; 7] = [
     [17, 6],
 ];
 
-pub(crate) fn dialogue_continue_button_bounds() -> Rect {
+pub fn dialogue_continue_button_bounds() -> Rect {
     Rect::new(632.0, 532.0, 136.0, 30.0)
 }
 
-mod dialogue;
-use dialogue::{npc_action_button_label, npc_action_enabled};
+pub mod dialogue;
+pub use dialogue::{npc_action_button_label, npc_action_enabled};
 
 #[derive(Debug, Clone)]
-pub(crate) struct ColonyExplorer {
-    position: Vec2,
-    destination: Option<Vec2>,
-    keyboard_direction: Vec2,
-    touch_direction: Vec2,
-    facing: UnitFacing,
-    approached_npc: Option<String>,
-    talking_to: Option<String>,
-    build_mode: bool,
+pub struct ColonyExplorer {
+    pub position: Vec2,
+    pub destination: Option<Vec2>,
+    pub keyboard_direction: Vec2,
+    pub touch_direction: Vec2,
+    pub facing: UnitFacing,
+    pub approached_npc: Option<String>,
+    pub talking_to: Option<String>,
+    pub build_mode: bool,
+    pub player_start: Vec2,
+    pub walk_speed: f32,
+    pub player_radius: f32,
+    pub interaction_distance: f32,
 }
 
 impl Default for ColonyExplorer {
@@ -55,24 +61,50 @@ impl Default for ColonyExplorer {
             approached_npc: None,
             talking_to: None,
             build_mode: false,
+            player_start: PLAYER_START,
+            walk_speed: WALK_SPEED,
+            player_radius: PLAYER_RADIUS,
+            interaction_distance: INTERACTION_DISTANCE,
         }
     }
 }
 
 impl ColonyExplorer {
-    pub(crate) fn reset(&mut self) {
+    pub fn from_config(config: &GameConfig) -> Self {
+        let mut explorer = Self::default();
+        explorer.player_start = vec2(
+            config.exploration.player_start[0],
+            config.exploration.player_start[1],
+        );
+        explorer.position = explorer.player_start;
+        explorer.walk_speed = config.exploration.walk_speed;
+        explorer.player_radius = config.exploration.player_radius;
+        explorer.interaction_distance = config.exploration.interaction_distance;
+        explorer
+    }
+
+    pub fn reset(&mut self) {
+        let player_start = self.player_start;
+        let walk_speed = self.walk_speed;
+        let player_radius = self.player_radius;
+        let interaction_distance = self.interaction_distance;
         *self = Self::default();
+        self.player_start = player_start;
+        self.position = player_start;
+        self.walk_speed = walk_speed;
+        self.player_radius = player_radius;
+        self.interaction_distance = interaction_distance;
     }
 
-    pub(crate) fn has_left_start(&self) -> bool {
-        self.position.distance_squared(PLAYER_START) > 0.01
+    pub fn has_left_start(&self) -> bool {
+        self.position.distance_squared(self.player_start) > 0.01
     }
 
-    pub(crate) fn position(&self) -> Vec2 {
+    pub fn position(&self) -> Vec2 {
         self.position
     }
 
-    pub(crate) fn update(&mut self, dt: f32, colony: &ColonyState) {
+    pub fn update(&mut self, dt: f32, colony: &ColonyState) {
         let manual = self.keyboard_direction + self.touch_direction;
         let (direction, remaining) = if manual.length_squared() > 0.01 {
             self.destination = None;
@@ -90,7 +122,7 @@ impl ColonyExplorer {
             return;
         };
         self.set_facing(direction);
-        let distance = (WALK_SPEED * dt).min(remaining);
+        let distance = (self.walk_speed * dt).min(remaining);
         let movement = direction * distance;
         let before = self.position;
         self.move_with_collision(movement, colony);
@@ -102,28 +134,23 @@ impl ColonyExplorer {
         }
     }
 
-    pub(crate) fn set_keyboard_direction(&mut self, direction: Vec2) {
+    pub fn set_keyboard_direction(&mut self, direction: Vec2) {
         self.keyboard_direction = direction;
     }
 
-    pub(crate) fn set_touch_direction(&mut self, direction: Vec2) {
+    pub fn set_touch_direction(&mut self, direction: Vec2) {
         self.touch_direction = direction;
     }
 
-    pub(crate) fn request_walk(&mut self, destination: Vec2, colony: &ColonyState) {
+    pub fn request_walk(&mut self, destination: Vec2, colony: &ColonyState) {
         self.close_dialogue();
         self.approached_npc = None;
-        if can_occupy(colony, destination) {
+        if can_occupy_with_radius(colony, destination, self.player_radius) {
             self.destination = Some(destination);
         }
     }
 
-    pub(crate) fn request_approach(
-        &mut self,
-        npc_id: &str,
-        npc_position: Vec2,
-        colony: &ColonyState,
-    ) {
+    pub fn request_approach(&mut self, npc_id: &str, npc_position: Vec2, colony: &ColonyState) {
         self.close_dialogue();
         let away = (self.position - npc_position).normalize_or_zero();
         let direction = if away.length_squared() > 0.01 {
@@ -131,29 +158,31 @@ impl ColonyExplorer {
         } else {
             vec2(-1.0, 0.0)
         };
-        let destination = npc_position + direction * (INTERACTION_DISTANCE * 0.72);
-        if can_occupy(colony, destination) {
+        let destination = npc_position + direction * (self.interaction_distance * 0.72);
+        if can_occupy_with_radius(colony, destination, self.player_radius) {
             self.approached_npc = Some(npc_id.to_owned());
             self.destination = Some(destination);
         }
     }
 
-    pub(crate) fn interact(&mut self, campaign: &CampaignState, data: &GameData) {
-        if let Some(character_id) = nearest_npc(campaign, data, self.position) {
+    pub fn interact(&mut self, campaign: &CampaignState, data: &GameData) {
+        if let Some(character_id) =
+            nearest_npc_with_distance(campaign, data, self.position, self.interaction_distance)
+        {
             self.destination = None;
             self.approached_npc = None;
             self.talking_to = Some(character_id);
         }
     }
 
-    pub(crate) fn update_approach(&mut self, campaign: &CampaignState, data: &GameData) {
+    pub fn update_approach(&mut self, campaign: &CampaignState, data: &GameData) {
         if self.destination.is_some() {
             return;
         }
         let ready = self.approached_npc.as_deref().is_some_and(|id| {
             npc(campaign, data, id).is_some()
                 && npc_position(campaign, id).is_some_and(|position| {
-                    self.position.distance(position) <= INTERACTION_DISTANCE
+                    self.position.distance(position) <= self.interaction_distance
                 })
         });
         if ready {
@@ -161,7 +190,7 @@ impl ColonyExplorer {
         }
     }
 
-    pub(crate) fn set_build_mode(&mut self, enabled: bool) {
+    pub fn set_build_mode(&mut self, enabled: bool) {
         self.build_mode = enabled;
         if enabled {
             self.destination = None;
@@ -169,15 +198,15 @@ impl ColonyExplorer {
         }
     }
 
-    pub(crate) fn build_mode(&self) -> bool {
+    pub fn build_mode(&self) -> bool {
         self.build_mode
     }
 
-    pub(crate) fn close_dialogue(&mut self) {
+    pub fn close_dialogue(&mut self) {
         self.talking_to = None;
     }
 
-    pub(crate) fn draw_depth(&self, depth: i32, context: ColonyDepthContext<'_>) -> Option<String> {
+    pub fn draw_depth(&self, depth: i32, context: ColonyDepthContext<'_>) -> Option<String> {
         let ColonyDepthContext {
             campaign,
             data,
@@ -276,7 +305,7 @@ impl ColonyExplorer {
         clicked
     }
 
-    pub(crate) fn draw_dialogue(
+    pub fn draw_dialogue(
         &mut self,
         campaign: &CampaignState,
         data: &GameData,
@@ -427,24 +456,25 @@ impl ColonyExplorer {
         true
     }
 
-    pub(crate) fn is_talking(&self) -> bool {
+    pub fn is_talking(&self) -> bool {
         self.talking_to.is_some()
     }
 
-    pub(crate) fn talking_to(&self) -> Option<&str> {
+    pub fn talking_to(&self) -> Option<&str> {
         self.talking_to.as_deref()
     }
 
-    pub(crate) fn can_talk(&self, campaign: &CampaignState, data: &GameData) -> bool {
-        nearest_npc(campaign, data, self.position).is_some()
+    pub fn can_talk(&self, campaign: &CampaignState, data: &GameData) -> bool {
+        nearest_npc_with_distance(campaign, data, self.position, self.interaction_distance)
+            .is_some()
     }
 
-    fn is_moving(&self) -> bool {
+    pub fn is_moving(&self) -> bool {
         self.destination.is_some()
             || (self.keyboard_direction + self.touch_direction).length_squared() > 0.01
     }
 
-    fn set_facing(&mut self, direction: Vec2) {
+    pub fn set_facing(&mut self, direction: Vec2) {
         self.facing = if direction.x + direction.y >= 0.0 {
             UnitFacing::SouthEast
         } else {
@@ -452,335 +482,14 @@ impl ColonyExplorer {
         };
     }
 
-    fn move_with_collision(&mut self, movement: Vec2, colony: &ColonyState) {
+    pub fn move_with_collision(&mut self, movement: Vec2, colony: &ColonyState) {
         let horizontal = self.position + vec2(movement.x, 0.0);
-        if can_occupy(colony, horizontal) {
+        if can_occupy_with_radius(colony, horizontal, self.player_radius) {
             self.position = horizontal;
         }
         let vertical = self.position + vec2(0.0, movement.y);
-        if can_occupy(colony, vertical) {
+        if can_occupy_with_radius(colony, vertical, self.player_radius) {
             self.position = vertical;
         }
     }
 }
-
-pub(crate) struct ColonyDepthContext<'a> {
-    pub(crate) campaign: &'a CampaignState,
-    pub(crate) data: &'a GameData,
-    pub(crate) assets: &'a AssetManager,
-    pub(crate) visuals: &'a VisualCatalog,
-    pub(crate) view: ColonyView,
-    pub(crate) mouse: Vec2,
-}
-
-struct CharacterDrawContext<'a> {
-    character: &'a CharacterRecord,
-    center: Vec2,
-    facing_right: bool,
-    moving: bool,
-    interactable: bool,
-    hovered: bool,
-    highlighted: bool,
-    assets: &'a AssetManager,
-    visuals: &'a VisualCatalog,
-    zoom: f32,
-}
-
-fn draw_character(context: CharacterDrawContext<'_>) {
-    let CharacterDrawContext {
-        character,
-        center,
-        facing_right,
-        moving,
-        interactable,
-        hovered,
-        highlighted,
-        assets,
-        visuals,
-        zoom,
-    } = context;
-    draw_colony_contact(center, zoom, highlighted);
-    if hovered {
-        draw_circle(
-            center.x,
-            center.y - 6.0,
-            19.0 * zoom,
-            Color::new(0.24, 0.78, 0.62, 0.22),
-        );
-    }
-    if highlighted {
-        draw_circle_lines(
-            center.x,
-            center.y - 6.0,
-            23.0 * zoom,
-            3.0,
-            Color::new(0.95, 0.78, 0.30, 0.96),
-        );
-    }
-    visuals.draw_unit_pose(
-        assets,
-        &character.id,
-        &character.name,
-        if facing_right {
-            UnitFacing::SouthEast
-        } else {
-            UnitFacing::SouthWest
-        },
-        if moving {
-            UnitAnimationState::Move
-        } else {
-            UnitAnimationState::Idle
-        },
-        Rect::new(
-            center.x - 20.0 * zoom,
-            center.y - 22.0 * zoom,
-            40.0 * zoom,
-            30.0 * zoom,
-        ),
-        WHITE,
-    );
-    if interactable {
-        let marker = center + vec2(0.0, -29.0 * zoom);
-        draw_circle(
-            marker.x,
-            marker.y,
-            8.0,
-            if hovered {
-                Color::new(0.54, 1.0, 0.78, 1.0)
-            } else {
-                Color::new(0.18, 0.58, 0.50, 0.96)
-            },
-        );
-        for offset in [-3.5, 0.0, 3.5] {
-            draw_circle(
-                marker.x + offset,
-                marker.y,
-                1.1,
-                Color::new(0.02, 0.08, 0.08, 1.0),
-            );
-        }
-    }
-    if hovered || highlighted {
-        let width = measure_text(&character.name, None, 12, 1.0).width + 14.0;
-        draw_rectangle(
-            center.x - width / 2.0,
-            center.y - 38.0,
-            width,
-            18.0,
-            Color::new(0.02, 0.08, 0.08, 0.94),
-        );
-        draw_text(
-            &character.name,
-            center.x - width / 2.0 + 7.0,
-            center.y - 25.0,
-            12.0,
-            Color::new(0.76, 1.0, 0.88, 1.0),
-        );
-    }
-}
-
-fn draw_colony_contact(center: Vec2, zoom: f32, highlighted: bool) {
-    let accent = if highlighted {
-        Color::new(0.96, 0.78, 0.30, 0.76)
-    } else {
-        Color::new(0.24, 0.82, 0.68, 0.62)
-    };
-    draw_ellipse(
-        center.x,
-        center.y + 4.0 * zoom,
-        8.0 * zoom,
-        2.5 * zoom,
-        0.0,
-        Color::new(accent.r, accent.g, accent.b, 0.20),
-    );
-    draw_ellipse_lines(
-        center.x,
-        center.y + 4.0 * zoom,
-        8.0 * zoom,
-        2.5 * zoom,
-        0.0,
-        1.0 * zoom,
-        accent,
-    );
-}
-
-fn draw_wrapped(text: &str, x: f32, y: f32, width: f32) {
-    macroquad_toolkit::ui::draw_text_block_ex(
-        text,
-        x,
-        y - 14.0,
-        width,
-        50.0,
-        macroquad_toolkit::ui::TextStyle::new(14.0, Color::new(0.72, 0.84, 0.80, 1.0))
-            .with_macroquad_font()
-            .with_line_gap(4.0),
-        14.0,
-    );
-}
-fn npc_status(character: &CharacterRecord, guest: bool) -> String {
-    let duty = match character.id.as_str() {
-        "mara_venn" => "SECURITY LEAD",
-        "ilya_reed" => "COLONY CLINICIAN",
-        "sol_cairn" => "CHIEF ENGINEER",
-        "nadi_vale" => "XENOBIOLOGY LEAD",
-        "veya_orn" => "DIRECTORATE EXILE",
-        "sedge" => "MIREBORN COURIER",
-        _ => "COLONIST",
-    };
-    if guest {
-        format!("{duty} // WAYSTATION GUEST // NOT ON ROSTER")
-    } else {
-        format!(
-            "{} // {}",
-            duty,
-            match character.availability {
-                Availability::Ready => "ON DUTY",
-                Availability::Recovering => "RECOVERING",
-            }
-        )
-    }
-}
-
-fn npc_action_label(character: &CharacterRecord, guest: bool) -> &'static str {
-    if guest {
-        return "RECRUIT CONTACT";
-    }
-    match character.id.as_str() {
-        "ilya_reed" => "REQUEST TREATMENT",
-        "nadi_vale" | "sedge" => "ENTER GENE LAB",
-        _ => "OPEN ROSTER",
-    }
-}
-
-fn npc_action(character: &CharacterRecord, guest: bool) -> Option<UiAction> {
-    if guest {
-        return Some(UiAction::RecruitOutsider);
-    }
-    match character.id.as_str() {
-        "ilya_reed" if !character.injuries.is_empty() => Some(UiAction::TreatInjury),
-        "ilya_reed" => None,
-        "nadi_vale" | "sedge" => Some(UiAction::OpenGeneLab),
-        _ => Some(UiAction::OpenRoster),
-    }
-}
-
-pub(crate) fn npc_position(campaign: &CampaignState, id: &str) -> Option<Vec2> {
-    npc_grid_position(campaign, id).map(grid_vec)
-}
-
-fn npc_grid_position(campaign: &CampaignState, id: &str) -> Option<[i32; 2]> {
-    if colony_story::identity_npc(&campaign.strategy.mirexis_path_id) == Some(id) {
-        if let Some(kind) = BuildingKind::identity_for_path(&campaign.strategy.mirexis_path_id) {
-            if let Some(identity_building) = campaign
-                .colony
-                .buildings
-                .iter()
-                .find(|building| building.kind == kind)
-            {
-                return Some(identity_building.position);
-            }
-        }
-    }
-    let rostered = campaign.roster.iter().any(|character| character.id == id);
-    if id == "veya_orn" || (id == "sedge" && !rostered) {
-        if let Some(waystation) = campaign
-            .colony
-            .buildings
-            .iter()
-            .find(|building| building.kind == BuildingKind::Waystation)
-        {
-            return Some(waystation.position);
-        }
-    }
-    if id == "sedge" && rostered {
-        if let Some(gene_lab) = campaign
-            .colony
-            .buildings
-            .iter()
-            .find(|building| building.kind == BuildingKind::GeneLab)
-        {
-            return Some(gene_lab.position);
-        }
-    }
-    campaign
-        .roster
-        .iter()
-        .position(|character| character.id == id)
-        .and_then(|index| (index > 0 && index < NPC_STATIONS.len()).then_some(NPC_STATIONS[index]))
-}
-
-struct NpcView {
-    character: CharacterRecord,
-    guest: bool,
-}
-
-fn npc(campaign: &CampaignState, data: &GameData, id: &str) -> Option<NpcView> {
-    if let Some(character) = campaign
-        .roster
-        .iter()
-        .skip(1)
-        .find(|character| character.id == id)
-    {
-        return Some(NpcView {
-            character: character.clone(),
-            guest: false,
-        });
-    }
-    let definition = campaign.available_outsider(data)?;
-    (definition.id == id).then(|| NpcView {
-        character: CharacterRecord::from_def(definition),
-        guest: true,
-    })
-}
-
-fn nearest_npc(campaign: &CampaignState, data: &GameData, position: Vec2) -> Option<String> {
-    if let Some(character) = campaign.roster.iter().skip(1).find(|character| {
-        npc_position(campaign, &character.id)
-            .is_some_and(|npc_position| position.distance(npc_position) <= INTERACTION_DISTANCE)
-    }) {
-        return Some(character.id.clone());
-    }
-    let definition = campaign.available_outsider(data)?;
-    npc_position(campaign, &definition.id)
-        .is_some_and(|npc_position| position.distance(npc_position) <= INTERACTION_DISTANCE)
-        .then(|| definition.id.clone())
-}
-
-fn can_occupy(colony: &ColonyState, position: Vec2) -> bool {
-    if position.x < PLAYER_RADIUS
-        || position.y < PLAYER_RADIUS
-        || position.x > (COLONY_WIDTH - 1) as f32 - PLAYER_RADIUS
-        || position.y > (COLONY_HEIGHT - 1) as f32 - PLAYER_RADIUS
-    {
-        return false;
-    }
-    let collides = |anchor: [i32; 2]| {
-        let center = grid_vec(anchor);
-        (position.x - center.x).abs() < 0.50 + PLAYER_RADIUS
-            && (position.y - center.y).abs() < 0.50 + PLAYER_RADIUS
-    };
-    let clear_of_npcs = NPC_STATIONS
-        .iter()
-        .skip(1)
-        .all(|station| position.distance(grid_vec(*station)) >= 0.52);
-    clear_of_npcs
-        && !colony
-            .buildings
-            .iter()
-            .any(|building| collides(building.position))
-        && !colony
-            .construction_queue
-            .iter()
-            .any(|project| collides(project.position))
-}
-
-fn grid_vec(position: [i32; 2]) -> Vec2 {
-    vec2(position[0] as f32, position[1] as f32)
-}
-
-fn player_draw_depth(position: Vec2) -> i32 {
-    (position.x + position.y).floor() as i32
-}
-
-#[cfg(test)]
-mod tests;

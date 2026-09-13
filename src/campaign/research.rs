@@ -3,7 +3,7 @@
 use super::CampaignState;
 use crate::colony::BuildingKind;
 
-const RESEARCH_ANNEX_DISCOUNT: i32 = 5;
+pub const RESEARCH_ANNEX_DISCOUNT: i32 = 5;
 
 impl CampaignState {
     pub fn research_material_cost(&self, base_cost: i32) -> i32 {

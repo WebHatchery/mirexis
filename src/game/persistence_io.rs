@@ -8,7 +8,7 @@ use macroquad_toolkit::persistence::{
 };
 
 impl Game {
-    pub(super) fn autosave_current(&mut self, success_message: &str) {
+    pub fn autosave_current(&mut self, success_message: &str) {
         let save = self.session.to_save_with_mission(
             &self.data.config.version,
             &self.campaign,
@@ -29,7 +29,7 @@ impl Game {
         }
     }
 
-    pub(super) fn autosave_campaign_only(&mut self, success_message: &str) {
+    pub fn autosave_campaign_only(&mut self, success_message: &str) {
         let save = SaveData::campaign_only(&self.data.config.version, &self.campaign);
         let game_name = self.data.config.game_name.clone();
         let slot = self.data.config.save_slot.clone();
@@ -46,7 +46,7 @@ impl Game {
         }
     }
 
-    pub(super) fn save_game(&mut self) {
+    pub fn save_game(&mut self) {
         let save = self.session.to_save_with_mission(
             &self.data.config.version,
             &self.campaign,
@@ -66,7 +66,7 @@ impl Game {
         }
     }
 
-    pub(super) fn load_game(&mut self) {
+    pub fn load_game(&mut self) {
         let loaded: Result<SaveData, String> = load_from_slot_with_migration(
             &self.data.config.game_name,
             &self.data.config.save_slot,
@@ -130,14 +130,14 @@ impl Game {
         }
     }
 
-    fn reset_transient_state_after_load(&mut self) {
+    pub fn reset_transient_state_after_load(&mut self) {
         clear_first_hour_help(&mut self.campaign.first_hour);
         self.reset_tactical_transients(false);
         self.new_campaign_armed = false;
         self.delete_save_armed = false;
     }
 
-    pub(super) fn delete_save(&mut self) {
+    pub fn delete_save(&mut self) {
         match delete_slot(&self.data.config.game_name, &self.data.config.save_slot) {
             Ok(()) => {
                 self.save_exists = false;
@@ -148,11 +148,11 @@ impl Game {
     }
 }
 
-fn clear_first_hour_help(progress: &mut crate::first_hour::FirstHourProgress) {
+pub fn clear_first_hour_help(progress: &mut crate::first_hour::FirstHourProgress) {
     progress.help_open = false;
 }
 
-fn resume_state(session: &GameSession) -> AppState {
+pub fn resume_state(session: &GameSession) -> AppState {
     if session.battle_is_over() {
         AppState::Debrief
     } else {
@@ -160,7 +160,7 @@ fn resume_state(session: &GameSession) -> AppState {
     }
 }
 
-fn restored_outcome(
+pub fn restored_outcome(
     session: &GameSession,
     mission: &crate::data::MissionDef,
 ) -> Option<crate::state::MissionOutcome> {
@@ -168,6 +168,3 @@ fn restored_outcome(
         .then(|| session.mission_outcome(mission))
         .flatten()
 }
-
-#[cfg(test)]
-mod tests;

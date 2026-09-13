@@ -5,13 +5,13 @@ use crate::colony::{BuildingKind, BuildingState};
 use macroquad_toolkit::grid::TilePos;
 
 impl Game {
-    pub(super) fn capture_ninth_recruitment(&mut self) {
+    pub fn capture_ninth_recruitment(&mut self) {
         self.prepare_ninth_recruitment();
         self.colony_operations_open = true;
         self.state = AppState::Colony;
     }
 
-    pub(super) fn capture_ninth_roster(&mut self) {
+    pub fn capture_ninth_roster(&mut self) {
         self.prepare_ninth_recruitment();
         self.campaign
             .recruit_outsider(&self.data)
@@ -20,7 +20,7 @@ impl Game {
         self.state = AppState::Roster;
     }
 
-    pub(super) fn capture_ninth_resonance(&mut self) {
+    pub fn capture_ninth_resonance(&mut self) {
         self.prepare_ninth_recruitment();
         self.campaign
             .recruit_outsider(&self.data)
@@ -60,24 +60,24 @@ impl Game {
         self.tactical_panel_open = true;
     }
 
-    pub(super) fn capture_recruited_briefing(&mut self) {
+    pub fn capture_recruited_briefing(&mut self) {
         self.capture_recruited_roster(AppState::MissionBriefing);
     }
 
-    pub(super) fn capture_recruited_roster_screen(&mut self) {
+    pub fn capture_recruited_roster_screen(&mut self) {
         self.capture_recruited_roster(AppState::Roster);
     }
 
-    pub(super) fn capture_recruited_roster_info(&mut self) {
+    pub fn capture_recruited_roster_info(&mut self) {
         self.capture_recruited_roster(AppState::Roster);
         self.roster_inspection_id = Some("mireborn_sense".to_owned());
     }
 
-    pub(super) fn capture_recruited_gene_lab(&mut self) {
+    pub fn capture_recruited_gene_lab(&mut self) {
         self.capture_recruited_roster(AppState::GeneLab);
     }
 
-    fn capture_recruited_roster(&mut self, state: AppState) {
+    pub fn capture_recruited_roster(&mut self, state: AppState) {
         self.campaign.strategy.contact_protocol_id = "directorate_requisition".to_owned();
         self.campaign.colony.buildings.push(BuildingState {
             id: "capture_waystation".to_owned(),
@@ -122,7 +122,7 @@ impl Game {
         self.state = state;
     }
 
-    fn prepare_ninth_recruitment(&mut self) {
+    pub fn prepare_ninth_recruitment(&mut self) {
         self.campaign.strategy.contact_protocol_id = "brood_cultivation".to_owned();
         for event in &mut self.campaign.strategy.character_events {
             event.resolved = true;

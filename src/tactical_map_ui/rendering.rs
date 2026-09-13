@@ -1,0 +1,498 @@
+//! Tactical terrain, effects, and projected battlefield rendering helpers.
+
+use super::*;
+
+pub fn draw_backdrop(rect: Rect) {
+    draw_rectangle(
+        rect.x,
+        rect.y,
+        rect.w,
+        rect.h,
+        Color::new(0.012, 0.026, 0.030, 1.0),
+    );
+    draw_circle(
+        rect.x + rect.w * 0.72,
+        rect.y + 60.0,
+        160.0,
+        Color::new(0.08, 0.24, 0.22, 0.10),
+    );
+    for index in 0..9 {
+        let y = rect.y + 26.0 + index as f32 * 48.0;
+        draw_line(
+            rect.x + 18.0,
+            y,
+            rect.right() - 18.0,
+            y + 22.0,
+            1.0,
+            Color::new(0.10, 0.24, 0.23, 0.20),
+        );
+    }
+}
+
+pub fn draw_terrain_tile(
+    ctx: &UiContext<'_>,
+    view: GridView,
+    position: TilePos,
+    hovered: Option<TilePos>,
+) {
+    let blocked = ctx.session.tactical.blocked.contains(&position);
+    let movable = !blocked && ctx.session.can_move_selected_to(position);
+    let terrain_cost = ctx
+        .session
+        .tactical
+        .terrain_costs
+        .iter()
+        .find(|(tile, _)| *tile == position)
+        .map_or(1, |(_, cost)| *cost);
+    let top = view.diamond(position);
+    let elevation = view.elevation(position);
+    draw_exposed_cliffs(view, position, top);
+    let parity = ((position.x * 17 + position.y * 31).unsigned_abs() % 3) as f32;
+    let top_color = if blocked {
+        Color::new(0.22 + parity * 0.014, 0.17, 0.12, 1.0)
+    } else if elevation >= 2 {
+        Color::new(0.16 + parity * 0.010, 0.27, 0.24, 1.0)
+    } else if elevation == 1 {
+        Color::new(0.12 + parity * 0.010, 0.21, 0.19, 1.0)
+    } else if elevation < 0 {
+        Color::new(0.05 + parity * 0.006, 0.11, 0.14, 1.0)
+    } else {
+        Color::new(0.085 + parity * 0.010, 0.145 + parity * 0.007, 0.145, 1.0)
+    };
+    draw_diamond_fill(top, top_color);
+
+    let art_rect = view.art_bounds(position, TERRAIN_ART_SCALE, TERRAIN_ART_PIVOT);
+    ctx.visuals.draw_atlas_cell(
+        ctx.assets,
+        &ctx.visuals.terrain,
+        0,
+        art_rect,
+        Color::new(0.92, 0.97, 0.94, 1.0),
+    );
+
+    draw_surface_seams(top, position, blocked, elevation);
+
+    if terrain_cost > 1 && !blocked {
+        draw_projected_hatch(top, Color::new(0.90, 0.58, 0.20, 0.50));
+    }
+    if movable {
+        draw_diamond_fill(top, Color::new(0.06, 0.72, 0.56, 0.30));
+        draw_poly(
+            (top[0].x + top[2].x) * 0.5,
+            (top[0].y + top[2].y) * 0.5,
+            4,
+            3.0,
+            45.0,
+            Color::new(0.70, 1.0, 0.90, 0.86),
+        );
+    }
+    if position == ctx.session.tactical.selected_tile {
+        draw_diamond_outline(top, Color::new(0.94, 1.0, 0.98, 1.0), 3.0);
+        draw_diamond_outline(
+            inset_diamond(top, 0.82),
+            Color::new(0.20, 0.92, 0.78, 1.0),
+            2.0,
+        );
+    } else if hovered == Some(position) {
+        draw_diamond_outline(top, Color::new(0.58, 0.98, 0.90, 0.92), 2.0);
+    } else {
+        draw_diamond_outline(top, Color::new(0.20, 0.38, 0.36, 0.72), 1.0);
+    }
+}
+
+pub fn draw_obscuring_fields(ctx: &UiContext<'_>, view: GridView) {
+    for field in &ctx.session.tactical.obscuring_fields {
+        let radius = i32::from(field.radius);
+        for x in field.center.x - radius..=field.center.x + radius {
+            for y in field.center.y - radius..=field.center.y + radius {
+                let tile = TilePos::new(x, y);
+                if !ctx.session.tactical.fog.is_valid(tile)
+                    || crate::tactical::manhattan(field.center, tile) > radius
+                {
+                    continue;
+                }
+                let diamond = view.diamond(tile);
+                draw_diamond_fill(diamond, Color::new(0.52, 0.74, 0.34, 0.20));
+                draw_diamond_outline(diamond, Color::new(0.72, 0.92, 0.42, 0.72), 2.0);
+            }
+        }
+    }
+}
+
+pub fn draw_exposed_cliffs(view: GridView, position: TilePos, top: [Vec2; 4]) {
+    draw_cliff_face(
+        view,
+        position,
+        TilePos::new(position.x, position.y + 1),
+        top[3],
+        top[2],
+        Color::new(0.07, 0.13, 0.13, 1.0),
+    );
+    draw_cliff_face(
+        view,
+        position,
+        TilePos::new(position.x + 1, position.y),
+        top[2],
+        top[1],
+        Color::new(0.035, 0.075, 0.085, 1.0),
+    );
+}
+
+pub fn draw_cliff_face(
+    view: GridView,
+    position: TilePos,
+    neighbor: TilePos,
+    a: Vec2,
+    b: Vec2,
+    color: Color,
+) {
+    let drop = view.cliff_drop(position, neighbor);
+    if drop == 0 {
+        return;
+    }
+    let offset = vec2(0.0, f32::from(drop) * view.elevation_step());
+    draw_side_quad(a, b, b + offset, a + offset, color);
+    for band in 1..=drop {
+        let t = f32::from(band) / f32::from(drop);
+        let line_offset = offset * t;
+        draw_line(
+            a.x + line_offset.x,
+            a.y + line_offset.y,
+            b.x + line_offset.x,
+            b.y + line_offset.y,
+            1.0,
+            Color::new(0.24, 0.47, 0.43, 0.52),
+        );
+    }
+    draw_line(a.x, a.y, b.x, b.y, 1.5, Color::new(0.30, 0.58, 0.52, 0.60));
+}
+
+pub fn draw_surface_seams(top: [Vec2; 4], position: TilePos, blocked: bool, elevation: i8) {
+    if blocked {
+        return;
+    }
+    let pattern = (position.x as u32).wrapping_mul(31) ^ (position.y as u32).wrapping_mul(17);
+    if !pattern.is_multiple_of(5) {
+        return;
+    }
+    let center = (top[0] + top[2]) * 0.5;
+    let inset = inset_diamond(top, 0.72);
+    let color = if elevation < 0 {
+        Color::new(0.30, 0.74, 0.68, 0.34)
+    } else {
+        Color::new(0.36, 0.60, 0.56, 0.28)
+    };
+    draw_line(inset[3].x, inset[3].y, center.x, center.y, 1.0, color);
+    draw_line(center.x, center.y, inset[1].x, inset[1].y, 1.0, color);
+}
+
+pub fn draw_tile_contents(ctx: &UiContext<'_>, view: GridView, position: TilePos) {
+    let rect = view.tile_rect(position);
+    let blocked = ctx.session.tactical.blocked.contains(&position);
+    let occupied = ctx
+        .session
+        .tactical
+        .units
+        .iter()
+        .any(|unit| unit.position == position);
+    let cluttered = ctx
+        .session
+        .tactical
+        .hazards
+        .iter()
+        .any(|hazard| hazard.position == position)
+        || ctx
+            .session
+            .tactical
+            .destructible_cover
+            .iter()
+            .any(|cover| cover.position == position)
+        || is_objective(ctx, position);
+    crate::world_art::draw_tactical_dressing(
+        crate::world_art::TacticalDressingContext {
+            assets: ctx.assets,
+            visuals: ctx.visuals,
+            view,
+            position,
+        },
+        blocked,
+        occupied,
+        cluttered,
+        &ctx.mission.hostile_faction,
+    );
+    if let Some(hazard) = ctx
+        .session
+        .tactical
+        .hazards
+        .iter()
+        .find(|hazard| hazard.position == position)
+    {
+        crate::hazard_ui::draw_tile(rect, hazard.kind);
+    }
+    if is_objective(ctx, position) {
+        draw_objective(
+            ctx,
+            rect,
+            ctx.mission.objective_kind == ObjectiveKind::DefendAsset,
+        );
+    }
+    if let Some(cover) = ctx
+        .session
+        .tactical
+        .destructible_cover
+        .iter()
+        .find(|cover| cover.position == position)
+    {
+        crate::cover_ui::draw_cover(
+            ctx.assets,
+            ctx.visuals,
+            view,
+            cover,
+            ctx.session.can_attack_selected_cover(position),
+        );
+    }
+}
+
+pub fn draw_foreground(ctx: &UiContext<'_>, view: GridView, hovered: Option<TilePos>) {
+    let canopy_tiles = [TilePos::new(12, 19), TilePos::new(13, 19)];
+    for tile in canopy_tiles {
+        if tile.x >= ctx.session.tactical.fog.width as i32
+            || tile.y >= ctx.session.tactical.fog.height as i32
+        {
+            continue;
+        }
+        let focused = hovered == Some(tile)
+            || ctx.session.tactical.selected_tile == tile
+            || ctx
+                .session
+                .tactical
+                .units
+                .iter()
+                .any(|unit| unit.position == tile);
+        ctx.visuals.draw_atlas_cell(
+            ctx.assets,
+            &ctx.visuals.terrain,
+            7,
+            view.art_bounds(tile, CANOPY_ART_SCALE, CANOPY_ART_PIVOT),
+            Color::new(1.0, 1.0, 1.0, if focused { 0.18 } else { 0.70 }),
+        );
+    }
+}
+
+pub fn draw_side_quad(a: Vec2, b: Vec2, c: Vec2, d: Vec2, color: Color) {
+    draw_triangle(a, b, c, color);
+    draw_triangle(a, c, d, color);
+}
+
+pub fn draw_diamond_fill(points: [Vec2; 4], color: Color) {
+    draw_triangle(points[0], points[1], points[2], color);
+    draw_triangle(points[0], points[2], points[3], color);
+}
+
+pub fn draw_diamond_outline(points: [Vec2; 4], color: Color, width: f32) {
+    for index in 0..4 {
+        let next = (index + 1) % 4;
+        draw_line(
+            points[index].x,
+            points[index].y,
+            points[next].x,
+            points[next].y,
+            width,
+            color,
+        );
+    }
+}
+
+pub fn inset_diamond(points: [Vec2; 4], factor: f32) -> [Vec2; 4] {
+    let center = (points[0] + points[2]) * 0.5;
+    points.map(|point| center + (point - center) * factor)
+}
+
+pub fn draw_projected_hatch(points: [Vec2; 4], color: Color) {
+    for step in 1..5 {
+        let t = step as f32 / 6.0;
+        let left = points[3].lerp(points[0], t);
+        let right = points[2].lerp(points[1], t);
+        draw_line(left.x, left.y, right.x, right.y, 1.5, color);
+    }
+}
+
+pub fn is_objective(ctx: &UiContext<'_>, position: TilePos) -> bool {
+    matches!(
+        ctx.mission.objective_kind,
+        ObjectiveKind::SecureAndClear
+            | ObjectiveKind::Extraction
+            | ObjectiveKind::SignalTrace
+            | ObjectiveKind::DefendAsset
+    ) && position == ctx.session.tactical.objective_tile
+        && ctx.session.tactical.objective_state == ObjectiveState::Active
+}
+
+pub fn draw_objective(ctx: &UiContext<'_>, rect: Rect, defended_asset: bool) {
+    let center = vec2(rect.x + rect.w * 0.5, rect.y + rect.h * 0.48);
+    ctx.visuals.draw_atlas_cell(
+        ctx.assets,
+        ctx.visuals.concept_atlas("objectives"),
+        objective_art_cell(ctx.mission.objective_kind, defended_asset),
+        Rect::new(center.x - 30.0, center.y - 42.0, 60.0, 60.0),
+        Color::new(1.0, 1.0, 1.0, 0.88),
+    );
+    for radius in [rect.w * 0.18, rect.w * 0.26] {
+        draw_ellipse_ring(
+            center,
+            radius,
+            radius * 0.46,
+            Color::new(1.0, 0.76, 0.20, 1.0),
+            2.0,
+        );
+    }
+    draw_poly(
+        center.x,
+        center.y - 10.0,
+        4,
+        if defended_asset { 8.0 } else { 5.0 },
+        45.0,
+        Color::new(1.0, 0.76, 0.20, 0.94),
+    );
+    draw_line(
+        center.x,
+        center.y - 10.0,
+        center.x,
+        center.y - 30.0,
+        2.0,
+        Color::new(1.0, 0.82, 0.34, 0.78),
+    );
+}
+
+pub fn objective_art_cell(kind: ObjectiveKind, defended_asset: bool) -> usize {
+    if defended_asset {
+        return 3;
+    }
+    match kind {
+        ObjectiveKind::SecureAndClear => 2,
+        ObjectiveKind::Extraction => 0,
+        ObjectiveKind::SignalTrace => 6,
+        ObjectiveKind::DefendAsset => 3,
+        ObjectiveKind::Holdout => 1,
+        ObjectiveKind::EliminateAll => 10,
+    }
+}
+
+pub fn draw_ellipse_ring(center: Vec2, rx: f32, ry: f32, color: Color, width: f32) {
+    let segments = 24;
+    for index in 0..segments {
+        let a = index as f32 / segments as f32 * std::f32::consts::TAU;
+        let b = (index + 1) as f32 / segments as f32 * std::f32::consts::TAU;
+        draw_line(
+            center.x + a.cos() * rx,
+            center.y + a.sin() * ry,
+            center.x + b.cos() * rx,
+            center.y + b.sin() * ry,
+            width,
+            color,
+        );
+    }
+}
+
+pub fn targeting_action(
+    session: &GameSession,
+    targeting: TargetingView<'_>,
+    tile: TilePos,
+) -> Option<UiAction> {
+    let target = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == tile);
+    match targeting {
+        TargetingView::Equipment {
+            unit_id,
+            equipment_id,
+        } => target.and_then(|target| {
+            session
+                .can_use_equipment(unit_id, equipment_id, &target.id)
+                .then(|| UiAction::UseEquipmentOn(target.id.clone()))
+        }),
+        TargetingView::ClassAction {
+            unit_id,
+            target_kind: crate::data::TechniqueTarget::Tile,
+        } => session
+            .can_target_class_action_tile(unit_id, tile)
+            .then_some(UiAction::UseClassActionOnTile(tile)),
+        TargetingView::ClassAction { unit_id, .. } => target.and_then(|target| {
+            session
+                .can_target_class_action(unit_id, &target.id)
+                .then(|| UiAction::UseClassActionOn(target.id.clone()))
+        }),
+        TargetingView::Skill { unit_id, skill_id }
+            if crate::skills::target_kind(skill_id) == Some(crate::data::TechniqueTarget::Tile) =>
+        {
+            crate::skills::can_target_tile(session, unit_id, skill_id, tile)
+                .then_some(UiAction::UseSkillOnTile(tile))
+        }
+        TargetingView::Skill { unit_id, skill_id } => target.and_then(|target| {
+            crate::skills::can_target_unit(session, unit_id, skill_id, &target.id)
+                .then(|| UiAction::UseSkillOn(target.id.clone()))
+        }),
+    }
+}
+
+pub fn handle_click(
+    ctx: &UiContext<'_>,
+    hovered: Option<TilePos>,
+    viewport: Rect,
+    mouse: Vec2,
+    suppress_click: bool,
+    actions: &mut Vec<UiAction>,
+) {
+    if suppress_click || !is_mouse_button_released(MouseButton::Left) {
+        return;
+    }
+    if !viewport.contains(mouse) {
+        return;
+    }
+    let Some(tile) = hovered else {
+        return;
+    };
+    if let Some(targeting) = ctx.targeting {
+        if let Some(action) = targeting_action(ctx.session, targeting, tile) {
+            actions.push(action);
+        }
+        return;
+    }
+    actions.push(normal_tile_action(ctx.session, ctx.first_hour, tile));
+}
+
+pub fn normal_tile_action(
+    session: &GameSession,
+    first_hour: &FirstHourProgress,
+    tile: TilePos,
+) -> UiAction {
+    let hostile = session
+        .tactical
+        .units
+        .iter()
+        .find(|unit| unit.position == tile && unit.team == Team::Hostile);
+    if let Some(hostile) = hostile.filter(|unit| session.can_attack_selected(&unit.id)) {
+        if !guided_attack_needs_confirmation(first_hour) || session.tactical.selected_tile == tile {
+            return UiAction::AttackSelected(hostile.id.clone());
+        }
+        return UiAction::SelectTile(tile);
+    }
+    if session.can_attack_selected_cover(tile) {
+        UiAction::AttackCover(tile)
+    } else if session.can_move_selected_to(tile) {
+        UiAction::MoveSelected(tile)
+    } else {
+        UiAction::SelectTile(tile)
+    }
+}
+
+pub fn guided_attack_needs_confirmation(progress: &FirstHourProgress) -> bool {
+    progress.guidance_enabled
+        && progress.is_tactical_stage()
+        && matches!(
+            progress.lesson,
+            TacticalLesson::Attack | TacticalLesson::ApplyLearning
+        )
+}

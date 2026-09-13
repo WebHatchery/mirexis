@@ -3,7 +3,7 @@
 use crate::data::{OperationModifier, Team};
 use crate::tactical::UnitState;
 
-pub(crate) fn apply(modifier: OperationModifier, unit: &mut UnitState) {
+pub fn apply(modifier: OperationModifier, unit: &mut UnitState) {
     match modifier {
         OperationModifier::DirectorateFireControl if unit.team == Team::Hostile => {
             unit.accuracy += 10;

@@ -6,7 +6,7 @@ use crate::ui::{TargetingView, UiAction, UiContext};
 use crate::ui_widgets::button;
 use macroquad::prelude::{Rect, Vec2};
 
-fn skill_button_label<'a>(
+pub fn skill_button_label<'a>(
     label: &'a str,
     unit: &UnitState,
     skill_id: &str,
@@ -35,7 +35,7 @@ fn skill_button_label<'a>(
     "UNAVAILABLE"
 }
 
-pub(crate) fn draw_action_buttons(
+pub fn draw_action_buttons(
     ctx: &UiContext<'_>,
     selected: Option<&UnitState>,
     rect: Rect,
@@ -115,6 +115,3 @@ pub(crate) fn draw_action_buttons(
         }
     }
 }
-
-#[cfg(test)]
-mod tests;
