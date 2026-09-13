@@ -2,9 +2,7 @@
 
 use mirexis::skill_training::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
-
-use crate::test_prelude::*;
+pub mod test_prelude;
 
 #[path = "skill_training/tests.rs"]
 mod tests;

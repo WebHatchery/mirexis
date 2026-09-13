@@ -82,7 +82,7 @@ pub fn draw_selected_character(
             dark::TEXT_DIM,
         );
     }
-    draw_equipment_controls(
+    draw_equipment_controls(EquipmentControlsContext {
         campaign,
         character,
         data,
@@ -91,7 +91,7 @@ pub fn draw_selected_character(
         mouse,
         roster_inspection_id,
         actions,
-    );
+    });
 }
 
 fn draw_character_profile(
@@ -356,16 +356,28 @@ fn draw_techniques<'a>(
     inspected_technique
 }
 
-fn draw_equipment_controls(
-    campaign: &CampaignState,
-    character: &crate::campaign::CharacterRecord,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
+struct EquipmentControlsContext<'a> {
+    campaign: &'a CampaignState,
+    character: &'a crate::campaign::CharacterRecord,
+    data: &'a GameData,
+    assets: &'a AssetManager,
+    visuals: &'a VisualCatalog,
     mouse: Vec2,
-    roster_inspection_id: Option<&str>,
-    actions: &mut Vec<UiAction>,
-) {
+    roster_inspection_id: Option<&'a str>,
+    actions: &'a mut Vec<UiAction>,
+}
+
+fn draw_equipment_controls(context: EquipmentControlsContext<'_>) {
+    let EquipmentControlsContext {
+        campaign,
+        character,
+        data,
+        assets,
+        visuals,
+        mouse,
+        roster_inspection_id,
+        actions,
+    } = context;
     draw_ui_text_ex(
         "WORKSHOP // EQUIPMENT",
         344.0,

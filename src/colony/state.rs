@@ -3,6 +3,12 @@
 use super::*;
 use crate::data::StartingResources;
 
+impl Default for ColonyState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ColonyState {
     pub fn new() -> Self {
         Self::new_with_resources(&StartingResources {

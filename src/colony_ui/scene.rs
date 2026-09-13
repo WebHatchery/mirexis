@@ -60,16 +60,16 @@ pub fn draw_colony(context: ColonyDrawContext<'_>) -> ColonyDrawResult {
         &mut actions,
     );
     if operations_open {
-        super::draw_operations(
+        super::operations::draw_operations(super::operations::OperationsDrawContext {
             campaign,
             data,
             assets,
             visuals,
             mouse,
-            &mut facility_upgrade_open,
-            &mut salvage_open,
-            &mut actions,
-        );
+            facility_upgrade_open: &mut facility_upgrade_open,
+            salvage_open: &mut salvage_open,
+            actions: &mut actions,
+        });
     }
     if !facility_upgrade_open && !salvage_open && !field_notes_open && !memorial_open {
         crate::first_hour_colony_ui::draw_focus(

@@ -1,7 +1,7 @@
 //! Integration tests for the game orchestration modules.
 
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
+pub mod test_prelude;
 
 #[path = "game/audio_flow.rs"]
 mod audio_flow;

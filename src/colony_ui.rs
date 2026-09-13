@@ -1,6 +1,5 @@
 //! Colony hub presentation and strategic intent production.
 pub mod operations;
-pub use operations::*;
 
 use crate::campaign::{Availability, CampaignState};
 use crate::colony::{BuildingKind, SIGNAL_CARTOGRAPHY_UPGRADE};

@@ -2,7 +2,7 @@
 
 use mirexis::demo::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
+pub mod test_prelude;
 
 use crate::test_prelude::*;
 

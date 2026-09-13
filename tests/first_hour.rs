@@ -2,9 +2,7 @@
 
 use mirexis::first_hour::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
-
-use crate::test_prelude::*;
+pub mod test_prelude;
 
 #[path = "first_hour/tests.rs"]
 mod tests;

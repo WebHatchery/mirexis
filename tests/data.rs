@@ -2,9 +2,7 @@
 
 use mirexis::data::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
-
-use crate::test_prelude::*;
+pub mod test_prelude;
 
 #[path = "data/tests.rs"]
 mod tests;

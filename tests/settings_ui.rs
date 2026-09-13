@@ -2,9 +2,7 @@
 
 use mirexis::settings_ui::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
-
-use crate::test_prelude::*;
+pub mod test_prelude;
 
 #[path = "settings_ui/tests.rs"]
 mod tests;

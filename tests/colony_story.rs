@@ -2,9 +2,7 @@
 
 use mirexis::colony_story::*;
 #[path = "support/test_prelude.rs"]
-mod test_prelude;
-
-use crate::test_prelude::*;
+pub mod test_prelude;
 
 #[path = "colony_story/tests.rs"]
 mod tests;

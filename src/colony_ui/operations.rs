@@ -2,16 +2,28 @@
 
 use super::*;
 
-pub fn draw_operations(
-    campaign: &CampaignState,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
-    mouse: Vec2,
-    facility_upgrade_open: &mut bool,
-    salvage_open: &mut bool,
-    actions: &mut Vec<UiAction>,
-) {
+pub(super) struct OperationsDrawContext<'a> {
+    pub(super) campaign: &'a CampaignState,
+    pub(super) data: &'a GameData,
+    pub(super) assets: &'a AssetManager,
+    pub(super) visuals: &'a VisualCatalog,
+    pub(super) mouse: Vec2,
+    pub(super) facility_upgrade_open: &'a mut bool,
+    pub(super) salvage_open: &'a mut bool,
+    pub(super) actions: &'a mut Vec<UiAction>,
+}
+
+pub(super) fn draw_operations(context: OperationsDrawContext<'_>) {
+    let OperationsDrawContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        mouse,
+        facility_upgrade_open,
+        salvage_open,
+        actions,
+    } = context;
     if *facility_upgrade_open {
         actions.clear();
         upgrades::draw_modal(campaign, mouse, actions);
@@ -62,7 +74,7 @@ pub fn draw_operations(
     let (pending_research, defense) = draw_operations_summary(campaign, data, mouse, actions);
     let (decision, choosing_contact, choosing_escalation, choosing_mirexis) =
         draw_decision_panel(campaign, data, assets, visuals, mouse, actions);
-    let (evolution_pending, research_surface_visible) = draw_campaign_surfaces(
+    let surfaces = draw_campaign_surfaces(CampaignSurfacesContext {
         campaign,
         data,
         assets,
@@ -71,8 +83,8 @@ pub fn draw_operations(
         actions,
         pending_research,
         decision,
-    );
-    draw_operations_footer(
+    });
+    draw_operations_footer(OperationsFooterContext {
         campaign,
         data,
         assets,
@@ -82,10 +94,10 @@ pub fn draw_operations(
         choosing_contact,
         choosing_escalation,
         choosing_mirexis,
-        evolution_pending,
-        research_surface_visible,
+        evolution_pending: surfaces.evolution_pending,
+        research_surface_visible: surfaces.research_surface_visible,
         defense,
-    );
+    });
 }
 
 fn draw_operations_summary(
@@ -386,16 +398,33 @@ fn draw_decision_panel(
     )
 }
 
-fn draw_campaign_surfaces(
-    campaign: &CampaignState,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
+struct CampaignSurfacesContext<'a> {
+    campaign: &'a CampaignState,
+    data: &'a GameData,
+    assets: &'a AssetManager,
+    visuals: &'a VisualCatalog,
     mouse: Vec2,
-    actions: &mut Vec<UiAction>,
+    actions: &'a mut Vec<UiAction>,
     pending_research: bool,
     decision: Option<crate::colony_decision_ui::DecisionKind>,
-) -> (bool, bool) {
+}
+
+struct CampaignSurfacesResult {
+    evolution_pending: bool,
+    research_surface_visible: bool,
+}
+
+fn draw_campaign_surfaces(context: CampaignSurfacesContext<'_>) -> CampaignSurfacesResult {
+    let CampaignSurfacesContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        mouse,
+        actions,
+        pending_research,
+        decision,
+    } = context;
     let evolution_pending = campaign.strategy.contact_complete
         && campaign.roster.iter().any(|character| {
             character.mutation_evolution_id.is_empty()
@@ -470,23 +499,42 @@ fn draw_campaign_surfaces(
             research::draw_available(campaign, assets, visuals, mouse, actions);
         }
     }
-    (evolution_pending, research_surface_visible)
+    CampaignSurfacesResult {
+        evolution_pending,
+        research_surface_visible,
+    }
 }
 
-fn draw_operations_footer(
-    campaign: &CampaignState,
-    data: &GameData,
-    assets: &AssetManager,
-    visuals: &VisualCatalog,
+struct OperationsFooterContext<'a> {
+    campaign: &'a CampaignState,
+    data: &'a GameData,
+    assets: &'a AssetManager,
+    visuals: &'a VisualCatalog,
     mouse: Vec2,
-    actions: &mut Vec<UiAction>,
+    actions: &'a mut Vec<UiAction>,
     choosing_contact: bool,
     choosing_escalation: bool,
     choosing_mirexis: bool,
     evolution_pending: bool,
     research_surface_visible: bool,
     defense: crate::colony::ColonyDefenseMap,
-) {
+}
+
+fn draw_operations_footer(context: OperationsFooterContext<'_>) {
+    let OperationsFooterContext {
+        campaign,
+        data,
+        assets,
+        visuals,
+        mouse,
+        actions,
+        choosing_contact,
+        choosing_escalation,
+        choosing_mirexis,
+        evolution_pending,
+        research_surface_visible,
+        defense,
+    } = context;
     if !choosing_contact
         && !choosing_escalation
         && !choosing_mirexis
