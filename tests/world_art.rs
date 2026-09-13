@@ -1,6 +1,9 @@
 //! Integration tests for the world_art module.
 
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 use mirexis::world_art::*;
 
 #[path = "world_art/tests.rs"]

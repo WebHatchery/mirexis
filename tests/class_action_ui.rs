@@ -1,7 +1,10 @@
 //! Integration tests for the class_action_ui module.
 
 use mirexis::class_action_ui::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "class_action_ui/tests.rs"]
 mod tests;

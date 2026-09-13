@@ -1,7 +1,10 @@
 //! Integration tests for the state module.
 
 use mirexis::state::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "state/tests.rs"]
 mod tests;

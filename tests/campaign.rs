@@ -1,7 +1,10 @@
 //! Integration tests for the campaign module.
 
 use mirexis::campaign::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "campaign/tests.rs"]
 mod tests;

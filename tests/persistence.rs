@@ -1,7 +1,10 @@
 //! Integration tests for the persistence module.
 
 use mirexis::persistence::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "persistence/tests.rs"]
 mod tests;

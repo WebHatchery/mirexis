@@ -308,8 +308,8 @@ pub fn draw_skill(
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TargetStatus {
-    label: &'static str,
-    valid: bool,
+    pub label: &'static str,
+    pub valid: bool,
 }
 
 pub fn targeting_status(ctx: &UiContext<'_>, tile: TilePos) -> TargetStatus {

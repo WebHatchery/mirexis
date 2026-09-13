@@ -1,8 +1,8 @@
 use super::*;
+use macroquad_toolkit::grid::TilePos;
 use mirexis::campaign::CampaignState;
 use mirexis::data::GameData;
 use mirexis::state::{CommandCost, GameSession, RuleError};
-use macroquad_toolkit::grid::TilePos;
 
 fn unit_mut<'a>(session: &'a mut GameSession, id: &str) -> &'a mut mirexis::state::UnitState {
     session

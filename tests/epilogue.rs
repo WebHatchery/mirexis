@@ -1,7 +1,10 @@
 //! Integration tests for the epilogue module.
 
 use mirexis::epilogue::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "epilogue/tests.rs"]
 mod tests;

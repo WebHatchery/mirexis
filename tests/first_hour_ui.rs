@@ -1,7 +1,10 @@
 //! Integration tests for the first_hour_ui module.
 
 use mirexis::first_hour_ui::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "first_hour_ui/tests.rs"]
 mod tests;

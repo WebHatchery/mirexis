@@ -1,6 +1,9 @@
 //! Integration tests for the trauma module.
 
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 use mirexis::trauma::*;
 
 #[path = "trauma/tests.rs"]

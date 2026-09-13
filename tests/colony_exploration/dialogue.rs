@@ -1,6 +1,6 @@
 //! Integration tests for the colony_exploration\dialogue module.
 
-use mirexis::test_prelude::*;
+use crate::test_prelude::*;
 use mirexis::colony_exploration::dialogue::*;
 
 #[path = "dialogue/tests.rs"]

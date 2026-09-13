@@ -1,6 +1,9 @@
 //! Integration tests for the visual_assets module.
 
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 use mirexis::visual_assets::*;
 
 #[path = "visual_assets/tests.rs"]

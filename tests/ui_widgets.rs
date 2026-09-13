@@ -1,6 +1,9 @@
 //! Integration tests for the ui_widgets module.
 
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 use mirexis::ui_widgets::*;
 
 #[path = "ui_widgets/tests.rs"]

@@ -1,10 +1,10 @@
 use super::*;
+use macroquad_toolkit::grid::TilePos;
 use mirexis::campaign::CampaignState;
 use mirexis::data::GameData;
 use mirexis::first_hour::FirstHourStage;
 use mirexis::formation::FormationKind;
 use mirexis::state::GameSession;
-use macroquad_toolkit::grid::TilePos;
 
 #[test]
 fn first_hour_teaching_lane_is_attackable_after_the_cover_move() {

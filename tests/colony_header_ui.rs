@@ -1,7 +1,10 @@
 //! Integration tests for the colony_header_ui module.
 
 use mirexis::colony_header_ui::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "colony_header_ui/tests.rs"]
 mod tests;

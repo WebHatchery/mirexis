@@ -1,7 +1,10 @@
 //! Integration tests for the data module.
 
 use mirexis::data::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "data/tests.rs"]
 mod tests;

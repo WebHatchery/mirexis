@@ -1,7 +1,10 @@
 //! Integration tests for the phase_readiness module.
 
 use mirexis::phase_readiness::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "phase_readiness/tests.rs"]
 mod tests;

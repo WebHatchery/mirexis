@@ -1,7 +1,10 @@
 //! Integration tests for the map_variants module.
 
 use mirexis::map_variants::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "map_variants/tests.rs"]
 mod tests;

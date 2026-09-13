@@ -51,7 +51,7 @@ use macroquad_toolkit::prelude::{
     begin_virtual_ui_frame, dark, end_virtual_ui_frame, GamepadInput,
 };
 
-use types::{AppState, TacticalTargeting};
+pub use types::{AppState, TacticalTargeting};
 
 pub struct Game {
     data: GameData,

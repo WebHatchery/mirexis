@@ -1,7 +1,10 @@
 //! Integration tests for the briefing_intel_ui module.
 
 use mirexis::briefing_intel_ui::*;
-use mirexis::test_prelude::*;
+#[path = "support/test_prelude.rs"]
+mod test_prelude;
+
+use crate::test_prelude::*;
 
 #[path = "briefing_intel_ui/tests.rs"]
 mod tests;
