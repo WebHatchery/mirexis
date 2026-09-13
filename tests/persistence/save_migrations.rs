@@ -1,3 +1,5 @@
+//! Save migration regressions across campaign and session schema versions.
+
 use super::*;
 use mirexis::data::Team;
 

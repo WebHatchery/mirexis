@@ -1,4 +1,4 @@
-//! Focused late_migrations integration tests.
+//! Campaign phase and consequence save migrations.
 
 use super::*;
 

@@ -1,3 +1,6 @@
+//! Campaign regression cases stay separate because each covers a distinct
+//! unlock, resource, or persistence-facing rule.
+
 use super::*;
 use mirexis::state::CharacterConsequence;
 
@@ -17,4 +20,4 @@ mod relay;
 mod research;
 mod salvage;
 
-mod test_part_1;
+mod authored_campaign_rules;

@@ -1,3 +1,6 @@
+//! Strategy cases remain one scenario per phase, faction, and deterministic
+//! materialization rule so regressions retain their diagnostic names.
+
 use super::*;
 
 fn positions_are_connected(
@@ -35,9 +38,9 @@ fn positions_are_connected(
     false
 }
 
-#[path = "tests/suite_a.rs"]
-mod suite_a;
-#[path = "tests/suite_b.rs"]
-mod suite_b;
-#[path = "tests/suite_c.rs"]
-mod suite_c;
+#[path = "tests/campaign_progression.rs"]
+mod campaign_progression;
+#[path = "tests/escalation_and_variants.rs"]
+mod escalation_and_variants;
+#[path = "tests/mission_materialization.rs"]
+mod mission_materialization;

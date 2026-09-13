@@ -1,4 +1,4 @@
-//! Focused tests integration tests.
+//! Colony bounds, legacy layouts, and unique-facility regressions.
 
 use super::*;
 

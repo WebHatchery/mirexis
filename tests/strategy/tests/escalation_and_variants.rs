@@ -1,4 +1,4 @@
-//! Focused tests integration tests.
+//! Escalation responses and deterministic map-variant regressions.
 
 use super::*;
 

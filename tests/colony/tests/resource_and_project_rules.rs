@@ -1,4 +1,4 @@
-//! Focused tests integration tests.
+//! Resource production, upgrades, and project-clearance regressions.
 
 use super::*;
 

@@ -1,4 +1,4 @@
-//! Focused test_part_1 integration tests.
+//! Deployment, training, and content-materialization regressions.
 
 use super::*;
 

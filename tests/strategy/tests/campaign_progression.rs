@@ -1,4 +1,4 @@
-//! Focused tests integration tests.
+//! Campaign progression, contacts, and phase-gate regressions.
 
 use super::*;
 

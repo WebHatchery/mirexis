@@ -1,4 +1,4 @@
-//! Focused test_part_1 integration tests.
+//! Character identity, injury, squad, and event regressions.
 
 use super::*;
 

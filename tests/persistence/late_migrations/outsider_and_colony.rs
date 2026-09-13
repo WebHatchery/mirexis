@@ -1,4 +1,4 @@
-//! Focused late_migrations integration tests.
+//! Outsider, colony, and relationship save migrations.
 
 use super::*;
 

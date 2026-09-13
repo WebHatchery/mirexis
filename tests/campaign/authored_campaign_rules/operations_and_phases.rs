@@ -1,4 +1,4 @@
-//! Focused test_part_1 integration tests.
+//! Campaign phase, contact, facility, and operation regressions.
 
 use super::*;
 

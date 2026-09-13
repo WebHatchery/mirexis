@@ -1,4 +1,4 @@
-//! Focused tests integration tests.
+//! Mission materialization, reinforcements, and recovery regressions.
 
 use super::*;
 
