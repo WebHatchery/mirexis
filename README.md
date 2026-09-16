@@ -166,7 +166,7 @@ cargo build --release --features demo --target wasm32-unknown-unknown --target-d
 ```
 
 `publish-itch.ps1` builds the feature-gated WebGL module, packages it with the
-touch-safe `itch-index.html` launcher, and sends only that demo package to the
+shared, touch-safe itch launcher generated from `game_page.json`, and sends only that demo package to the
 `html5-demo` itch.io channel. The standard Windows channel continues to use the full
 build produced by `publish.ps1`.
 
@@ -176,9 +176,9 @@ Console messages mentioning `lib.min.js`, `mq_js_bundle.js`, or
 `screen.orientation.lock()` come from a browser session, including a web game
 launched on Windows. They are not diagnostics from the native `mirexis.exe`.
 
-The itch launcher loads only the extra bridges this game needs: JS utilities,
-gamepads, and storage. It does not load the unused external networking or clipboard
-bridges. Macroquad also bundles its own optional `quad_net` plugin, so its
+The shared itch launcher bundles runtime bridges locally, including JS utilities,
+gamepads, storage, networking, and clipboard support. Optional bridges remain inert
+until used. Macroquad also bundles its own optional `quad_net` plugin, so its
 "not used in the rust code" informational message can still appear safely.
 
 Mirexis and its bundled runtime do not call `screen.orientation.lock()`. An error
