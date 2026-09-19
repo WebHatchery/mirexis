@@ -31,40 +31,12 @@ Status: automated and internal verification complete; external playtests pending
 
 ## Automated verification baseline
 
-- 526 Mirexis unit tests pass, including individual Memorial Register record streaming, failed-objective migration defaults, long-register pagination, non-linear field-doctrine choice visibility, touch-persistent roster equipment inspection, and deployment-row affordance coverage for full,
-  minimum, and recovering squads, construction availability coverage for unlocks,
-  materials, and unique projects, effective repair-cost affordability coverage, and
-  tactical equipment cancellation coverage, invalid-target persistence coverage, and
-  roster prerequisite-label coverage, Gene Lab biomass-label coverage, and Waystation
-  outsider shortfall-label coverage, tactical target-gate label coverage, and mutation
-  availability-label coverage, objective interaction-label coverage, Overwatch
-  availability-label coverage, class-action availability-label coverage, technique
-  availability-label coverage, field-item availability-label coverage, and deployment
-  food-gate label coverage, Commons meal-gate label coverage, and Relay scan-gate label
-  coverage, treatment-gate label coverage, research material-gate label coverage, and
-  Waystation recruitment resource-gate label coverage, Waystation dialogue recruitment
-  shortfall-label coverage, contextual treatment and Gene Lab blocker-label coverage,
-  targeted class-action, field-item, and technique team/range blocker coverage, and
-  targeting-card rule-reason coverage, guided attack-confirmation focus coverage,
-  objective-interaction, replay-skip, end-phase geometry, readiness-summary, hit-impact,
-  incapacitation, objective-completion, extraction-completion, objective-damage, and
-  cover-outcome feedback,
-  attack-outcome event-summary, callout-lane geometry, recovery-audio, battle-log
-  event-grouping, filter-count, hostile-replay-consequence, and display-name event-summary
-  coverage,
-  debrief-return, dialogue-continue, advance-control, briefing-deployment focus, and
-  first-hour Operations event-card geometry coverage, progression capture-surface fidelity,
-  and campaign decision resource-gate
-  label coverage, facility-upgrade blocker-label coverage, first-hour investment
-  material-gate label coverage, character-event food-gate label coverage, Build Mode
-  construction-blocker label coverage, roster equipment-row geometry coverage, finale
-  debrief summary coverage, completed-campaign debrief voice coverage, scene-local capture
-  reset and Contact event visibility coverage, bounded
-  ending-register coverage, completed-campaign register-lane coverage,
-  briefing pressure geometry coverage, bounded briefing-intelligence coverage,
-  workshop equipment-panel geometry coverage, and separated combat-feedback
-  callout coverage. Audio response coverage now includes distinct phase and reinforcement
-  cues, priority selection for mixed event batches, and settings preview behavior.
+- The implementation checkpoint passed its automated reliability suite. Test
+  counts and UI-label inventories are not acceptance targets. Future coverage
+  follows `CODE_STANDARDS.md` §11: simple public-API tests of core calculations,
+  state transitions, JSON loading, and useful regressions, owned by each crate's
+  `tests/` directory, with a strong five-case target per major feature. UI and
+  rendering generally use capture review and manual interaction checks.
 - External asset-registry and Rust source-size gates pass.
 - `publish.ps1` passes without parameters for Windows and WebGL and deploys to preview.
 - The canonical set contains 105 audited 1280×720 scenes, including the settings, Field Notes, and paginated Memorial Register

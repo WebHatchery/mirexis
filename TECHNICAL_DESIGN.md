@@ -38,7 +38,7 @@ The implemented slice proves all roadmap systems together:
 - Derived values such as deployment stats and colony-defense maps are recomputed.
 - Reusable runtime behavior belongs in macroquad-toolkit. Project-local behavior is
   limited to Mirexis rules and presentation.
-- Every `.rs` file stays below 800 non-test lines. Add named sibling modules rather
+- Every `.rs` file stays within 800 total physical lines, including tests. Add named sibling modules rather
   than `mod.rs` files as ownership grows.
 
 ## 3. Runtime State and Transitions
@@ -1062,12 +1062,21 @@ The completion baseline is:
 
 - `cargo fmt -- --check`
 - `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo test` (520 Mirexis unit tests plus asset-registry and source-size gates)
-- deterministic 103-scene capture with visual inspection
+- `cargo test` with the asset-registry and source-size gates
+- deterministic capture of the current scene manifest with visual inspection
 - `.\publish.ps1` with no parameters (Windows release, WebGL release, packaging,
   preview deployment, and catalog update)
 
 Simulation tests never depend on frame timing or rendered pixels.
+Follow `CODE_STANDARDS.md` §11: focus tests on core calculations, state
+transitions, JSON loading, and useful regressions with simple setups and
+rule-like names. Strongly target five cases per major feature across its
+suites, use table-driven assertions for related inputs, and explain distinct
+coverage beyond that target. All tests and test-only helpers belong in each
+crate's `tests/` directory and exercise intentional public library APIs.
+Migrate legacy tests under `src/` separately before expanding coverage.
+Use captures and interaction review for UI and rendering; they generally do
+not need unit tests.
 
 ## 14. Completed Milestones
 
